@@ -1,0 +1,3 @@
+--extra-index-url https://devpi.archive.org/wb/prod/
+wayback==0.2.1.2
+GlobalWayback==0.3
