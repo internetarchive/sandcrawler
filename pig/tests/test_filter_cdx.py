@@ -10,9 +10,9 @@ Abstract into a base test class/template:
 import os
 import unittest
 from nose.tools import *
-from pigpy.hadoop import Hadoop
+from pighelper import PigTestHelper
 
-
+"""
 class TestFilterCDX(unittest.TestCase):
 
     def setUp(self):
@@ -33,3 +33,10 @@ class TestFilterCDX(unittest.TestCase):
         self.hadoop.run_pig_job("filter-cdx-ps.pig")
         self.hadoop.copyToLocal("/reports/output.csv", "output.csv")
 
+"""
+
+class TestFilterCDX(PigTestHelper):
+
+    def test_thing(self):
+
+        self.run_pig("filter-cdx-ps.pig", "tests/files/example.cdx")

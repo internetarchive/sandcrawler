@@ -13,7 +13,7 @@ https://hub.docker.com/r/chalimartines/local-pig
     ln -s pig-0.12.0-cdh5.0.1/pig-0.12.0-cdh5.0.1.jar pig-0.12.0-cdh5.0.1/pig.jar
     ./pig-*/bin/pig -x local -version
 
-    #XXX:
+    #XXX: don't need Hadoop?
     #wget https://archive.cloudera.com/cdh5/cdh/5/hadoop-2.3.0-cdh5.0.1.tar.gz
     #tar xvf hadoop-*.tar.gz
     #export HADOOP_HOME=hadoop-2.3*
