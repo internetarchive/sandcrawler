@@ -1,0 +1,75 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "ede8d6f8c246a58f84fffe98979d8c17f624535aba1e23aa0539308859f2ffa1"
+        },
+        "host-environment-markers": {
+            "implementation_name": "cpython",
+            "implementation_version": "3.5.3",
+            "os_name": "posix",
+            "platform_machine": "x86_64",
+            "platform_python_implementation": "CPython",
+            "platform_release": "4.9.0-6-amd64",
+            "platform_system": "Linux",
+            "platform_version": "#1 SMP Debian 4.9.82-1+deb9u3 (2018-03-02)",
+            "python_full_version": "3.5.3",
+            "python_version": "3.5",
+            "sys_platform": "linux"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.5"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "happybase": {
+            "hashes": [
+                "sha256:e20376e2e32291798d2226502994134c1c4e175136d8375b3c517a234fa22481"
+            ],
+            "version": "==1.1.0"
+        },
+        "happybase-mock": {
+            "hashes": [
+                "sha256:327203ff63171a83c9fab34b249636b6a55550041273d2acddc0723433bdf260",
+                "sha256:bd4583551f40e8b7f622ffd462f8e7ed1d34d14d73fa1758f0a5f413b1949f50"
+            ],
+            "version": "==0.9.0"
+        },
+        "nose": {
+            "hashes": [
+                "sha256:dadcddc0aefbf99eea214e0f1232b94f2fa9bd98fa8353711dacb112bfcbbb2a",
+                "sha256:9ff7c6cc443f8c51994b34a667bbcf45afd6d945be7477b52e97516fd17c53ac",
+                "sha256:f1bffef9cbc82628f6e7d7b40d7e255aefaa1adb6a1b1d26c69a8b79e6208a98"
+            ],
+            "version": "==1.3.7"
+        },
+        "ply": {
+            "hashes": [
+                "sha256:096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce",
+                "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"
+            ],
+            "version": "==3.11"
+        },
+        "six": {
+            "hashes": [
+                "sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb",
+                "sha256:70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9"
+            ],
+            "version": "==1.11.0"
+        },
+        "thriftpy": {
+            "hashes": [
+                "sha256:309e57d97b5bfa01601393ad4f245451e989d6206a59279e56866b264a99796d"
+            ],
+            "version": "==0.3.9"
+        }
+    },
+    "develop": {}
+}
