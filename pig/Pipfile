@@ -11,8 +11,7 @@ name = "pypi"
 
 [packages]
 
-pigpy = "*"
-nose = "*"
+pytest = "*"
 
 
 [requires]

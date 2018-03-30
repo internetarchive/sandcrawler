@@ -5,17 +5,16 @@ Include `PigTestHelper` and extend in your test classes, call `self.run_pig()`
 with your script and example input file, then look at the output (at returned
 path) to check for validity.
 
-TODO: squelch pig stdout going to console, presumably because of subprocess.run
-behavior
+TODO: switch to pytest-style fixture generation
 
 author: Bryan Newbold <bnewbold@archive.org>
 """
+
 import os
 import shutil
 import tempfile
 import unittest
 import subprocess
-from nose.tools import *
 
 
 class PigTestHelper(unittest.TestCase):

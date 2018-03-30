@@ -2,27 +2,32 @@
 As of March 2018, the archive runs Pig version 0.12.0, via CDH5.0.1 (Cloudera
 Distribution).
 
+"Local mode" unit tests in this folder run with Pig version 0.17.0 (controlled
+by `fetch_deps.sh`) due to [dependency/jar issues][pig-bug] in local mode of
+0.12.0.
+
+[pig-bug]: https://issues.apache.org/jira/browse/PIG-3530
+
 ## Development and Testing
 
-To run pig in development on your laptop, you can either use docker or 
+Fetch dependencies (pig):
 
-https://hub.docker.com/r/chalimartines/local-pig
+    ./fetch_deps.sh
 
-    wget https://archive.cloudera.com/cdh5/cdh/5/pig-0.12.0-cdh5.0.1.tar.gz
-    tar xvf pig-*.tar.gz
-    ln -s pig-0.12.0-cdh5.0.1/pig-0.12.0-cdh5.0.1.jar pig-0.12.0-cdh5.0.1/pig.jar
-    ./pig-*/bin/pig -x local -version
+Write .pig scripts here, and add a pytho wrapper test to `./tests/` when done.
+Test vector files (input/output) can go in `./tests/files/`.
 
-    #XXX: don't need Hadoop?
-    #wget https://archive.cloudera.com/cdh5/cdh/5/hadoop-2.3.0-cdh5.0.1.tar.gz
-    #tar xvf hadoop-*.tar.gz
-    #export HADOOP_HOME=hadoop-2.3*
+Install pipenv system-wide if you don't have it:
 
-Tests require python3, nosetests3, and pigpy. You can install these with:
+    # or use apt, homebrew, etc
+    sudo pip3 install pipenv
 
-    pip install pipenv
-    pipenv install --three
+Run the tests with:
 
-Then:
+    pipenv run pytest
 
-    pipenv run nosetests3
+Could also, in theory, use a docker image ([local-pig][]), but it's pretty easy
+to just download.
+
+[local-pig]: https://hub.docker.com/r/chalimartines/local-pig
+
