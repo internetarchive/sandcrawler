@@ -74,6 +74,8 @@ def transform_line(raw_cdx):
     if '-' in (surt, dt, url, mime, http_status, key, c_size, offset, warc):
         return None
 
+    key = "sha1:{}".format(key)
+
     info = dict(surt=surt, dt=dt, url=url, c_size=c_size, offset=offset,
         warc=warc)
 
@@ -92,7 +94,7 @@ def test_transform_line():
 
     raw = "edu,upenn,ldc)/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf 20170828233154 https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf application/pdf 200 WL3FEA62TEU4F52Y5DOVQ62VET4QJW7G - - 210251 931661233 SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828231135742-00000-00009-wbgrp-svc284/SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz"
     correct = {
-        'key': "WL3FEA62TEU4F52Y5DOVQ62VET4QJW7G",
+        'key': "sha1:WL3FEA62TEU4F52Y5DOVQ62VET4QJW7G",
         'file:mime': "application/pdf",
         'file:cdx': {
             'surt': "edu,upenn,ldc)/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf",
@@ -150,7 +152,9 @@ class MRCDXBackfillHBase(MRJob):
         if self.hb_table is None:
             try:
                 host = self.options.hbase_host
-                hb_conn = happybase.Connection(host=host)
+                # TODO: make these configs accessible from... mrconf.cfg?
+                hb_conn = happybase.Connection(host=host, transport="framed",
+                    protocol="compact")
             except Exception as err:
                 raise Exception("Couldn't connect to HBase using host: {}".format(host))
             self.hb_table = hb_conn.table(self.options.hbase_table)

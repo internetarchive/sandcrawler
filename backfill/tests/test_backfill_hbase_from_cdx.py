@@ -1,3 +1,6 @@
+"""
+TODO: could probably refactor to use unittest.mock.patch('happybase')
+"""
 
 import io
 import json
@@ -33,13 +36,13 @@ com,pbworks,educ333b)/robots.txt 20170705063311 http://educ333b.pbworks.com/robo
 
     assert job.hb_table.row(b'1') == {}
     # HTTP 301
-    assert job.hb_table.row(b'3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ') == {}
+    assert job.hb_table.row(b'sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ') == {}
     # valid
-    assert job.hb_table.row(b'MPCXVWMUTRUGFP36SLPHKDLY6NGU4S3J') != {}
+    assert job.hb_table.row(b'sha1:MPCXVWMUTRUGFP36SLPHKDLY6NGU4S3J') != {}
     # text/plain
-    assert job.hb_table.row(b'6VAUYENMOU2SK2OWNRPDD6WTQTECGZAD') == {}
+    assert job.hb_table.row(b'sha1:6VAUYENMOU2SK2OWNRPDD6WTQTECGZAD') == {}
 
-    row = job.hb_table.row(b'MPCXVWMUTRUGFP36SLPHKDLY6NGU4S3J')
+    row = job.hb_table.row(b'sha1:MPCXVWMUTRUGFP36SLPHKDLY6NGU4S3J')
     assert row[b'file:mime'] == b"application/pdf"
 
     file_cdx = json.loads(row[b'file:cdx'].decode('utf-8'))
