@@ -8,28 +8,17 @@ from backfill_hbase_from_cdx import MRCDXBackfillHBase
 
 @pytest.fixture
 def job():
+    """
+    Note: this mock only seems to work with job.run_mapper(), not job.run();
+    the later results in a separate instantiation without the mock?
+    """
     conn = happybase_mock.Connection()
-    conn.create_table('wbgrp-journal-extract-test', {'file': {}, 'grobid0': {}})
+    conn.create_table('wbgrp-journal-extract-test',
+        {'file': {}, 'grobid0': {}, 'f': {}})
     table = conn.table('wbgrp-journal-extract-test')
 
     job = MRCDXBackfillHBase(['--no-conf', '-'], hb_table=table)
-    job.hb_table = table
     return job
-
-#Example to read back rows...
-"""
-def basic_job_run_capturing_output(job):
-
-    job.sandbox(stdin=open('tests/files/example.cdx', 'r'))
-    results = []
-    with job.make_runner() as runner:
-        runner.run()
-        for key, value in job.parse_output(runner.cat_output()):
-            results.append(value)
-
-    print(results)
-    assert len(list(job.hb_table.scan())) == 5
-"""
 
 def test_some_lines(job):
 
@@ -52,4 +41,10 @@ com,pbworks,educ333b)/robots.txt 20170705063311 http://educ333b.pbworks.com/robo
 
     row = job.hb_table.row(b'MPCXVWMUTRUGFP36SLPHKDLY6NGU4S3J')
     assert row[b'file:mime'] == b"application/pdf"
-    json.loads(row[b'file:cdx'].decode('utf-8'))
+
+    file_cdx = json.loads(row[b'file:cdx'].decode('utf-8'))
+    assert int(file_cdx['offset']) == 328850624
+
+    f_c = json.loads(row[b'f:c'].decode('utf-8'))
+    assert f_c['u'] == "http://cadmus.eui.eu/bitstream/handle/1814/36635/RSCAS_2015_03.pdf%3Bjsessionid%3D761393014319A39F40D32AE3EB3A853F?sequence%3D1"
+    assert b'i' not in f_c

@@ -18,6 +18,7 @@ TODO:
 
 import sys
 import json
+from datetime import datetime
 import happybase
 import mrjob
 from mrjob.job import MRJob
@@ -27,7 +28,6 @@ NORMAL_MIME = (
     'application/postscript',
     'text/html',
     'text/xml',
-    #'application/xml',
 )
 
 def normalize_mime(raw):
@@ -62,15 +62,31 @@ def transform_line(raw_cdx):
     url = cdx[2]
     mime = normalize_mime(cdx[3])
     http_status = cdx[4]
-    if http_status != "200":
-        return None
     key = cdx[5]
     c_size = cdx[8]
     offset = cdx[9]
     warc = cdx[10]
+
+    if not (key.isalnum() and c_size.isdigit() and offset.isdigit()
+            and http_status == "200" and len(key) == 32 and dt.isdigit()):
+        return None
+
+    if '-' in (surt, dt, url, mime, http_status, key, c_size, offset, warc):
+        return None
+
     info = dict(surt=surt, dt=dt, url=url, c_size=c_size, offset=offset,
         warc=warc)
-    return {'key': key, 'file:mime': mime, 'file:cdx': info}
+
+    warc_file = warc.split('/')[-1]
+    dt_iso = datetime.strptime(dt, "%Y%m%d%H%M%S").isoformat()
+    try:
+        dt_iso = datetime.strptime(dt, "%Y%m%d%H%M%S").isoformat()
+    except:
+        return None
+
+    # 'i' intentionally not set
+    heritrix = dict(u=url, d=dt_iso, f=warc_file, o=offset, c="1")
+    return {'key': key, 'file:mime': mime, 'file:cdx': info, 'f:c': heritrix}
 
 def test_transform_line():
 
@@ -85,6 +101,13 @@ def test_transform_line():
             'warc': "SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828231135742-00000-00009-wbgrp-svc284/SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz",
             'offset': "931661233",
             'c_size': "210251",
+        },
+        'f:c': {
+            'u': "https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf",
+            'd': "2017-08-28T23:31:54",
+            'f': "SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz",
+            'o': "931661233",
+            'c': "1",
         }
     }
 
@@ -120,6 +143,7 @@ class MRCDXBackfillHBase(MRJob):
             self.hb_table = None
 
         super(MRCDXBackfillHBase, self).__init__(*args, **kwargs)
+        self.mime_filter = ['application/pdf']
 
     def mapper_init(self):
 
@@ -130,8 +154,6 @@ class MRCDXBackfillHBase(MRJob):
             except Exception as err:
                 raise Exception("Couldn't connect to HBase using host: {}".format(host))
             self.hb_table = hb_conn.table(self.options.hbase_table)
-
-        self.mime_filter = ['application/pdf']
 
     def mapper(self, _, raw_cdx):
 
@@ -154,6 +176,7 @@ class MRCDXBackfillHBase(MRJob):
             return
 
         key = info.pop('key')
+        info['f:c'] = json.dumps(info['f:c'], sort_keys=True, indent=None)
         info['file:cdx'] = json.dumps(info['file:cdx'], sort_keys=True,
             indent=None)
 
