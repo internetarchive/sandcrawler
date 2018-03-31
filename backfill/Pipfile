@@ -1,21 +1,16 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
 
-
-
 [packages]
-
 happybase = "*"
 happybase-mock = "*"
-nose = "*"
-
+pytest = "*"
+mrjob = "*"
+pytest-pythonpath = "*"
 
 [requires]
-
 python_version = "3.5"
