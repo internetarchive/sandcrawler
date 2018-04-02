@@ -76,8 +76,8 @@ def transform_line(raw_cdx):
 
     key = "sha1:{}".format(key)
 
-    info = dict(surt=surt, dt=dt, url=url, c_size=c_size, offset=offset,
-        warc=warc)
+    info = dict(surt=surt, dt=dt, url=url, c_size=int(c_size),
+        offset=int(offset), warc=warc)
 
     warc_file = warc.split('/')[-1]
     dt_iso = datetime.strptime(dt, "%Y%m%d%H%M%S").isoformat()
@@ -87,7 +87,7 @@ def transform_line(raw_cdx):
         return None
 
     # 'i' intentionally not set
-    heritrix = dict(u=url, d=dt_iso, f=warc_file, o=offset, c="1")
+    heritrix = dict(u=url, d=dt_iso, f=warc_file, o=int(offset), c=1)
     return {'key': key, 'file:mime': mime, 'file:cdx': info, 'f:c': heritrix}
 
 def test_transform_line():
@@ -101,15 +101,15 @@ def test_transform_line():
             'url': "https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf",
             'dt': "20170828233154",
             'warc': "SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828231135742-00000-00009-wbgrp-svc284/SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz",
-            'offset': "931661233",
-            'c_size': "210251",
+            'offset': 931661233,
+            'c_size': 210251,
         },
         'f:c': {
             'u': "https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf",
             'd': "2017-08-28T23:31:54",
             'f': "SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz",
-            'o': "931661233",
-            'c': "1",
+            'o': 931661233,
+            'c': 1,
         }
     }
 
