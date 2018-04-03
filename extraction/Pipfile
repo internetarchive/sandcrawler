@@ -1,0 +1,25 @@
+[[source]]
+name = "ia"
+url = "https://devpi.archive.org/wb/prod"
+verify_ssl = true
+
+[[source]]
+name = "pypi"
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+pytest = "*"
+mrjob = "*"
+requests = "*"
+wayback = {version=">=0.2.1.2", index="ia"}
+globalwayback = {version=">=0.3", index="ia"}
+pytest-pythonpath = "*"
+happybase = "*"
+happybase-mock = "*"
+xmltodict = "*"
+
+[requires]
+python_version = "3.5"
