@@ -17,11 +17,6 @@ Fetch dependencies (pig):
 Write .pig scripts here, and add a pytho wrapper test to `./tests/` when done.
 Test vector files (input/output) can go in `./tests/files/`.
 
-Install pipenv system-wide if you don't have it:
-
-    # or use apt, homebrew, etc
-    sudo pip3 install pipenv
-
 Run the tests with:
 
     pipenv run pytest
