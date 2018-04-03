@@ -11,6 +11,7 @@ happybase-mock = "*"
 pytest = "*"
 mrjob = "*"
 pytest-pythonpath = "*"
+setuptools = "*"
 
 [requires]
 python_version = "3.5"
