@@ -167,17 +167,18 @@ class MRCDXBackfillHBase(MRJob):
                 raw_cdx.startswith('#')):
 
             # Skip line
+            # XXX: tests don't cover this path; need coverage!
             self.increment_counter('lines', 'invalid')
-            return _, status
+            return _, dict(status="invalid")
 
         info = transform_line(raw_cdx)
         if info is None:
             self.increment_counter('lines', 'invalid')
-            return
+            return _, dict(status="invalid")
 
         if info['file:mime'] not in self.mime_filter:
             self.increment_counter('lines', 'skip')
-            return
+            return _, dict(status="skip")
 
         key = info.pop('key')
         info['f:c'] = json.dumps(info['f:c'], sort_keys=True, indent=None)
