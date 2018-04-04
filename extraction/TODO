@@ -1,0 +1,2 @@
+- abstract CDX line reading and HBase stuff out into a common library
+- actual GROBID_SERVER="http://wbgrp-svc096.us.archive.org:8070"
