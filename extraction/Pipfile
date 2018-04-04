@@ -10,18 +10,18 @@ verify_ssl = true
 
 [dev-packages]
 ipython = "*"
+happybase-mock = "*"
+pytest = "*"
+pytest-pythonpath = "*"
+responses = "*"
 
 [packages]
-pytest = "*"
+globalwayback = {version=">=0.3", index="ia"}
+happybase = "*"
 mrjob = "*"
 requests = "*"
 wayback = {version=">=0.2.1.2", index="ia"}
-globalwayback = {version=">=0.3", index="ia"}
-pytest-pythonpath = "*"
-happybase = "*"
-happybase-mock = "*"
 xmltodict = "*"
-responses = "*"
 
 [requires]
 python_version = "3.5"
