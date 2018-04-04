@@ -22,3 +22,8 @@ this, and python in general:
     # libjpeg-dev is for some wayback/pillow stuff
     sudo apt install python3-dev python3-pip python3-wheel libjpeg-dev
     pip3 install --user pipenv
+
+Each directory has it's own environment. Do something like:
+
+    pipenv install --dev
+    pipenv shell

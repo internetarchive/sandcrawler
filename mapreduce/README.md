@@ -1,14 +1,11 @@
 
+Hadoop streaming map/reduce jobs written in python using the mrjob library.
+
 ## Development and Testing
 
-Requires (eg, via `apt`):
+System dependencies in addition to `../README.md`:
 
-- libjpeg-dev
-
-Install pipenv system-wide if you don't have it:
-
-    # or use apt, homebrew, etc
-    sudo pip3 install pipenv
+- `libjpeg-dev` (for wayback libraries)
 
 Run the tests with:
 
@@ -16,7 +13,11 @@ Run the tests with:
 
 TODO: GROBID and HBase during development?
 
-## Backfill
+## Extraction Task
+
+TODO:
+
+## Backfill Task
 
 An example actually connecting to HBase from a local machine, with thrift
 running on a devbox:
