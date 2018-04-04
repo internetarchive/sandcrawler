@@ -120,7 +120,7 @@ def test_transform_line():
 
 class MRCDXBackfillHBase(MRJob):
 
-    # CDX lines in
+    # CDX lines in; JSON status out
     INPUT_PROTOCOL = mrjob.protocol.RawValueProtocol
     OUTPUT_PROTOCOL = mrjob.protocol.JSONValueProtocol
 

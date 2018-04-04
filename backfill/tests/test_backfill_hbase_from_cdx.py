@@ -23,6 +23,7 @@ def job():
     job = MRCDXBackfillHBase(['--no-conf', '-'], hb_table=table)
     return job
 
+
 def test_some_lines(job):
 
     raw = io.BytesIO(b"""
