@@ -147,7 +147,7 @@ class MRExtractCdxGrobid(MrJob):
 
         # Fetch data from WARCs in petabox
         try:
-            rstore = ResourceStore(loaderfactory=CDXLoaderFactory()) 
+            rstore = ResourceStore(loaderfactory=CDXLoaderFactory())
             gwb_record = rstore.load_resource(
                 info['file:cdx']['warc'],
                 info['file:cdx']['offset'],
@@ -219,7 +219,7 @@ class MRExtractCdxGrobid(MrJob):
         if info is None:
             self.increment_counter('lines', status['status'])
             return _, status
-        
+
         # Decide what to bother inserting back into HBase
         # Particularly: ('f:c', 'file:mime', 'file:size', 'file:cdx')
         grobid_status = info.get('grobid0:status_code', None)

@@ -107,7 +107,7 @@ def do_tei(path, encumbered=True):
         el = tei.find('.//{%s}back/{%s}div[@type="annex"]' % (ns, ns))
         info['annex'] = (el or None) and " ".join(el.itertext()).strip()
 
-    return info    
+    return info
 
 def main():
     parser = argparse.ArgumentParser(
