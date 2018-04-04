@@ -1,5 +1,0 @@
-- better test coverage (actually check coverage!)
-- use pre-mapper command to filter down, eg, by status type?
-- automation/docs for bundling virtualenv along
-- think about speedups
-- refactor into extraction folder

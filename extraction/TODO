@@ -1,2 +1,6 @@
+- better test coverage (actually check coverage!)
+- use pre-mapper command to filter down, eg, by status type?
+- automation/docs for bundling virtualenv along
+- think about speedups
 - abstract CDX line reading and HBase stuff out into a common library
 - actual GROBID_SERVER="http://wbgrp-svc096.us.archive.org:8070"
