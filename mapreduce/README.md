@@ -11,6 +11,11 @@ Run the tests with:
 
     pipenv run pytest
 
+Check test coverage with:
+
+    pytest --cov --cov-report html
+    # open ./htmlcov/index.html in a browser
+
 TODO: GROBID and HBase during development?
 
 ## Extraction Task

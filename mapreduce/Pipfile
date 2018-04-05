@@ -14,6 +14,7 @@ happybase-mock = "*"
 pytest = "*"
 pytest-pythonpath = "*"
 responses = "*"
+pytest-cov = "*"
 
 [packages]
 globalwayback = {version=">=0.3", index="ia"}

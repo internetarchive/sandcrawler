@@ -1,4 +1,9 @@
 *venv.zip
+*,cover
+!.coveragerc
+htmlcov/
+
+
 *.o
 *.a
 *.pyc
