@@ -16,7 +16,6 @@ TODO:
 - sentry integration for error reporting
 """
 
-import sys
 import json
 import happybase
 import mrjob
@@ -56,8 +55,8 @@ class MRCDXBackfillHBase(MRJob):
             host = self.options.hbase_host
             # TODO: make these configs accessible from... mrconf.cfg?
             hb_conn = happybase.Connection(host=host, transport="framed",
-                protocol="compact")
-        except Exception as err:
+                                           protocol="compact")
+        except Exception:
             raise Exception("Couldn't connect to HBase using host: {}".format(host))
         self.hb_table = hb_conn.table(self.options.hbase_table)
 
@@ -67,9 +66,6 @@ class MRCDXBackfillHBase(MRJob):
 
         if (raw_cdx.startswith(' ') or raw_cdx.startswith('filedesc') or
                 raw_cdx.startswith('#')):
-
-            # Skip line
-            # XXX: tests don't cover this path; need coverage!
             self.increment_counter('lines', 'invalid')
             yield _, dict(status="invalid", reason="line prefix")
             return
@@ -87,8 +83,8 @@ class MRCDXBackfillHBase(MRJob):
 
         key = info.pop('key')
         info['f:c'] = json.dumps(info['f:c'], sort_keys=True, indent=None)
-        info['file:cdx'] = json.dumps(info['file:cdx'], sort_keys=True,
-            indent=None)
+        info['file:cdx'] = json.dumps(info['file:cdx'],
+                                      sort_keys=True, indent=None)
 
         self.hb_table.put(key, info)
         self.increment_counter('lines', 'success')
@@ -97,4 +93,3 @@ class MRCDXBackfillHBase(MRJob):
 
 if __name__ == '__main__': # pragma: no cover
     MRCDXBackfillHBase.run()
-

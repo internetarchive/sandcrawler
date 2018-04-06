@@ -14,7 +14,7 @@ def normalize_mime(raw):
         if raw.startswith(norm):
             return norm
 
-    # Special cases 
+    # Special cases
     if raw.startswith('application/xml'):
         return 'text/xml'
     if raw.startswith('application/x-pdf'):
@@ -23,14 +23,14 @@ def normalize_mime(raw):
 
 
 def test_normalize_mime():
-    assert normalize_mime("asdf") == None
+    assert normalize_mime("asdf") is None
     assert normalize_mime("application/pdf") == "application/pdf"
     assert normalize_mime("application/pdf+journal") == "application/pdf"
     assert normalize_mime("Application/PDF") == "application/pdf"
-    assert normalize_mime("application/p") == None
+    assert normalize_mime("application/p") is None
     assert normalize_mime("application/xml+stuff") == "text/xml"
     assert normalize_mime("application/x-pdf") == "application/pdf"
-    assert normalize_mime("application/x-html") == None
+    assert normalize_mime("application/x-html") is None
 
 
 def parse_cdx_line(raw_cdx):
@@ -65,7 +65,7 @@ def parse_cdx_line(raw_cdx):
     warc_file = warc.split('/')[-1]
     try:
         dt_iso = datetime.strptime(dt, "%Y%m%d%H%M%S").isoformat()
-    except:
+    except Exception:
         return None
 
     # 'i' intentionally not set

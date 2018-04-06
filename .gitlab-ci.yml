@@ -10,7 +10,7 @@ test_mapreduce:
     - cd mapreduce
     - pipenv install --dev --deploy
     - pipenv run pytest --cov
-    - pipenv run pylint *.py
+    - pipenv run pylint --disable bad-continuation,arguments-differ,unidiomatic-typecheck *.py
     
 test_pig:
   script:

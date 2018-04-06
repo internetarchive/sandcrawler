@@ -23,9 +23,7 @@ A flag can be specified to disable copyright encumbered bits (--no-emcumbered):
 Prints JSON to stdout, errors to stderr
 """
 
-import os
 import io
-import sys
 import json
 import argparse
 import xml.etree.ElementTree as ET
