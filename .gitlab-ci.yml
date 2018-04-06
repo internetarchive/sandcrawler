@@ -1,7 +1,7 @@
 image: python:3.6-stretch
 before_script:
   - apt update -qy
-  - apt install -y python3-dev python3-pip python3-wheel libjpeg-dev
+  - apt install -y python3-dev python3-pip python3-wheel libjpeg-dev openjdk-8-jre-headless
   - pip3 install pipenv
   - pipenv --version
 
@@ -17,4 +17,4 @@ test_pig:
     - cd pig
     - ./fetch_deps.sh
     - pipenv install --dev --deploy
-    - pipenv run pytest
+    - JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::") pipenv run pytest

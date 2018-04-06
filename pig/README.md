@@ -10,6 +10,8 @@ by `fetch_deps.sh`) due to [dependency/jar issues][pig-bug] in local mode of
 
 ## Development and Testing
 
+To run tests, you need Java installed and `JAVA_HOME` configured.
+
 Fetch dependencies (pig):
 
     ./fetch_deps.sh
