@@ -30,7 +30,7 @@ from wayback.resource import ArcResource
 from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
 from common import parse_cdx_line
-from grobid2json import do_tei
+from grobid2json import teixml2json
 
 
 class MRExtractCdxGrobid(MRJob):
@@ -147,8 +147,8 @@ class MRExtractCdxGrobid(MRJob):
 
         # Convert TEI XML to JSON
         # TODO:
-        info['grobid0:tei_json'] = do_tei(grobid_response.content, encumbered=True)
-        info['grobid0:metadata'] = do_tei(grobid_response.content, encumbered=False)
+        info['grobid0:tei_json'] = teixml2json(grobid_response.content, encumbered=True)
+        info['grobid0:metadata'] = teixml2json(grobid_response.content, encumbered=False)
 
         # Determine extraction "quality"
         # TODO:
