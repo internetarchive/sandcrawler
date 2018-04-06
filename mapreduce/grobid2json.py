@@ -20,6 +20,7 @@ Prints JSON to stdout, errors to stderr
 """
 
 import os
+import io
 import sys
 import json
 import argparse
@@ -73,11 +74,18 @@ def biblio_info(elem):
     return ref
 
 
-def do_tei(path, encumbered=True):
+def do_tei(content, encumbered=True):
 
-    info = dict(filename=os.path.basename(path))
+    if type(content) == str:
+        content = io.StringIO(content)
+    elif type(content) == bytes:
+        content = io.BytesIO(content)
 
-    tree = ET.parse(path)
+    info = dict()
+
+    #print(content)
+    #print(content.getvalue())
+    tree = ET.parse(content)
     tei = tree.getroot()
 
     header = tei.find('.//{%s}teiHeader' % ns)
@@ -109,7 +117,7 @@ def do_tei(path, encumbered=True):
 
     return info
 
-def main():
+def main():   # pragma no cover
     parser = argparse.ArgumentParser(
         description="GROBID TEI XML to JSON",
         usage="%(prog)s [options] <teifile>...")
@@ -121,9 +129,10 @@ def main():
     args = parser.parse_args()
 
     for filename in args.teifiles:
+        content = open(filename, 'r')
         print(json.dumps(
-            do_tei(filename,
+            do_tei(content,
                encumbered=(not args.no_encumbered))))
 
-if __name__=='__main__':
+if __name__=='__main__':   # pragma no cover
     main()

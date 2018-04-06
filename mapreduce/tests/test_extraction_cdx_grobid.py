@@ -1,12 +1,16 @@
 
 import io
 import json
-import pytest
 import mrjob
+import pytest
+import struct
 import responses
 import happybase_mock
+from unittest import mock
 from extraction_cdx_grobid import MRExtractCdxGrobid
 
+
+FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
 
 @pytest.fixture
 def job():
@@ -22,13 +26,14 @@ def job():
     job = MRExtractCdxGrobid(['--no-conf', '-'], hb_table=table)
     return job
 
-
+@mock.patch('extraction_cdx_grobid.MRExtractCdxGrobid.fetch_warc_content', return_value=(FAKE_PDF_BYTES, None))
 @responses.activate
-def test_mapper_lines(job):
+def test_mapper_lines(mock_fetch, job):
 
-    fake_grobid = {}
-    responses.add(responses.POST, 'http://localhost:9070/api/processFulltextDocument', status=200,
-        body=json.dumps(fake_grobid), content_type='application/json')
+    with open('tests/files/23b29ea36382680716be08fc71aa81bd226e8a85.xml', 'r') as f:
+        real_tei_xml = f.read()
+    responses.add(responses.POST, 'http://localhost:8070/api/processFulltextDocument', status=200,
+        body=real_tei_xml, content_type='application/json')
 
     raw = io.BytesIO(b"""
 com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 301 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz
@@ -36,16 +41,23 @@ eu,eui,cadmus)/bitstream/handle/1814/36635/rscas_2015_03.pdf;jsessionid=76139301
 com,pbworks,educ333b)/robots.txt 20170705063311 http://educ333b.pbworks.com/robots.txt text/plain 200 6VAUYENMOU2SK2OWNRPDD6WTQTECGZAD - - 638 398190140 CITESEERX-CRAWL-2017-06-20-20170705062707827-00049-00058-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705063158203-00053-31209~wbgrp-svc284.us.archive.org~8443.warc.gz
 """)
 
-    job.sandbox(stdin=raw)
+    output = io.BytesIO()
+    job.sandbox(stdin=raw, stdout=output)
 
-    pytest.skip("need to mock wayback fetch")
     job.run_mapper()
 
+    # for debugging tests
+    #print(output.getvalue().decode('utf-8'))
+    #print(list(job.hb_table.scan()))
+
     # wayback gets FETCH 1x times
+    # TODO:
 
     # grobid gets POST 3x times
+    # TODO:
 
     # hbase 
+    # TODO:
 
 
     assert job.hb_table.row(b'1') == {}
@@ -58,15 +70,18 @@ com,pbworks,educ333b)/robots.txt 20170705063311 http://educ333b.pbworks.com/robo
 
     row = job.hb_table.row(b'sha1:MPCXVWMUTRUGFP36SLPHKDLY6NGU4S3J')
 
-    assert struct.unpack("", row[b'file:size']) == 12345
+    assert struct.unpack("!q", row[b'file:size'])[0] == len(FAKE_PDF_BYTES)
     assert row[b'file:mime'] == b"application/pdf"
-    assert struct.unpack("", row[b'grobid0:status_code']) == 200
-    assert row[b'grobid0:quality'] == None # TODO
+    assert struct.unpack("!q", row[b'grobid0:status_code'])[0] == 200
+    # TODO: assert row[b'grobid0:quality'] == None
     status = json.loads(row[b'grobid0:status'].decode('utf-8'))
-    assert type(row[b'grobid0:status']) == type(dict())
-    assert row[b'grobid0:tei_xml'] == "<xml><lorem>ipsum</lorem></xml>"
+    assert type(status) == type(dict())
+    assert row[b'grobid0:tei_xml'].decode('utf-8') == real_tei_xml
     tei_json = json.loads(row[b'grobid0:tei_json'].decode('utf-8'))
     metadata = json.loads(row[b'grobid0:metadata'].decode('utf-8'))
+    assert tei_json['title'] == metadata['title']
+    assert 'body' in tei_json
+    assert 'body' not in metadata
 
 def test_parse_cdx_invalid(job):
 
