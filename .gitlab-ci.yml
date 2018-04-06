@@ -1,0 +1,17 @@
+image: python:3.5
+before_script:
+  - apt update -qy
+  - apt install -y python3-dev python3-pip python3-wheel libjpeg-dev
+  - pip3 install --user pipenv
+
+test_mapreduce:
+  script:
+    - cd mapreduce
+    - pipenv install --dev
+    - pipenv run pytest
+    
+test_pig:
+  script:
+    - cd pig
+    - pipenv install --dev
+    - pipenv run pytest

@@ -1,8 +1,6 @@
 *venv.zip
 *,cover
-!.coveragerc
 htmlcov/
-
 
 *.o
 *.a
@@ -22,6 +20,9 @@ build/
 _build/
 src/build/
 *.log
+
+!.coveragerc
+!.gitlab-ci.yml
 
 # Don't ignore this file itself
 !.gitignore
