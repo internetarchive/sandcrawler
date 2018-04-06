@@ -13,6 +13,9 @@ Requires:
 - wayback/GWB libraries
 """
 
+# XXX: some broken MRO thing going on in here
+# pylint: skip-file
+
 import io
 import sys
 import json
