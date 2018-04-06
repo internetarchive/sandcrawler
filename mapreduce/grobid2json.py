@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 """
+NB: adapted to work as a library for PDF extraction. Will probably be
+re-written eventually to be correct, complete, and robust; this is just a
+first iteration.
+
 This script tries to extract everything from a GROBID TEI XML fulltext dump:
 
 - header metadata
@@ -38,6 +42,8 @@ def journal_info(elem):
     journal = dict()
     journal['name'] = elem.findtext('.//{%s}monogr/{%s}title' % (ns, ns))
     journal['publisher'] = elem.findtext('.//{%s}publicationStmt/{%s}publisher' % (ns, ns))
+    if journal['publisher'] == '':
+        journal['publisher'] = None
     journal['issn'] = elem.findtext('.//{%s}idno[@type="ISSN"]' % ns)
     journal['eissn'] = elem.findtext('.//{%s}idno[@type="eISSN"]' % ns)
     journal['volume'] = elem.findtext('.//{%s}biblScope[@unit="volume"]' % ns)
@@ -59,6 +65,8 @@ def biblio_info(elem):
             ref['title'] = other_title
     ref['authors'] = all_authors(elem)
     ref['publisher'] = elem.findtext('.//{%s}publicationStmt/{%s}publisher' % (ns, ns))
+    if ref['publisher'] == '':
+        ref['publisher'] = None
     date = elem.find('.//{%s}date[@type="published"]' % ns)
     ref['date'] = (date != None) and date.attrib.get('when')
     ref['volume'] = elem.findtext('.//{%s}biblScope[@unit="volume"]' % ns)
@@ -74,7 +82,7 @@ def biblio_info(elem):
     return ref
 
 
-def do_tei(content, encumbered=True):
+def teixml2json(content, encumbered=True):
 
     if type(content) == str:
         content = io.StringIO(content)
@@ -131,7 +139,7 @@ def main():   # pragma no cover
     for filename in args.teifiles:
         content = open(filename, 'r')
         print(json.dumps(
-            do_tei(content,
+            teixml2json(content,
                encumbered=(not args.no_encumbered))))
 
 if __name__=='__main__':   # pragma no cover

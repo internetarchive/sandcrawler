@@ -61,6 +61,7 @@ class MRExtractCdxGrobid(MRJob):
         r = requests.post(self.options.grobid_uri + "/api/processFulltextDocument",
             files={'input': content})
         if r.status_code is not 200:
+            # if invalid file, get a 400 with JSON body with 'description' key (and others)
             # XXX:
             return None
         return r
