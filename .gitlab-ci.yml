@@ -11,10 +11,11 @@ test_mapreduce:
     - pipenv install --dev --deploy
     - pipenv run pytest --cov
     - pipenv run pylint --disable bad-continuation,arguments-differ,unidiomatic-typecheck *.py
-    
-test_pig:
-  script:
-    - cd pig
-    - ./fetch_deps.sh
-    - pipenv install --dev --deploy
-    - JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::") pipenv run pytest
+
+# Needs fixing
+#test_pig:
+#  script:
+#    - cd pig
+#    - ./fetch_deps.sh
+#    - pipenv install --dev --deploy
+#    - JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::") pipenv run pytest

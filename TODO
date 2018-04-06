@@ -3,6 +3,8 @@ Will probably eventually refactor into top-level plus modules. Eg, "common"
 directory, "backfill" and "extraction" as sub-directories. Downside of this is
 single giant pipenv venv with all dependencies?
 
+- fix pig gitlab-ci tests (JAVA_HOME)
+
 sentry:
 - https://github.com/getsentry/raven-python
 
