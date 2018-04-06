@@ -12,7 +12,8 @@ cd deps/
 
 # Fetch Pig
 #wget -c https://archive.cloudera.com/cdh5/cdh/5/pig-${PIG_VERSION}.tar.gz
-wget -c http://mirror.metrocast.net/apache/pig/pig-${PIG_VERSION}/pig-${PIG_VERSION}.tar.gz
+#wget -c http://mirror.metrocast.net/apache/pig/pig-${PIG_VERSION}/pig-${PIG_VERSION}.tar.gz
+wget -c https://archive.org/serve/hadoop_pig_mirror/pig-${PIG_VERSION}.tar.gz
 tar xvf pig-${PIG_VERSION}.tar.gz
 ln -fs pig-${PIG_VERSION} pig
 ./pig/bin/pig -x local -version
