@@ -23,6 +23,7 @@ src/build/
 
 !.coveragerc
 !.gitlab-ci.yml
+!.pylintrc
 
 # Don't ignore this file itself
 !.gitignore

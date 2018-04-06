@@ -15,6 +15,7 @@ pytest = "*"
 pytest-pythonpath = "*"
 responses = "*"
 pytest-cov = "*"
+pylint = "*"
 
 [packages]
 globalwayback = {version=">=0.3", index="ia"}

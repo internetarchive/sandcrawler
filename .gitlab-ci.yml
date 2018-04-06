@@ -3,14 +3,14 @@ before_script:
   - apt update -qy
   - apt install -y python3-dev python3-pip python3-wheel libjpeg-dev
   - pip3 install pipenv
-  - pipenv -v
+  - pipenv --version
 
 test_mapreduce:
   script:
     - cd mapreduce
     - pipenv install --dev --deploy
     - pipenv run pytest
-    #- pipenv run flake8
+    - pipenv run pylint *.py
     
 test_pig:
   script:
