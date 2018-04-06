@@ -15,5 +15,6 @@ test_mapreduce:
 test_pig:
   script:
     - cd pig
+    - ./fetch_deps.sh
     - pipenv install --dev --deploy
     - pipenv run pytest
