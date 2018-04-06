@@ -9,7 +9,7 @@ test_mapreduce:
   script:
     - cd mapreduce
     - pipenv install --dev --deploy
-    - pipenv run pytest
+    - pipenv run pytest --cov
     - pipenv run pylint *.py
     
 test_pig:
