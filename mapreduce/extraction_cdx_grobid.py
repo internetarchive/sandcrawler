@@ -53,15 +53,9 @@ class MRExtractCdxGrobid(MRJob):
                               help='URI of GROBID API Server')
 
     def __init__(self, *args, **kwargs):
-
-        # Allow passthrough for tests
-        if 'hb_table' in kwargs:
-            self.hb_table = kwargs.pop('hb_table')
-        else:
-            self.hb_table = None
-
         super(MRExtractCdxGrobid, self).__init__(*args, **kwargs)
         self.mime_filter = ['application/pdf']
+        self.hb_table = None
 
     def grobid_process_fulltext(self, content):
         r = requests.post(self.options.grobid_uri + "/api/processFulltextDocument",
@@ -73,15 +67,17 @@ class MRExtractCdxGrobid(MRJob):
 
     def mapper_init(self):
 
-        if self.hb_table is None:
-            try:
-                host = self.options.hbase_host
-                # TODO: make these configs accessible from... mrconf.cfg?
-                hb_conn = happybase.Connection(host=host, transport="framed",
-                    protocol="compact")
-            except Exception as err:
-                raise Exception("Couldn't connect to HBase using host: {}".format(host))
-            self.hb_table = hb_conn.table(self.options.hbase_table)
+        if self.hb_table:
+            return
+
+        try:
+            host = self.options.hbase_host
+            # TODO: make these configs accessible from... mrconf.cfg?
+            hb_conn = happybase.Connection(host=host, transport="framed",
+                protocol="compact")
+        except Exception as err:
+            raise Exception("Couldn't connect to HBase using host: {}".format(host))
+        self.hb_table = hb_conn.table(self.options.hbase_table)
 
     def parse_line(self, raw_cdx):
 

@@ -43,27 +43,23 @@ class MRCDXBackfillHBase(MRJob):
                               help='HBase thrift API host to connect to')
 
     def __init__(self, *args, **kwargs):
-
-        # Allow passthrough for tests
-        if 'hb_table' in kwargs:
-            self.hb_table = kwargs.pop('hb_table')
-        else:
-            self.hb_table = None
-
         super(MRCDXBackfillHBase, self).__init__(*args, **kwargs)
         self.mime_filter = ['application/pdf']
+        self.hb_table = None
 
     def mapper_init(self):
 
-        if self.hb_table is None:
-            try:
-                host = self.options.hbase_host
-                # TODO: make these configs accessible from... mrconf.cfg?
-                hb_conn = happybase.Connection(host=host, transport="framed",
-                    protocol="compact")
-            except Exception as err:
-                raise Exception("Couldn't connect to HBase using host: {}".format(host))
-            self.hb_table = hb_conn.table(self.options.hbase_table)
+        if self.hb_table:
+            return
+
+        try:
+            host = self.options.hbase_host
+            # TODO: make these configs accessible from... mrconf.cfg?
+            hb_conn = happybase.Connection(host=host, transport="framed",
+                protocol="compact")
+        except Exception as err:
+            raise Exception("Couldn't connect to HBase using host: {}".format(host))
+        self.hb_table = hb_conn.table(self.options.hbase_table)
 
     def mapper(self, _, raw_cdx):
 

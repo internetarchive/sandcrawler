@@ -18,13 +18,15 @@ def job():
     Note: this mock only seems to work with job.run_mapper(), not job.run();
     the later results in a separate instantiation without the mock?
     """
+    job = MRExtractCdxGrobid(['--no-conf', '-'])
+
     conn = happybase_mock.Connection()
     conn.create_table('wbgrp-journal-extract-test',
         {'file': {}, 'grobid0': {}, 'f': {}})
-    table = conn.table('wbgrp-journal-extract-test')
+    job.hb_table = conn.table('wbgrp-journal-extract-test')
 
-    job = MRExtractCdxGrobid(['--no-conf', '-'], hb_table=table)
     return job
+
 
 @mock.patch('extraction_cdx_grobid.MRExtractCdxGrobid.fetch_warc_content', return_value=(FAKE_PDF_BYTES, None))
 @responses.activate

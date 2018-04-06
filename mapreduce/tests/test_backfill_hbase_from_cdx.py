@@ -15,12 +15,13 @@ def job():
     Note: this mock only seems to work with job.run_mapper(), not job.run();
     the later results in a separate instantiation without the mock?
     """
+    job = MRCDXBackfillHBase(['--no-conf', '-'])
+
     conn = happybase_mock.Connection()
     conn.create_table('wbgrp-journal-extract-test',
         {'file': {}, 'grobid0': {}, 'f': {}})
-    table = conn.table('wbgrp-journal-extract-test')
+    job.hb_table = conn.table('wbgrp-journal-extract-test')
 
-    job = MRCDXBackfillHBase(['--no-conf', '-'], hb_table=table)
     return job
 
 
