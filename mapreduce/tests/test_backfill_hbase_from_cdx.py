@@ -52,3 +52,22 @@ com,pbworks,educ333b)/robots.txt 20170705063311 http://educ333b.pbworks.com/robo
     f_c = json.loads(row[b'f:c'].decode('utf-8'))
     assert f_c['u'] == "http://cadmus.eui.eu/bitstream/handle/1814/36635/RSCAS_2015_03.pdf%3Bjsessionid%3D761393014319A39F40D32AE3EB3A853F?sequence%3D1"
     assert b'i' not in f_c
+
+def test_parse_cdx_skip(job):
+
+    job.mapper_init()
+
+    print("CDX prefix")
+    raw = " com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz"
+    info, status = job.mapper(None, raw).__next__()
+    assert info is None
+    assert status['status'] == "invalid"
+    assert 'prefix' in status['reason']
+
+    print("mimetype")
+    raw = "com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf text/html 200 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz"
+    info, status = job.mapper(None, raw).__next__()
+    assert info is None
+    assert status['status'] == "skip"
+    assert 'mimetype' in status['reason']
+

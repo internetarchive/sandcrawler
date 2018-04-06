@@ -75,16 +75,19 @@ class MRCDXBackfillHBase(MRJob):
             # Skip line
             # XXX: tests don't cover this path; need coverage!
             self.increment_counter('lines', 'invalid')
-            return _, dict(status="invalid")
+            yield _, dict(status="invalid", reason="line prefix")
+            return
 
         info = parse_cdx_line(raw_cdx)
         if info is None:
             self.increment_counter('lines', 'invalid')
-            return _, dict(status="invalid")
+            yield _, dict(status="invalid")
+            return
 
         if info['file:mime'] not in self.mime_filter:
             self.increment_counter('lines', 'skip')
-            return _, dict(status="skip")
+            yield _, dict(status="skip", reason="unwanted mimetype")
+            return
 
         key = info.pop('key')
         info['f:c'] = json.dumps(info['f:c'], sort_keys=True, indent=None)
@@ -96,6 +99,6 @@ class MRCDXBackfillHBase(MRJob):
 
         yield _, dict(status="success")
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     MRCDXBackfillHBase.run()
 

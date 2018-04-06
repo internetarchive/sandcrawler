@@ -121,7 +121,6 @@ def test_parse_cdx_skip(job):
 
     job.mapper_init()
 
-
     print("warc format")
     raw = "com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz"
     info, status = job.mapper(None, raw).__next__()

@@ -29,6 +29,8 @@ def test_normalize_mime():
     assert normalize_mime("Application/PDF") == "application/pdf"
     assert normalize_mime("application/p") == None
     assert normalize_mime("application/xml+stuff") == "text/xml"
+    assert normalize_mime("application/x-pdf") == "application/pdf"
+    assert normalize_mime("application/x-html") == None
 
 
 def parse_cdx_line(raw_cdx):

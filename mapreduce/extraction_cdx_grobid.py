@@ -207,6 +207,6 @@ class MRExtractCdxGrobid(MRJob):
 
         yield _, dict(status="success", grobid_status=grobid_status)
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     MRExtractCdxGrobid.run()
 
