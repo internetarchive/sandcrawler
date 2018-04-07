@@ -1,4 +1,5 @@
 *venv.zip
+mapreduce-*.tar.gz
 *,cover
 htmlcov/
 
