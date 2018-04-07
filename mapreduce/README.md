@@ -20,28 +20,37 @@ TODO: GROBID and HBase during development?
 
 ## Extraction Task
 
-TODO:
+An example actually connecting to HBase from a local machine, with thrift
+running on a devbox and GROBID running on a dedicated machine:
+
+    ./extraction_cdx_grobid.py \
+        --hbase-table wbgrp-journal-extract-0-qa \
+        --hbase-host bnewbold-dev.us.archive.org \
+        --grobid-uri http://wbgrp-svc096.us.archive.org:8070
+        tests/files/example.cdx
 
 ## Backfill Task
 
 An example actually connecting to HBase from a local machine, with thrift
 running on a devbox:
 
-    ./backfill_hbase_from_cdx.py tests/files/example.cdx \
+    ./backfill_hbase_from_cdx.py \
         --hbase-table wbgrp-journal-extract-0-qa \
         --hbase-host bnewbold-dev.us.archive.org
+        tests/files/example.cdx
 
 Actual invocation to run on Hadoop cluster (running on an IA devbox, where
 hadoop environment is configured):
 
     # Create tarball of virtualenv
     pipenv shell
-    tar -czf backfill-4OmRI0zZ.tar.gz -C /home/bnewbold/.local/share/virtualenvs/backfill-4OmRI0zZ .
+    export VENVSHORT=`basename $VIRTUAL_ENV`
+    tar -czf $VENVSHORT.tar.gz -C /home/bnewbold/.local/share/virtualenvs/$VENVSHORT .
 
     ./backfill_hbase_from_cdx.py \
-        -r hadoop \
         --hbase-host bnewbold-dev.us.archive.org \
         --hbase-table wbgrp-journal-extract-0-qa \
+        -r hadoop \
         -c mrjob.conf \
-        --archive backfill-4OmRI0zZ.tar.gz#venv \
+        --archive $VENVSHORT#venv \
         hdfs:///user/bnewbold/journal_crawl_cdx/citeseerx_crawl_2017.cdx
