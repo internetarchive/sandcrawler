@@ -7,4 +7,4 @@ include-ids=yes
 
 [MISCELLANEOUS]
 # List of note tags to take in consideration, separated by a comma.
-notes=FIXME,XXX
+notes=FIXME,XXX,DELETEME

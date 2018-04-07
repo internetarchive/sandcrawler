@@ -3,6 +3,7 @@ Will probably eventually refactor into top-level plus modules. Eg, "common"
 directory, "backfill" and "extraction" as sub-directories. Downside of this is
 single giant pipenv venv with all dependencies?
 
+- how to get argument (like --hbase-table) into mrjob.conf, or similar?
 - fix pig gitlab-ci tests (JAVA_HOME). also make fetch_deps *way* more quiet
 
 sentry:
