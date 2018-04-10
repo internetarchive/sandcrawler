@@ -35,7 +35,7 @@ def test_mapper_lines(mock_fetch, job):
     with open('tests/files/23b29ea36382680716be08fc71aa81bd226e8a85.xml', 'r') as f:
         real_tei_xml = f.read()
     responses.add(responses.POST, 'http://localhost:8070/api/processFulltextDocument', status=200,
-        body=real_tei_xml, content_type='application/json')
+        body=real_tei_xml, content_type='text/xml')
 
     raw = io.BytesIO(b"""
 com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 301 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz
@@ -53,15 +53,15 @@ com,pbworks,educ333b)/robots.txt 20170705063311 http://educ333b.pbworks.com/robo
     #print(list(job.hb_table.scan()))
 
     # wayback gets FETCH 1x times
-    # TODO:
+    mock_fetch.assert_called_once_with(
+        "CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz",
+        328850624,
+        854156)
 
-    # grobid gets POST 3x times
-    # TODO:
+    # grobid gets POST 1x times
+    assert len(responses.calls) == 1
 
-    # hbase 
-    # TODO:
-
-
+    # HBase
     assert job.hb_table.row(b'1') == {}
     # HTTP 301
     assert job.hb_table.row(b'sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ') == {}
@@ -70,6 +70,7 @@ com,pbworks,educ333b)/robots.txt 20170705063311 http://educ333b.pbworks.com/robo
     # text/plain
     assert job.hb_table.row(b'sha1:6VAUYENMOU2SK2OWNRPDD6WTQTECGZAD') == {}
 
+    # Saved extraction info
     row = job.hb_table.row(b'sha1:MPCXVWMUTRUGFP36SLPHKDLY6NGU4S3J')
 
     assert struct.unpack("!q", row[b'file:size'])[0] == len(FAKE_PDF_BYTES)
@@ -152,12 +153,38 @@ def test_parse_cdx_skip(job):
     assert status['status'] == "skip"
     assert 'mimetype' in status['reason']
 
-def test_tei_json_convert():
-    # TODO: load xml test vector, run it through
-    with open('tests/files/23b29ea36382680716be08fc71aa81bd226e8a85.xml', 'r') as f:
-        xml_content = f.read()
-    pass
 
-def test_tei_json_convert_invalid():
-    # TODO: pass in junk
-    pass
+@mock.patch('extraction_cdx_grobid.MRExtractCdxGrobid.fetch_warc_content', return_value=(FAKE_PDF_BYTES, None))
+@responses.activate
+def test_grobid_503(mock_fetch, job):
+
+    status = b"{'status': 'done broke due to 503'}"
+    responses.add(responses.POST, 'http://localhost:8070/api/processFulltextDocument', status=503,
+        body=status)
+
+    raw = io.BytesIO(b"""com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz""")
+
+    output = io.BytesIO()
+    job.sandbox(stdin=raw, stdout=output)
+    job.run_mapper()
+    row = job.hb_table.row(b'sha1:ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ')
+    status = json.loads(row[b'grobid0:status'].decode('utf-8'))
+    assert json.loads(row[b'grobid0:status'].decode('utf-8')) == status
+
+
+@mock.patch('extraction_cdx_grobid.MRExtractCdxGrobid.fetch_warc_content', return_value=(FAKE_PDF_BYTES, None))
+@responses.activate
+def test_grobid_not_xml(mock_fetch, job):
+
+    status = b"{'status': 'done broke'}"
+    responses.add(responses.POST, 'http://localhost:8070/api/processFulltextDocument', status=200,
+        body=status)
+
+    raw = io.BytesIO(b"""com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz""")
+
+    output = io.BytesIO()
+    job.sandbox(stdin=raw, stdout=output)
+    job.run_mapper()
+    row = job.hb_table.row(b'sha1:ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ')
+    assert json.loads(row[b'grobid0:status'].decode('utf-8')) == status
+
