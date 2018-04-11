@@ -7,13 +7,6 @@ formats.
 Requires:
 - happybase
 - mrjob
-
-TODO:
-- argparse
-- refactor into an object
-- tests in separate file
-- nose tests
-- sentry integration for error reporting
 """
 
 import json
