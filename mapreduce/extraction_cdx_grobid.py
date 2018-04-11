@@ -13,11 +13,10 @@ Requires:
 - wayback/GWB libraries
 """
 
-# XXX: some broken MRO thing going on in here
+# XXX: some broken MRO thing going on in here due to python3 object wrangling
+# in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
-import io
-import sys
 import xml
 import json
 import struct
@@ -80,7 +79,7 @@ class MRExtractCdxGrobid(MRJob):
             # TODO: make these configs accessible from... mrconf.cfg?
             hb_conn = happybase.Connection(host=host, transport="framed",
                 protocol="compact")
-        except Exception as err:
+        except Exception:
             raise Exception("Couldn't connect to HBase using host: {}".format(host))
         self.hb_table = hb_conn.table(self.options.hbase_table)
 
@@ -108,7 +107,7 @@ class MRExtractCdxGrobid(MRJob):
         try:
             rstore = ResourceStore(loaderfactory=CDXLoaderFactory())
             gwb_record = rstore.load_resource(warc_uri, offset, c_size)
-        except wayback.exception.ResourceUnavailable as err:
+        except wayback.exception.ResourceUnavailable:
             return None, dict(status="error",
                 reason="failed to load file contents from wayback/petabox")
 
@@ -137,7 +136,7 @@ class MRExtractCdxGrobid(MRJob):
             return None, dict(status="error", reason="connection to GROBID worker")
 
         info['grobid0:status_code'] = grobid_response.status_code
-        if grobid_response.status_code is not 200:
+        if grobid_response.status_code != 200:
             # response.text is .content decoded as utf-8
             info['grobid0:status'] = json.loads(grobid_response.text)
             return info, dict(status="error", reason="non-200 GROBID HTTP status",
@@ -215,7 +214,7 @@ class MRExtractCdxGrobid(MRJob):
 
         # Convert fields to binary
         for k in list(info.keys()):
-            if info[k] == None:
+            if info[k] is None:
                 info.pop(k)
             elif k in ('f:c', 'file:cdx', 'grobid0:status', 'grobid0:tei_json',
                     'grobid0:metadata'):
@@ -242,4 +241,3 @@ class MRExtractCdxGrobid(MRJob):
 
 if __name__ == '__main__': # pragma: no cover
     MRExtractCdxGrobid.run()
-
