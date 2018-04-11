@@ -19,6 +19,7 @@ Requires:
 
 import xml
 import json
+import raven
 import struct
 import requests
 import happybase
@@ -31,6 +32,9 @@ from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
 from common import parse_cdx_line
 from grobid2json import teixml2json
+
+# Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
+sentry_client = raven.Client()
 
 
 class MRExtractCdxGrobid(MRJob):
@@ -74,6 +78,7 @@ class MRExtractCdxGrobid(MRJob):
         if self.hb_table:
             return
 
+        sentry_client.tags_context(dict(hbase_table=self.options.hbase_table))
         try:
             host = self.options.hbase_host
             # TODO: make these configs accessible from... mrconf.cfg?
@@ -166,6 +171,7 @@ class MRExtractCdxGrobid(MRJob):
 
         return info, None
 
+    @sentry_client.capture_exceptions
     def mapper(self, _, raw_cdx):
         """
         1. parse CDX line
@@ -186,6 +192,9 @@ class MRExtractCdxGrobid(MRJob):
             yield _, status
             return
         key = info['key']
+
+        # Note: this may not get "cleared" correctly
+        sentry_client.extra_context(dict(row_key=key))
 
         # Check if we've already processed this line
         oldrow = self.hb_table.row(key,
