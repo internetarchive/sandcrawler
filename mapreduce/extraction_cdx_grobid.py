@@ -138,9 +138,9 @@ class MRExtractCdxGrobid(MRJob):
         info['grobid0:status_code'] = grobid_response.status_code
         if grobid_response.status_code != 200:
             # response.text is .content decoded as utf-8
-            info['grobid0:status'] = json.loads(grobid_response.text)
+            info['grobid0:status'] = dict(description=grobid_response.text)
             return info, dict(status="error", reason="non-200 GROBID HTTP status",
-                extra=grobid_response.content)
+                extra=grobid_response.text)
 
         info['grobid0:status'] = {'status': 'success'}
         info['grobid0:tei_xml'] = grobid_response.content
