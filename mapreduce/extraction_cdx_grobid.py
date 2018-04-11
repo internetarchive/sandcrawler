@@ -143,7 +143,7 @@ class MRExtractCdxGrobid(MRJob):
             return info, dict(status="error", reason="non-200 GROBID HTTP status",
                 extra=grobid_response.content)
 
-        info['grobid0:status'] = {}
+        info['grobid0:status'] = {'status': 'success'}
         info['grobid0:tei_xml'] = grobid_response.content
 
         # Convert TEI XML to JSON
@@ -189,9 +189,9 @@ class MRExtractCdxGrobid(MRJob):
         key = info['key']
 
         # Check if we've already processed this line
-        oldrow = self.hb_table.row(key, columns=['f', 'file',
-            'grobid0:status_code'])
-        if oldrow.get('grobid0:status', None):
+        oldrow = self.hb_table.row(key, columns=[b'f', b'file',
+            b'grobid0:status_code'])
+        if oldrow.get(b'grobid0:status_code', None) != None:
             # This file has already been processed; skip it
             self.increment_counter('lines', 'existing')
             yield _, dict(status="existing", key=key)
@@ -209,7 +209,7 @@ class MRExtractCdxGrobid(MRJob):
         # Particularly: ('f:c', 'file:mime', 'file:size', 'file:cdx')
         grobid_status = info.get('grobid0:status_code', None)
         for k in list(info.keys()):
-            if k in oldrow:
+            if k.encode('utf-8') in oldrow:
                 info.pop(k)
 
         # Convert fields to binary
