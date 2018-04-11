@@ -158,7 +158,7 @@ def test_parse_cdx_skip(job):
 @responses.activate
 def test_grobid_503(mock_fetch, job):
 
-    status = b"{'status': 'done broke due to 503'}"
+    status = b'{"status": "done broke due to 503"}'
     responses.add(responses.POST, 'http://localhost:8070/api/processFulltextDocument', status=503,
         body=status)
 
@@ -176,9 +176,9 @@ def test_grobid_503(mock_fetch, job):
 @responses.activate
 def test_grobid_not_xml(mock_fetch, job):
 
-    status = b"{'status': 'done broke'}"
+    payload = b'this is not XML'
     responses.add(responses.POST, 'http://localhost:8070/api/processFulltextDocument', status=200,
-        body=status)
+        body=payload)
 
     raw = io.BytesIO(b"""com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz""")
 
@@ -186,5 +186,24 @@ def test_grobid_not_xml(mock_fetch, job):
     job.sandbox(stdin=raw, stdout=output)
     job.run_mapper()
     row = job.hb_table.row(b'sha1:ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ')
-    assert json.loads(row[b'grobid0:status'].decode('utf-8')) == status
+    assert struct.unpack("!q", row[b'grobid0:status_code'])[0] == 200
+    assert row[b'grobid0:tei_xml'] == payload
+    assert b'grobid0:tei_json' not in row
 
+
+@mock.patch('extraction_cdx_grobid.MRExtractCdxGrobid.fetch_warc_content', return_value=(FAKE_PDF_BYTES, None))
+@responses.activate
+def test_grobid_invalid_connection(mock_fetch, job):
+
+    status = b'{"status": "done broke"}'
+    job.options.grobid_uri = 'http://host.invalid:8070/api/processFulltextDocument'
+
+    raw = io.BytesIO(b"""com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz""")
+
+    output = io.BytesIO()
+    job.sandbox(stdin=raw, stdout=output)
+    #with pytest.raises...
+    job.run_mapper()
+    assert job.hb_table.row(b'sha1:ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ') == {}
+
+# TODO: failure to fetch from wayback
