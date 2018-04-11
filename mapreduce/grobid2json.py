@@ -95,6 +95,8 @@ def teixml2json(content, encumbered=True):
     tei = tree.getroot()
 
     header = tei.find('.//{%s}teiHeader' % ns)
+    if header is None:
+        raise ValueError("XML does not look like TEI format")
     info['title'] = header.findtext('.//{%s}analytic/{%s}title' % (ns, ns))
     info['authors'] = all_authors(header.find('.//{%s}sourceDesc/{%s}biblStruct' % (ns, ns)))
     info['journal'] = journal_info(header)

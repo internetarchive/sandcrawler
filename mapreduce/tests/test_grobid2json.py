@@ -18,5 +18,5 @@ def test_invalid_xml():
 
     with pytest.raises(xml.etree.ElementTree.ParseError):
         teixml2json("this is not XML")
-    with pytest.raises(xml.etree.ElementTree.ParseError):
+    with pytest.raises(ValueError):
         teixml2json("<xml></xml>")
