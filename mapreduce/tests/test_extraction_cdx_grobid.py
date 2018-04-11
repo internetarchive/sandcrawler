@@ -6,8 +6,9 @@ import pytest
 import struct
 import responses
 import happybase_mock
+import wayback.exception
 from unittest import mock
-from extraction_cdx_grobid import MRExtractCdxGrobid
+from extraction_cdx_grobid import MRExtractCdxGrobid, Resource
 
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
@@ -192,7 +193,6 @@ def test_grobid_not_xml(mock_fetch, job):
 
 
 @mock.patch('extraction_cdx_grobid.MRExtractCdxGrobid.fetch_warc_content', return_value=(FAKE_PDF_BYTES, None))
-@responses.activate
 def test_grobid_invalid_connection(mock_fetch, job):
 
     status = b'{"status": "done broke"}'
@@ -202,8 +202,51 @@ def test_grobid_invalid_connection(mock_fetch, job):
 
     output = io.BytesIO()
     job.sandbox(stdin=raw, stdout=output)
-    #with pytest.raises...
     job.run_mapper()
+    output = output.getvalue().decode('utf-8')
+    assert 'error' in output
+    assert 'GROBID' in output
     assert job.hb_table.row(b'sha1:ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ') == {}
 
-# TODO: failure to fetch from wayback
+
+def test_wayback_failure(job):
+
+    job.options.warc_uri_prefix = 'http://host.invalid/'
+
+    raw = io.BytesIO(b"""com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz""")
+
+    output = io.BytesIO()
+    job.sandbox(stdin=raw, stdout=output)
+    job.run_mapper()
+    output = output.getvalue().decode('utf-8')
+    assert 'error' in output
+    assert 'wayback' in output
+    assert job.hb_table.row(b'sha1:ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ') == {}
+
+
+@mock.patch('extraction_cdx_grobid.ResourceStore')
+def test_wayback_not_found(mock_rs, job):
+
+    # This is... a little convoluded. Basically creating a 404 situation for
+    # reading a wayback resource.
+    mock_resource = mock.MagicMock()
+    mock_resource.get_status.return_value = (404, "Not Found")
+    mock_rso = mock.MagicMock()
+    mock_rso.load_resource.return_value = mock_resource
+    mock_rs.return_value = mock_rso
+    print(mock_rs().load_resource().get_status())
+
+    job.options.warc_uri_prefix = 'http://dummy-archive.org/'
+
+    raw = io.BytesIO(b"""com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz""")
+
+    output = io.BytesIO()
+    job.sandbox(stdin=raw, stdout=output)
+    job.run_mapper()
+    output = output.getvalue().decode('utf-8')
+
+    print(output)
+    assert 'error' in output
+    assert 'not 200' in output
+    assert job.hb_table.row(b'sha1:ABCDEF12345Q2MSVX7XZKYAYSCX5QBYJ') == {}
+

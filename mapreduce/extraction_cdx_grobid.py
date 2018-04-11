@@ -109,7 +109,8 @@ class MRExtractCdxGrobid(MRJob):
             rstore = ResourceStore(loaderfactory=CDXLoaderFactory())
             gwb_record = rstore.load_resource(warc_uri, offset, c_size)
         except wayback.exception.ResourceUnavailable as err:
-            return None, dict(status="petabox_error", reason="failed to load file contents")
+            return None, dict(status="error",
+                reason="failed to load file contents from wayback/petabox")
 
         if gwb_record.get_status()[0] != 200:
             return None, dict(status="error",
