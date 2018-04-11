@@ -40,6 +40,7 @@ sentry_client = raven.Client()
 class MRExtractCdxGrobid(MRJob):
 
     # CDX lines in; JSON status out
+    HADOOP_INPUT_FORMAT = 'org.apache.hadoop.mapred.lib.NLineInputFormat'
     INPUT_PROTOCOL = mrjob.protocol.RawValueProtocol
     OUTPUT_PROTOCOL = mrjob.protocol.JSONValueProtocol
 
