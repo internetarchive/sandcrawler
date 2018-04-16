@@ -23,6 +23,10 @@ this, and python in general:
     sudo apt install python3-dev python3-pip python3-wheel libjpeg-dev
     pip3 install --user pipenv
 
+On macOS:
+
+    brew install libjpeg pipenv
+
 Each directory has it's own environment. Do something like:
 
     pipenv install --dev
