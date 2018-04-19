@@ -64,6 +64,9 @@ class MRExtractCdxGrobid(MRJob):
                               type=str,
                               default='https://archive.org/serve/',
                               help='URI where WARCs can be found')
+        self.add_passthru_arg('--force-existing',
+                              action="store_true",
+                              help='Re-processes (with GROBID) existing lines')
 
     def __init__(self, *args, **kwargs):
         super(MRExtractCdxGrobid, self).__init__(*args, **kwargs)
@@ -201,7 +204,8 @@ class MRExtractCdxGrobid(MRJob):
         # Check if we've already processed this line
         oldrow = self.hb_table.row(key,
             columns=[b'f:c', b'file', b'grobid0:status_code'])
-        if oldrow.get(b'grobid0:status_code', None) != None:
+        if (oldrow.get(b'grobid0:status_code', None) != None
+                and not self.options.force_existing):
             # This file has already been processed; skip it
             self.increment_counter('lines', 'existing')
             yield _, dict(status="existing", key=key)
