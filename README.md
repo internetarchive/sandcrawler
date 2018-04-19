@@ -20,7 +20,7 @@ Pretty much everything here uses python/pipenv. To setup your environment for
 this, and python in general:
 
     # libjpeg-dev is for some wayback/pillow stuff
-    sudo apt install python3-dev python3-pip python3-wheel libjpeg-dev
+    sudo apt install -y python3-dev python3-pip python3-wheel libjpeg-dev build-essentials
     pip3 install --user pipenv
 
 On macOS:
@@ -29,5 +29,11 @@ On macOS:
 
 Each directory has it's own environment. Do something like:
 
+    cd mapreduce
     pipenv install --dev
     pipenv shell
+
+## Possible Issues with Setup
+
+Bryan had `~/.local/bin` in his `$PATH`, and that seemed to make everything
+work.
