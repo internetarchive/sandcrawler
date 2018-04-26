@@ -152,6 +152,12 @@ class MRExtractCdxGrobid(MRJob):
             return info, dict(status="error", reason="non-200 GROBID HTTP status",
                 extra=grobid_response.text)
 
+        # 4 MByte XML size limit
+        if len(grobid_response.content) > 4000000:
+            info['grobid0:status'] = dict(description=grobid_response.text)
+            return info, dict(status="oversize", reason="TEI response was too large",
+                extra=grobid_response.text)
+
         info['grobid0:status'] = {'status': 'success'}
         info['grobid0:tei_xml'] = grobid_response.content
 
