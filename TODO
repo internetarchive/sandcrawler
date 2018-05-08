@@ -1,4 +1,9 @@
 
+pig:
+- potentially want to *not* de-dupe CDX lines by uniq sha1 in all cases; run
+  this as a second-stage filter? for example, may want many URL links in fatcat
+  for a single file (different links, different policies)
+
 - include input file name (and chunk? and CDX?) in sentry context
 - play with test image on older releases (eg, trusty)
 

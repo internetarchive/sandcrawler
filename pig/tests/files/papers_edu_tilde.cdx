@@ -4,12 +4,12 @@
 #http://www.comp.hkbu.edu.hk/~ymc/papers/conference/ijcnn03_710.pdf
 
 # should be 6 matches:
-hk,edu,hkbu,comp)/~ymc/papers/conference/ijcnn03_710.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-edu,stanford,www)/~johntayl/Papers/taylor2.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-edu,nps,met)/~mtmontgo/papers/isabel_part2.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-edu,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-jp,ac,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-co,edu,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+hk,edu,hkbu,comp)/~ymc/papers/conference/ijcnn03_710.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 LQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+edu,stanford,www)/~johntayl/Papers/taylor2.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 XQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+edu,nps,met)/~mtmontgo/papers/isabel_part2.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 PQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+edu,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 9QHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+jp,ac,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 8QHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+co,edu,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 7QHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
 
 # NOT:
-com,corp,edu,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+com,corp,edu,pitt,www)/~druzdzel/psfiles/ecai06.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 6QHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz

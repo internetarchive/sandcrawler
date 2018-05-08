@@ -5,7 +5,7 @@
 
 # should match 4:
 
-edu,fit,research)/sealevelriselibrary/documents/doc_mgr/448/Florida_Keys_Low_Island_Biodiversity_&_SLR_-_Ross_et_al_2009.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-org,sgmjournals,ijs)//cgi/reprint/54/6/2217.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-uk,ac,soton,ecs,eprints)/12020/1/mind-the-semantic-gap.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
-au,edu,uq,eprint)/archive/00004120/01/R103_Forrester_pp.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+edu,fit,research)/sealevelriselibrary/documents/doc_mgr/448/Florida_Keys_Low_Island_Biodiversity_&_SLR_-_Ross_et_al_2009.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3I - - 123 456 CRAWL/CRAWL.warc.gz
+org,sgmjournals,ijs)//cgi/reprint/54/6/2217.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 TQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+uk,ac,soton,ecs,eprints)/12020/1/mind-the-semantic-gap.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 NQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+au,edu,uq,eprint)/archive/00004120/01/R103_Forrester_pp.pdf 20170706005950 http://mit.edu/file.pdf application/pdf 200 QQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
