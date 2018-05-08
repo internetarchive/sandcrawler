@@ -1,4 +1,5 @@
 
+- include input file name (and chunk? and CDX?) in sentry context
 - play with test image on older releases (eg, trusty)
 
 - how to get argument (like --hbase-table) into mrjob.conf, or similar?
