@@ -1,0 +1,7 @@
+#http://journals.ametsoc.org/doi/pdf/10.1175/2008BAMS2370.1
+#http://www.nejm.org:80/doi/pdf/10.1056/NEJMoa1013607
+
+# should match 2:
+
+org,ametsoc,journals)/doi/pdf/10.1175/2008BAMS2370.1 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
+org,nejm,www)/doi/pdf/10.1056/NEJMoa1013607 20170706005950 http://mit.edu/file.pdf application/pdf 200 MQHD36X5MNZPWFNMD5LFOYZSFGCHUN3V - - 123 456 CRAWL/CRAWL.warc.gz
