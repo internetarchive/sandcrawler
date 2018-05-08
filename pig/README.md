@@ -28,3 +28,8 @@ to just download.
 
 [local-pig]: https://hub.docker.com/r/chalimartines/local-pig
 
+## Run in Production
+
+    pig -param INPUT="/user/bnewbold/pdfs/global-20171227034923" \
+        -param OUTPUT="/user/bnewbold/pdfs/gwb-pdf-20171227034923-surt-filter" \
+        filter-cdx-paper-pdfs.pig
