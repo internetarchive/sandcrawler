@@ -36,7 +36,8 @@ class PigTestHelper(unittest.TestCase):
         self._tmpdir = tempfile.mkdtemp()
 
     def tearDown(self):
-        shutil.rmtree(self._tmpdir)
+        pass
+        # XXX: shutil.rmtree(self._tmpdir)
 
     def run_pig_raw(self, params):
         """Low-level variant with params appended directly. Returns
@@ -67,7 +68,14 @@ class PigTestHelper(unittest.TestCase):
             '-p', 'INPUT={}'.format(in_file),
             '-p', 'OUTPUT={}'.format(out_file),
             ] + pargs
-        self.run_pig_raw(params)
-        return out_file
+        status = self.run_pig_raw(params)
+        assert status.returncode == 0
+        # Capture all the part-r-* files
+        print("out_file: {}".format(out_file))
+        subprocess.run("/bin/ls -la {}/part-*".format(out_file), shell=True)
+        sub = subprocess.run("/bin/cat {}/part-*".format(out_file), stdout=subprocess.PIPE, shell=True)
+        out = sub.stdout.decode('utf-8')
+        print(out)
+        return out
 
     # TODO: helper to verify that output matches an expected file
