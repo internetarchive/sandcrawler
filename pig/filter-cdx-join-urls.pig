@@ -18,7 +18,7 @@ surts = FOREACH urls GENERATE SURTURL(url) AS url_surt;
 surts = ORDER surts by url_surt ASC PARALLEL 10;
 surts = DISTINCT surts;
 
-cdx = LOAD '$INPUT' AS cdxline:chararray;
+cdx = LOAD '$INPUT_CDX' AS cdxline:chararray;
 cdx = FILTER cdx BY not STARTSWITH (cdxline, 'filedesc');
 cdx = FILTER cdx BY not STARTSWITH (cdxline, ' ');
 
