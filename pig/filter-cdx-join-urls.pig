@@ -23,7 +23,7 @@ cdx = FILTER cdx BY not STARTSWITH (cdxline, 'filedesc');
 cdx = FILTER cdx BY not STARTSWITH (cdxline, ' ');
 
 cdx = FOREACH cdx GENERATE STRSPLIT(cdxline,'\\s+') as cols, cdxline;
-cdx = FOREACH cdx GENERATE (chararray)cols.$0 as cdx_surt, (chararray)cols.$1 as timestamp, (chararray)cols.$3 as mimetype, (chararray)cols.$4 as httpstatus, cdxline;
+cdx = FOREACH cdx GENERATE (chararray)cols.$0 as cdx_surt, (chararray)cols.$1 as timestamp, (chararray)cols.$3 as mimetype, (chararray)cols.$4 as httpstatus, (chararray)cols.$5 as sha1sum, cdxline;
 cdx = FILTER cdx BY not cdx_surt matches '-';
 cdx = FILTER cdx BY httpstatus matches '200';
 cdx = FILTER cdx BY mimetype matches '.*pdf.*';
@@ -31,7 +31,13 @@ cdx = FILTER cdx BY mimetype matches '.*pdf.*';
 -- Core JOIN
 full_join = JOIN cdx BY cdx_surt, surts BY url_surt;
 
-result = FOREACH full_join GENERATE cdxline;
+-- DISTINCT by sha1 column
+full_uniq = FOREACH (GROUP full_join BY sha1sum) {
+    r = TOP(1, 0, $1);
+    GENERATE FLATTEN(r);
+};
+
+result = FOREACH full_uniq GENERATE cdxline;
 result = DISTINCT result;
 
 STORE result INTO '$OUTPUT' USING PigStorage();
