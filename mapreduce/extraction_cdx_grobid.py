@@ -146,16 +146,16 @@ class MRExtractCdxGrobid(MRJob):
             return None, dict(status="error", reason="connection to GROBID worker")
 
         info['grobid0:status_code'] = grobid_response.status_code
+
+        # 4 MByte XML size limit; don't record GROBID status on this path
+        if len(grobid_response.content) > 4000000:
+            info['grobid0:status'] = {'status': 'oversize'}
+            return info, dict(status="oversize", reason="TEI response was too large")
+
         if grobid_response.status_code != 200:
             # response.text is .content decoded as utf-8
-            info['grobid0:status'] = dict(description=grobid_response.text)
+            info['grobid0:status'] = dict(status='error', description=grobid_response.text)
             return info, dict(status="error", reason="non-200 GROBID HTTP status",
-                extra=grobid_response.text)
-
-        # 4 MByte XML size limit
-        if len(grobid_response.content) > 4000000:
-            info['grobid0:status'] = dict(description=grobid_response.text)
-            return info, dict(status="oversize", reason="TEI response was too large",
                 extra=grobid_response.text)
 
         info['grobid0:status'] = {'status': 'success'}
