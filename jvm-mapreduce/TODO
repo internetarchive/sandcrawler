@@ -1,0 +1,16 @@
+
+Libraries:
+- sbt? or gradle? (build tool)
+    => debian packages: https://www.scala-sbt.org/download.html
+       (or just a single .deb...)
+- scalding (mapreduce framework)
+- scala (java also fine?)
+    => will scala work with java 1.7?
+    => scala 2.11 (~2014) works with java 7; scala 2.12 and up require 8
+    => debian stretch: scala 2.11.8-1
+    => ubuntu xenial: scala/xenial 2.11.6-6
+    => "Scalding works with Scala 2.10 and 2.11 is recommended"
+- testing
+- hbase connector library
+    => maybe spyglass?
+- hbase mock
