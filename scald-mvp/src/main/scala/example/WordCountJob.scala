@@ -1,4 +1,4 @@
-package com.twitter.scalding.examples
+package example
 
 import com.twitter.scalding._
 

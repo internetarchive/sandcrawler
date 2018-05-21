@@ -1,5 +1,8 @@
 import Dependencies._
 
+val hadoopVersion = "2.5.0" // IA cluster 2018-05-21: 2.5.0-cdh5.3.1
+val hbaseVersion = "0.98.6" // IA cluster 2018-05-21: 0.98.6-cdh5.3.1
+
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
@@ -12,7 +15,9 @@ lazy val root = (project in file(".")).
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "org.scala-lang" % "scala-library" % "2.11.6",
     libraryDependencies += "com.twitter" % "scalding-core_2.11" % "0.17.2",
-    libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "2.6.0",
+    libraryDependencies += "org.apache.hadoop" % "hadoop-common" % hadoopVersion,
+    libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion,
+    libraryDependencies += "org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % hadoopVersion classifier "tests",
 
     // cargo-culted from twitter/scalding's build.sbt
     // hint via https://stackoverflow.com/questions/23280494/sbt-assembly-error-deduplicate-different-file-contents-found-in-the-following#23280952
