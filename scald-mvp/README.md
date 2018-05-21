@@ -25,4 +25,4 @@ running on my laptop:
 
 later, using hadop command instead:
 
-    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.WordCount --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out2
+    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.WordCountJob --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out3
