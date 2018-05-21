@@ -12,6 +12,15 @@ Or, with actual files on hadoop:
 Horray! One issue with this was that building scalding took *forever* (meaning
 30+ minutes).
 
+potentially instead:
+
+    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool main.scala.example.WordCountJob --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out2
+
+Hypothesis: class name should be same as file name. Don't need `main` function
+if using Scalding Tool wrapper jar. Don't need scald.rb.
+
+    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.WordCount --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out2
+
 ## sbt
 
 Uncommenting this line in scalding:build.sbt sped things way up (don't need to

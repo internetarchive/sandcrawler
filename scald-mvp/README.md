@@ -23,8 +23,6 @@ running on my laptop:
     # on cluster:
     yarn jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar WordCount --hdfs --input hdfs:///user/bnewbold/dummy.txt
 
-## ATTIC
+later, using hadop command instead:
 
-wrote build.sbt from scratch
-
-`sbt` command from `twitter/scalding` upstream repo
+    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.WordCount --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out2
