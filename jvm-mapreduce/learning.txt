@@ -1,0 +1,46 @@
+
+## proof of concept on hadoop:
+
+This seemed to work:
+
+    yarn jar tutorial/execution-tutorial/target/scala-2.11/execution-tutorial-assembly-0.18.0-SNAPSHOT.jar Tutorial1 --hdfs --input test_cdx --output test_scalding_out1
+
+Or, with actual files on hadoop:
+
+    yarn jar tutorial/execution-tutorial/target/scala-2.11/execution-tutorial-assembly-0.18.0-SNAPSHOT.jar Tutorial1 --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out2
+
+Horray! One issue with this was that building scalding took *forever* (meaning
+30+ minutes).
+
+## sbt
+
+Uncommenting this line in scalding:build.sbt sped things way up (don't need to
+run *all* the tests):
+
+       // Uncomment if you don't want to run all the tests before building assembly
+       // test in assembly := {},
+
+Also get the following error (in a different context):
+
+    bnewbold@orithena$ sbt new typesafehub/scala-sbt
+    [info] Loading project definition from /home/bnewbold/src/scala-sbt.g8/project/project
+    [info] Compiling 1 Scala source to /home/bnewbold/src/scala-sbt.g8/project/project/target/scala-2.9.1/sbt-0.11.2/classes...
+    [error] error while loading CharSequence, class file '/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar(java/lang/CharSequence.class)' is broken
+    [error] (bad constant pool tag 18 at byte 10)
+    [error] one error found
+    [error] {file:/home/bnewbold/src/scala-sbt.g8/project/project/}default-46da7b/compile:compile: Compilation failed
+    Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore?  
+
+## resources/tutorials
+
+Whole bunch of example commands (sbt, maven, gradle) to build scalding:
+
+    https://medium.com/@gayani.nan/how-to-run-a-scalding-job-567160fa193
+
+Also looks good:
+
+    https://blog.matthewrathbone.com/2015/10/20/scalding-tutorial.html
+
+Possibly related:
+
+    http://sujitpal.blogspot.com/2012/08/scalding-for-impatient.html
