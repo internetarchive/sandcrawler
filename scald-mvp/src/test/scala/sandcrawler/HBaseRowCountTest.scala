@@ -17,19 +17,18 @@ import parallelai.spyglass.hbase.HBaseConstants.SourceMode
  * Example of how to define tests for HBaseSource
  */
 @RunWith(classOf[JUnitRunner])
-class SimpleHBaseSourceExampleTest extends FunSpec with TupleConversions {
+class HBaseRowCountTest extends FunSpec with TupleConversions {
 
   val output = "/tmp/testOutput"
 
   val log = LoggerFactory.getLogger(this.getClass.getName)
 
   val sampleData = List(
-    List("1", "kk1", "pp1"),
-    List("2", "kk2", "pp2"),
-    List("3", "kk3", "pp3")
+    List("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"),
+    List("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU")
   )
 
-  JobTest("example.SimpleHBaseSourceExample")
+  JobTest("sandcrawler.HBaseRowCountJob")
     .arg("test", "")
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
@@ -39,9 +38,7 @@ class SimpleHBaseSourceExampleTest extends FunSpec with TupleConversions {
       "table_name",
       "quorum_name:2181",
       new Fields("key"),
-      List("column_family"),
-      List(new Fields("column_name1", "column_name2")),
-      sourceMode = SourceMode.GET_LIST, keyList = List("1", "2", "3")),
+      sourceMode = SourceMode.GET_LIST, keyList = List("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q", "sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU", "3")),
     sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(Bytes.toBytes(s))}):_*)))
     .sink[Tuple](Tsv(output format "get_list")) {
       outputBuffer =>
