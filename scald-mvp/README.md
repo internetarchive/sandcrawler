@@ -26,3 +26,22 @@ running on my laptop:
 later, using hadop command instead:
 
     hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.WordCountJob --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out3
+
+helpful for debugging dependency woes:
+
+    sbt dependencyTree
+
+## Custom build
+
+in SpyGlass repo:
+
+    # This builds the new .jar and installs it in the (laptop local) ~/.m2
+    # repository
+    mvn clean install -U
+
+    # Copy that .jar (and associated pom.xml) over to where sbt can find it
+    mkdir -p ~/.sbt/preloaded/parallelai/
+    cp -r ~/.m2/repository/parallelai/parallelai.spyglass ~/.sbt/preloaded/parallelai/
+
+    # then build here
+    sbt assembly
