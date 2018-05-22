@@ -4,6 +4,7 @@ val hadoopVersion = "2.5.0" // IA cluster 2018-05-21: 2.5.0-cdh5.3.1
 val hbaseVersion = "0.98.6" // IA cluster 2018-05-21: 0.98.6-cdh5.3.1
 
 lazy val root = (project in file(".")).
+
   settings(
     inThisBuild(List(
       organization := "org.archive",
@@ -11,13 +12,20 @@ lazy val root = (project in file(".")).
       version      := "0.1.0-SNAPSHOT",
       test in assembly := {},
     )),
+
     name := "scald-mvp",
+
+    resolvers += "conjars.org" at "http://conjars.org/repo",
+    resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases",
+    resolvers += "Cloudera Maven Repository" at "https://repository.cloudera.com/artifactory/cloudera-repos",
+
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "org.scala-lang" % "scala-library" % "2.11.6",
     libraryDependencies += "com.twitter" % "scalding-core_2.11" % "0.17.2",
     libraryDependencies += "org.apache.hadoop" % "hadoop-common" % hadoopVersion,
     libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion,
     libraryDependencies += "org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % hadoopVersion classifier "tests",
+    //libraryDependencies += "parallelai" % "parallelai.spyglass" % "2.10_0.10_CDH5_4.4",
 
     // cargo-culted from twitter/scalding's build.sbt
     // hint via https://stackoverflow.com/questions/23280494/sbt-assembly-error-deduplicate-different-file-contents-found-in-the-following#23280952
