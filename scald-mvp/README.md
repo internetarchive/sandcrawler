@@ -45,3 +45,6 @@ in SpyGlass repo:
 
     # then build here
     sbt assembly
+
+The medium-term plan here is to push the custom SpyGlass jar as a static maven
+repo to an archive.org item, and point build.sbt to that folder.
