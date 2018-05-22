@@ -37,7 +37,7 @@ class SimpleHBaseSourceExampleTest extends FunSpec with TupleConversions {
     .source[Tuple](
     new HBaseSource(
       "table_name",
-      "quorum_name:2181",
+      "mtrcs-zk1.us.archive.org:2181",
       new Fields("key"),
       List("column_family"),
       List(new Fields("column_name1", "column_name2")),
