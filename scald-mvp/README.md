@@ -31,6 +31,19 @@ helpful for debugging dependency woes:
 
     sbt dependencyTree
 
+testing the spyglass example program (expect a table error):
+
+    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.SimpleHBaseSourceExample --hdfs --output hdfs:///user/bnewbold/spyglass_out_test --app.conf.path thing.conf --debug true
+    # org.apache.hadoop.hbase.TableNotFoundException: table_name
+
+running a spyglass job (gives a nullpointer exception):
+
+    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs --output hdfs:///user/bnewbold/spyglass_out_test --app.conf.path thing.conf
+
+    # Caused by: java.lang.NullPointerException
+    #         at parallelai.spyglass.hbase.HBaseSource.<init>(HBaseSource.scala:48)
+    #         at sandcrawler.HBaseRowCountJob.<init>(HBaseRowCountJob.scala:17)
+
 ## Custom build
 
 in SpyGlass repo:
