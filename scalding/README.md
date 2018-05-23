@@ -1,52 +1,42 @@
 
-following https://medium.com/@gayani.nan/how-to-run-a-scalding-job-567160fa193
+This directory contains Hadoop map/reduce jobs written in Scala (compiled to
+the JVM) using the Scalding framework.
 
+See the other markdown files in this directory for more background and tips.
 
-running on my laptop:
+## Building and Running
 
-    openjdk version "1.8.0_171"
-    OpenJDK Runtime Environment (build 1.8.0_171-8u171-b11-1~deb9u1-b11)
-    OpenJDK 64-Bit Server VM (build 25.171-b11, mixed mode)
+Locally, you need to have the JVM (eg, OpenJDK 1.8), `sbt` build tool, and
+might need (exactly) Scala version 2.11.8.
 
-    Scala code runner version 2.11.8 -- Copyright 2002-2016, LAMP/EPFL
+See section below on building and installing custom SpyGlass jar.
 
-    sbt: 1.1.5
+Run tests:
 
-    sbt new scala/scala-seed.g8
+    sbt test
 
-    # inserted additional deps, tweaked versions
-    # hadoop 2.5.0 seems to conflict with cascading; sticking with 2.6.0
+Build a jar and upload to a cluster machine (from which to run in production):
 
     sbt assembly
-    scp target/scala-2.11/scald-mvp-assembly-0.1.0-SNAPSHOT.jar devbox:
+    scp scp target/scala-2.11/scald-mvp-assembly-0.1.0-SNAPSHOT.jar devbox:
 
-    # on cluster:
-    yarn jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar WordCount --hdfs --input hdfs:///user/bnewbold/dummy.txt
+Run on cluster:
 
-later, using hadop command instead:
+    devbox$ touch thing.conf
+    devbox$ hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs \
+        --app.conf.path thing.conf \
+        --output hdfs:///user/bnewbold/spyglass_out_test 
 
-    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.WordCountJob --hdfs --input hdfs:///user/bnewbold/dummy.txt --output hdfs:///user/bnewbold/test_scalding_out3
+## Building SpyGlass Jar
 
-helpful for debugging dependency woes:
+SpyGlass is a "scalding-to-HBase" connector. It isn't maintained, so we needed
+to rebuild to support our versions of HBase/scalding/etc. From SpyGlass fork
+(<https://github.com/bnewbold/SpyGlass>,
+`bnewbold-scala2.11` branch):
 
-    sbt dependencyTree
-
-testing the spyglass example program (expect a table error):
-
-    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool example.SimpleHBaseSourceExample --hdfs --output hdfs:///user/bnewbold/spyglass_out_test --app.conf.path thing.conf --debug true
-    # org.apache.hadoop.hbase.TableNotFoundException: table_name
-
-running a spyglass job (gives a nullpointer exception):
-
-    hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs --output hdfs:///user/bnewbold/spyglass_out_test --app.conf.path thing.conf
-
-    # Caused by: java.lang.NullPointerException
-    #         at parallelai.spyglass.hbase.HBaseSource.<init>(HBaseSource.scala:48)
-    #         at sandcrawler.HBaseRowCountJob.<init>(HBaseRowCountJob.scala:17)
-
-## Custom build
-
-in SpyGlass repo:
+    cd ~/src/SpyGlass
+    git checkout bnewbold-scala2.11
 
     # This builds the new .jar and installs it in the (laptop local) ~/.m2
     # repository
@@ -56,8 +46,6 @@ in SpyGlass repo:
     mkdir -p ~/.sbt/preloaded/parallelai/
     cp -r ~/.m2/repository/parallelai/parallelai.spyglass ~/.sbt/preloaded/parallelai/
 
-    # then build here
-    sbt assembly
-
 The medium-term plan here is to push the custom SpyGlass jar as a static maven
 repo to an archive.org item, and point build.sbt to that folder.
+
