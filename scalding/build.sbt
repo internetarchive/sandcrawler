@@ -31,7 +31,7 @@ lazy val root = (project in file(".")).
 
     // cargo-culted from twitter/scalding's build.sbt
     // hint via https://stackoverflow.com/questions/23280494/sbt-assembly-error-deduplicate-different-file-contents-found-in-the-following#23280952
-    mergeStrategy in assembly :=  {
+    assemblyMergeStrategy in assembly :=  {
         case s if s.endsWith(".class") => MergeStrategy.last
         case s if s.endsWith("project.clj") => MergeStrategy.concat
         case s if s.endsWith(".html") => MergeStrategy.last
@@ -44,6 +44,6 @@ lazy val root = (project in file(".")).
         case s if s.endsWith("libjansi.so") => MergeStrategy.rename
         case s if s.endsWith("properties") => MergeStrategy.filterDistinctLines
         case s if s.endsWith("xml") => MergeStrategy.last
-        case x => (mergeStrategy in assembly).value(x)
+        case x => (assemblyMergeStrategy in assembly).value(x)
     },
   )
