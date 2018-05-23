@@ -3,6 +3,8 @@
 
 `.scala` file names should match internal classes.
 
+This project used to be called `scald-mvp`; now it's `sandcrawler`.
+
 ## Dev Environment
 
 Versions running on Bryan's Debian/Linux laptop:

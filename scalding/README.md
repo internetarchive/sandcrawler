@@ -18,12 +18,12 @@ Run tests:
 Build a jar and upload to a cluster machine (from which to run in production):
 
     sbt assembly
-    scp scp target/scala-2.11/scald-mvp-assembly-0.1.0-SNAPSHOT.jar devbox:
+    scp target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar devbox:
 
 Run on cluster:
 
     devbox$ touch thing.conf
-    devbox$ hadoop jar scald-mvp-assembly-0.1.0-SNAPSHOT.jar \
+    devbox$ hadoop jar sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
         com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs \
         --app.conf.path thing.conf \
         --output hdfs:///user/bnewbold/spyglass_out_test 

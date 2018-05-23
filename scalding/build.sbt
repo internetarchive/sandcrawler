@@ -9,11 +9,11 @@ lazy val root = (project in file(".")).
     inThisBuild(List(
       organization := "org.archive",
       scalaVersion := "2.11.8",
-      version      := "0.1.0-SNAPSHOT",
+      version      := "0.2.0-SNAPSHOT",
       test in assembly := {},
     )),
 
-    name := "scald-mvp",
+    name := "sandcrawler",
 
     resolvers += "conjars.org" at "http://conjars.org/repo",
     resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases",
