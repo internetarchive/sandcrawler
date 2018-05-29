@@ -25,7 +25,13 @@ class HBaseRowCountTest extends FunSpec with TupleConversions {
 
   val sampleData = List(
     List("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q", "a", "b"),
-    List("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU", "a", "b")
+    List("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU", "a", "b"),
+    List("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT", "a", "b"),
+    List("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56", "a", "b"),
+    List("sha1:885C3YNNEGH5WAG5ZAAXWA8BNXJWT6CZ", "a", "b"),
+    List("sha1:00904C3YNNEGH5WAG5ZA9XWAEBNXJWT6", "a", "b"),
+    List("sha1:249C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ", "a", "b"),
+    List("sha1:095893C3YNNEGH5WAG5ZAAXWAEBNXJWT", "a", "b")
   )
 
   JobTest("sandcrawler.HBaseRowCountJob")
@@ -42,9 +48,9 @@ class HBaseRowCountTest extends FunSpec with TupleConversions {
       new Fields("key"),
       List("file"),
       List(new Fields("size", "mimetype")),
-      sourceMode = SourceMode.GET_LIST, keyList = List("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q", "sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU")),
+      sourceMode = SourceMode.SCAN_ALL),
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(Bytes.toBytes(s))}):_*)))
-    .sink[Tuple](Tsv(output format "get_list")) {
+    .sink[Tuple](Tsv(output)) {
       outputBuffer =>
 
         it("should return the test data provided.") {
@@ -54,7 +60,7 @@ class HBaseRowCountTest extends FunSpec with TupleConversions {
 
         it("should return the correct count") {
           println("raw output => " + outputBuffer)
-          assert(outputBuffer(0).getObject(0) === 2)
+          assert(outputBuffer(0).getObject(0) === 8)
         }
     }
     .run

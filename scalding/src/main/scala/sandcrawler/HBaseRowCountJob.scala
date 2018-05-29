@@ -24,7 +24,7 @@ class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
     new Fields("key"),
     List("file"),
     List(new Fields("size", "mimetype")),
-    sourceMode = SourceMode.GET_LIST, keyList = List("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q", "sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"))
+    sourceMode = SourceMode.SCAN_ALL)
     .read
     .debug
     .groupAll { _.size('count) }
