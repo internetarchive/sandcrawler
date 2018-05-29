@@ -27,15 +27,6 @@ class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
     sourceMode = SourceMode.GET_LIST, keyList = List("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q", "sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"))
     .read
     .debug
-    .fromBytesWritable(new Fields("key"))
-    .write(Tsv(output format "get_list"))
-
-    /*
-    List("column_family"),
-    sourceMode = SourceMode.SCAN_ALL)
-    .read
-    .debug
-    .fromBytesWritable(new Fields("key"))
-    .write(Tsv(output format "get_list"))
-    */
+    .groupAll { _.size('count) }
+    .write(Tsv(output))
 }

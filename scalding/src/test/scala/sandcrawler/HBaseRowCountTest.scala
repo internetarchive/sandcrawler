@@ -46,11 +46,15 @@ class HBaseRowCountTest extends FunSpec with TupleConversions {
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(Bytes.toBytes(s))}):_*)))
     .sink[Tuple](Tsv(output format "get_list")) {
       outputBuffer =>
-        log.debug("Output => " + outputBuffer)
 
         it("should return the test data provided.") {
           println("outputBuffer.size => " + outputBuffer.size)
-          assert(outputBuffer.size === 2)
+          assert(outputBuffer.size === 1)
+        }
+
+        it("should return the correct count") {
+          println("raw output => " + outputBuffer)
+          assert(outputBuffer(0).getObject(0) === 2)
         }
     }
     .run
