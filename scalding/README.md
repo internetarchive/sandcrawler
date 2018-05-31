@@ -1,4 +1,3 @@
-
 This directory contains Hadoop map/reduce jobs written in Scala (compiled to
 the JVM) using the Scalding framework.
 
@@ -27,6 +26,11 @@ Run on cluster:
         com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs \
         --app.conf.path thing.conf \
         --output hdfs:///user/bnewbold/spyglass_out_test 
+        
+If your `sbt` task fails with this error:
+
+     java.util.concurrent.ExecutionException: java.lang.OutOfMemoryError: Metaspace
+try restarting `sbt` with more memory (e.g., `sbt -mem 2048`).
 
 ## Building SpyGlass Jar
 
