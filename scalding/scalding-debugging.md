@@ -49,7 +49,7 @@ matches).
 
 Values of type `List[Fields]` are not printed in the expected way:
 
-    $ scala -cp cascading-core-2.6.1.jar 
+    $ scala -cp scala  -cp ~/.m2/repository/cascading/cascading-core/2.6.1/cascading-core-2.6.1.jar
     Welcome to Scala 2.11.12 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_31).
     Type in expressions for evaluation. Or try :help.
 
