@@ -1,4 +1,3 @@
-
 Quick tips for debugging scalding issues...
 
 ## Dependencies
@@ -45,3 +44,26 @@ Another time, saw a bunch of `None.get` errors when running tests. These were
 resolved by ensuring that the `HBaseSource` constructors had exactly identical
 names and arguments (eg, table names and zookeeper quorums have to be exact
 matches).
+
+## Fields
+
+Values of type `List[Fields]` are not printed in the expected way:
+
+    $ scala -cp cascading-core-2.6.1.jar 
+    Welcome to Scala 2.11.12 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_31).
+    Type in expressions for evaluation. Or try :help.
+
+    scala> import cascading.tuple.Fields
+    import cascading.tuple.Fields
+
+    scala> val fields1 = new Fields("a", "b")
+    fields1: cascading.tuple.Fields = 'a', 'b'
+
+    scala> val fields2 = new Fields("c")
+    fields2: cascading.tuple.Fields = 'c'
+
+    scala> val allFields = List(fields1, fields2)
+    allFields: List[cascading.tuple.Fields] = List('a', 'b', 'c')
+
+    scala> allFields.length
+    res0: Int = 2
