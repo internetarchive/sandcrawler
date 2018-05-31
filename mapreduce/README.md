@@ -26,7 +26,7 @@ running on a devbox and GROBID running on a dedicated machine:
 
     ./extraction_cdx_grobid.py \
         --hbase-table wbgrp-journal-extract-0-qa \
-        --hbase-host bnewbold-dev.us.archive.org \
+        --hbase-host wbgrp-svc263.us.archive.org \
         --grobid-uri http://wbgrp-svc096.us.archive.org:8070 \
         tests/files/example.cdx
 
@@ -39,7 +39,7 @@ Running from the cluster:
 
     ./extraction_cdx_grobid.py \
         --hbase-table wbgrp-journal-extract-0-qa \
-        --hbase-host bnewbold-dev.us.archive.org \
+        --hbase-host wbgrp-svc263.us.archive.org \
         --grobid-uri http://wbgrp-svc096.us.archive.org:8070 \
         -r hadoop \
         -c mrjob.conf \
@@ -53,7 +53,7 @@ running on a devbox:
 
     ./backfill_hbase_from_cdx.py \
         --hbase-table wbgrp-journal-extract-0-qa \
-        --hbase-host bnewbold-dev.us.archive.org \
+        --hbase-host wbgrp-svc263.us.archive.org \
         tests/files/example.cdx
 
 Actual invocation to run on Hadoop cluster (running on an IA devbox, where
@@ -65,7 +65,7 @@ hadoop environment is configured):
     tar -czf $VENVSHORT.tar.gz -C /home/bnewbold/.local/share/virtualenvs/$VENVSHORT .
 
     ./backfill_hbase_from_cdx.py \
-        --hbase-host bnewbold-dev.us.archive.org \
+        --hbase-host wbgrp-svc263.us.archive.org \
         --hbase-table wbgrp-journal-extract-0-qa \
         -r hadoop \
         -c mrjob.conf \
