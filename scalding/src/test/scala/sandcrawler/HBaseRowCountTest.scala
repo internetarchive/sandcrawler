@@ -12,6 +12,7 @@ import scala._
 import com.twitter.scalding.Tsv
 import parallelai.spyglass.hbase.HBaseSource
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
+import sandcrawler.HBaseRowCountJob
 
 /**
  * Example of how to define tests for HBaseSource
@@ -39,18 +40,9 @@ class HBaseRowCountTest extends FunSpec with TupleConversions {
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
     .arg("debug", "true")
-    .source[Tuple](
-    new HBaseSource(
-      //"table_name",
-      //"quorum_name:2181",
-      "wbgrp-journal-extract-0-qa",
-      "mtrcs-zk1.us.archive.org:2181",
-      new Fields("key"),
-      List("file"),
-      List(new Fields("size", "mimetype")),
-      sourceMode = SourceMode.SCAN_ALL),
+    .source[Tuple](HBaseRowCountJob.getHBaseSource,
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(Bytes.toBytes(s))}):_*)))
-    .sink[Tuple](Tsv(output)) {
+      .sink[Tuple](Tsv(output)) {
       outputBuffer =>
 
         it("should return the test data provided.") {
