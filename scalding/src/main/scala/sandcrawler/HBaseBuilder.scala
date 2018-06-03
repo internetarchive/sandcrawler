@@ -40,10 +40,8 @@ object HBaseBuilder {
     (families, groupedColNames.map({fields => new Fields(fields : _*)}))
   }
 
-  /*
-  def build(table: String, server: String, colSpec: List[String], sourceMode: SourceMode, keyList: List[String]) {
-    val (families: List[String], fields: List[Fields]) = parseColSpec(colSpec)
+  def build(table: String, server: String, colSpec: List[String], sourceMode: SourceMode, keyList: List[String] = List("key")) = {
+    val (families, fields) = parseColSpec(colSpec)
     new HBaseSource(table, server, new Fields("key"), families, fields, sourceMode = sourceMode, keyList = keyList)
   }
-   */
 }

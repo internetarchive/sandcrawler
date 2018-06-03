@@ -24,13 +24,9 @@ class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
 }
 
 object HBaseRowCountJob {
-  def getHBaseSource = new HBaseSource(
-    //"table_name",
-    //"quorum_name:2181",
+  def getHBaseSource = HBaseBuilder.build(
     "wbgrp-journal-extract-0-qa",     // HBase Table Name
     "mtrcs-zk1.us.archive.org:2181",  // HBase Zookeeper server (to get runtime config info; can be array?)
-    new Fields("key"),
-    List("file"),
-    List(new Fields("size", "mimetype")),
-    sourceMode = SourceMode.SCAN_ALL)
+    List("file:size", "file:mime"),
+    SourceMode.SCAN_ALL)
 }
