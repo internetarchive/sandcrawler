@@ -16,17 +16,17 @@ class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
 
   val output = args("output")
 
-  val hbs = new HBaseSource(
-    //"table_name",
-    //"quorum_name:2181",
-    "wbgrp-journal-extract-0-qa",     // HBase Table Name
-    "mtrcs-zk1.us.archive.org:2181",  // HBase Zookeeper server (to get runtime config info; can be array?)
-    new Fields("key"),
-    List("file"),
-    List(new Fields("size", "mimetype")),
-    sourceMode = SourceMode.SCAN_ALL)
+  HBaseRowCountJob.getHBaseSource
     .read
     .debug
     .groupAll { _.size('count) }
     .write(Tsv(output))
+}
+
+object HBaseRowCountJob {
+  def getHBaseSource = HBaseBuilder.build(
+    "wbgrp-journal-extract-0-qa",     // HBase Table Name
+    "mtrcs-zk1.us.archive.org:2181",  // HBase Zookeeper server (to get runtime config info; can be array?)
+    List("file:size", "file:mime"),
+    SourceMode.SCAN_ALL)
 }
