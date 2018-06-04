@@ -19,6 +19,7 @@ lazy val root = (project in file(".")).
     resolvers += "Apache HBase" at "https://repository.apache.org/content/repositories/releases",
     resolvers += "Cloudera Maven Repository" at "https://repository.cloudera.com/artifactory/cloudera-repos",
     resolvers += "Twitter Maven Repository" at "https://maven.twttr.com",
+    resolvers += "IA Sandcrawler Rebuilt Jars" at "https://archive.org/download/ia_sandcrawler_maven2/repository",
 
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "org.scala-lang" % "scala-library" % "2.11.8",

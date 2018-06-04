@@ -30,26 +30,13 @@ Run on cluster:
 If your `sbt` task fails with this error:
 
      java.util.concurrent.ExecutionException: java.lang.OutOfMemoryError: Metaspace
+
 try restarting `sbt` with more memory (e.g., `sbt -mem 2048`).
 
-## Building SpyGlass Jar
+## SpyGlass Jar
 
 SpyGlass is a "scalding-to-HBase" connector. It isn't maintained, so we needed
-to rebuild to support our versions of HBase/scalding/etc. From SpyGlass fork
-(<https://github.com/bnewbold/SpyGlass>,
-`bnewbold-scala2.11` branch):
-
-    cd ~/src/SpyGlass
-    git checkout bnewbold-scala2.11
-
-    # This builds the new .jar and installs it in the (laptop local) ~/.m2
-    # repository
-    mvn clean install -U
-
-    # Copy that .jar (and associated pom.xml) over to where sbt can find it
-    mkdir -p ~/.sbt/preloaded/parallelai/
-    cp -r ~/.m2/repository/parallelai/parallelai.spyglass ~/.sbt/preloaded/parallelai/
-
-The medium-term plan here is to push the custom SpyGlass jar as a static maven
-repo to an archive.org item, and point build.sbt to that folder.
-
+to rebuild to support our versions of HBase/scalding/etc. Our fork (including
+build instructions) is at <https://github.com/bnewbold/SpyGlass>
+(`bnewbold-scala2.11` branch); compiled .jar files are available from
+<https://archive.org/download/ia_sandcrawler_maven2>.
