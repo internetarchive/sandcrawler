@@ -11,16 +11,11 @@ object HBaseBuilder {
     "file" -> List("size", "mime", "cdx"),
     "grobid0" -> List("status_code", "quality", "status", "tei_xml", "tei_json", "metadata"),
     "match0" -> List("status", "doi", "info"))
-  // map from colFamily:colName -> colFamily
-  // Code from https://stackoverflow.com/a/50595189/6310511
-  val inverseSchema = for ((k, vs) <- schema; v <- vs) yield (k + ":" + v, k)
+  val inverseSchema = {for ((k,vs) <- schema; v <-vs) yield (k + ":" + v)}.toList
 
-  // The argument should be a string with a comma-separated list of family:column, 
-  // such as "f:c, file:size". Spaces after the comma are optional.
+  // The argument should be a comma-separated list of family:column, such as "f:c, file:size".
   @throws(classOf[IllegalArgumentException])
-  def parseColSpec(colSpec: String) : (List[String], List[Fields]) = {
-    val colSpecs = (if (colSpec.trim.length == 0) List() else colSpec.split(", *").toList)
-
+  def parseColSpec(colSpecs: List[String]) : (List[String], List[Fields]) = {
     // Verify that all column specifiers are legal.
     for (colSpec <- colSpecs) {
       if (!(inverseSchema contains colSpec)) {
@@ -44,7 +39,7 @@ object HBaseBuilder {
     (families, groupedColNames.map({fields => new Fields(fields : _*)}))
   }
 
-  def build(table: String, server: String, colSpec: String, sourceMode: SourceMode, keyList: List[String] = List("key")) = {
+  def build(table: String, server: String, colSpec: List[String], sourceMode: SourceMode, keyList: List[String] = List("key")) = {
     val (families, fields) = parseColSpec(colSpec)
     new HBaseSource(table, server, new Fields("key"), families, fields, sourceMode = sourceMode, keyList = keyList)
   }
