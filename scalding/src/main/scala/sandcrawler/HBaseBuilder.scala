@@ -15,8 +15,12 @@ object HBaseBuilder {
   // Code from https://stackoverflow.com/a/50595189/6310511
   val inverseSchema = for ((k, vs) <- schema; v <- vs) yield (k + ":" + v, k)
 
+  // The argument should be a string with a comma-separated list of family:column, 
+  // such as "f:c, file:size". Spaces after the comma are optional.
   @throws(classOf[IllegalArgumentException])
-  def parseColSpec(colSpecs: List[String]) : (List[String], List[Fields]) = {
+  def parseColSpec(colSpec: String) : (List[String], List[Fields]) = {
+    val colSpecs = (if (colSpec.trim.length == 0) List() else colSpec.split(", *").toList)
+
     // Verify that all column specifiers are legal.
     for (colSpec <- colSpecs) {
       if (!(inverseSchema contains colSpec)) {
@@ -40,7 +44,7 @@ object HBaseBuilder {
     (families, groupedColNames.map({fields => new Fields(fields : _*)}))
   }
 
-  def build(table: String, server: String, colSpec: List[String], sourceMode: SourceMode, keyList: List[String] = List("key")) = {
+  def build(table: String, server: String, colSpec: String, sourceMode: SourceMode, keyList: List[String] = List("key")) = {
     val (families, fields) = parseColSpec(colSpec)
     new HBaseSource(table, server, new Fields("key"), families, fields, sourceMode = sourceMode, keyList = keyList)
   }

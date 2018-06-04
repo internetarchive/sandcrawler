@@ -27,6 +27,6 @@ object HBaseRowCountJob {
   def getHBaseSource = HBaseBuilder.build(
     "wbgrp-journal-extract-0-qa",     // HBase Table Name
     "mtrcs-zk1.us.archive.org:2181",  // HBase Zookeeper server (to get runtime config info; can be array?)
-    List("file:size", "file:mime"),
+    "file:size, file:mime",
     SourceMode.SCAN_ALL)
 }

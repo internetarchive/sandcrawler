@@ -6,7 +6,7 @@ import sandcrawler.HBaseBuilder
 
 class HBaseBuilderTest extends FlatSpec with Matchers {
   "parseColSpec()" should "work on legal nontrivial input" in {
-    val (fams, fields) = HBaseBuilder.parseColSpec(List("file:size", "file:cdx", "match0:status"))
+    val (fams, fields) = HBaseBuilder.parseColSpec("file:size, file:cdx, match0:status")
     fams should have length 2
     fields should have length 2
     val fileIndex = fams.indexOf("file")
@@ -18,26 +18,26 @@ class HBaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "work on empty input" in {
-    val (fams, fields) = HBaseBuilder.parseColSpec(List())
+    val (fams, fields) = HBaseBuilder.parseColSpec("")
     fams should have length 0
     fields should have length 0
   }
 
   it should "throw IllegalArgumentException on malformed input" in {
     a [IllegalArgumentException] should be thrownBy {
-      HBaseBuilder.parseColSpec(List("file_size"))
+      HBaseBuilder.parseColSpec("file_size")
     }
   }
 
   it should "throw IllegalArgumentException on nonexistent family" in {
     a [IllegalArgumentException] should be thrownBy {
-      HBaseBuilder.parseColSpec(List("foo:bar"))
+      HBaseBuilder.parseColSpec("foo:bar")
     }
   }
 
   it should "throw IllegalArgumentException on nonexistent column" in {
     a [IllegalArgumentException] should be thrownBy {
-      HBaseBuilder.parseColSpec(List("file:bar"))
+      HBaseBuilder.parseColSpec("file:bar")
     }
   }
 }
