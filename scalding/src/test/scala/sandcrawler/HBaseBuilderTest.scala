@@ -1,8 +1,7 @@
-package example
+package sandcrawler
 
 import cascading.tuple.Fields
 import org.scalatest._
-import sandcrawler.HBaseBuilder
 
 class HBaseBuilderTest extends FlatSpec with Matchers {
   "parseColSpec()" should "work on legal nontrivial input" in {

@@ -13,8 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.twitter.scalding
+package example
 
+import com.twitter.scalding.{ JobTest, TextLine, TypedTsv }
 import org.scalatest.{ Matchers, WordSpec }
 
 class WordCountTest extends WordSpec with Matchers {
