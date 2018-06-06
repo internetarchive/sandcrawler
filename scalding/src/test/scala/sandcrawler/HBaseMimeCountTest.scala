@@ -12,9 +12,6 @@ import parallelai.spyglass.hbase.HBaseSource
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import scala._
 
-/**
- * Example of how to define tests for HBaseSource
- */
 @RunWith(classOf[JUnitRunner])
 class HBaseMimeCountTest extends FunSpec with TupleConversions {
 
@@ -49,14 +46,11 @@ class HBaseMimeCountTest extends FunSpec with TupleConversions {
       .sink[Tuple](Tsv(output)) {
         outputBuffer =>
         it("should return a 2-element list.") {
-          println("outputBuffer.size => " + outputBuffer.size)
-          println("outputBuffer(0) => " + outputBuffer(0))
-          println("outputBuffer(1) => " + outputBuffer(1))
           assert(outputBuffer.size === 2)
         }
 
+        // Convert List[Tuple] to Map[String, Integer].
         val counts = outputBuffer.map(t => (t.getString(0), t.getInteger(1))).toMap
-
         it("should have the appropriate number of each mime type") {
           assert(counts(mimeType1) == mimeType1Count)
           assert(counts(mimeType2) == mimeType2Count)
@@ -64,5 +58,4 @@ class HBaseMimeCountTest extends FunSpec with TupleConversions {
     }
     .run
     .finish
-
 }
