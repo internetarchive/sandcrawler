@@ -33,8 +33,8 @@ class HBaseMimeCountTest extends FunSpec with TupleConversions {
     List("sha1:095893C3YNNEGH5WAG5ZAAXWAEBNXJWT", mimeType2)
   )
 
-  val mimeType1Count = 3
-  val mimeType2Count = 5
+  val mimeType1Count = sampleData.count(lst => lst(1) == mimeType1)
+  val mimeType2Count = sampleData.count(lst => lst(1) == mimeType2)
 
   JobTest("sandcrawler.HBaseMimeCountJob")
     .arg("test", "")
