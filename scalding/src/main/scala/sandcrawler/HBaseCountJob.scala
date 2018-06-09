@@ -10,7 +10,7 @@ import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 
 class HBaseCountJob(args: Args, colSpec: String) extends JobBase(args) with HBasePipeConversions {
   val output = args("output")
-  // TODO: Add error checking.
+  HBaseBuilder.parseColSpec(colSpec)
   val Col: String = colSpec.split(":")(1)
 
   HBaseCountJob.getHBaseSource(colSpec)
