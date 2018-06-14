@@ -1,4 +1,11 @@
 
+## Why Scalding
+
+Scalding vs. Java (MapReduce) vs. Java (Cascading) vs. Scoobi vs. Scrunch:
+
+- <https://speakerdeck.com/agemooij/why-hadoop-mapreduce-needs-scala?slide=34>
+- <https://github.com/twitter/scalding/wiki/Comparison-to-Scrunch-and-Scoobi>
+
 ## Tips/Gotchas
 
 `.scala` file names should match internal classes.
