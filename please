@@ -14,16 +14,28 @@ from datetime import datetime
 HDFS_DIR = "hdfs:///user/bnewbold/sandcrawler"
 HBASE_HOST = "wbgrp-svc263.us.archive.org"
 
+def rebuild_python():
+    print("Rebuilding python venv...")
+    cmd = """cd mapreduce;
+        export PIPENV_VENV_IN_PROJECT=1;
+        pipenv install --deploy
+        tar -czf venv-current.tar.gz -C .venv ."""
+    subprocess.call(cmd, shell=True)
+
+def rebuild_scalding():
+    print("Rebuilding scalding jar...")
+    cmd = """cd scalding; sbt assembly"""
+    subprocess.call(cmd, shell=True)
+
 def run_backfill(args):
+    if args.rebuild:
+        rebuild_python()
     print("Starting backfill job...")
     output = "{}/output-{}/{}-backfill".format(
         HDFS_DIR,
         args.env,
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
     cmd = """cd mapreduce;
-        export PIPENV_VENV_IN_PROJECT=1;
-        pipenv install --deploy
-        tar -czf venv-current.tar.gz -C .venv .
         pipenv run ./backfill_hbase_from_cdx.py \
             --hbase-host {hbase_host} \
             --hbase-table wbgrp-journal-extract-0-{env} \
@@ -57,6 +69,9 @@ def main():
         action='store_true')
     parser.add_argument('--qa',
         help="run against qa HBase table",
+        action='store_true')
+    parser.add_argument('--rebuild',
+        help="rebuild whatever artifact gets sent",
         action='store_true')
     subparsers = parser.add_subparsers()
 
