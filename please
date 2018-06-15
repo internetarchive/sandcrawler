@@ -11,44 +11,42 @@ import argparse
 import subprocess
 from datetime import datetime
 
-HDFS_OUT_DIR = "/user/bnewbold/sandcrawler/out"
+HDFS_DIR = "hdfs:///user/bnewbold/sandcrawler"
 HBASE_HOST = "wbgrp-svc263.us.archive.org"
 
 def run_backfill(args):
-    output = "hdfs://{}/{}/{}-backfill".format(
-        HDFS_OUT_DIR,
+    print("Starting backfill job...")
+    output = "{}/output-{}/{}-backfill".format(
+        HDFS_DIR,
         args.env,
-        datetime.strftime(datetime.now(), "%Y-%m-%d-%H:%M:%S"))
-    cmd = """hadoop jar \
-        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
-        com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs \
-        --app.conf.path scalding/ia_cluster.conf \
-        --output hdfs://{}""".format(output)
-
-
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
     cmd = """cd mapreduce;
-        pipenv shell
-        export VENVSHORT=`basename $VIRTUAL_ENV`
-        ./backfill_hbase_from_cdx.py \
-            --hbase-host {HBASE_HOST} \
-            --hbase-table wbgrp-journal-extract-0-{args.env} \
+        export PIPENV_VENV_IN_PROJECT=1;
+        pipenv install --deploy
+        tar -czf venv-current.tar.gz -C .venv .
+        pipenv run ./backfill_hbase_from_cdx.py \
+            --hbase-host {hbase_host} \
+            --hbase-table wbgrp-journal-extract-0-{env} \
             -r hadoop \
             -c mrjob.conf \
-            --archive $VENVSHORT.tar.gz#venv \
-            {args.input_cdx}
-            """.format()
+            --archive venv-current.tar.gz#venv \
+            {input_cdx}
+            """.format(hbase_host=HBASE_HOST, env=args.env,
+                input_cdx=args.input_cdx)
     subprocess.call(cmd, shell=True)
 
 def run_rowcount(args):
-    output = "hdfs://{}/{}/{}-rowcount".format(
-        HDFS_OUT_DIR,
+    print("Starting rowcount job...")
+    output = "{}/output-{}/{}-rowcount".format(
+        HDFS_DIR,
         args.env,
-        datetime.strftime(datetime.now(), "%Y-%m-%d-%H:%M:%S"))
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
     cmd = """hadoop jar \
         scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
-        com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs \
+        com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob \
+        --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
-        --output hdfs://{}""".format(output)
+        --output {}""".format(output)
     subprocess.call(cmd, shell=True)
 
 def main():
@@ -80,6 +78,7 @@ def main():
         args.env = "prod"
     if args.qa:
         args.env = "qa"
+
     args.func(args)
 
 if __name__ == '__main__':

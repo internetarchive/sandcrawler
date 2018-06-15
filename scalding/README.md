@@ -3,12 +3,19 @@ the JVM) using the Scalding framework.
 
 See the other markdown files in this directory for more background and tips.
 
-## Building and Running
+## Dependencies
 
 Locally, you need to have the JVM (eg, OpenJDK 1.8), `sbt` build tool, and
 might need (exactly) Scala version 2.11.8.
 
-See section below on building and installing custom SpyGlass jar.
+On a debian/ubuntu machine:
+
+    echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
+    sudo apt-get update
+    sudo apt install scala sbt
+
+## Building and Running
 
 Run tests:
 
@@ -26,17 +33,12 @@ Run on cluster:
         com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs \
         --app.conf.path thing.conf \
         --output hdfs:///user/bnewbold/spyglass_out_test 
-        
+
+## Troubleshooting
+
 If your `sbt` task fails with this error:
 
      java.util.concurrent.ExecutionException: java.lang.OutOfMemoryError: Metaspace
 
 try restarting `sbt` with more memory (e.g., `sbt -mem 2048`).
 
-## SpyGlass Jar
-
-SpyGlass is a "scalding-to-HBase" connector. It isn't maintained, so we needed
-to rebuild to support our versions of HBase/scalding/etc. Our fork (including
-build instructions) is at <https://github.com/bnewbold/SpyGlass>
-(`bnewbold-scala2.11` branch); compiled .jar files are available from
-<https://archive.org/download/ia_sandcrawler_maven2>.

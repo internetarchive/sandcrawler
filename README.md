@@ -20,7 +20,7 @@ Pretty much everything here uses python/pipenv. To setup your environment for
 this, and python in general:
 
     # libjpeg-dev is for some wayback/pillow stuff
-    sudo apt install -y python3-dev python3-pip python3-wheel libjpeg-dev build-essentials
+    sudo apt install -y python3-dev python3-pip python3-wheel libjpeg-dev build-essential
     pip3 install --user pipenv
 
 On macOS:

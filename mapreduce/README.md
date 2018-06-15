@@ -33,6 +33,7 @@ running on a devbox and GROBID running on a dedicated machine:
 Running from the cluster:
 
     # Create tarball of virtualenv
+    export PIPENV_VENV_IN_PROJECT=1
     pipenv shell
     export VENVSHORT=`basename $VIRTUAL_ENV`
     tar -czf $VENVSHORT.tar.gz -C /home/bnewbold/.local/share/virtualenvs/$VENVSHORT .
@@ -60,9 +61,9 @@ Actual invocation to run on Hadoop cluster (running on an IA devbox, where
 hadoop environment is configured):
 
     # Create tarball of virtualenv
-    pipenv shell
-    export VENVSHORT=`basename $VIRTUAL_ENV`
-    tar -czf $VENVSHORT.tar.gz -C /home/bnewbold/.local/share/virtualenvs/$VENVSHORT .
+    export PIPENV_VENV_IN_PROJECT=1
+    pipenv install --deploy
+    tar -czf venv-current.tar.gz -C .venv .
 
     ./backfill_hbase_from_cdx.py \
         --hbase-host wbgrp-svc263.us.archive.org \
