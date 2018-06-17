@@ -41,7 +41,7 @@ class HBaseMimeCountTest extends FunSpec with TupleConversions {
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
     .arg("debug", "true")
-    .source[Tuple](HBaseMimeCountJob.getHBaseSource,
+    .source[Tuple](HBaseCountJob.getHBaseSource("file:mime"),
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(Bytes.toBytes(s))}):_*)))
       .sink[Tuple](Tsv(output)) {
         outputBuffer =>

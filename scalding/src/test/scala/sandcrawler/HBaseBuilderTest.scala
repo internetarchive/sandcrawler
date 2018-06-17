@@ -4,8 +4,8 @@ import cascading.tuple.Fields
 import org.scalatest._
 
 class HBaseBuilderTest extends FlatSpec with Matchers {
-  "parseColSpec()" should "work on legal nontrivial input" in {
-    val (fams, fields) = HBaseBuilder.parseColSpec(List("file:size", "file:cdx", "match0:status"))
+  "parseColSpecs()" should "work on legal nontrivial input" in {
+    val (fams, fields) = HBaseBuilder.parseColSpecs(List("file:size", "file:cdx", "match0:status"))
     fams should have length 2
     fields should have length 2
     val fileIndex = fams.indexOf("file")
@@ -17,26 +17,26 @@ class HBaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "work on empty input" in {
-    val (fams, fields) = HBaseBuilder.parseColSpec(List())
+    val (fams, fields) = HBaseBuilder.parseColSpecs(List())
     fams should have length 0
     fields should have length 0
   }
 
   it should "throw IllegalArgumentException on malformed input" in {
     a [IllegalArgumentException] should be thrownBy {
-      HBaseBuilder.parseColSpec(List("file_size"))
+      HBaseBuilder.parseColSpecs(List("file_size"))
     }
   }
 
   it should "throw IllegalArgumentException on nonexistent family" in {
     a [IllegalArgumentException] should be thrownBy {
-      HBaseBuilder.parseColSpec(List("foo:bar"))
+      HBaseBuilder.parseColSpecs(List("foo:bar"))
     }
   }
 
   it should "throw IllegalArgumentException on nonexistent column" in {
     a [IllegalArgumentException] should be thrownBy {
-      HBaseBuilder.parseColSpec(List("file:bar"))
+      HBaseBuilder.parseColSpecs(List("file:bar"))
     }
   }
 }

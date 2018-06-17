@@ -13,20 +13,25 @@ object HBaseBuilder {
     "match0" -> List("status", "doi", "info"))
   val inverseSchema = {for ((k,vs) <- schema; v <-vs) yield (k + ":" + v)}.toList
 
+  // The argument should be of the form family:column, such as "file:size".
+  @throws(classOf[IllegalArgumentException])
+  def parseColSpec(colSpec: String) {
+    if (!(inverseSchema contains colSpec)) {
+      throw new IllegalArgumentException("No such column: " + colSpec)
+    }
+    val pair = colSpec split(":")
+    if (pair.length != 2) {
+      throw new IllegalArgumentException("Bad column specifier " + colSpec +
+        " (specifiers should be family:name)")
+    }
+    (pair(0), pair(1))
+  }
+
   // The argument should be a comma-separated list of family:column, such as "f:c, file:size".
   @throws(classOf[IllegalArgumentException])
-  def parseColSpec(colSpecs: List[String]) : (List[String], List[Fields]) = {
+  def parseColSpecs(colSpecs: List[String]) : (List[String], List[Fields]) = {
     // Verify that all column specifiers are legal.
-    for (colSpec <- colSpecs) {
-      if (!(inverseSchema contains colSpec)) {
-        throw new IllegalArgumentException("No such column: " + colSpec)
-      }
-      val pair = colSpec split(":")
-      if (colSpec.split(":").length != 2) {
-        throw new IllegalArgumentException("Bad column specifier " + colSpec + 
-          " (specifiers should be family:name)")
-      }
-    }
+    for (colSpec <- colSpecs) parseColSpec(colSpec)
 
     // Produce and return a tuple containing:
     // 1. A list of column families.
@@ -39,8 +44,8 @@ object HBaseBuilder {
     (families, groupedColNames.map({fields => new Fields(fields : _*)}))
   }
 
-  def build(table: String, server: String, colSpec: List[String], sourceMode: SourceMode, keyList: List[String] = List("key")) = {
-    val (families, fields) = parseColSpec(colSpec)
+  def build(table: String, server: String, colSpecs: List[String], sourceMode: SourceMode, keyList: List[String] = List("key")) = {
+    val (families, fields) = parseColSpecs(colSpecs)
     new HBaseSource(table, server, new Fields("key"), families, fields, sourceMode = sourceMode, keyList = keyList)
   }
 }
