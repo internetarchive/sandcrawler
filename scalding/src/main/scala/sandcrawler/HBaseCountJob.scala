@@ -13,7 +13,9 @@ class HBaseCountJob(args: Args, colSpec: String) extends JobBase(args) with HBas
   HBaseBuilder.parseColSpec(colSpec)
   val Col: String = colSpec.split(":")(1)
 
-  HBaseCountJob.getHBaseSource(colSpec)
+  HBaseCountJob.getHBaseSource(args("hbase-table"),
+                               args("zookeeper-hosts"),
+                               colSpec)
     .read
     .fromBytesWritable(Symbol(Col))
     .debug
@@ -22,9 +24,9 @@ class HBaseCountJob(args: Args, colSpec: String) extends JobBase(args) with HBas
 }
 
 object HBaseCountJob {
-  def getHBaseSource(colSpec: String) = HBaseBuilder.build(
-    "wbgrp-journal-extract-0-qa",     // HBase Table Name
-    "mtrcs-zk1.us.archive.org:2181",  // HBase Zookeeper server (to get runtime config info; can be array?)
+  def getHBaseSource(hbase_table: String, zookeeper_hosts: String, colSpec: String) = HBaseBuilder.build(
+    hbase_table,      // HBase Table Name
+    zookeeper_hosts,  // HBase Zookeeper server (to get runtime config info; can be array?)
     List(colSpec),
     SourceMode.SCAN_ALL)
 }

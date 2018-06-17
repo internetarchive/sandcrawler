@@ -10,12 +10,10 @@ import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 
 class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversions {
 
-
-  // For now doesn't actually count, just dumps a "word count"
-
   val output = args("output")
 
-  HBaseRowCountJob.getHBaseSource
+  HBaseRowCountJob.getHBaseSource(args("hbase-table"),
+                                  args("zookeeper-hosts"))
     .read
     .debug
     .groupAll { _.size('count) }
@@ -23,9 +21,14 @@ class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
 }
 
 object HBaseRowCountJob {
-  def getHBaseSource = HBaseBuilder.build(
-    "wbgrp-journal-extract-0-qa",     // HBase Table Name
-    "mtrcs-zk1.us.archive.org:2181",  // HBase Zookeeper server (to get runtime config info; can be array?)
-    List("file:size", "file:mime"),
-    SourceMode.SCAN_ALL)
+
+  // eg, "wbgrp-journal-extract-0-qa", "mtrcs-zk1.us.archive.org:2181"
+  def getHBaseSource(hbase_table: String, zookeeper_hosts: String) : HBaseSource = {
+    return HBaseBuilder.build(
+      hbase_table,
+      zookeeper_hosts,
+      List("file:size"),
+      SourceMode.SCAN_ALL)
+  }
+
 }
