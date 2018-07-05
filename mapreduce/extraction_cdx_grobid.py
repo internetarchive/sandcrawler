@@ -36,6 +36,10 @@ from grobid2json import teixml2json
 # Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
 sentry_client = raven.Client()
 
+# Specific poison-pill rows we should skip
+KEY_BLACKLIST = (
+    'sha1:DLCCSMMVTCCIR6LRXHEQLZ4PWO6NG2YT',    # "failed to guess ARC header format"
+)
 
 class MRExtractCdxGrobid(MRJob):
 
@@ -203,6 +207,10 @@ class MRExtractCdxGrobid(MRJob):
             yield _, status
             return
         key = info['key']
+        if key in KEY_BLACKLIST:
+            self.increment_counter('lines', 'blacklist')
+            yield _, dict(status='blacklist', key=key)
+            return
 
         # Note: this may not get "cleared" correctly
         sentry_client.extra_context(dict(row_key=key))
