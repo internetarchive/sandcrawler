@@ -1,6 +1,8 @@
 
-REGISTER /usr/lib/hbase/hbase-client-0.98.6-cdh5.3.1.jar
-REGISTER /usr/lib/hbase/hbase-common-0.98.6-cdh5.3.1.jar
+REGISTER /usr/lib/hbase/lib/hbase-client-0.98.6-cdh5.3.1.jar
+REGISTER /usr/lib/hbase/lib/hbase-common-0.98.6-cdh5.3.1.jar
+REGISTER /usr/lib/hbase/lib/hbase-hadoop2-compat-0.98.6-cdh5.3.1.jar
+REGISTER /usr/lib/hbase/lib/hbase-protocol-0.98.6-cdh5.3.1.jar
 
 set hbase.zookeeper.quorum 'mtrcs-zk1.us.archive.org,mtrcs-zk2.us.archive.org,mtrcs-zk3.us.archive.org'
 
