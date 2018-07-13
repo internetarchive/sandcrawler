@@ -19,6 +19,7 @@ import scala._
 class HBaseRowCountTest extends FunSpec with TupleConversions {
 
   val output = "/tmp/testOutput"
+  val (testTable, testHost) = ("test-table", "dummy-host:2181")
 
   val log = LoggerFactory.getLogger(this.getClass.getName)
 
@@ -37,8 +38,10 @@ class HBaseRowCountTest extends FunSpec with TupleConversions {
     .arg("test", "")
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
+    .arg("hbase-table", testTable)
+    .arg("zookeeper-hosts", testHost)
     .arg("debug", "true")
-    .source[Tuple](HBaseRowCountJob.getHBaseSource,
+    .source[Tuple](HBaseRowCountJob.getHBaseSource(testTable, testHost),
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(Bytes.toBytes(s))}):_*)))
       .sink[Tuple](Tsv(output)) {
       outputBuffer =>
