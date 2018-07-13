@@ -23,10 +23,10 @@ class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
 object HBaseRowCountJob {
 
   // eg, "wbgrp-journal-extract-0-qa", "mtrcs-zk1.us.archive.org:2181"
-  def getHBaseSource(hbase_table: String, zookeeper_hosts: String) : HBaseSource = {
+  def getHBaseSource(hbaseTable: String, zookeeperHosts: String) : HBaseSource = {
     return HBaseBuilder.build(
-      hbase_table,
-      zookeeper_hosts,
+      hbaseTable,
+      zookeeperHosts,
       List("file:size"),
       SourceMode.SCAN_ALL)
   }

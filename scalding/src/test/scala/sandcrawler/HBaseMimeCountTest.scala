@@ -16,7 +16,7 @@ import scala._
 class HBaseMimeCountTest extends FunSpec with TupleConversions {
 
   val output = "/tmp/testOutput"
-  val (test_table, test_host) = ("test-table", "dummy-host:2181")
+  val (testTable, testHost) = ("test-table", "dummy-host:2181")
 
   val log = LoggerFactory.getLogger(this.getClass.getName)
 
@@ -41,10 +41,10 @@ class HBaseMimeCountTest extends FunSpec with TupleConversions {
     .arg("test", "")
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
-    .arg("hbase-table", test_table)
-    .arg("zookeeper-hosts", test_host)
+    .arg("hbase-table", testTable)
+    .arg("zookeeper-hosts", testHost)
     .arg("debug", "true")
-    .source[Tuple](HBaseCountJob.getHBaseSource(test_table, test_host, "file:mime"),
+    .source[Tuple](HBaseCountJob.getHBaseSource(testTable, testHost, "file:mime"),
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(Bytes.toBytes(s))}):_*)))
       .sink[Tuple](Tsv(output)) {
         outputBuffer =>

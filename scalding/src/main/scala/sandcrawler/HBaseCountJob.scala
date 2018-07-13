@@ -24,9 +24,9 @@ class HBaseCountJob(args: Args, colSpec: String) extends JobBase(args) with HBas
 }
 
 object HBaseCountJob {
-  def getHBaseSource(hbase_table: String, zookeeper_hosts: String, colSpec: String) = HBaseBuilder.build(
-    hbase_table,      // HBase Table Name
-    zookeeper_hosts,  // HBase Zookeeper server (to get runtime config info; can be array?)
+  def getHBaseSource(hbaseTable: String, zookeeperHosts: String, colSpec: String) = HBaseBuilder.build(
+    hbaseTable,      // HBase Table Name
+    zookeeperHosts,  // HBase Zookeeper server (to get runtime config info; can be array?)
     List(colSpec),
     SourceMode.SCAN_ALL)
 }
