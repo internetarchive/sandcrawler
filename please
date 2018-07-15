@@ -13,6 +13,7 @@ from datetime import datetime
 
 HDFS_DIR = "hdfs:///user/bnewbold/sandcrawler"
 HBASE_HOST = "wbgrp-svc263.us.archive.org"
+ZOOKEEPER_HOSTS = "mtrcs-zk1.us.archive.org:2181"
 GROBID_URI = "http://wbgrp-svc096.us.archive.org:8070"
 
 def rebuild_python():
@@ -86,7 +87,12 @@ def run_rowcount(args):
         com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
-        --output {}""".format(output)
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env)
     subprocess.call(cmd, shell=True)
 
 def run_statuscount(args):
@@ -102,7 +108,12 @@ def run_statuscount(args):
         com.twitter.scalding.Tool sandcrawler.HBaseStatusCountJob \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
-        --output {}""".format(output)
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env)
     subprocess.call(cmd, shell=True)
 
 def main():
