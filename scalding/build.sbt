@@ -13,6 +13,13 @@ lazy val root = (project in file(".")).
       test in assembly := {},
     )),
 
+    (scalastyleSources in Compile) := {
+      // all .scala files in "src/main/scala"
+      val scalaSourceFiles = ((scalaSource in Compile).value ** "*.scala").get    
+      val dirNameToExclude = "example"
+      scalaSourceFiles.filterNot(_.getAbsolutePath.contains(dirNameToExclude))
+    },
+
     name := "sandcrawler",
 
     resolvers += "conjars.org" at "http://conjars.org/repo",
@@ -47,4 +54,5 @@ lazy val root = (project in file(".")).
         case s if s.endsWith("xml") => MergeStrategy.last
         case x => (assemblyMergeStrategy in assembly).value(x)
     },
+
   )
