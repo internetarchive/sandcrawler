@@ -1,5 +1,33 @@
 package sandcrawler
 
+import cascading.property.AppProps
+import cascading.tuple.Fields
+import com.twitter.scalding._
+import com.twitter.scalding.typed.TDsl._
+import java.util.Properties
+import parallelai.spyglass.base.JobBase
+import org.apache.hadoop.hbase.util.Bytes
+import parallelai.spyglass.hbase.{HBaseSource, HBasePipeConversions}
+import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import com.twitter.scalding.Args
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 
-class HBaseStatusCountJob(args: Args) extends HBaseCountJob(args, "grobid0:status_code")
+class HBaseStatusCountJob(args: Args) extends JobBase(args) with HBasePipeConversions {
+
+  val colSpec = "grobid0:status_code"
+  val output = args("output")
+  HBaseBuilder.parseColSpec(colSpec)
+  val Col: String = colSpec.split(":")(1)
+
+  val source : TypedPipe[Long] = HBaseCountJob.getHBaseSource(args("hbase-table"),
+                                                              args("zookeeper-hosts"),
+                                                              colSpec)
+    .read
+    .toTypedPipe[(ImmutableBytesWritable,ImmutableBytesWritable)]('key, 'status_code)
+    .map { case (key, raw_code) => Bytes.toLong(raw_code.copyBytes()) }
+
+  source.groupBy { identity }
+    .size
+    .debug
+    .write(TypedTsv[(Long,Long)](output))
+}
