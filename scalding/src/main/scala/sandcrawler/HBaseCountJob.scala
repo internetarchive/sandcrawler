@@ -5,8 +5,8 @@ import cascading.tuple.Fields
 import com.twitter.scalding._
 import java.util.Properties
 import parallelai.spyglass.base.JobBase
-import parallelai.spyglass.hbase.{HBaseSource, HBasePipeConversions}
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
+import parallelai.spyglass.hbase.{HBaseSource, HBasePipeConversions}
 
 class HBaseCountJob(args: Args, colSpec: String) extends JobBase(args) with HBasePipeConversions {
   val output = args("output")
