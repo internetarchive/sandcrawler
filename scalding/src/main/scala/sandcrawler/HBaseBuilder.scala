@@ -1,6 +1,8 @@
 package sandcrawler
 
 import cascading.tuple.Fields
+import parallelai.spyglass.base.JobBase
+import cascading.tap.SinkMode
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBaseSource
 import scala._
@@ -47,5 +49,10 @@ object HBaseBuilder {
   def build(table: String, server: String, colSpecs: List[String], sourceMode: SourceMode, keyList: List[String] = List("key")) : HBaseSource = {
     val (families, fields) = parseColSpecs(colSpecs)
     new HBaseSource(table, server, new Fields("key"), families, fields, sourceMode = sourceMode, keyList = keyList)
+  }
+
+  def buildSink(table: String, server: String, colSpecs: List[String], sinkMode: SinkMode, keyList: List[String] = List("key")) : HBaseSource = {
+    val (families, fields) = parseColSpecs(colSpecs)
+    new HBaseSource(table, server, new Fields("key"), families, fields, sinkMode = sinkMode)
   }
 }
