@@ -62,7 +62,7 @@
    <parameter name="maxParameters"><![CDATA[8]]></parameter>
   </parameters>
  </check>
- <check level="warning" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="true">
+ <check level="warning" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="false">
   <parameters>
    <parameter name="ignore"><![CDATA[-1,0,1,2,3]]></parameter>
   </parameters>
@@ -118,14 +118,14 @@
  <check level="warning" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"></check>
  <check enabled="true" class="org.scalastyle.scalariform.BlockImportChecker" level="warning"/>
  <check enabled="true" class="org.scalastyle.scalariform.ImportOrderChecker" level="warning">
- <parameters>
-  <parameter name="groups">java,scala,others</parameter>
-  <parameter name="group.java">javax?\..+</parameter>
-  <parameter name="group.scala">scala\..+</parameter>
-  <parameter name="group.others">.+</parameter>
- </parameters>
-</check>
- <check level="warning" class="org.scalastyle.scalariform.IllegalImportsChecker" enabled="true">
+  <parameters>
+   <parameter name="groups">java,scala,others</parameter>
+   <parameter name="group.java">javax?\..+</parameter>
+   <parameter name="group.scala">scala\..+</parameter>
+   <parameter name="group.others">.+</parameter>
+  </parameters>
+ </check>
+<check level="warning" class="org.scalastyle.scalariform.IllegalImportsChecker" enabled="true">
   <parameters>
    <parameter name="illegalImports"><![CDATA[sun._,java.awt._]]></parameter>
   </parameters>

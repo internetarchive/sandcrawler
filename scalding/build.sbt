@@ -19,6 +19,7 @@ lazy val root = (project in file(".")).
       val dirNameToExclude = "/example/"
       scalaSourceFiles.filterNot(_.getAbsolutePath.contains(dirNameToExclude))
     },
+
     name := "sandcrawler",
 
     resolvers += "conjars.org" at "http://conjars.org/repo",
@@ -53,4 +54,5 @@ lazy val root = (project in file(".")).
         case s if s.endsWith("xml") => MergeStrategy.last
         case x => (assemblyMergeStrategy in assembly).value(x)
     },
+
   )
