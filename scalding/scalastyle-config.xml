@@ -6,6 +6,13 @@
    <parameter name="maxFileLength"><![CDATA[800]]></parameter>
   </parameters>
  </check>
+<check enabled="true" class="org.scalastyle.file.IndentationChecker" level="warning">
+ <parameters>
+  <parameter name="tabSize">2</parameter>
+  <parameter name="methodParamIndentSize">2</parameter>
+  <parameter name="classParamIndentSize">4</parameter>
+ </parameters>
+</check>
  <check level="warning" class="org.scalastyle.file.HeaderMatchesChecker" enabled="false">
   <parameters>
    <parameter name="header"><![CDATA[// Copyright (C) 2011-2012 the original author or authors.
@@ -50,11 +57,6 @@
   </parameters>
  </check>
  <check level="warning" class="org.scalastyle.scalariform.EqualsHashCodeChecker" enabled="true"></check>
- <check level="warning" class="org.scalastyle.scalariform.IllegalImportsChecker" enabled="true">
-  <parameters>
-   <parameter name="illegalImports"><![CDATA[sun._,java.awt._]]></parameter>
-  </parameters>
- </check>
  <check level="warning" class="org.scalastyle.scalariform.ParameterNumberChecker" enabled="true">
   <parameters>
    <parameter name="maxParameters"><![CDATA[8]]></parameter>
@@ -114,4 +116,18 @@
  <check level="warning" class="org.scalastyle.scalariform.PublicMethodsHaveTypeChecker" enabled="true"></check>
  <check level="warning" class="org.scalastyle.file.NewLineAtEofChecker" enabled="true"></check>
  <check level="warning" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"></check>
+ <check enabled="true" class="org.scalastyle.scalariform.BlockImportChecker" level="warning"/>
+ <check enabled="true" class="org.scalastyle.scalariform.ImportOrderChecker" level="warning">
+ <parameters>
+  <parameter name="groups">java,scala,others</parameter>
+  <parameter name="group.java">javax?\..+</parameter>
+  <parameter name="group.scala">scala\..+</parameter>
+  <parameter name="group.others">.+</parameter>
+ </parameters>
+</check>
+ <check level="warning" class="org.scalastyle.scalariform.IllegalImportsChecker" enabled="true">
+  <parameters>
+   <parameter name="illegalImports"><![CDATA[sun._,java.awt._]]></parameter>
+  </parameters>
+ </check>
 </scalastyle>

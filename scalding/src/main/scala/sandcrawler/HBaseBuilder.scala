@@ -39,8 +39,8 @@ object HBaseBuilder {
     val groupMap: Map[String, List[String]] = colSpecs.groupBy(c => (c split ":")(0))
     val families = groupMap.keys.toList
     val groupedColNames : List[List[String]] = families map {fam => {
-        val cols = {groupMap(fam).map(v => v.split(":")(1))}
-        cols}}
+      val cols = {groupMap(fam).map(v => v.split(":")(1))}
+      cols}}
     (families, groupedColNames.map({fields => new Fields(fields : _*)}))
   }
 

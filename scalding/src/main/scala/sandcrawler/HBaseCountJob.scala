@@ -1,21 +1,24 @@
 package sandcrawler
 
+import java.util.Properties
+
 import cascading.property.AppProps
 import cascading.tuple.Fields
 import com.twitter.scalding._
-import java.util.Properties
 import parallelai.spyglass.base.JobBase
-import parallelai.spyglass.hbase.{HBaseSource, HBasePipeConversions}
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
+import parallelai.spyglass.hbase.HBasePipeConversions
+import parallelai.spyglass.hbase.HBaseSource
 
 class HBaseCountJob(args: Args, colSpec: String) extends JobBase(args) with HBasePipeConversions {
   val output = args("output")
   HBaseBuilder.parseColSpec(colSpec)
   val Col: String = colSpec.split(":")(1)
 
-  HBaseCountJob.getHBaseSource(args("hbase-table"),
-                               args("zookeeper-hosts"),
-                               colSpec)
+  HBaseCountJob.getHBaseSource(
+    args("hbase-table"),
+    args("zookeeper-hosts"),
+    colSpec)
     .read
     .fromBytesWritable(Symbol(Col))
     .debug
