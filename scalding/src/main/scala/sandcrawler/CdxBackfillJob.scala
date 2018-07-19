@@ -1,15 +1,17 @@
 package sandcrawler
 
+import java.util.Properties
+
 import cascading.property.AppProps
+import cascading.tap.SinkMode
 import cascading.tuple.Fields
 import cascading.pipe.joiner._
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
-import java.util.Properties
-import cascading.tap.SinkMode
 import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
-import parallelai.spyglass.hbase.{HBaseSource, HBasePipeConversions}
+import parallelai.spyglass.hbase.HBasePipeConversions
+import parallelai.spyglass.hbase.HBaseSource
 import scala.util.parsing.json.JSONObject
 
 // Type that represents a raw parsed CDX line
@@ -82,7 +84,7 @@ class CdxBackfillJob(args: Args) extends JobBase(args) with HBasePipeConversions
 object CdxBackfillJob {
 
   def getHBaseSource(hbase_table: String, zookeeper_hosts: String) : HBaseSource = {
-    return HBaseBuilder.build(
+    HBaseBuilder.build(
       hbase_table,
       zookeeper_hosts,
       List("file:size"), // not actually needed
@@ -90,7 +92,7 @@ object CdxBackfillJob {
   }
 
   def getHBaseSink(hbase_table: String, zookeeper_hosts: String) : HBaseSource = {
-    return HBaseBuilder.buildSink(
+    HBaseBuilder.buildSink(
       hbase_table,
       zookeeper_hosts,
       List("f:c", "file:cdx", "file:mime"),
@@ -118,8 +120,7 @@ object CdxBackfillJob {
     if (lower.startsWith("application/x-pdf")) {
       return "application/pdf"
     }
-    return lower
-
+    lower
   }
 
   def isCdxLine(line: String) : Boolean = {
