@@ -1,9 +1,10 @@
 package sandcrawler
 
+import java.util.Properties
+
 import cascading.property.AppProps
 import cascading.tuple.Fields
 import com.twitter.scalding._
-import java.util.Properties
 import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
@@ -13,8 +14,9 @@ class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
 
   val output = args("output")
 
-  HBaseRowCountJob.getHBaseSource(args("hbase-table"),
-                                  args("zookeeper-hosts"))
+  HBaseRowCountJob.getHBaseSource(
+    args("hbase-table"),
+    args("zookeeper-hosts"))
     .read
     .debug
     .groupAll { _.size('count) }
@@ -31,5 +33,4 @@ object HBaseRowCountJob {
       List("file:size"),
       SourceMode.SCAN_ALL)
   }
-
 }
