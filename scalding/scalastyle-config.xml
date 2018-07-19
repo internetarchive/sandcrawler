@@ -114,7 +114,8 @@
  <check level="warning" class="org.scalastyle.scalariform.PublicMethodsHaveTypeChecker" enabled="true"></check>
  <check level="warning" class="org.scalastyle.file.NewLineAtEofChecker" enabled="true"></check>
  <check level="warning" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"></check>
- <check class="org.scalastyle.scalariform.ImportOrderChecker"  level="warning" enabled="true">
+ <check class="org.scalastyle.scalariform.BlockImportChecker" level="warning" enabled="true"/>
+<check class="org.scalastyle.scalariform.ImportOrderChecker" level="warning" enabled="true">
   <parameters>
    <parameter name="groups">java,scala,others</parameter>
    <parameter name="group.java">javax?\..+</parameter>

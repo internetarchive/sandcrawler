@@ -6,7 +6,8 @@ import com.twitter.scalding._
 import java.util.Properties
 import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
-import parallelai.spyglass.hbase.{HBaseSource, HBasePipeConversions}
+import parallelai.spyglass.hbase.HBasePipeConversions
+import parallelai.spyglass.hbase.HBaseSource
 
 class HBaseRowCountJob(args: Args) extends JobBase(args) with HBasePipeConversions {
 
