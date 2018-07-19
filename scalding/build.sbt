@@ -16,7 +16,7 @@ lazy val root = (project in file(".")).
     (scalastyleSources in Compile) := {
       // all .scala files in "src/main/scala"
       val scalaSourceFiles = ((scalaSource in Compile).value ** "*.scala").get    
-      val dirNameToExclude = "example"
+      val dirNameToExclude = "/example/"
       scalaSourceFiles.filterNot(_.getAbsolutePath.contains(dirNameToExclude))
     },
 
