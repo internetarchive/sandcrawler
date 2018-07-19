@@ -1,6 +1,8 @@
 package sandcrawler
 
 import java.util.Properties
+import scala.util.parsing.json.JSONObject
+import scala.util.Try
 
 import cascading.property.AppProps
 import cascading.tap.SinkMode
@@ -12,7 +14,6 @@ import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
-import scala.util.parsing.json.JSONObject
 
 // Type that represents a raw parsed CDX line
 case class CdxLine(surt: String,
@@ -130,11 +131,17 @@ object CdxBackfillJob {
   }
 
   def keepCdx(line: CdxLine) : Boolean = {
-    // TODO: sha1.isalnum() and c_size.isdigit() and offset.isdigit() and dt.isdigit()
+    if (List(line.surt, line.datetime, line.url, line.mime, line.c_size, line.offset, line.warc).contains("-")) {
+      println("DASHLINE")
+      return false
+    }
+    // TODO: sha1.isalnum()
     if (line.http_status != "200" || line.sha1.size != 32) {
       return false
     }
-    // TODO: '-' in (line.surt, line.datetime, line.url, line.mime, line.c_size, line.offset, line.warc)
+    if (List(line.c_size, line.offset, line.datetime).map(s => Try(s.toLong).toOption).contains(None)) {
+      return false
+    }
     return true
   }
 
@@ -174,7 +181,7 @@ object CdxBackfillJob {
       "offset" -> line.offset.toInt,
       "warc" -> line.warc
     ))
-    (key, heritrixInfo.toString(), fileCdx.toString(), line.mime)
+    (key, heritrixInfo.toString(), fileCdx.toString(), normalizeMime(line.mime))
   }
 
   def lineToCdxLine(line: String) : CdxLine = {

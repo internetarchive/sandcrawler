@@ -65,7 +65,7 @@ class CdxBackfillTest extends FlatSpec with Matchers {
         assert(obj("f") == "CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz")
         assert(obj("c") == 854156)
         assert(obj("o") == 328850624)
-        assert(obj("d") == "2017-08-28T23:31:54Z")
+        assert(obj("d") == "2017-07-05T06:22:02Z")
       }
       case other => assert(false)
     }
@@ -80,7 +80,7 @@ class CdxBackfillTest extends FlatSpec with Matchers {
       }
       case other => assert(false)
     }
-    assert(row._3 == "application/pdf")
+    assert(row._4 == "application/pdf")
   }
 
 }
