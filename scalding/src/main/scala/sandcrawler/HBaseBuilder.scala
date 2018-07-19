@@ -4,9 +4,9 @@ import scala._
 
 import cascading.tap.SinkMode
 import cascading.tuple.Fields
+import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBaseSource
-import parallelai.spyglass.base.JobBase
 
 object HBaseBuilder {
   // map from column families to column names
