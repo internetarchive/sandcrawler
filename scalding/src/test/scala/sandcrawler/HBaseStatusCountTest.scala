@@ -48,18 +48,18 @@ class HBaseStatusCountTest extends FunSpec with TupleConversions {
     .arg("debug", "true")
     .source[Tuple](HBaseCountJob.getHBaseSource(testTable, testHost, "grobid0:status_code"),
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
-      .sink[Tuple](TypedTsv[(Long, Long)](output)) {
-        outputBuffer =>
-        it("should return a 2-element list.") {
-          assert(outputBuffer.size === 2)
-        }
+    .sink[Tuple](TypedTsv[(Long, Long)](output)) {
+      outputBuffer =>
+      it("should return a 2-element list.") {
+        assert(outputBuffer.size === 2)
+      }
 
-        // Convert List[Tuple] to Map[Long, Long].
-        val counts = outputBuffer.map(t => (t.getLong(0), t.getLong(1))).toMap
-        it("should have the appropriate number of each status type") {
-          assert(counts(statusType1) == statusType1Count)
-          assert(counts(statusType2) == statusType2Count)
-        }
+      // Convert List[Tuple] to Map[Long, Long].
+      val counts = outputBuffer.map(t => (t.getLong(0), t.getLong(1))).toMap
+      it("should have the appropriate number of each status type") {
+        assert(counts(statusType1) == statusType1Count)
+        assert(counts(statusType2) == statusType2Count)
+      }
     }
     .run
     .finish

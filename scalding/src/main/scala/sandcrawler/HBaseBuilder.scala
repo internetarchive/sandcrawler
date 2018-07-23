@@ -1,9 +1,12 @@
 package sandcrawler
 
+import scala._
+
+import cascading.tap.SinkMode
 import cascading.tuple.Fields
+import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBaseSource
-import scala._
 
 object HBaseBuilder {
   // map from column families to column names
@@ -39,13 +42,18 @@ object HBaseBuilder {
     val groupMap: Map[String, List[String]] = colSpecs.groupBy(c => (c split ":")(0))
     val families = groupMap.keys.toList
     val groupedColNames : List[List[String]] = families map {fam => {
-        val cols = {groupMap(fam).map(v => v.split(":")(1))}
-        cols}}
+      val cols = {groupMap(fam).map(v => v.split(":")(1))}
+      cols}}
     (families, groupedColNames.map({fields => new Fields(fields : _*)}))
   }
 
   def build(table: String, server: String, colSpecs: List[String], sourceMode: SourceMode, keyList: List[String] = List("key")) : HBaseSource = {
     val (families, fields) = parseColSpecs(colSpecs)
     new HBaseSource(table, server, new Fields("key"), families, fields, sourceMode = sourceMode, keyList = keyList)
+  }
+
+  def buildSink(table: String, server: String, colSpecs: List[String], sinkMode: SinkMode, keyList: List[String] = List("key")) : HBaseSource = {
+    val (families, fields) = parseColSpecs(colSpecs)
+    new HBaseSource(table, server, new Fields("key"), families, fields, sinkMode = sinkMode)
   }
 }
