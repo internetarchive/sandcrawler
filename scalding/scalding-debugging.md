@@ -45,6 +45,22 @@ resolved by ensuring that the `HBaseSource` constructors had exactly identical
 names and arguments (eg, table names and zookeeper quorums have to be exact
 matches).
 
+If you get:
+
+    value toTypedPipe is not a member of cascading.pipe.Pipe
+
+You probably need to [import some types][tdsl] from:
+
+    import com.twitter.scalding.typed.TDsl._
+
+[tdsl]: https://github.com/twitter/scalding/wiki/Type-safe-api-reference#interoperating-between-fields-api-and-type-safe-api
+
+## Running Individual Tests
+
+You can run a single test matching a string glob pattern like:
+
+    sbt:sandcrawler> testOnly *CdxBackfill*
+
 ## Fields
 
 Values of type `List[Fields]` are not printed in the expected way:
