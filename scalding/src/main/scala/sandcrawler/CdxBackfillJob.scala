@@ -108,12 +108,12 @@ object CdxBackfillJob {
     )
 
     val lower = raw.toLowerCase()
-    normalMime.foreach { case (key, value) =>
-      if (lower.startsWith(key)) {
-        return value
-      }
+    normalMime.find { case (key, _) =>
+      lower.startsWith(key)
+    } match {
+      case Some((_, value)) => value
+      case None => lower
     }
-    lower
   }
 
   def isCdxLine(line: String) : Boolean = {
