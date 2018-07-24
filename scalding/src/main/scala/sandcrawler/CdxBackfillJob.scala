@@ -1,7 +1,5 @@
 package sandcrawler
 
-// TODO: fix import order to satisfy scala style
-
 import java.util.Properties
 
 import scala.util.Try
@@ -30,9 +28,6 @@ case class CdxLine(surt: String, datetime: String, url: String, mime: String, ht
  *  5. filter to only those with null HBase key column
  *  6. convert CDX fields to HBase columns
  *  7. sink results to HBase
- *
- * TODO: I really mixed the Scalding "field-base" and "type-based" APIs here.
- * Should decide on a best practice.
  */
 class CdxBackfillJob(args: Args) extends JobBase(args) with HBasePipeConversions {
 
@@ -107,7 +102,6 @@ object CdxBackfillJob {
       "application/xml" -> "text/xml"
     )
 
-    // TODO: improvement of control flow
     val lower = raw.toLowerCase()
     normalMime.foreach { case (key, value) =>
       if (lower.startsWith(key)) {
