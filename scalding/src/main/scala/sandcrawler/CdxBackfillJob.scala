@@ -3,13 +3,14 @@ package sandcrawler
 // TODO: fix import order to satisfy scala style
 
 import java.util.Properties
-import scala.util.parsing.json.JSONObject
-import scala.util.Try
 
+import scala.util.Try
+import scala.util.parsing.json.JSONObject
+
+import cascading.pipe.joiner._
 import cascading.property.AppProps
 import cascading.tap.SinkMode
 import cascading.tuple.Fields
-import cascading.pipe.joiner._
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
 import parallelai.spyglass.base.JobBase
@@ -18,16 +19,7 @@ import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
 
 // Type that represents a raw parsed CDX line
-case class CdxLine(surt: String,
-                   datetime: String,
-                   url: String,
-                   mime: String,
-                   httpStatus: String,
-                   sha1: String,
-                   c_size: String,
-                   offset: String,
-                   warc: String)
-
+case class CdxLine(surt: String, datetime: String, url: String, mime: String, httpStatus: String, sha1: String, c_size: String, offset: String, warc: String)
 
 /**
  *  CDX backfill:
@@ -119,7 +111,8 @@ object CdxBackfillJob {
     val lower = raw.toLowerCase()
     normalMime.foreach { case (key, value) =>
       if (lower.startsWith(key)) {
-        return value
+        lower = value
+        break
       }
     }
     lower
@@ -134,16 +127,15 @@ object CdxBackfillJob {
   def keepCdx(line: CdxLine) : Boolean = {
     if (List(line.surt, line.datetime, line.url, line.mime, line.c_size, line.offset, line.warc).contains("-")) {
       // TODO: hadoop counter (was: "DASHLINE")
-      return false
+      false
+    } else if (line.httpStatus != "200" || line.sha1.size != 32) {
+      // TODO: sha1.isalnum()
+      false
+    } else if (List(line.c_size, line.offset, line.datetime).map(s => Try(s.toLong).toOption).contains(None)) {
+      false
+    } else {
+      true
     }
-    // TODO: sha1.isalnum()
-    if (line.httpStatus != "200" || line.sha1.size != 32) {
-      return false
-    }
-    if (List(line.c_size, line.offset, line.datetime).map(s => Try(s.toLong).toOption).contains(None)) {
-      return false
-    }
-    return true
   }
 
   // Returns (key, f:c, file:cdx, file:mime), all as strings, which is close to
