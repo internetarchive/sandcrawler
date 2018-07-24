@@ -53,27 +53,97 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
   val GrobidStringWithoutTitle = GrobidString.replace("title", "nottitle")
   val MalformedGrobidString = GrobidString.replace("}", "")
 
+  val CrossrefString =
+"""
+{ "_id" : { "$oid" : "5a553d5988a035a45bf50ed3" }, 
+  "indexed" : { "date-parts" : [ [ 2017, 10, 23 ] ], 
+    "date-time" : "2017-10-23T17:19:16Z", 
+    "timestamp" : { "$numberLong" : "1508779156477" } }, 
+  "reference-count" : 0, 
+  "publisher" : "Elsevier BV", 
+  "issue" : "3", 
+  "license" : [ { "URL" : "http://www.elsevier.com/tdm/userlicense/1.0/", 
+                    "start" : { "date-parts" : [ [ 1996, 1, 1 ] ], 
+                                "date-time" : "1996-01-01T00:00:00Z", 
+                                "timestamp" : { "$numberLong" : "820454400000" } }, 
+                                "delay-in-days" : 0, "content-version" : "tdm" }],
+  "content-domain" : { "domain" : [], "crossmark-restriction" : false }, 
+  "published-print" : { "date-parts" : [ [ 1996 ] ] }, 
+  "DOI" : "10.1016/0987-7983(96)87729-2", 
+  "type" : "journal-article", 
+  "created" : { "date-parts" : [ [ 2002, 7, 25 ] ], 
+    "date-time" : "2002-07-25T15:09:41Z", 
+    "timestamp" : { "$numberLong" : "1027609781000" } }, 
+  "page" : "186-187", 
+  "source" : "Crossref", 
+  "is-referenced-by-count" : 0, 
+  "title" : [ "les ferments lactiques: classification, propriÃ©tÃ©s, utilisations agroalimentaires" ], 
+  "prefix" : "10.1016", 
+  "volume" : "9", 
+  "author" : [ { "given" : "W", "family" : "Gaier", "affiliation" : [] } ], 
+  "member" : "78", 
+  "container-title" : [ "Journal de PÃ©diatrie et de PuÃ©riculture" ], 
+  "link" : [ { "URL" :  "http://api.elsevier.com/content/article/PII:0987-7983(96)87729-2?httpAccept=text/xml",
+               "content-type" : "text/xml", 
+                 "content-version" : "vor",
+                 "intended-application" : "text-mining" }, 
+               { "URL" :
+  "http://api.elsevier.com/content/article/PII:0987-7983(96)87729-2?httpAccept=text/plain",
+                 "content-type" : "text/plain", 
+                 "content-version" : "vor",
+                 "intended-application" : "text-mining" } ], 
+  "deposited" : { "date-parts" : [ [ 2015, 9, 3 ] ], 
+                  "date-time" : "2015-09-03T10:03:43Z", 
+                  "timestamp" : { "$numberLong" : "1441274623000" } }, 
+  "score" : 1, 
+  "issued" : { "date-parts" : [ [ 1996 ] ] }, 
+  "references-count" : 0, 
+  "alternative-id" : [ "0987-7983(96)87729-2" ], 
+  "URL" : "http://dx.doi.org/10.1016/0987-7983(96)87729-2", 
+  "ISSN" : [ "0987-7983" ], 
+  "issn-type" : [ { "value" : "0987-7983", "type" : "print" } ], 
+  "subject" : [ "Pediatrics, Perinatology, and Child Health" ]
+}
+"""
+  val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
+  val MalformedCrossrefString = CrossrefString.replace("}", "")
+
   "titleToSlug()" should "extract the parts of titles before a colon" in {
-    val slug = HBaseCrossrefScore.titleToSlug("hello:there")
+    val slug = HBaseCrossrefScore.titleToSlug("HELLO:there")
     slug shouldBe "hello"
   }
   it should "extract an entire colon-less string" in {
-    val slug = HBaseCrossrefScore.titleToSlug("hello there")
+    val slug = HBaseCrossrefScore.titleToSlug("hello THERE")
     slug shouldBe "hello there"
   }
 
   "grobidToSlug()" should "get the right slug for a grobid json string" in {
     val slug = HBaseCrossrefScore.grobidToSlug(GrobidString)
-    slug should contain ("Dummy Example File")
+    slug should contain ("dummy example file")
   }
 
-  "grobidToSlug()" should "return None if given json string without title" in {
+  it should "return None if given json string without title" in {
     val slug = HBaseCrossrefScore.grobidToSlug(GrobidStringWithoutTitle)
     slug shouldBe None
   }
 
-  "grobidToSlug()" should "return None if given a malformed json string" in {
+  it should "return None if given a malformed json string" in {
     val slug = HBaseCrossrefScore.grobidToSlug(MalformedGrobidString)
     slug shouldBe None
+  }
+
+  "crossrefToSlug()" should "get the right slug for a crossref json string" in {
+    val slug = HBaseCrossrefScore.crossrefToSlug(CrossrefString)
+    slug should contain ("les ferments lactiques")
+  }
+
+  it should "return None if given json string without title" in {
+    val slug = HBaseCrossrefScore.grobidToSlug(CrossrefStringWithoutTitle)
+    slug shouldBe None
+  }
+
+  it should "return None if given a malformed json string" in {
+    val slug = HBaseCrossrefScore.grobidToSlug(MalformedCrossrefString)
+     slug shouldBe None
   }
 }

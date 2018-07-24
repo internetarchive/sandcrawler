@@ -26,14 +26,13 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
     .map('tei_json -> 'slug) {
       json : String => HBaseCrossrefScore.grobidToSlug(json)}
 
-  /*
   val crossrefSource = TextLine(args("input"))
   val crossrefPipe = crossrefSource
     .read
     .map('line -> 'slug) {
-      json : String => crossrefToSlug(json)}
+      json : String => HBaseCrossrefScore.crossrefToSlug(json)}
 
-
+/*
   statusPipe.groupBy { identity }
     .size
     .debug
@@ -56,7 +55,20 @@ object HBaseCrossrefScore {
     }
   }
 
+  def crossrefToSlug(json : String) : Option[String] = {
+    val jsonObject = JSON.parseFull(json)
+    if (jsonObject == None) {
+      None
+    } else {
+      val globalMap = jsonObject.get.asInstanceOf[Map[String, Any]]
+      globalMap.get("title") match {
+        case Some(title) => Some(titleToSlug(title.asInstanceOf[List[String]](0)))
+        case None => None
+      }
+    }
+  }
+
   def titleToSlug(title : String) : String = {
-    title.split(":")(0)
+    title.split(":")(0).toLowerCase()
   }
 }
