@@ -41,34 +41,42 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
 }
 
 object HBaseCrossrefScore {
-  def grobidToSlug(json : String) : Option[String] = {
+  def jsonToMap(json : String) : Map[String, Any] = {
     // https://stackoverflow.com/a/32717262/631051
     val jsonObject = JSON.parseFull(json)
     if (jsonObject == None) {
-      None
+      // Empty map for malformed JSON
+      Map[String, Any]()
     } else {
-      val globalMap = jsonObject.get.asInstanceOf[Map[String, Any]]
-      globalMap.get("title") match {
-        case Some(title) => Some(titleToSlug(title.asInstanceOf[String]))
-        case None => None
-      }
+      jsonObject.get.asInstanceOf[Map[String, Any]]
+    }
+  }
+
+
+  def grobidToSlug(json : String) : Option[String] = {
+    val map = jsonToMap(json)
+    if (map contains "title") {
+      titleToSlug(map("title").asInstanceOf[String])
+    } else {
+      None
     }
   }
 
   def crossrefToSlug(json : String) : Option[String] = {
-    val jsonObject = JSON.parseFull(json)
-    if (jsonObject == None) {
-      None
+    val map = jsonToMap(json)
+    if (map contains "title") {
+      titleToSlug(map("title").asInstanceOf[List[String]](0))
     } else {
-      val globalMap = jsonObject.get.asInstanceOf[Map[String, Any]]
-      globalMap.get("title") match {
-        case Some(title) => Some(titleToSlug(title.asInstanceOf[List[String]](0)))
-        case None => None
-      }
+      None
     }
   }
 
-  def titleToSlug(title : String) : String = {
-    title.split(":")(0).toLowerCase()
+  def titleToSlug(title : String) : Option[String] = {
+    val slug = title.split(":")(0).toLowerCase()
+    if (slug.isEmpty) {
+      None
+    } else {
+      Some(slug)
+    }
   }
 }

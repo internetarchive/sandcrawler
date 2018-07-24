@@ -110,11 +110,12 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
 
   "titleToSlug()" should "extract the parts of titles before a colon" in {
     val slug = HBaseCrossrefScore.titleToSlug("HELLO:there")
-    slug shouldBe "hello"
+    slug should contain ("hello")
   }
+
   it should "extract an entire colon-less string" in {
     val slug = HBaseCrossrefScore.titleToSlug("hello THERE")
-    slug shouldBe "hello there"
+    slug should contain ("hello there")
   }
 
   "grobidToSlug()" should "get the right slug for a grobid json string" in {
