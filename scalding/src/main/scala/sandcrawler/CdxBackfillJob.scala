@@ -96,6 +96,10 @@ object CdxBackfillJob {
     val normalMime = Map(
       "application/pdf" -> "application/pdf",
       "application/x-pdf" -> "application/pdf",
+      "('application/pdf'" -> "application/pdf",
+      "image/pdf" -> "application/pdf",
+      "text/pdf" -> "application/pdf",
+      "\"application/pdf\"" -> "application/pdf",
       "application/postscript" -> "application/postscript",
       "text/html" -> "text/html",
       "text/xml" -> "text/xml",
@@ -105,8 +109,7 @@ object CdxBackfillJob {
     val lower = raw.toLowerCase()
     normalMime.foreach { case (key, value) =>
       if (lower.startsWith(key)) {
-        lower = value
-        break
+        return value
       }
     }
     lower
