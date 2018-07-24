@@ -51,6 +51,7 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
 }
 """
   val GrobidStringWithoutTitle = GrobidString.replace("title", "nottitle")
+  val MalformedGrobidString = GrobidString.replace("}", "")
 
   "titleToSlug()" should "extract the parts of titles before a colon" in {
     val slug = HBaseCrossrefScore.titleToSlug("hello:there")
@@ -63,11 +64,16 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
 
   "grobidToSlug()" should "get the right slug for a grobid json string" in {
     val slug = HBaseCrossrefScore.grobidToSlug(GrobidString)
-    slug shouldBe "Dummy Example File"
+    slug should contain ("Dummy Example File")
   }
 
-  "grobidToSlug()" should "return empty string for a grobid json string without a title" in {
+  "grobidToSlug()" should "return None if given json string without title" in {
     val slug = HBaseCrossrefScore.grobidToSlug(GrobidStringWithoutTitle)
-    slug shouldBe ""
+    slug shouldBe None
+  }
+
+  "grobidToSlug()" should "return None if given a malformed json string" in {
+    val slug = HBaseCrossrefScore.grobidToSlug(MalformedGrobidString)
+    slug shouldBe None
   }
 }

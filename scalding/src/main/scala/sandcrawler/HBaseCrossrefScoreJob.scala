@@ -22,7 +22,7 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
     sourceMode = SourceMode.SCAN_ALL)
 
   val grobidPipe = grobidSource
-   .read
+    .read
     .map('tei_json -> 'slug) {
       json : String => HBaseCrossrefScore.grobidToSlug(json)}
 
@@ -42,17 +42,21 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
 }
 
 object HBaseCrossrefScore {
-  def grobidToSlug(json : String) = {
+  def grobidToSlug(json : String) : Option[String] = {
     // https://stackoverflow.com/a/32717262/631051
     val jsonObject = JSON.parseFull(json)
-    val globalMap = jsonObject.get.asInstanceOf[Map[String, Any]]
-    globalMap.get("title") match {
-      case Some(title) => titleToSlug(title.asInstanceOf[String])
-      case None => ""
+    if (jsonObject == None) {
+      None
+    } else {
+      val globalMap = jsonObject.get.asInstanceOf[Map[String, Any]]
+      globalMap.get("title") match {
+        case Some(title) => Some(titleToSlug(title.asInstanceOf[String]))
+        case None => None
+      }
     }
   }
 
-  def titleToSlug(title : String) = {
+  def titleToSlug(title : String) : String = {
     title.split(":")(0)
   }
 }
