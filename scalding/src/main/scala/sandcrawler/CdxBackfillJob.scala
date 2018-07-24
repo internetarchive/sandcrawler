@@ -3,6 +3,7 @@ package sandcrawler
 import java.util.Properties
 
 import scala.util.Try
+import scala.util.matching.Regex
 import scala.util.parsing.json.JSONObject
 
 import cascading.pipe.joiner._
@@ -122,11 +123,14 @@ object CdxBackfillJob {
   }
 
   def keepCdx(line: CdxLine) : Boolean = {
+    val sha1Pattern = """[A-Z2-7]{32}""".r
     if (List(line.surt, line.datetime, line.url, line.mime, line.c_size, line.offset, line.warc).contains("-")) {
-      // TODO: hadoop counter (was: "DASHLINE")
       false
-    } else if (line.httpStatus != "200" || line.sha1.size != 32) {
-      // TODO: sha1.isalnum()
+    } else if (line.httpStatus != "200") {
+      false
+    } else if (line.mime != "application/pdf") {
+      false
+    } else if (sha1Pattern.unapplySeq(line.sha1).isEmpty) {
       false
     } else if (List(line.c_size, line.offset, line.datetime).map(s => Try(s.toLong).toOption).contains(None)) {
       false
