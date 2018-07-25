@@ -15,7 +15,9 @@ import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
 
-class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConversions {
+class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with
+    HBasePipeConversions {
+  val NoTitle = "NO TITLE" // Used for slug if title is empty or unparseable
 
   // key is SHA1
   val grobidSource = HBaseCrossrefScore.getHBaseSource(
@@ -30,8 +32,12 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
       val (key, json) = (entry._1, entry._2)
       HBaseCrossrefScore.grobidToSlug(json) match {
           case Some(slug) => (key, json, slug)
-          case None => (key, json, "none")
+          case None => (key, json, NoTitle)
       }
+    }
+    .filter { entry =>
+      val (_, _, slug) = entry
+      slug != NoTitle && slug.length > 0
     }
     .write(TypedTsv[(String, String, String)](args("output")))
 
@@ -79,7 +85,7 @@ object HBaseCrossrefScore {
     if (map contains "title") {
       titleToSlug(map("title").asInstanceOf[String])
     } else {
-      Some("grobidToSlug None: " + map("foo"))
+      None
     }
   }
 
@@ -89,7 +95,7 @@ object HBaseCrossrefScore {
       // TODO: Don't ignore titles after the first.
       titleToSlug(map("title").asInstanceOf[List[String]](0))
     } else {
-      Some("crossRefToSlug None")
+      None
     }
   }
 

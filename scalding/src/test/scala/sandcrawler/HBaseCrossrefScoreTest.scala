@@ -163,7 +163,7 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
     List(Bytes.toBytes("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"), Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title1"))),
     List(Bytes.toBytes("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"), Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title2: TNG"))),
     List(Bytes.toBytes("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT"), Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title3: The Sequel"))),
-    List(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56"), Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title4"))))
+    List(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56"), Bytes.toBytes(MalformedGrobidString)))
 
   JobTest("sandcrawler.HBaseCrossrefScoreJob")
     .arg("test", "")
@@ -180,13 +180,19 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
       "1" -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"))))
     .sink[(String, String, String)](TypedTsv[(String, String, String)](output)) {
       outputBuffer =>
-      it("should return a 4-element list.") {
-        assert(outputBuffer.size === 4)
+      it("should return a 3-element list.") {
+        assert(outputBuffer.size === 3)
       }
-      it("should return the right slugs.") {
-        val (sha1, json, slug) = outputBuffer(0)
-        assert(slug == "title1")
+      it("should return the right first slug.") {
+        val (_, _, slug0) = outputBuffer(0)
+        assert(slug0 == "title1")
       }
+      /*
+      it("should return the right last slug.") {
+        val (_, _, slug3) = outputBuffer(3)
+        assert(slug3 == "foo")
+      }
+       */
     }
     .run
     .finish
