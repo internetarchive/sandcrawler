@@ -183,8 +183,10 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
       it("should return a 3-element list.") {
         assert(outputBuffer.size === 3)
       }
-      it("should return the right first slug.") {
-        val (_, _, slug0) = outputBuffer(0)
+      it("should return the right first entry.") {
+        val (sha1, json, slug0) = outputBuffer(0)
+        assert(sha1 == new String(grobidSampleData(0)(0), "UTF-8"))
+        assert(json == new String(grobidSampleData(0)(1), "UTF-8"))
         assert(slug0 == "title1")
       }
       /*
