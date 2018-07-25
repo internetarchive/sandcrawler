@@ -178,10 +178,14 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
     .source(TextLine(input), List((
       "0" -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
       "1" -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"))))
-    .sink[Tuple](TypedTsv[(String, String, String)](output)) {
+    .sink[(String, String, String)](TypedTsv[(String, String, String)](output)) {
       outputBuffer =>
-      it("should return a 2-element list.") {
-        assert(outputBuffer.size === 2)
+      it("should return a 4-element list.") {
+        assert(outputBuffer.size === 4)
+      }
+      it("should return the right slugs.") {
+        val (sha1, json, slug) = outputBuffer(0)
+        assert(slug == "title1")
       }
     }
     .run
