@@ -179,13 +179,13 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
     .source[Tuple](HBaseCrossrefScore.getHBaseSource(testTable, testHost),
       grobidSampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
     .source(TextLine(input), List(
-      CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
-      CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.5"),
-      CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.75"),
-      CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1")))
-    .sink[(String, String, String)](TypedTsv[(String, String, String)](output)) {
+      0 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
+      1 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.5"),
+      2 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.75"),
+      3 -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1")))
+    .sink[String](TypedTsv[String](output)) {
       outputBuffer =>
-      it should "return a 3-element list" in {
+      it should "return a 4-element list" in {
         outputBuffer should have length 3
       }
       /*
