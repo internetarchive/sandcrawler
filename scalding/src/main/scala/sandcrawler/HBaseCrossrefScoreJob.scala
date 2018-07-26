@@ -87,37 +87,40 @@ object HBaseCrossrefScore {
     List("grobid0:tei_json"),
     SourceMode.SCAN_ALL)
 
-  def performJoin(grobidJson : String, crossRefJson : String, sha1 : String) : (String, String, String) = {
-    (sha1, "1.2.3.4", "100")
-  }
-
-  def jsonToMap(json : String) : Map[String, Any] = {
+  def jsonToMap(json : String) : Option[Map[String, Any]] = {
     // https://stackoverflow.com/a/32717262/631051
     val jsonObject = JSON.parseFull(json)
     if (jsonObject == None) {
-      // Empty map for malformed JSON
-      Map[String, Any]("malformed json" -> json)
+      None
     } else {
-      jsonObject.get.asInstanceOf[Map[String, Any]]
+      Some(jsonObject.get.asInstanceOf[Map[String, Any]])
     }
   }
 
   def grobidToSlug(json : String) : Option[String] = {
-    val map = jsonToMap(json)
-    if (map contains "title") {
-      titleToSlug(map("title").asInstanceOf[String])
-    } else {
-      None
+    jsonToMap(json) match {
+      case None => None
+      case Some(map) => {
+        if (map contains "title") {
+          titleToSlug(map("title").asInstanceOf[String])
+        } else {
+          None
+        }
+      }
     }
   }
 
   def crossrefToSlug(json : String) : Option[String] = {
-    val map = jsonToMap(json)
-    if (map contains "title") {
-      // TODO: Don't ignore titles after the first.
-      titleToSlug(map("title").asInstanceOf[List[String]](0))
-    } else {
-      Some(map.keys.mkString(","))
+    jsonToMap(json) match {
+      case None => None
+      case Some(map) => {
+        if (map contains "title") {
+          // TODO: Don't ignore titles after the first.
+          titleToSlug(map("title").asInstanceOf[List[String]](0))
+        } else {
+          None
+        }
+      }
     }
   }
 
@@ -150,16 +153,24 @@ object HBaseCrossrefScore {
   def computeOutput(sha1 : String, grobidJson : String, crossrefJson : String) :
     // (score, sha1, doi, grobidTitle, crossrefTitle)
       (Int, String, String, String, String) = {
-    // JSON has already been validated in previous stages.
-    val grobid = jsonToMap(grobidJson)
-    val crossref = jsonToMap(crossrefJson)
+    jsonToMap(grobidJson) match {
+      case None => (0, "", "", "", "")  // This can't happen, because grobidJson already validated in earlier stage
+      case Some(grobid) => {
+        val grobidTitle = grobid("title").asInstanceOf[String].toLowerCase()
 
-    val grobidTitle = grobid("title").asInstanceOf[String].toLowerCase()
-    val crossrefTitle = crossref("title").asInstanceOf[List[String]](0).toLowerCase()
-    (computeSimilarity(grobidTitle, crossrefTitle),
-      sha1,
-      crossref("DOI").asInstanceOf[String],
-      "'" + grobidTitle + "'",
-      "'" + crossrefTitle + "'")
+        jsonToMap(crossrefJson) match {
+          case None => (0, "", "", "", "")  // This can't happen, because crossrefJson already validated in earlier stage
+          case Some(crossref) => {
+            val crossrefTitle = crossref("title").asInstanceOf[List[String]](0).toLowerCase()
+
+            (computeSimilarity(grobidTitle, crossrefTitle),
+              sha1,
+              crossref("DOI").asInstanceOf[String],
+              "'" + grobidTitle + "'",
+              "'" + crossrefTitle + "'")
+          }
+        }
+      }
+    }
   }
 }
