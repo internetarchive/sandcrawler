@@ -42,7 +42,7 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
       val (slug, _, _) = entry
       slug != NoTitle
     }
-    .debug  // SHould be 3 tuples for mocked data
+//    .debug  // SHould be 3 tuples for mocked data
 
   val grobidGroup = grobidPipe
     .groupBy { case (slug, key, json) => slug }
@@ -74,7 +74,6 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
       ((slug0: String, sha1 : String, grobidJson : String),
         (slug1 : String, crossrefJson : String))) = entry
     HBaseCrossrefScore.computeOutput(sha1, grobidJson, crossrefJson)}
-    .debug
   // Output: score, sha1, doi, grobid title, crossref title
     .write(TypedTsv[(Int, String, String, String, String)](args("output")))
 
