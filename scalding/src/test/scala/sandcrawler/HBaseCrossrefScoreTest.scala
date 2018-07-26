@@ -163,10 +163,14 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
   val (testTable, testHost) = ("test-table", "dummy-host:2181")
 
   val grobidSampleData = List(
-    List(Bytes.toBytes("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"), Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title1"))),
-    List(Bytes.toBytes("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"), Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title2: TNG"))),
-    List(Bytes.toBytes("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT"), Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title3: The Sequel"))),
-    List(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56"), Bytes.toBytes(MalformedGrobidString)))
+    List(Bytes.toBytes("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"),
+      Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title 1"))),
+    List(Bytes.toBytes("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"),
+      Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title 2: TNG"))),
+    List(Bytes.toBytes("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT"),
+      Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title 3: The Sequel"))),
+    List(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56"), 
+      Bytes.toBytes(MalformedGrobidString)))
 
   JobTest("sandcrawler.HBaseCrossrefScoreJob")
     .arg("test", "")
@@ -180,18 +184,27 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
       grobidSampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
     .source(TextLine(input), List(
       0 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
-      1 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.5"),
-      2 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.75"),
+      1 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG 2").replace("<<DOI>>", "DOI-0.5"),
+      2 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG 3").replace("<<DOI>>", "DOI-0.75"),
       3 -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1")))
-    .sink[String](TypedTsv[String](output)) {
+    .sink[(Int, String, String, String, String)](TypedTsv[(Int,
+    String, String, String, String)](output)) {
+      // Grobid titles: 
+      //   "Title 1", "Title 2: TNG", "Title 3: The Sequel"
+      // crossref slugs: 
+      //   "Title 1: TNG", "Title 1: TNG 2", "Title 1: TNG 3", "Title 2 Rebooted"
+      // Join should have 3 "Title  1" slugs and 1 "Title 2" slug
       outputBuffer =>
       it should "return a 4-element list" in {
-        outputBuffer should have length 3
+        outputBuffer should have length 4
       }
+
       /*
       it should "return the right first entry" in {
         val (slug, slug0, slug1, sha1, grobidJson, crossrefJson) = outputBuffer(0)
-        slug shouldBe "title1"
+        slug shouldBe "title 1"
+        slug shouldBe slug0
+        slug shouldBe slug1
         sha1 shouldBe new String(grobidSampleData(0)(0), "UTF-8")
         grobidJson shouldBe new String(grobidSampleData(0)(1), "UTF-8")
       }
