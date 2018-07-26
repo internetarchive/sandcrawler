@@ -7,6 +7,8 @@ import scala.util.parsing.json.JSON
 
 import cascading.tuple.Fields
 import com.twitter.scalding._
+import com.twitter.scalding.typed.CoGrouped
+import com.twitter.scalding.typed.Grouped
 import com.twitter.scalding.typed.TDsl._
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
@@ -14,6 +16,7 @@ import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
+
 
 class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with
     HBasePipeConversions {
@@ -26,36 +29,56 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with
   val grobidPipe : TypedPipe[(String, String, String)] = grobidSource
     .read
     .fromBytesWritable(new Fields("key", "tei_json"))
-    .debug
     .toTypedPipe[(String, String)]('key, 'tei_json)
     .map { entry =>
       val (key, json) = (entry._1, entry._2)
       HBaseCrossrefScore.grobidToSlug(json) match {
-          case Some(slug) => (key, json, slug)
-          case None => (key, json, NoTitle)
+          case Some(slug) => (slug, key, json)
+          case None => (NoTitle, key, json)
       }
     }
     .filter { entry =>
-      val (_, _, slug) = entry
-      slug != NoTitle && slug.length > 0
+      val (slug, _, _) = entry
+      slug != NoTitle
     }
-    .write(TypedTsv[(String, String, String)](args("output")))
 
-/*
-    .map('key -> 'sha1) { sha1 : String => sha1 }
+  val grobidGroup = grobidPipe
+    .groupBy { case (slug, key, json) => slug }
+//    .debug
+
+
   val crossrefSource = TextLine(args("crossref-input"))
-  val crossrefPipe = crossrefSource
+  val crossrefPipe : TypedPipe[(String, String)] = crossrefSource
     .read
-    .map('line -> 'slug) {
-      json : String => HBaseCrossrefScore.crossrefToSlug(json)}
-    .debug
+    .toTypedPipe[String]('line)
+    .map{ json : String =>
+//      val (offset, json) = entry
+      HBaseCrossrefScore.crossrefToSlug(json) match {
+        case Some(slug) => (slug, json)
+        case None => (NoTitle, json)
+      }
+    }
+  .debug
+    .filter { entry =>
+      val (slug, json) = entry
+      slug != NoTitle
+    }
+  val crossrefGroup = crossrefPipe
+  .groupBy { case (slug, json) => slug }
 
-  val innerJoinPipe = grobidPipe.joinWithSmaller('slug -> 'slug, crossrefPipe)
-  innerJoinPipe
-    .mapTo(('tei_json, 'line, 'sha1) -> ('sha1, 'doi, 'score)) {
-      x : (String, String, String) => HBaseCrossrefScore.performJoin(x._1, x._2, x._3)}
-    .write(TypedTsv[(String, String, String)](args("output")))
- */
+  // TODO: Figure out which is smaller.
+  val theJoin : CoGrouped[String, ((String, String, String), (String, String))] = 
+    grobidGroup.join(crossrefGroup)
+
+  theJoin.map{ entry =>
+        val (slug : String, 
+          ((slug0: String, sha1 : String, grobidJson : String), 
+            (slug1 : String, crossrefJson : String))) = entry
+        // TODO: For now, output it all.
+        (slug, slug0, slug1, sha1, grobidJson, crossrefJson)}
+      .write(TypedTsv[(String, String, String, String, String, String)](args("output")))
+
+
 }
 
 object HBaseCrossrefScore {
@@ -74,7 +97,7 @@ object HBaseCrossrefScore {
     val jsonObject = JSON.parseFull(json)
     if (jsonObject == None) {
       // Empty map for malformed JSON
-      Map[String, Any]("foo" -> json)
+      Map[String, Any]("malformed json" -> json)
     } else {
       jsonObject.get.asInstanceOf[Map[String, Any]]
     }
@@ -95,7 +118,7 @@ object HBaseCrossrefScore {
       // TODO: Don't ignore titles after the first.
       titleToSlug(map("title").asInstanceOf[List[String]](0))
     } else {
-      None
+      Some(map.keys.mkString(","))
     }
   }
 

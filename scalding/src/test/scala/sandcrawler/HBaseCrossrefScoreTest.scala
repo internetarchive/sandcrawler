@@ -8,7 +8,7 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.scalatest._
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 
-class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
+class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
   val GrobidString = """
 {
   "title": "<<TITLE>>",
@@ -113,7 +113,9 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
   val CrossrefStringWithTitle = CrossrefString.replace("<<TITLE>>", "SomeTitle")
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
-/*
+
+  // Unit tests
+
   "titleToSlug()" should "extract the parts of titles before a colon" in {
     val slug = HBaseCrossrefScore.titleToSlug("HELLO:there")
     slug should contain ("hello")
@@ -125,7 +127,7 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
   }
 
   "grobidToSlug()" should "get the right slug for a grobid json string" in {
-    val slug = HBaseCrossrefScore.grobidToSlug(GrobidString)
+    val slug = HBaseCrossrefScore.grobidToSlug(GrobidStringWithTitle)
     slug should contain ("dummy example file")
   }
 
@@ -140,8 +142,8 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
   }
 
   "crossrefToSlug()" should "get the right slug for a crossref json string" in {
-    val slug = HBaseCrossrefScore.crossrefToSlug(CrossrefString)
-    slug should contain ("les ferments lactiques")
+    val slug = HBaseCrossrefScore.crossrefToSlug(CrossrefStringWithTitle)
+    slug should contain ("sometitle")
   }
 
   it should "return None if given json string without title" in {
@@ -153,8 +155,9 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
     val slug = HBaseCrossrefScore.grobidToSlug(MalformedCrossrefString)
      slug shouldBe None
   }
- */
-  
+
+  //  Pipeline tests
+
   val output = "/tmp/testOutput"
   val input = "/tmp/testInput"
   val (testTable, testHost) = ("test-table", "dummy-host:2181")
@@ -176,23 +179,22 @@ class HBaseCrossrefScoreTest extends FunSpec with TupleConversions {
     .source[Tuple](HBaseCrossrefScore.getHBaseSource(testTable, testHost),
       grobidSampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
     .source(TextLine(input), List((
-      "0" -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
-      "1" -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"))))
-    .sink[(String, String, String)](TypedTsv[(String, String, String)](output)) {
+      CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
+      CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.5"),
+      CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.75"),
+      CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"))))
+    .sink[(String, String, String, String, String,
+    String)](TypedTsv[(String, String, String, String, String, String)](output)) {
       outputBuffer =>
-      it("should return a 3-element list.") {
-        assert(outputBuffer.size === 3)
-      }
-      it("should return the right first entry.") {
-        val (sha1, json, slug0) = outputBuffer(0)
-        assert(sha1 == new String(grobidSampleData(0)(0), "UTF-8"))
-        assert(json == new String(grobidSampleData(0)(1), "UTF-8"))
-        assert(slug0 == "title1")
-      }
       /*
-      it("should return the right last slug.") {
-        val (_, _, slug3) = outputBuffer(3)
-        assert(slug3 == "foo")
+      it should "return a 3-element list" in {
+        outputBuffer should have length 3
+      }
+      it should "return the right first entry" in {
+        val (slug, slug0, slug1, sha1, grobidJson, crossrefJson) = outputBuffer(0)
+        slug shouldBe "title1"
+        sha1 shouldBe new String(grobidSampleData(0)(0), "UTF-8")
+        grobidJson shouldBe new String(grobidSampleData(0)(1), "UTF-8")
       }
        */
     }
