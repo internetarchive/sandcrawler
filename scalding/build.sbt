@@ -55,4 +55,5 @@ lazy val root = (project in file(".")).
         case x => (assemblyMergeStrategy in assembly).value(x)
     },
 
+    testOptions in Test += Tests.Argument("-oF")
   )
