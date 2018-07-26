@@ -17,7 +17,6 @@ import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
 
-
 class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with
     HBasePipeConversions {
   val NoTitle = "NO TITLE" // Used for slug if title is empty or unparseable
@@ -29,6 +28,7 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with
   val grobidPipe : TypedPipe[(String, String, String)] = grobidSource
     .read
     .fromBytesWritable(new Fields("key", "tei_json"))
+    .debug
     .toTypedPipe[(String, String)]('key, 'tei_json)
     .map { entry =>
       val (key, json) = (entry._1, entry._2)
@@ -41,24 +41,24 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with
       val (slug, _, _) = entry
       slug != NoTitle
     }
+    .debug
+    .write(TypedTsv[(String, String, String)](args("output")))
+
+  /*
 
   val grobidGroup = grobidPipe
     .groupBy { case (slug, key, json) => slug }
-//    .debug
-
 
   val crossrefSource = TextLine(args("crossref-input"))
   val crossrefPipe : TypedPipe[(String, String)] = crossrefSource
     .read
     .toTypedPipe[String]('line)
     .map{ json : String =>
-//      val (offset, json) = entry
       HBaseCrossrefScore.crossrefToSlug(json) match {
         case Some(slug) => (slug, json)
         case None => (NoTitle, json)
       }
     }
-  .debug
     .filter { entry =>
       val (slug, json) = entry
       slug != NoTitle
@@ -77,7 +77,7 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with
         // TODO: For now, output it all.
         (slug, slug0, slug1, sha1, grobidJson, crossrefJson)}
       .write(TypedTsv[(String, String, String, String, String, String)](args("output")))
-
+   */
 
 }
 

@@ -178,18 +178,17 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
     .arg("debug", "true")
     .source[Tuple](HBaseCrossrefScore.getHBaseSource(testTable, testHost),
       grobidSampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
-    .source(TextLine(input), List((
+    .source(TextLine(input), List(
       CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
       CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.5"),
       CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0.75"),
-      CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"))))
-    .sink[(String, String, String, String, String,
-    String)](TypedTsv[(String, String, String, String, String, String)](output)) {
+      CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1")))
+    .sink[(String, String, String)](TypedTsv[(String, String, String)](output)) {
       outputBuffer =>
-      /*
       it should "return a 3-element list" in {
         outputBuffer should have length 3
       }
+      /*
       it should "return the right first entry" in {
         val (slug, slug0, slug1, sha1, grobidJson, crossrefJson) = outputBuffer(0)
         slug shouldBe "title1"
