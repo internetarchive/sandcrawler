@@ -126,6 +126,10 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
     slug should contain ("hello there")
   }
 
+  it should "return None if given empty string" in {
+    HBaseCrossrefScore.titleToSlug("") shouldBe None
+  }
+
   "grobidToSlug()" should "get the right slug for a grobid json string" in {
     val slug = HBaseCrossrefScore.grobidToSlug(GrobidStringWithTitle)
     slug should contain ("dummy example file")
@@ -138,6 +142,11 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
 
   it should "return None if given a malformed json string" in {
     val slug = HBaseCrossrefScore.grobidToSlug(MalformedGrobidString)
+    slug shouldBe None
+  }
+
+  it should "return None if given an empty json string" in {
+    val slug = HBaseCrossrefScore.grobidToSlug("")
     slug shouldBe None
   }
 
