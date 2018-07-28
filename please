@@ -116,6 +116,29 @@ def run_statuscount(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+def run_matchcrossref(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting matchcrossref job...")
+    output = "{}/output-{}/{}-matchcrossref".format(
+        HDFS_DIR,
+        args.env,
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    cmd = """hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.HBaseCrossrefScoreJob \
+        --hdfs \
+        --app.conf.path scalding/ia_cluster.conf \
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --crossref-input {crossref_input} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env,
+            crossref_input=args.crossref_input)
+    subprocess.call(cmd, shell=True)
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -145,6 +168,11 @@ def main():
 
     sub_statuscount = subparsers.add_parser('status-count')
     sub_statuscount.set_defaults(func=run_statuscount)
+
+    sub_matchcrossref = subparsers.add_parser('match-crossref')
+    sub_matchcrossref.set_defaults(func=run_matchcrossref)
+    sub_matchcrossref.add_argument('crossref_input',
+        help="full HDFS path of Crossref JSON dump")
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
