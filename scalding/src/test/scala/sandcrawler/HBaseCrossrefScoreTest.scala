@@ -162,7 +162,30 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
 
   it should "return None if given a malformed json string" in {
     val slug = HBaseCrossrefScore.grobidToSlug(MalformedCrossrefString)
-     slug shouldBe None
+    slug shouldBe None
+  }
+
+  "removeAccents()" should "handle the empty string" in {
+    HBaseCrossrefScore.removeAccents("") shouldBe ""
+  }
+
+  it should "not change a string with unaccented characters" in {
+    HBaseCrossrefScore.removeAccents("abc123") shouldBe "abc123"
+  }
+
+  it should "remove accents from Ls" in {
+    HBaseCrossrefScore.removeAccents("E\u0141\u0142en") shouldBe "ELlen"
+  }
+
+  it should "remove accents from Es without changing case" in {
+    val result = HBaseCrossrefScore.removeAccents("\u00e9")
+    result should have length 1
+    result shouldBe "e"
+  }
+
+  it should "convert the ø in Soren" in {
+    HBaseCrossrefScore.removeAccents("Søren") shouldBe "Soren"
+    HBaseCrossrefScore.removeAccents("SØREN") shouldBe "SOREN"
   }
 
   //  Pipeline tests

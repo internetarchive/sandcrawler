@@ -1,7 +1,9 @@
 package sandcrawler
 
+import java.text.Normalizer
 import java.util.Arrays
 import java.util.Properties
+import java.util.regex.Pattern
 
 import scala.math
 import scala.util.parsing.json.JSON
@@ -124,7 +126,7 @@ object HBaseCrossrefScore {
   }
 
   def titleToSlug(title : String) : Option[String] = {
-    val slug = title.split(":")(0).toLowerCase()
+    val slug = removeAccents(title).split(":")(0).toLowerCase()
     if (slug.isEmpty) {
       None
     } else {
@@ -172,4 +174,28 @@ object HBaseCrossrefScore {
       }
     }
   }
+
+  // scalastyle:off
+  // Adapted from https://git-wip-us.apache.org/repos/asf?p=commons-lang.git;a=blob;f=src/main/java/org/apache/commons/lang3/StringUtils.java;h=1d7b9b99335865a88c509339f700ce71ce2c71f2;hb=HEAD#l934
+  // scalastyle:on
+  def removeAccents(s : String) : String = {
+    val replacements = Map(
+      '\u0141' -> 'L',
+      '\u0142' -> 'l',  // Letter ell
+      '\u00d8' -> 'O',
+      '\u00f8' -> 'o'
+    )
+    val sb = new StringBuilder(Normalizer.normalize(s, Normalizer.Form.NFD))
+    for (i <- 0 to sb.length - 1) {
+      for (key <- replacements.keys) {
+        if (sb(i) == key) {
+          sb.deleteCharAt(i);
+          sb.insert(i, replacements(key))
+        }
+      }
+    }
+    val pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+")
+    pattern.matcher(sb).replaceAll("").toString
+  }
 }
+
