@@ -188,6 +188,53 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
     HBaseCrossrefScore.removeAccents("SØREN") shouldBe "SOREN"
   }
 
+  // Tests adapted from https://oldfashionedsoftware.com/2009/11/19/string-distance-and-refactoring-in-scala/
+  "stringDistance" should "work on empty strings" in {
+    HBaseCrossrefScore.stringDistance("", "") shouldBe 0
+    HBaseCrossrefScore.stringDistance("a", "") shouldBe 1
+    HBaseCrossrefScore.stringDistance("", "a") shouldBe 1
+    HBaseCrossrefScore.stringDistance("abc", "") shouldBe 3
+    HBaseCrossrefScore.stringDistance("", "abc") shouldBe 3
+  }
+
+  it should "work on equal strings" in {
+    HBaseCrossrefScore.stringDistance("", "") shouldBe 0
+    HBaseCrossrefScore.stringDistance("a", "a") shouldBe 0
+    HBaseCrossrefScore.stringDistance("abc", "abc") shouldBe 0
+  }
+
+  it should "work where only inserts are needed" in {
+    HBaseCrossrefScore.stringDistance("", "a") shouldBe 1
+    HBaseCrossrefScore.stringDistance("a", "ab") shouldBe 1
+    HBaseCrossrefScore.stringDistance("b", "ab") shouldBe 1
+    HBaseCrossrefScore.stringDistance("ac", "abc") shouldBe 1
+    HBaseCrossrefScore.stringDistance("abcdefg", "xabxcdxxefxgx") shouldBe 6
+  }
+
+  it should "work where only deletes are needed" in {
+    HBaseCrossrefScore.stringDistance( "a", "") shouldBe 1
+    HBaseCrossrefScore.stringDistance( "ab", "a") shouldBe 1
+    HBaseCrossrefScore.stringDistance( "ab", "b") shouldBe 1
+    HBaseCrossrefScore.stringDistance("abc", "ac") shouldBe 1
+    HBaseCrossrefScore.stringDistance("xabxcdxxefxgx", "abcdefg") shouldBe 6
+  }
+
+  it should "work where only substitutions are needed" in {
+    HBaseCrossrefScore.stringDistance(  "a",   "b") shouldBe 1
+    HBaseCrossrefScore.stringDistance( "ab",  "ac") shouldBe 1
+    HBaseCrossrefScore.stringDistance( "ac",  "bc") shouldBe 1
+    HBaseCrossrefScore.stringDistance("abc", "axc") shouldBe 1
+    HBaseCrossrefScore.stringDistance("xabxcdxxefxgx", "1ab2cd34ef5g6") shouldBe 6
+  }
+
+  it should "work where many operations are needed" in {
+    HBaseCrossrefScore.stringDistance("example", "samples") shouldBe 3
+    HBaseCrossrefScore.stringDistance("sturgeon", "urgently") shouldBe 6
+    HBaseCrossrefScore.stringDistance("levenshtein", "frankenstein") shouldBe 6
+    HBaseCrossrefScore.stringDistance("distance", "difference") shouldBe 5
+    HBaseCrossrefScore.stringDistance("java was neat", "scala is great") shouldBe 7
+  }
+
   //  Pipeline tests
 
   val output = "/tmp/testOutput"
@@ -227,7 +274,7 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
       //   "Title 1: TNG", "Title 1: TNG 2", "Title 1: TNG 3", "Title 2 Rebooted"
       // Join should have 3 "Title  1" slugs and 1 "Title 2" slug
       outputBuffer =>
-      it should "return a 4-element list" in {
+      "The pipeline" should "return a 4-element list" in {
         outputBuffer should have length 4
       }
 
