@@ -1,6 +1,9 @@
+package sandcrawler
+
 import scala.math
 import scala.util.parsing.json.JSON
 
+import cascading.flow.FlowDef
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
 
@@ -9,9 +12,9 @@ case class ReduceFeatures(json : String)
 case class ReduceOutput(val score : Int, json1 : String, json2 : String)
 
 abstract class Scorable {
-  def getInputPipe(args : Args) : TypedPipe[(String, ReduceFeatures)] =
+  def getInputPipe(args : Args, flowDef : FlowDef, mode : Mode) : TypedPipe[(String, ReduceFeatures)] =
   {
-    getFeaturesPipe(args)
+    getFeaturesPipe(args)(flowDef, mode)
       .filter { entry => Scorable.isValidSlug(entry.slug) }
       .groupBy { case MapFeatures(key, slug, json) => slug }
       .map { tuple =>
@@ -21,7 +24,7 @@ abstract class Scorable {
   }
 
   // abstract method
-  def getFeaturesPipe(args : Args) : TypedPipe[MapFeatures]
+  def getFeaturesPipe(args : Args)(implicit flowDef : FlowDef, mode : Mode) : TypedPipe[MapFeatures]
 }
 
 object Scorable {

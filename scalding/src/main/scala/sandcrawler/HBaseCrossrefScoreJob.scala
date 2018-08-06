@@ -27,8 +27,9 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
   val grobidSource = HBaseCrossrefScore.getHBaseSource(
     args("hbase-table"),
     args("zookeeper-hosts"))
-  val grobidPipe : TypedPipe[(String, String, String)] = grobidSource
-    .read
+
+  val pipe0 : cascading.pipe.Pipe = grobidSource.read
+  val grobidPipe : TypedPipe[(String, String, String)] = pipe0
     .fromBytesWritable(new Fields("key", "tei_json"))
     //  .debug  // Should be 4 tuples for mocked data
     .toTypedPipe[(String, String)]('key, 'tei_json)
@@ -78,7 +79,6 @@ class HBaseCrossrefScoreJob(args: Args) extends JobBase(args) with HBasePipeConv
     HBaseCrossrefScore.computeOutput(sha1, grobidJson, crossrefJson)}
     // Output: score, sha1, doi, grobid title, crossref title
     .write(TypedTsv[(Int, String, String, String, String)](args("output")))
-
 }
 
 object HBaseCrossrefScore {
