@@ -77,8 +77,9 @@ class ScorableTest extends FlatSpec with Matchers {
   }
 
   "computeOutput()" should "return Scorable.MaxScore if given identical ReduceFeatures" in { 
-    val output = Scorable.computeOutput(new ReduceFeatures(JsonString), new ReduceFeatures(JsonString))
-    output.score shouldBe Scorable.MaxScore
+    val score = Scorable.computeSimilarity(
+      new ReduceFeatures(JsonString), new ReduceFeatures(JsonString))
+    score shouldBe Scorable.MaxScore
   }
 
   /*

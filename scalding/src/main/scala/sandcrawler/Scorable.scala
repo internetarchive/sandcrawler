@@ -69,19 +69,16 @@ object Scorable {
 
   val MaxScore = 1000
 
-  def computeOutput(feature1 : ReduceFeatures, feature2 : ReduceFeatures) :
-      ReduceOutput = {
-    val json1 = jsonToMap(feature1.json)
-    val json2 = jsonToMap(feature2.json)
+  def computeSimilarity(features1 : ReduceFeatures, features2 : ReduceFeatures) : Int = {
+    val json1 = jsonToMap(features1.json)
+    val json2 = jsonToMap(features2.json)
     getStringOption(json1, "title") match {
-      case None => ReduceOutput(0, "No title", feature1.json)
+      case None => 0
       case Some(title1) => {
         getStringOption(json2, "title") match {
-          case None => ReduceOutput(0, "No title", feature2.json)
+          case None => 0
           case Some(title2) => 
-            ReduceOutput(
-              (StringUtilities.similarity(title1, title2) * MaxScore).toInt,
-              feature1.json, feature2.json)
+            (StringUtilities.similarity(title1, title2) * MaxScore).toInt
         }
       }
     }

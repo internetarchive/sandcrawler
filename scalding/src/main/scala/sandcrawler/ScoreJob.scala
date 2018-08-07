@@ -17,7 +17,9 @@ class ScoreJob(args: Args, sc1 : Scorable, sc2 : Scorable)(implicit flowDef : Fl
 
   pipe1.join(pipe2).map { entry =>
     val (slug : String, (features1 : ReduceFeatures, features2 : ReduceFeatures)) = entry
-    Scorable.computeOutput(features1, features2)
+    new ReduceOutput(Scorable.computeSimilarity(features1, features2),
+      features1.json,
+      features2.json)
   }
     .write(TypedTsv[ReduceOutput](args("output")))
 }
