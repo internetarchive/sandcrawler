@@ -8,7 +8,7 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.scalatest._
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 
-class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
+class ScorableTest extends FlatSpec with Matchers {
   val JsonString = """
 {
   "title": "<<TITLE>>",
@@ -58,24 +58,24 @@ class HBaseCrossrefScoreTest extends FlatSpec with Matchers {
 
   "titleToSlug()" should "extract the parts of titles before a colon" in {
     val slug = Scorable.titleToSlug("HELLO:there")
-    slug should contain ("hello")
+    slug shouldBe "hello"
   }
 
   it should "extract an entire colon-less string" in {
     val slug = Scorable.titleToSlug("hello THERE")
-    slug should contain ("hello there")
+    slug shouldBe "hello there"
   }
 
-  it should "return None if given empty string" in {
-    Scorable.titleToSlug("") shouldBe None
+  it should "return Scorable.NoSlug if given empty string" in {
+    Scorable.titleToSlug("") shouldBe Scorable.NoSlug
   }
 
   "jsonToMap()" should "return a map, given a legal JSON string" in {
-    Scorable.jsonToMap(jsonString) should be (Some(_))
+    Scorable.jsonToMap(JsonString) should not be (None)
   }
 
   it should "return None, given illegal JSON" in {
-    Scorable.jsonToMap("illegal{,json{{") should be (None))
+    Scorable.jsonToMap("illegal{,json{{") should be (None)
   }
 
 /*
