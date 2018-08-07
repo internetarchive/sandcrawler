@@ -7,7 +7,7 @@ import cascading.flow.FlowDef
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
 
-case class MapFeatures(val key : String, slug : String, json : String)
+case class MapFeatures(slug : String, json : String)
 case class ReduceFeatures(json : String)
 case class ReduceOutput(val score : Int, json1 : String, json2 : String)
 
@@ -16,7 +16,7 @@ abstract class Scorable {
   {
     getFeaturesPipe(args)(flowDef, mode)
       .filter { entry => Scorable.isValidSlug(entry.slug) }
-      .groupBy { case MapFeatures(key, slug, json) => slug }
+      .groupBy { case MapFeatures(slug, json) => slug }
       .map { tuple =>
         val (slug : String, features : MapFeatures) = tuple
         (slug, ReduceFeatures(features.json))

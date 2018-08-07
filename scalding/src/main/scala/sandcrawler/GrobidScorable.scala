@@ -16,8 +16,9 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
       args("hbase-table"),
       args("zookeeper-hosts"))
 
-    val pipe0 : Pipe = grobidSource.read
-    val grobidPipe : TypedPipe[MapFeatures] = pipe0
+//    val pipe0 : Pipe = grobidSource.read
+//    val grobidPipe : TypedPipe[MapFeatures] = pipe0
+    grobidSource.read
     .fromBytesWritable(new Fields("key", "tei_json"))
     //  .debug  // Should be 4 tuples for mocked data
     // TODO: Figure out why this line (used in HBaseCrossrefScoreJob.scala)
@@ -26,14 +27,10 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
     .map { entry =>
       val (key : String, json : String) = (entry._1, entry._2)
       HBaseCrossrefScore.grobidToSlug(json) match {
-        case Some(slug) => new MapFeatures(slug, key, json)
-        case None => new MapFeatures(Scorable.NoSlug, key, json)
+        case Some(slug) => new MapFeatures(slug, json)
+        case None => new MapFeatures(Scorable.NoSlug, json)
       }
     }
-    .filter {
-      _.slug != Scorable.NoSlug
-    }
-    grobidPipe
   }
 /*
   def fromBytesWritableLocal(f: Fields): Pipe = {
