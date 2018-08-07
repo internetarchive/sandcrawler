@@ -57,13 +57,11 @@ class ScorableTest extends FlatSpec with Matchers {
   val MalformedJsonString = JsonString.replace("}", "")
 
   "titleToSlug()" should "extract the parts of titles before a colon" in {
-    val slug = Scorable.titleToSlug("HELLO:there")
-    slug shouldBe "hello"
+    Scorable.titleToSlug("HELLO:there") shouldBe "hello"
   }
 
   it should "extract an entire colon-less string" in {
-    val slug = Scorable.titleToSlug("hello THERE")
-    slug shouldBe "hello there"
+    Scorable.titleToSlug("hello THERE") shouldBe "hello there"
   }
 
   it should "return Scorable.NoSlug if given empty string" in {
@@ -78,7 +76,12 @@ class ScorableTest extends FlatSpec with Matchers {
     Scorable.jsonToMap("illegal{,json{{") should be (None)
   }
 
-/*
+  "computeOutput()" should "return Scorable.MaxScore if given identical ReduceFeatures" in { 
+    val output = Scorable.computeOutput(new ReduceFeatures(JsonString), new ReduceFeatures(JsonString))
+    output.score shouldBe Scorable.MaxScore
+  }
+
+  /*
   it should "return None if given a malformed json string" in {
     val slug = Scorable.grobidToSlug(MalformedGrobidString)
     slug shouldBe None
