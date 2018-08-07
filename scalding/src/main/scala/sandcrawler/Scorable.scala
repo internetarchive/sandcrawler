@@ -44,35 +44,6 @@ object Scorable {
     }
   }
 
-  /*
-  def grobidToSlug(json : String) : Option[String] = {
-    jsonToMap(json) match {
-      case None => None
-      case Some(map) => {
-        if (map contains "title") {
-          titleToSlug(getString(map, "title"))
-        } else {
-          None
-        }
-      }
-    }
-  }
-
-  def crossrefToSlug(json : String) : Option[String] = {
-    jsonToMap(json) match {
-      case None => None
-      case Some(map) => {
-        if (map contains "title") {
-          // TODO: Stop ignoring secondary titles
-          titleToSlug(map("title").asInstanceOf[List[String]](0))
-        } else {
-          None
-        }
-      }
-    }
-  }
-   */
-
   def titleToSlug(title : String) : String = {
     val slug = StringUtilities.removeAccents(title).split(":")(0).toLowerCase()
     if (slug.isEmpty) {
