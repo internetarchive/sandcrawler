@@ -45,7 +45,8 @@ object Scorable {
   }
 
   def titleToSlug(title : String) : String = {
-    val slug = StringUtilities.removeAccents(title).split(":")(0).toLowerCase()
+    val slug = StringUtilities.removePunctuation(
+      StringUtilities.removeAccents(title).split(":")(0).toLowerCase())
     if (slug.isEmpty) {
       NoSlug
     } else {

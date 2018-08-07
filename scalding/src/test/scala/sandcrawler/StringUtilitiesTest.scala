@@ -26,6 +26,16 @@ class StringUtilitiesTest extends FlatSpec with Matchers {
     StringUtilities.removeAccents("SØREN") shouldBe "SOREN"
   }
 
+  "removePunctuation" should "work on the empty string" in {
+    StringUtilities.removePunctuation("") shouldBe ""
+  }
+
+  it should "work on non-empty text strings" in {
+    StringUtilities.removePunctuation("Hello, world!") shouldBe "Hello world"
+    StringUtilities.removePunctuation(":-)") shouldBe ""
+    StringUtilities.removePunctuation("<<---a---b--->") shouldBe "ab"
+  }
+
   // Tests adapted from https://oldfashionedsoftware.com/2009/11/19/string-distance-and-refactoring-in-scala/
   "stringDistance" should "work on empty strings" in {
     StringUtilities.stringDistance("", "") shouldBe 0

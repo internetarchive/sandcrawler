@@ -25,9 +25,15 @@ object StringUtilities {
     pattern.matcher(sb).replaceAll("")
   }
 
+  // Source: https://stackoverflow.com/a/30076541/631051
+  def removePunctuation(s: String) : String = {
+    s.replaceAll("""[\p{Punct}&&[^.]]""", "")
+  }
+
   // Adapted from: https://stackoverflow.com/a/16018452/631051
   def similarity(s1a : String, s2a : String) : Double = {
-    val (s1, s2) = (removeAccents(s1a), removeAccents(s2a))
+    val (s1, s2) = (removeAccents(removePunctuation(s1a)), 
+      removeAccents(removePunctuation(s2a)))
     val longer : String = if (s1.length > s2.length) s1 else s2
     val shorter : String = if (s1.length > s2.length) s2 else s1
     if (longer.length == 0) {

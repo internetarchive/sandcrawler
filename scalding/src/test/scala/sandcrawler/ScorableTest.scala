@@ -71,6 +71,13 @@ class ScorableTest extends FlatSpec with Matchers {
       Scorable.titleToSlug("") shouldBe Scorable.NoSlug
     }
 
+    "titleToSlug()" should "strip punctuation" in {
+      Scorable.titleToSlug("HELLO!:the:re") shouldBe "hello"
+      Scorable.titleToSlug("a:b:c") shouldBe "a"
+      Scorable.titleToSlug(
+        "If you're happy and you know it, clap your hands!") shouldBe "if youre happy and you know it clap your hands"
+    }
+
     "jsonToMap()" should "return a map, given a legal JSON string" in {
       Scorable.jsonToMap(JsonString) should not be (None)
     }
