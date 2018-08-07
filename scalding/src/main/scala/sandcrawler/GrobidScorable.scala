@@ -32,14 +32,20 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
       }
     }
   }
-/*
-  def fromBytesWritableLocal(f: Fields): Pipe = {
-	asList(f)
-	  .foldLeft(pipe) { (p, fld) => {
-	    p.map(fld.toString -> fld.toString) { from: org.apache.hadoop.hbase.io.ImmutableBytesWritable =>
-            Option(from).map(x => Bytes.toString(x.get)).getOrElse(null)
-          }
-      }}
-  }
- */
 }
+
+object GrobidScorable {
+  def grobidToSlug(json : String) : Option[String] = {
+    Scorable.jsonToMap(json) match {
+      case None => None
+      case Some(map) => {
+        if (map contains "title") {
+          Some(Scorable.titleToSlug(map("title").asInstanceOf[String]))
+        } else {
+          None
+        }
+      }
+    }
+  }
+}
+

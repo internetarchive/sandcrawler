@@ -15,10 +15,27 @@ class CrossrefScorable extends Scorable {
       .read
       .toTypedPipe[String](new Fields("line"))
       .map{ json : String =>
-        HBaseCrossrefScore.crossrefToSlug(json) match {
+        CrossrefScorable.crossrefToSlug(json) match {
           case Some(slug) => new MapFeatures(slug, json)
           case None => new MapFeatures(Scorable.NoSlug, json)
         }
       }
+  }
+}
+
+object CrossrefScorable {
+  def crossrefToSlug(json : String) : Option[String] = {
+    Scorable.jsonToMap(json) match {
+      case None => None
+      case Some(map) => {
+        if (map contains "title") {
+          // TODO: Don't ignore titles after the first.
+          val title = map("title").asInstanceOf[List[String]](0)
+          Some(Scorable.titleToSlug(title))
+        } else {
+          None
+        }
+      }
+    }
   }
 }
