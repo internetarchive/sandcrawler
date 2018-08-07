@@ -12,9 +12,11 @@ import parallelai.spyglass.hbase.HBaseSource
 class GrobidScorable extends Scorable with HBasePipeConversions {
   def getFeaturesPipe(args : Args)(implicit flowDef : FlowDef, mode : Mode) = {
     // TODO: Clean up code after debugging.
-    val grobidSource = HBaseCrossrefScore.getHBaseSource(
+    val grobidSource = HBaseBuilder.build(
       args("hbase-table"),
-      args("zookeeper-hosts"))
+      args("zookeeper-hosts"),
+      List("grobid0:tei_json"),
+      SourceMode.SCAN_ALL)
 
 //    val pipe0 : Pipe = grobidSource.read
 //    val grobidPipe : TypedPipe[MapFeatures] = pipe0
@@ -26,7 +28,7 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
     .toTypedPipe[(String, String)](new Fields("key", "tei_json"))
     .map { entry =>
       val (key : String, json : String) = (entry._1, entry._2)
-      HBaseCrossrefScore.grobidToSlug(json) match {
+      GrobidScorable.grobidToSlug(json) match {
         case Some(slug) => new MapFeatures(slug, json)
         case None => new MapFeatures(Scorable.NoSlug, json)
       }
