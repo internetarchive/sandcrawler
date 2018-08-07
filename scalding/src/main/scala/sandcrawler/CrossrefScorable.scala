@@ -11,8 +11,6 @@ import parallelai.spyglass.hbase.HBaseSource
 
 class CrossrefScorable extends Scorable {
   def getFeaturesPipe(args : Args)(implicit flowDef : FlowDef, mode : Mode) = {
-//    val crossrefSource = TextLine(args("crossref-input"))
-//    val crossrefPipe : TypedPipe[MapFeatures] = crossrefSource
     TextLine(args("crossref-input"))
       .read
       .toTypedPipe[String](new Fields("line"))
@@ -22,6 +20,5 @@ class CrossrefScorable extends Scorable {
           case None => new MapFeatures(Scorable.NoSlug, json)
         }
       }
-//    crossrefPipe
   }
 }
