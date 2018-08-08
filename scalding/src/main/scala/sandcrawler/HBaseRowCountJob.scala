@@ -30,7 +30,7 @@ object HBaseRowCountJob {
     HBaseBuilder.build(
       hbaseTable,
       zookeeperHosts,
-      List("file:size"),
+      List("f:c"),
       SourceMode.SCAN_ALL)
   }
 }
