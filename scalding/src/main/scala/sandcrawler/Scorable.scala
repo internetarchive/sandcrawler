@@ -30,7 +30,7 @@ abstract class Scorable {
 object Scorable {
   val NoSlug = "NO SLUG" // Used for slug if title is empty or unparseable
 
-  def isValidSlug(slug : String) = {
+  def isValidSlug(slug : String) : Boolean = {
     slug != NoSlug
   }
 
@@ -59,8 +59,7 @@ object Scorable {
     }
   }
 
-  def getStringOption(optionalMap : Option[Map[String, Any]], key : String) 
-      : Option[String] = {
+  def getStringOption(optionalMap : Option[Map[String, Any]], key : String) : Option[String] = {
     optionalMap match {
       case None => None
       case Some(map) => if (map contains key) Some(map(key).asInstanceOf[String]) else None
@@ -83,7 +82,7 @@ object Scorable {
       case Some(title1) => {
         getStringOption(json2, "title") match {
           case None => 0
-          case Some(title2) => 
+          case Some(title2) =>
             (StringUtilities.similarity(title1, title2) * MaxScore).toInt
         }
       }

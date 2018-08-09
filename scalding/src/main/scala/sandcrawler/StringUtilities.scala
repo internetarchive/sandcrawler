@@ -32,7 +32,7 @@ object StringUtilities {
 
   // Adapted from: https://stackoverflow.com/a/16018452/631051
   def similarity(s1a : String, s2a : String) : Double = {
-    val (s1, s2) = (removeAccents(removePunctuation(s1a)), 
+    val (s1, s2) = (removeAccents(removePunctuation(s1a)),
       removeAccents(removePunctuation(s2a)))
     val longer : String = if (s1.length > s2.length) s1 else s2
     val shorter : String = if (s1.length > s2.length) s2 else s1
