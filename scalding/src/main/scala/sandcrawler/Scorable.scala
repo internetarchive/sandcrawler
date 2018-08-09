@@ -45,12 +45,17 @@ object Scorable {
   }
 
   def titleToSlug(title : String) : String = {
-    val slug = StringUtilities.removePunctuation(
-      StringUtilities.removeAccents(title).split(":")(0).toLowerCase())
-    if (slug.isEmpty) {
+    if (title == null || title.isEmpty) {
       NoSlug
     } else {
-      slug
+      val unaccented = StringUtilities.removeAccents(title)
+      // Remove punctuation after splitting on colon.
+      val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase()))
+      if (slug.isEmpty || slug == null) {
+        NoSlug
+      } else {
+        slug
+      }
     }
   }
 

@@ -71,6 +71,10 @@ class ScorableTest extends FlatSpec with Matchers {
       Scorable.titleToSlug("") shouldBe Scorable.NoSlug
     }
 
+    it should "return Scorable.NoSlug if given null" in {
+      Scorable.titleToSlug(null) shouldBe Scorable.NoSlug
+    }
+
     "titleToSlug()" should "strip punctuation" in {
       Scorable.titleToSlug("HELLO!:the:re") shouldBe "hello"
       Scorable.titleToSlug("a:b:c") shouldBe "a"
