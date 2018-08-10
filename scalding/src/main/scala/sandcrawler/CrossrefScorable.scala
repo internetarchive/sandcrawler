@@ -10,7 +10,7 @@ import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
 
 class CrossrefScorable extends Scorable {
-  def getFeaturesPipe(args : Args)(implicit flowDef : FlowDef, mode : Mode) : TypedPipe[MapFeatures] = {
+  def getFeaturesPipe(args : Args) : TypedPipe[MapFeatures] = {
     // TODO: Generalize args so there can be multiple Grobid pipes in one job.
     TextLine(args("crossref-input"))
       .read

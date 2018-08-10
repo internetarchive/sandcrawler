@@ -6,11 +6,11 @@ import com.twitter.scalding.typed.TDsl._
 import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBasePipeConversions
 
-class ScoreJob(args: Args)(implicit flowDef : FlowDef, mode: Mode) extends JobBase(args) with
+class ScoreJob(args: Args) extends JobBase(args) with
     HBasePipeConversions {
-  /*
-  val pipe1 : TypedPipe[(String, ReduceFeatures)] = ScoreJob.getScorable1().getInputPipe(args, flowDef, mode)
-  val pipe2 : TypedPipe[(String, ReduceFeatures)] = ScoreJob.getScorable2().getInputPipe(args, flowDef, mode)
+
+  val pipe1 : TypedPipe[(String, ReduceFeatures)] = ScoreJob.getScorable1().getInputPipe(args)
+  val pipe2 : TypedPipe[(String, ReduceFeatures)] = ScoreJob.getScorable2().getInputPipe(args)
 
   pipe1.join(pipe2).map { entry =>
     val (slug : String, (features1 : ReduceFeatures, features2 : ReduceFeatures)) = entry
@@ -21,7 +21,6 @@ class ScoreJob(args: Args)(implicit flowDef : FlowDef, mode: Mode) extends JobBa
       features2.json)
   }
     .write(TypedTsv[ReduceOutput](args("output")))
-   */
 }
 
 // Ugly hack to get non-String information into ScoreJob above.

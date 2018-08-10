@@ -10,7 +10,7 @@ import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
 
 class GrobidScorable extends Scorable with HBasePipeConversions {
-  def getFeaturesPipe(args : Args)(implicit flowDef : FlowDef, mode : Mode) : TypedPipe[MapFeatures] = {
+  def getFeaturesPipe(args : Args) : TypedPipe[MapFeatures] = {
     // TODO: Generalize args so there can be multiple grobid pipes in one job.
     GrobidScorable.getHBaseSource(args("hbase-table"), args("zookeeper-hosts"))
       .read
