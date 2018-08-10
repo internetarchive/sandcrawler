@@ -11,14 +11,9 @@ import parallelai.spyglass.hbase.HBaseSource
 
 class GrobidScorable extends Scorable with HBasePipeConversions {
   def getFeaturesPipe(args : Args)(implicit flowDef : FlowDef, mode : Mode) : TypedPipe[MapFeatures] = {
-    // TODO: Clean up code after debugging.
-    val grobidSource = HBaseBuilder.build(
-      args("hbase-table"),
-      args("zookeeper-hosts"),
-      List("grobid0:tei_json"),
-      SourceMode.SCAN_ALL)
-
-    grobidSource.read
+    // TODO: Generalize args so there can be multiple grobid pipes in one job.
+    GrobidScorable.getHBaseSource(args("hbase-table"), args("zookeeper-hosts"))
+      .read
       .fromBytesWritable(new Fields("key", "tei_json"))
     // TODO: Figure out why this line (used in HBaseCrossrefScoreJob.scala)
     // didn't work here: .toTypedPipe[(String, String)]('key, 'tei_json)
@@ -34,6 +29,10 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
 }
 
 object GrobidScorable {
+  def getHBaseSource(table : String, host : String) : HBaseSource = {
+    HBaseBuilder.build(table, host, List("grobid0:tei_json"), SourceMode.SCAN_ALL)
+  }
+
   def grobidToSlug(json : String) : Option[String] = {
     Scorable.jsonToMap(json) match {
       case None => None

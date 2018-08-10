@@ -9,7 +9,7 @@ import com.twitter.scalding.typed.TDsl._
 
 case class MapFeatures(slug : String, json : String)
 case class ReduceFeatures(json : String)
-case class ReduceOutput(val score : Int, json1 : String, json2 : String)
+case class ReduceOutput(val slug : String,  score : Int, json1 : String, json2 : String)
 
 abstract class Scorable {
   def getInputPipe(args : Args, flowDef : FlowDef, mode : Mode) : TypedPipe[(String, ReduceFeatures)] =
