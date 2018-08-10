@@ -8,8 +8,9 @@ import com.twitter.scalding.typed.TDsl._
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
+import TDsl._
 
-class CrossrefScorable extends Scorable {
+class CrossrefScorable extends Scorable with HBasePipeConversions {
   // TODO: Generalize args so there can be multiple Grobid pipes in one job.
   def getSource(args : Args) : Source = {
     TextLine(args("crossref-input"))

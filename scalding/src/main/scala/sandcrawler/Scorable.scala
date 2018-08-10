@@ -6,13 +6,14 @@ import scala.util.parsing.json.JSON
 import cascading.flow.FlowDef
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
+import TDsl._
 
 case class MapFeatures(slug : String, json : String)
 case class ReduceFeatures(json : String)
 case class ReduceOutput(val slug : String,  score : Int, json1 : String, json2 : String)
 
 abstract class Scorable {
-  def getInputPipe(pipe : Pipe) : TypedPipe[(String, ReduceFeatures)] =
+  def getInputPipe(pipe : cascading.pipe.Pipe) : TypedPipe[(String, ReduceFeatures)] =
   {
     getFeaturesPipe(pipe)
       .filter { entry => Scorable.isValidSlug(entry.slug) }
@@ -25,7 +26,7 @@ abstract class Scorable {
 
   // abstract methods
   def getSource(args : Args) : Source
-  def getFeaturesPipe(pipe : Pipe) : TypedPipe[MapFeatures]
+  def getFeaturesPipe(pipe : cascading.pipe.Pipe) : TypedPipe[MapFeatures]
 }
 
 object Scorable {

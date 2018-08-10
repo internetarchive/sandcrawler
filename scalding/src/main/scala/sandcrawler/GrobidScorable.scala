@@ -8,6 +8,7 @@ import com.twitter.scalding.typed.TDsl._
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
+import TDsl._
 
 class GrobidScorable extends Scorable with HBasePipeConversions {
   def getSource(args : Args) : Source = {
@@ -15,10 +16,10 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
     GrobidScorable.getHBaseSource(args("hbase-table"), args("zookeeper-hosts"))
   }
 
-  def getFeaturesPipe(pipe : Pipe) : TypedPipe[MapFeatures] = {
+  def getFeaturesPipe(pipe : cascading.pipe.Pipe) : TypedPipe[MapFeatures] = {
     pipe
       .fromBytesWritable(new Fields("key", "tei_json"))
-      .toTypedPipe[(String, String)](new Fields("key", "tei_json"))
+      .toTypedPipe[(String, String)](new Fields('key, 'tei_json))
       .map { entry =>
         val (key : String, json : String) = (entry._1, entry._2)
         GrobidScorable.grobidToSlug(json) match {
