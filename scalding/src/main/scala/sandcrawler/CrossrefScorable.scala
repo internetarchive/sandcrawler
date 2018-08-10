@@ -10,6 +10,26 @@ import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
 import TDsl._
 
+import java.text.Normalizer
+import java.util.Arrays
+import java.util.Properties
+import java.util.regex.Pattern
+
+import scala.math
+import scala.util.parsing.json.JSON
+
+import cascading.tuple.Fields
+import com.twitter.scalding._
+import com.twitter.scalding.typed.CoGrouped
+import com.twitter.scalding.typed.Grouped
+import com.twitter.scalding.typed.TDsl._
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import org.apache.hadoop.hbase.util.Bytes
+import parallelai.spyglass.base.JobBase
+import parallelai.spyglass.hbase.HBaseConstants.SourceMode
+import parallelai.spyglass.hbase.HBasePipeConversions
+import parallelai.spyglass.hbase.HBaseSource
+
 class CrossrefScorable extends Scorable with HBasePipeConversions {
   // TODO: Generalize args so there can be multiple Grobid pipes in one job.
   def getSource(args : Args) : Source = {
@@ -17,6 +37,7 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
   }
 
   def getFeaturesPipe(pipe : Pipe) : TypedPipe[MapFeatures] = {
+    // Here I CANNOT call Pipe.toTypedPipe()
     pipe
       .toTypedPipe[String](new Fields("line"))
       .map{ json : String =>

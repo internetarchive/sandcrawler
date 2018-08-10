@@ -8,7 +8,7 @@ import com.twitter.scalding.typed.TDsl._
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
-import TDsl._
+//import TDsl._
 
 class GrobidScorable extends Scorable with HBasePipeConversions {
   def getSource(args : Args) : Source = {

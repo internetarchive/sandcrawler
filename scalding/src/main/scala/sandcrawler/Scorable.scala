@@ -6,7 +6,7 @@ import scala.util.parsing.json.JSON
 import cascading.flow.FlowDef
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
-import TDsl._
+//import TDsl._
 
 case class MapFeatures(slug : String, json : String)
 case class ReduceFeatures(json : String)
