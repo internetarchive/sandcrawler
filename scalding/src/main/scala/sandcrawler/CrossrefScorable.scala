@@ -36,9 +36,8 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
     TextLine(args("crossref-input"))
   }
 
-  def getFeaturesPipe(pipe : Pipe) : TypedPipe[MapFeatures] = {
-    // Here I CANNOT call Pipe.toTypedPipe()
-    pipe
+  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
+    getSource(args).read
       .toTypedPipe[String](new Fields("line"))
       .map{ json : String =>
         CrossrefScorable.crossrefToSlug(json) match {

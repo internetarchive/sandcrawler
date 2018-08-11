@@ -16,10 +16,11 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
     GrobidScorable.getHBaseSource(args("hbase-table"), args("zookeeper-hosts"))
   }
 
-  def getFeaturesPipe(pipe : cascading.pipe.Pipe) : TypedPipe[MapFeatures] = {
-    pipe
+  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
+    getSource(args)
+      .read
       .fromBytesWritable(new Fields("key", "tei_json"))
-      .toTypedPipe[(String, String)](new Fields('key, 'tei_json))
+      .toTypedPipe[(String, String)](new Fields("key", "tei_json"))
       .map { entry =>
         val (key : String, json : String) = (entry._1, entry._2)
         GrobidScorable.grobidToSlug(json) match {

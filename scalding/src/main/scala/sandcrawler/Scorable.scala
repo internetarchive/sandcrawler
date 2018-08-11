@@ -13,9 +13,9 @@ case class ReduceFeatures(json : String)
 case class ReduceOutput(val slug : String,  score : Int, json1 : String, json2 : String)
 
 abstract class Scorable {
-  def getInputPipe(pipe : cascading.pipe.Pipe) : TypedPipe[(String, ReduceFeatures)] =
+  def getInputPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[(String, ReduceFeatures)] =
   {
-    getFeaturesPipe(pipe)
+    getFeaturesPipe(args)
       .filter { entry => Scorable.isValidSlug(entry.slug) }
       .groupBy { case MapFeatures(slug, json) => slug }
       .map { tuple =>
@@ -26,7 +26,7 @@ abstract class Scorable {
 
   // abstract methods
   def getSource(args : Args) : Source
-  def getFeaturesPipe(pipe : cascading.pipe.Pipe) : TypedPipe[MapFeatures]
+  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures]
 }
 
 object Scorable {
