@@ -3,7 +3,7 @@ package sandcrawler
 import cascading.flow.FlowDef
 import cascading.tuple.Fields
 import com.twitter.scalding.{Args,Source,TextLine,TypedPipe, TypedTsv}
-//import com.twitter.scalding.typed.TDsl._
+//import com.twitter.scalding.source.TypedText
 import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
@@ -13,7 +13,7 @@ import cascading.pipe.Pipe
 class ScoreJob(args: Args) extends JobBase(args) { //with HBasePipeConversions {
   // TODO: Instantiate any subclass of Scorable specified in args.
   val sc1 : Scorable = new GrobidScorable()
-  val sc2 : Scorable = new GrobidScorable()
+  val sc2 : Scorable = new CrossrefScorable()
   val pipe1 : TypedPipe[(String, ReduceFeatures)] = sc1.getInputPipe(args)
   val pipe2 : TypedPipe[(String, ReduceFeatures)] = sc2.getInputPipe(args)
 
@@ -25,44 +25,10 @@ class ScoreJob(args: Args) extends JobBase(args) { //with HBasePipeConversions {
       features1.json,
       features2.json)
   }
-    .write(TypedTsv[ReduceOutput](args("output")))
+  //TypedTsv doesn't work over case classes.
+    .map { entry => (entry.slug, entry.score, entry.json1, entry.json2) }
 
-  /*
-  val grobidSource = HBaseCrossrefScore.getHBaseSource(
-    args("hbase-table"),
-    args("zookeeper-hosts"))
-
-  val source0 : Source = TextLine("foo")
-  val pipe0 : cascading.pipe.Pipe = source0.read
-  // This compiles:
-  val pipe00 : TypedPipe[String] = getFeaturesPipe0(pipe0)
-
-  // Calling a method within ScoreJob compiles fine.
-  def getFeaturesPipe0(pipe : cascading.pipe.Pipe) : TypedPipe[String] = {
-    pipe
-    // This compiles:
-      .toTypedPipe[String](new Fields("line"))
-  }
-
-  // Calling a function in a ScoreJob object leads to a compiler error.
-  val source1 : Source = TextLine("foo")
-  val pipe1 : cascading.pipe.Pipe = source1.read
-  // This leads to a compile error:
-  val pipe11 : TypedPipe[String] = ScoreJob.getFeaturesPipe1(pipe0)
-
-  val pipe : cascading.pipe.Pipe = grobidSource
-    .read
-  val grobidPipe : TypedPipe[(String, String)] = pipe
-    .fromBytesWritable(new Fields("key", "tei_json"))
-  // Here I CAN call Pipe.toTypedPipe()
-    .toTypedPipe[(String, String)]('key, 'tei_json)
-    .write(TypedTsv[(String, String)](args("output")))
-
-  // Let's try making a method call.
-//  ScoreJob.etFeaturesPipe(pipe)
-
-   */
-
+    .write(TypedTsv[(String, Int, String, String)](args("output")))
 }
 
 // Ugly hack to get non-String information into ScoreJob above.

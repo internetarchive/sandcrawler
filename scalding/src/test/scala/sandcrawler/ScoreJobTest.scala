@@ -148,7 +148,7 @@ class ScoreJobTest extends FlatSpec with Matchers {
       1 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG 2").replace("<<DOI>>", "DOI-0.5"),
       2 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG 3").replace("<<DOI>>", "DOI-0.75"),
       3 -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1")))
-    .sink[ReduceOutput](TypedTsv[ReduceOutput](output)) {
+    .sink[(String, Int, String, String)](TypedTsv[(String, Int, String, String)](output)) {
       // Grobid titles: 
       //   "Title 1", "Title 2: TNG", "Title 3: The Sequel"
       // crossref slugs: 
