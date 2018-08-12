@@ -1,5 +1,6 @@
 package sandcrawler
 
+import scala.util.parsing.json.JSONObject
 import cascading.flow.FlowDef
 import cascading.pipe.Pipe
 import cascading.tuple.Fields
@@ -21,13 +22,7 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
       .read
       .fromBytesWritable(new Fields("key", "tei_json"))
       .toTypedPipe[(String, String)](new Fields("key", "tei_json"))
-      .map { entry =>
-        val (key : String, json : String) = (entry._1, entry._2)
-        GrobidScorable.grobidToSlug(json) match {
-          case Some(slug) => new MapFeatures(slug, json)
-          case None => new MapFeatures(Scorable.NoSlug, json)
-        }
-      }
+      .map { entry : (String, String) => GrobidScorable.jsonToMapFeatures(entry._1, entry._2) }
   }
 }
 
@@ -36,14 +31,18 @@ object GrobidScorable {
     HBaseBuilder.build(table, host, List("grobid0:tei_json"), SourceMode.SCAN_ALL)
   }
 
-  def grobidToSlug(json : String) : Option[String] = {
+  def jsonToMapFeatures(key : String, json : String) : MapFeatures = {
     Scorable.jsonToMap(json) match {
-      case None => None
+      case None => MapFeatures(Scorable.NoSlug, json)
       case Some(map) => {
         if (map contains "title") {
-          Some(Scorable.titleToSlug(map("title").asInstanceOf[String]))
+          val map2 = Scorable.toScorableMap(Scorable.getString(map, "title"),
+            sha1=key)
+          new MapFeatures(
+            Scorable.mapToSlug(map2),
+            JSONObject(map2).toString)
         } else {
-          None
+          MapFeatures(Scorable.NoSlug, json)
         }
       }
     }

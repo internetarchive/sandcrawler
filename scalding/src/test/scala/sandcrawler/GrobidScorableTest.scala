@@ -60,18 +60,15 @@ class GrobidScorableTest extends FlatSpec with Matchers {
 
   // Unit tests
 
-  "grobidToSlug()" should "get the right slug for a grobid json string" in {
-    val slug = GrobidScorable.grobidToSlug(GrobidStringWithTitle)
-    slug should contain ("dummy example file")
+  "GrobidScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
+    val result = GrobidScorable.jsonToMapFeatures(MalformedGrobidString) shouldBe None
+    result.slug shouldBe Scorable.NoSlug
+    result.json shouldBe MalformedGrobidString
   }
 
-  it should "return None if given json string without title" in {
-    val slug = GrobidScorable.grobidToSlug(GrobidStringWithoutTitle)
-    slug shouldBe None
-  }
-
-  it should "return None if given a malformed json string" in {
-    val slug = GrobidScorable.grobidToSlug(MalformedGrobidString)
-    slug shouldBe None
+  "GrobidScorable.jsonToMapFeatures()" should "handle missing title" in {
+    val result = GrobidScorable.jsonToMapFeatures(GrobidStringWithoutTitle) shouldBe None
+    result.slug shouldBe Scorable.NoSlug
+    result.json shouldBe GrobidStringWithoutTitle
   }
 }

@@ -2,6 +2,7 @@ package sandcrawler
 
 import scala.math
 import scala.util.parsing.json.JSON
+import scala.util.parsing.json.JSONObject
 
 import cascading.flow.FlowDef
 import com.twitter.scalding._
@@ -36,6 +37,21 @@ object Scorable {
     slug != NoSlug
   }
 
+  // NOTE: I could go all out and make ScorableMap a type.
+  // TODO: Require year. Other features will get added here.
+  def toScorableMap(title : String, year : Int = 0, doi : String = "", sha1 : String = "") : Map[String, Any] = {
+   Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
+  }
+
+  def toScorableJson(title : String, year : Int, doi : String = "", sha1 : String = "") : String = {
+    JSONObject(toScorableMap(title=title, year=year, doi=doi, sha1=sha1)).toString
+  }
+
+  // TODO: Score on more fields than "title".
+  def isScorableMap(map : Map[String, Any]) : Boolean = {
+    map.contains("title")
+  }
+
   def jsonToMap(json : String) : Option[Map[String, Any]] = {
     // https://stackoverflow.com/a/32717262/631051
     val jsonObject = JSON.parseFull(json)
@@ -46,18 +62,17 @@ object Scorable {
     }
   }
 
-  def titleToSlug(title : String) : String = {
-    if (title == null || title.isEmpty) {
+  // Map should have been produced by toScorableMap.
+  // This guarantees it will have all of the fields needed to compute
+  // the ultimate score, which are a superset of those needed for a slug.
+  def mapToSlug(map : Map[String, Any]) : String = {
+    val unaccented = StringUtilities.removeAccents(getString(map, "title"))
+    // Remove punctuation after splitting on colon.
+    val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase()))
+    if (slug.isEmpty || slug == null) {
       NoSlug
     } else {
-      val unaccented = StringUtilities.removeAccents(title)
-      // Remove punctuation after splitting on colon.
-      val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase()))
-      if (slug.isEmpty || slug == null) {
-        NoSlug
-      } else {
-        slug
-      }
+      slug
     }
   }
 
@@ -68,8 +83,9 @@ object Scorable {
     }
   }
 
-  // Caller is responsible for ensuring that key is in map.
-  def getString(map : Map[String, String], key : String) : String = {
+  // Caller is responsible for ensuring that key is a String in map.
+  // TODO: Add and handle ClassCastException
+  def getString(map : Map[String, Any], key : String) : String = {
     assert(map contains key)
     map(key).asInstanceOf[String]
   }

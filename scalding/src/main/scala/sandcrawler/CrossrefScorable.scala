@@ -18,6 +18,7 @@ import java.util.regex.Pattern
 
 import scala.math
 import scala.util.parsing.json.JSON
+import scala.util.parsing.json.JSONObject
 
 import cascading.tuple.Fields
 import com.twitter.scalding._
@@ -40,33 +41,48 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
   def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
     getSource(args).read
       .toTypedPipe[String](new Fields("line"))
-      .map{ json : String => 
-        CrossrefScorable.simplifyJson(json) match {
-          case None => new MapFeatures(Scorable.NoSlug, json)
-          case Some(map) => new MapFeatures(
-            Scorable.titleToSlug(map("title").asInstanceOf[String]), 
-            JSONObject(map).toString)
+      .map{ json : String =>
+        Scorable.jsonToMap(json) match {
+          case None => MapFeatures(Scorable.NoSlug, json)
+          case Some(map) => {
+            if ((map contains "title") && (map contains "DOI")) {
+              val titles = map("title").asInstanceOf[List[String]]
+              if (titles.isEmpty) {
+                new MapFeatures(Scorable.NoSlug, json)
+              } else {
+                val title = titles(0)
+                val map2 = Scorable.toScorableMap(title=titles(0), doi=map("DOI").asInstanceOf[String])
+                new MapFeatures(
+                  Scorable.mapToSlug(map2),
+                  JSONObject(map2).toString)
+              }
+            } else {
+              new MapFeatures(Scorable.NoSlug, json)
+            }
+          }
         }
       }
   }
+}
 
-  object CrossrefScorable {
-    def simplifyJson(json : String) : Option[Map[String, Any]] = {
-      Scorable.jsonToMap(json) match {
-        case None => None
-        case Some(map) => {
-          if (map contains "title") {
-            val titles = map("title").asInstanceOf[List[String]]
-            if (titles.isEmpty) {
-              None
-            } else {
-              Some(Map("title" -> titles(0)))
-            }
-          } else {
+/*
+object CrossrefScorable {
+  def simplifyJson(json : String) : Option[Map[String, Any]] = {
+    Scorable.jsonToMap(json) match {
+      case None => None
+      case Some(map) => {
+        if (map contains "title") {
+          val titles = map("title").asInstanceOf[List[String]]
+          if (titles.isEmpty) {
             None
+          } else {
+            Some(Map("title" -> titles(0)))
           }
+        } else {
+          None
         }
       }
     }
   }
 }
+ */
