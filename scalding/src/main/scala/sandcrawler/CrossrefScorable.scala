@@ -64,25 +64,3 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
       }
   }
 }
-
-/*
-object CrossrefScorable {
-  def simplifyJson(json : String) : Option[Map[String, Any]] = {
-    Scorable.jsonToMap(json) match {
-      case None => None
-      case Some(map) => {
-        if (map contains "title") {
-          val titles = map("title").asInstanceOf[List[String]]
-          if (titles.isEmpty) {
-            None
-          } else {
-            Some(Map("title" -> titles(0)))
-          }
-        } else {
-          None
-        }
-      }
-    }
-  }
-}
- */
