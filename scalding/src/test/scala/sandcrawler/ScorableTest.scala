@@ -54,28 +54,36 @@ class ScorableTest extends FlatSpec with Matchers {
   "annex": null
 }
 """
+  private def titleToSlug(s : String) : String = {
+    Scorable.mapToSlug(Scorable.toScorableMap(title = s))
+  }
 
-  "titleToSlug()" should "extract the parts of titles before a colon" in {
-    Scorable.titleToSlug("HELLO:there") shouldBe "hello"
+  "mapToSlug()" should "extract the parts of titles before a colon" in {
+    titleToSlug("HELLO:there") shouldBe "hello"
   }
 
   it should "extract an entire colon-less string" in {
-    Scorable.titleToSlug("hello THERE") shouldBe "hello there"
+    titleToSlug("hello THERE") shouldBe "hellothere"
   }
 
   it should "return Scorable.NoSlug if given empty string" in {
-    Scorable.titleToSlug("") shouldBe Scorable.NoSlug
+    titleToSlug("") shouldBe Scorable.NoSlug
   }
 
   it should "return Scorable.NoSlug if given null" in {
-    Scorable.titleToSlug(null) shouldBe Scorable.NoSlug
+    titleToSlug(null) shouldBe Scorable.NoSlug
   }
 
-  "titleToSlug()" should "strip punctuation" in {
-    Scorable.titleToSlug("HELLO!:the:re") shouldBe "hello"
-    Scorable.titleToSlug("a:b:c") shouldBe "a"
-    Scorable.titleToSlug(
-      "If you're happy and you know it, clap your hands!") shouldBe "if youre happy and you know it clap your hands"
+  it should "strip punctuation" in {
+    titleToSlug("HELLO!:the:re") shouldBe "hello"
+    titleToSlug("a:b:c") shouldBe "a"
+    titleToSlug(
+      "If you're happy and you know it, clap your hands!") shouldBe "ifyourehappyandyouknowitclapyourhands"
+  }
+
+  it should "remove whitespace" in {
+    titleToSlug("foo bar : baz ::") shouldBe "foobar"
+    titleToSlug("\na\t:b:c") shouldBe "a"
   }
 
   "jsonToMap()" should "return a map, given a legal JSON string" in {

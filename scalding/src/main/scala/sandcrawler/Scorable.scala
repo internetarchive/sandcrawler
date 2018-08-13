@@ -66,13 +66,14 @@ object Scorable {
   // This guarantees it will have all of the fields needed to compute
   // the ultimate score, which are a superset of those needed for a slug.
   def mapToSlug(map : Map[String, Any]) : String = {
-    val unaccented = StringUtilities.removeAccents(getString(map, "title"))
-    // Remove punctuation after splitting on colon.
-    val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase()))
-    if (slug.isEmpty || slug == null) {
+    val title = getString(map, "title")
+    if (title == null) {
       NoSlug
     } else {
-      slug
+      val unaccented = StringUtilities.removeAccents(title)
+      // Remove punctuation after splitting on colon.
+      val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase())).replaceAll("\\s", "")
+      if (slug.isEmpty || slug == null) NoSlug else slug
     }
   }
 

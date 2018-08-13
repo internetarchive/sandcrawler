@@ -57,18 +57,28 @@ class GrobidScorableTest extends FlatSpec with Matchers {
   val GrobidStringWithTitle = GrobidString.replace("<<TITLE>>", "Dummy Example File")
   val GrobidStringWithoutTitle = GrobidString.replace("title", "nottitle")
   val MalformedGrobidString = GrobidString.replace("}", "")
+  val Key = "Dummy Key"
 
   // Unit tests
 
   "GrobidScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
-    val result = GrobidScorable.jsonToMapFeatures(MalformedGrobidString) shouldBe None
+    val result = GrobidScorable.jsonToMapFeatures(Key, MalformedGrobidString) 
     result.slug shouldBe Scorable.NoSlug
-    result.json shouldBe MalformedGrobidString
   }
 
-  "GrobidScorable.jsonToMapFeatures()" should "handle missing title" in {
-    val result = GrobidScorable.jsonToMapFeatures(GrobidStringWithoutTitle) shouldBe None
+  it should "handle missing title" in {
+    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithoutTitle)
     result.slug shouldBe Scorable.NoSlug
-    result.json shouldBe GrobidStringWithoutTitle
+  }
+
+  it should "handle valid input" in {
+    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithTitle)
+    result.slug shouldBe "dummyexamplefile"
+    Scorable.jsonToMap(result.json) match {
+      case None => fail()
+      case Some(map) => {
+        map("title").asInstanceOf[String] shouldBe "Dummy Example File"
+      }
+    }
   }
 }
