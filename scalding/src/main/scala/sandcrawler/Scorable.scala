@@ -39,7 +39,7 @@ object Scorable {
   // NOTE: I could go all out and make ScorableMap a type.
   // TODO: Require year. Other features will get added here.
   def toScorableMap(title : String, year : Int = 0, doi : String = "", sha1 : String = "") : Map[String, Any] = {
-   Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
+    Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
   }
 
   def toScorableJson(title : String, year : Int, doi : String = "", sha1 : String = "") : String = {

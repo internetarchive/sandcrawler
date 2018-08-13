@@ -61,7 +61,7 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
   "subject" : [ "Pediatrics, Perinatology, and Child Health" ]
 }
 """
-  val CrossrefStringWithTitle = CrossrefString.replace("<<TITLE>>", "SomeTitle")
+  val CrossrefStringWithTitle = CrossrefString.replace("<<TITLE>>", "Some Title")
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
 
@@ -78,11 +78,11 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
 
   it should "handle valid input" in {
     val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithTitle)
-    result.slug shouldBe "dummyexamplefile"
+    result.slug shouldBe "sometitle"
     Scorable.jsonToMap(result.json) match {
       case None => fail()
       case Some(map) => {
-        map("title").asInstanceOf[String] shouldBe "Dummy Example File"
+        map("title").asInstanceOf[String] shouldBe "Some Title"
       }
     }
   }

@@ -113,25 +113,32 @@ class ScoreJobTest extends FlatSpec with Matchers {
   val CrossrefStringWithTitle = CrossrefString.replace("<<TITLE>>", "SomeTitle")
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
+  val CrossrefStrings = List(
+    CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
+    CrossrefString.replace("<<TITLE>>", "Title 1: TNG 2A").replace("<<DOI>>", "DOI-0.5"),
+    CrossrefString.replace("<<TITLE>>", "Title 1: TNG 3").replace("<<DOI>>", "DOI-0.75"),
+    CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"))
 
   //  Pipeline tests
   val output = "/tmp/testOutput"
   val input = "/tmp/testInput"
   val (testTable, testHost) = ("test-table", "dummy-host:2181")
 
-  val grobidSampleData = List(
-    List(Bytes.toBytes("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"),
-      Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title 1"))),
-    List(Bytes.toBytes("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"),
-      Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title 2: TNG"))),
-    List(Bytes.toBytes("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT"),
-      Bytes.toBytes(GrobidString.replace("<<TITLE>>", "Title 3: The Sequel"))),
-    List(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56"), 
-      Bytes.toBytes(MalformedGrobidString)))
+  val Sha1Strings = List(
+    "sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q",
+    "sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU",
+    "sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT",
+    "sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56")
 
-  // TODO: Make less yucky.
-  ScoreJob.setScorable1(new CrossrefScorable())
-  ScoreJob.setScorable2(new GrobidScorable())
+  val GrobidStrings = List(
+    GrobidString.replace("<<TITLE>>", "Title 1"),
+    GrobidString.replace("<<TITLE>>", "Title 2: TNG"),
+    GrobidString.replace("<<TITLE>>", "Title 3: The Sequel"),
+    MalformedGrobidString)
+
+  val GrobidSampleData = (Sha1Strings zip GrobidStrings)
+    .map{case(s, g) =>
+      List(Bytes.toBytes(s), Bytes.toBytes(g))}
 
   JobTest("sandcrawler.ScoreJob")
     .arg("test", "")
@@ -142,12 +149,12 @@ class ScoreJobTest extends FlatSpec with Matchers {
     .arg("crossref-input", input)
     .arg("debug", "true")
     .source[Tuple](GrobidScorable.getHBaseSource(testTable, testHost),
-      grobidSampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
+      GrobidSampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
     .source(TextLine(input), List(
-      0 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG").replace("<<DOI>>", "DOI-0"),
-      1 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG 2").replace("<<DOI>>", "DOI-0.5"),
-      2 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG 3").replace("<<DOI>>", "DOI-0.75"),
-      3 -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1")))
+      0 -> CrossrefStrings(0),
+      1 -> CrossrefStrings(1),
+      2 -> CrossrefStrings(2),
+      3 -> CrossrefStrings(3)))
     .sink[(String, Int, String, String)](TypedTsv[(String, Int, String, String)](output)) {
       // Grobid titles and slugs (in parentheses): 
       //   Title 1                       (title1)
@@ -155,27 +162,40 @@ class ScoreJobTest extends FlatSpec with Matchers {
       //   Title 3: The Sequel           (title3)
       // crossref titles and slugs (in parentheses):
       //   Title 1: TNG                  (title1)
-      //   Title 1: TNG 2                (title1)
+      //   Title 1: TNG 2A               (title1)
       //   Title 1: TNG 3                (title1)
-      //   Title 2 Rebooted              (title2rebooted)
+      //   Title 2: Rebooted             (title2)
       // Join should have 3 "title1" slugs and 1 "title2" slug
       outputBuffer => 
       "The pipeline" should "return a 4-element list" in {
         outputBuffer should have length 4
       }
 
-              /*
-      it should "return the right first entry" in {
-        outputBuffer(0) shouldBe ReduceOutput("slug", 50, "",
-          "")
-        val (slug, slug0, slug1, sha1, grobidJson, crossrefJson) = outputBuffer(0)
-        slug shouldBe "title 1"
-        slug shouldBe slug0
-        slug shouldBe slug1
-        sha1 shouldBe new String(grobidSampleData(0)(0), "UTF-8")
-        grobidJson shouldBe new String(grobidSampleData(0)(1), "UTF-8")
+      it should "has right # of entries with each slug" in {
+        val slugs = outputBuffer.map(_._1)
+        val countMap : Map[String, Int] = slugs.groupBy(identity).mapValues(_.size)
+        countMap("title1") shouldBe 3
+        countMap("title2") shouldBe 1
       }
-        */
+
+      def bundle(slug : String, grobidIndex : Int, crossrefIndex : Int) = {
+        val mf1 : MapFeatures = GrobidScorable.jsonToMapFeatures(
+          Sha1Strings(grobidIndex), 
+          GrobidStrings(grobidIndex))
+        val mf2 : MapFeatures = CrossrefScorable.jsonToMapFeatures(
+          CrossrefStrings(crossrefIndex))
+        val score = Scorable.computeSimilarity(
+          ReduceFeatures(mf1.json),
+          ReduceFeatures(mf2.json))
+        (slug, score, mf1.json, mf2.json)
+      }
+
+      it should "have right output values" in {
+        outputBuffer.exists(_ == bundle("title1", 0, 0))
+        outputBuffer.exists(_ == bundle("title1", 0, 2))
+        outputBuffer.exists(_ == bundle("title1", 0, 1))
+        outputBuffer.exists(_ == bundle("title2", 1, 3))
+      }
     }
     .run
     .finish

@@ -1,15 +1,14 @@
 package sandcrawler
 
 import scala.util.parsing.json.JSONObject
+
 import cascading.flow.FlowDef
-import cascading.pipe.Pipe
 import cascading.tuple.Fields
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
-//import TDsl._
 
 class GrobidScorable extends Scorable with HBasePipeConversions {
   def getSource(args : Args) : Source = {
