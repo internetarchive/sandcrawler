@@ -34,11 +34,8 @@ object CrossrefScorable {
           if (titles.isEmpty || titles == null || doi.isEmpty || doi == null) {
             new MapFeatures(Scorable.NoSlug, json)
           } else {
-            val title = titles(0)
-            val map2 = Scorable.toScorableMap(title=title, doi=doi)
-            new MapFeatures(
-              Scorable.mapToSlug(map2),
-              JSONObject(map2).toString)
+            val sf : ScorableFeatures = new ScorableFeatures(title=titles(0), doi=doi)
+            new MapFeatures(sf.toSlug, sf.toString)
           }
         } else {
           new MapFeatures(Scorable.NoSlug, json)

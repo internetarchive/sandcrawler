@@ -54,38 +54,6 @@ class ScorableTest extends FlatSpec with Matchers {
   "annex": null
 }
 """
-  private def titleToSlug(s : String) : String = {
-    Scorable.mapToSlug(Scorable.toScorableMap(title = s))
-  }
-
-  "mapToSlug()" should "extract the parts of titles before a colon" in {
-    titleToSlug("HELLO:there") shouldBe "hello"
-  }
-
-  it should "extract an entire colon-less string" in {
-    titleToSlug("hello THERE") shouldBe "hellothere"
-  }
-
-  it should "return Scorable.NoSlug if given empty string" in {
-    titleToSlug("") shouldBe Scorable.NoSlug
-  }
-
-  it should "return Scorable.NoSlug if given null" in {
-    titleToSlug(null) shouldBe Scorable.NoSlug
-  }
-
-  it should "strip punctuation" in {
-    titleToSlug("HELLO!:the:re") shouldBe "hello"
-    titleToSlug("a:b:c") shouldBe "a"
-    titleToSlug(
-      "If you're happy and you know it, clap your hands!") shouldBe "ifyourehappyandyouknowitclapyourhands"
-  }
-
-  it should "remove whitespace" in {
-    titleToSlug("foo bar : baz ::") shouldBe "foobar"
-    titleToSlug("\na\t:b:c") shouldBe "a"
-  }
-
   "jsonToMap()" should "return a map, given a legal JSON string" in {
     Scorable.jsonToMap(JsonString) should not be (None)
   }

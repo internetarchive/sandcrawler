@@ -36,21 +36,6 @@ object Scorable {
     slug != NoSlug
   }
 
-  // NOTE: I could go all out and make ScorableMap a type.
-  // TODO: Require year. Other features will get added here.
-  def toScorableMap(title : String, year : Int = 0, doi : String = "", sha1 : String = "") : Map[String, Any] = {
-    Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
-  }
-
-  def toScorableJson(title : String, year : Int, doi : String = "", sha1 : String = "") : String = {
-    JSONObject(toScorableMap(title=title, year=year, doi=doi, sha1=sha1)).toString
-  }
-
-  // TODO: Score on more fields than "title".
-  def isScorableMap(map : Map[String, Any]) : Boolean = {
-    map.contains("title")
-  }
-
   def jsonToMap(json : String) : Option[Map[String, Any]] = {
     // https://stackoverflow.com/a/32717262/631051
     val jsonObject = JSON.parseFull(json)
@@ -58,21 +43,6 @@ object Scorable {
       None
     } else {
       Some(jsonObject.get.asInstanceOf[Map[String, Any]])
-    }
-  }
-
-  // Map should have been produced by toScorableMap.
-  // This guarantees it will have all of the fields needed to compute
-  // the ultimate score, which are a superset of those needed for a slug.
-  def mapToSlug(map : Map[String, Any]) : String = {
-    val title = getString(map, "title")
-    if (title == null) {
-      NoSlug
-    } else {
-      val unaccented = StringUtilities.removeAccents(title)
-      // Remove punctuation after splitting on colon.
-      val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase())).replaceAll("\\s", "")
-      if (slug.isEmpty || slug == null) NoSlug else slug
     }
   }
 
