@@ -66,23 +66,23 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
   val MalformedCrossrefString = CrossrefString.replace("}", "")
 
   // Unit tests
-  "simplifyJson()" should "return None for bad JSON" in {
-    CrossrefScorable.simplifyJson("") shouldBe None
-    CrossrefScorable.simplifyJson(MalformedCrossrefString) shouldBe None
+  "CrossrefScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
+    val result = CrossrefScorable.jsonToMapFeatures(MalformedCrossrefString) 
+    result.slug shouldBe Scorable.NoSlug
   }
 
-  it should "return None for JSON lacking title" in {
-    CrossrefScorable.simplifyJson(CrossrefStringWithoutTitle) shouldBe None
+  it should "handle missing title" in {
+    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithoutTitle)
+    result.slug shouldBe Scorable.NoSlug
   }
 
-  it should "return appropriate result for valid JSON" in {
-    CrossrefScorable.simplifyJson(CrossrefStringWithTitle) match {
-      case None => fail("None unexpectedly returned by simplifyJson")
+  it should "handle valid input" in {
+    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithTitle)
+    result.slug shouldBe "dummyexamplefile"
+    Scorable.jsonToMap(result.json) match {
+      case None => fail()
       case Some(map) => {
-        Scorable.isScorableMap(map) shouldBe true
-        map.size shouldBe 1
-        map.keys should contain ("title")
-        map("title") shouldBe "SomeTitle"
+        map("title").asInstanceOf[String] shouldBe "Dummy Example File"
       }
     }
   }

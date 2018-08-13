@@ -77,6 +77,7 @@ class GrobidScorableTest extends FlatSpec with Matchers {
     Scorable.jsonToMap(result.json) match {
       case None => fail()
       case Some(map) => {
+        map should contain key "title"
         map("title").asInstanceOf[String] shouldBe "Dummy Example File"
       }
     }

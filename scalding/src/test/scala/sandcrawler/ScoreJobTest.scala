@@ -149,11 +149,16 @@ class ScoreJobTest extends FlatSpec with Matchers {
       2 -> CrossrefString.replace("<<TITLE>>", "Title 1: TNG 3").replace("<<DOI>>", "DOI-0.75"),
       3 -> CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1")))
     .sink[(String, Int, String, String)](TypedTsv[(String, Int, String, String)](output)) {
-      // Grobid titles: 
-      //   "Title 1", "Title 2: TNG", "Title 3: The Sequel"
-      // crossref slugs: 
-      //   "Title 1: TNG", "Title 1: TNG 2", "Title 1: TNG 3", "Title 2 Rebooted"
-      // Join should have 3 "Title  1" slugs and 1 "Title 2" slug
+      // Grobid titles and slugs (in parentheses): 
+      //   Title 1                       (title1)
+      //   Title 2: TNG                  (title2)
+      //   Title 3: The Sequel           (title3)
+      // crossref titles and slugs (in parentheses):
+      //   Title 1: TNG                  (title1)
+      //   Title 1: TNG 2                (title1)
+      //   Title 1: TNG 3                (title1)
+      //   Title 2 Rebooted              (title2rebooted)
+      // Join should have 3 "title1" slugs and 1 "title2" slug
       outputBuffer => 
       "The pipeline" should "return a 4-element list" in {
         outputBuffer should have length 4

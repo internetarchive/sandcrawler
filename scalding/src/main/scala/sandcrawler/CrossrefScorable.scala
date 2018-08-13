@@ -41,26 +41,31 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
   def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
     getSource(args).read
       .toTypedPipe[String](new Fields("line"))
-      .map{ json : String =>
-        Scorable.jsonToMap(json) match {
-          case None => MapFeatures(Scorable.NoSlug, json)
-          case Some(map) => {
-            if ((map contains "title") && (map contains "DOI")) {
-              val titles = map("title").asInstanceOf[List[String]]
-              if (titles.isEmpty) {
-                new MapFeatures(Scorable.NoSlug, json)
-              } else {
-                val title = titles(0)
-                val map2 = Scorable.toScorableMap(title=titles(0), doi=map("DOI").asInstanceOf[String])
-                new MapFeatures(
-                  Scorable.mapToSlug(map2),
-                  JSONObject(map2).toString)
-              }
-            } else {
-              new MapFeatures(Scorable.NoSlug, json)
-            }
+      .map { CrossrefScorable.jsonToMapFeatures(_) }
+  }
+}
+
+object CrossrefScorable {
+  def jsonToMapFeatures(json : String) : MapFeatures = {
+    Scorable.jsonToMap(json) match {
+      case None => MapFeatures(Scorable.NoSlug, json)
+      case Some(map) => {
+        if ((map contains "titles") && (map contains "DOI")) {
+          val titles = map("titles").asInstanceOf[List[String]]
+          val doi = Scorable.getString(map, "DOI")
+          if (titles.isEmpty || titles == null || doi.isEmpty || doi == null) {
+            new MapFeatures(Scorable.NoSlug, json)
+          } else {
+            val title = titles(0)
+            val map2 = Scorable.toScorableMap(title=title, doi=doi)
+            new MapFeatures(
+              Scorable.mapToSlug(map2),
+              JSONObject(map2).toString)
           }
+        } else {
+          new MapFeatures(Scorable.NoSlug, json)
         }
       }
+    }
   }
 }
