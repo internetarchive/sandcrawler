@@ -143,17 +143,14 @@ class ScoreJobTest extends FlatSpec with Matchers {
     JsonString.replace("<<TITLE>>", "Title 2")
   )
 
-  val Ok = Bytes.toBytes("200")
-  val Bad = Bytes.toBytes("404")
+  val Ok = "200"
+  val Bad = "400"
+  val StatusCodes = List(Ok, Ok, Ok, Bad, Ok, Bad)
 
-  val SampleData : List[List[Array[Byte]]] = List(
-    List(Bytes.toBytes(Sha1Strings(0)), Bytes.toBytes(JsonStrings(0)), Ok),
-    List(Bytes.toBytes(Sha1Strings(1)), Bytes.toBytes(JsonStrings(1)), Ok),
-    List(Bytes.toBytes(Sha1Strings(2)), Bytes.toBytes(JsonStrings(2)), Ok),
-    List(Bytes.toBytes(Sha1Strings(3)), Bytes.toBytes(JsonStrings(3)), Bad),
-    List(Bytes.toBytes(Sha1Strings(4)), Bytes.toBytes(JsonStrings(4)), Ok),
-    List(Bytes.toBytes(Sha1Strings(5)), Bytes.toBytes(JsonStrings(5)), Bad)
-  )
+  val SampleData : List[List[Array[Byte]]] = (Sha1Strings, JsonStrings, StatusCodes)
+    .zipped
+    .toList
+    .map { case (sha, json, status) => List(Bytes.toBytes(sha), Bytes.toBytes(json), Bytes.toBytes(status)) }
 
   JobTest("sandcrawler.ScoreJob")
     .arg("test", "")
