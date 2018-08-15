@@ -20,6 +20,13 @@ lazy val root = (project in file(".")).
       scalaSourceFiles.filterNot(_.getAbsolutePath.contains(dirNameToExclude))
     },
 
+    (scalastyleSources in Test) := {
+      // all .scala files in "src/test/scala"
+      val scalaSourceFiles = ((scalaSource in Test).value ** "*.scala").get    
+      val dirNameToExclude = "/example/"
+      scalaSourceFiles.filterNot(_.getAbsolutePath.contains(dirNameToExclude))
+    },
+
     name := "sandcrawler",
 
     resolvers += "conjars.org" at "http://conjars.org/repo",

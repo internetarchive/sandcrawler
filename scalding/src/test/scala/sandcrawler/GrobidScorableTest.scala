@@ -2,7 +2,10 @@ package sandcrawler
 
 import cascading.tuple.Fields
 import cascading.tuple.Tuple
-import com.twitter.scalding.{JobTest, TextLine, TypedTsv, TupleConversions}
+import com.twitter.scalding.JobTest
+import com.twitter.scalding.TextLine
+import com.twitter.scalding.TupleConversions
+import com.twitter.scalding.TypedTsv
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
 import org.scalatest._
@@ -62,7 +65,7 @@ class GrobidScorableTest extends FlatSpec with Matchers {
   // Unit tests
 
   "GrobidScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
-    val result = GrobidScorable.jsonToMapFeatures(Key, MalformedGrobidString) 
+    val result = GrobidScorable.jsonToMapFeatures(Key, MalformedGrobidString)
     result.slug shouldBe Scorable.NoSlug
   }
 

@@ -2,6 +2,7 @@ package sandcrawler
 
 import org.scalatest._
 
+// scalastyle:off null
 class ScorableFeaturesTest extends FlatSpec with Matchers {
   private def titleToSlug(s : String) : String = {
     new ScorableFeatures(title = s).toSlug

@@ -22,6 +22,7 @@ class HBaseBuilderTest extends FlatSpec with Matchers {
     fields should have length 0
   }
 
+  //scalastyle:off no.whitespace.before.left.bracket
   it should "throw IllegalArgumentException on malformed input" in {
     a [IllegalArgumentException] should be thrownBy {
       HBaseBuilder.parseColSpecs(List("file_size"))
