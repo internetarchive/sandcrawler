@@ -124,9 +124,13 @@ def run_matchcrossref(args):
         HDFS_DIR,
         args.env,
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    # Notes: -D options must come after Tool but before class name
+    # https://github.com/twitter/scalding/wiki/Frequently-asked-questions#how-do-i-pass-parameters-to-my-hadoop-job-number-of-reducers--memory-options--etc-
     cmd = """hadoop jar \
         scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
-        com.twitter.scalding.Tool sandcrawler.HBaseCrossrefScoreJob \
+        com.twitter.scalding.Tool \
+        -Dmapred.reduce.tasks={reducers} \
+        sandcrawler.ScoreJob \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
         --hbase-table wbgrp-journal-extract-0-{env} \
@@ -136,6 +140,7 @@ def run_matchcrossref(args):
             output=output,
             zookeeper_hosts=ZOOKEEPER_HOSTS,
             env=args.env,
+            reducers=args.reducers,
             crossref_input=args.crossref_input)
     subprocess.call(cmd, shell=True)
 
@@ -173,6 +178,10 @@ def main():
     sub_matchcrossref.set_defaults(func=run_matchcrossref)
     sub_matchcrossref.add_argument('crossref_input',
         help="full HDFS path of Crossref JSON dump")
+    sub_matchcrossref.add_argument('--reducers',
+        help="number of reducers to run",
+        type=int, default=30)
+
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
