@@ -67,6 +67,7 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
 """
   // scalastyle:on
   val CrossrefStringWithTitle = CrossrefString.replace("<<TITLE>>", "Some Title")
+  val CrossrefStringWithEmptyTitle = CrossrefString.replace("<<TITLE>>", "")
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
 
@@ -78,6 +79,11 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
 
   it should "handle missing title" in {
     val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithoutTitle)
+    result.slug shouldBe Scorable.NoSlug
+  }
+
+  it should "handle empty title" in {
+    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithEmptyTitle)
     result.slug shouldBe Scorable.NoSlug
   }
 
