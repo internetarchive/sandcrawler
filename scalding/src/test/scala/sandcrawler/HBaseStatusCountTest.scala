@@ -30,6 +30,7 @@ class HBaseStatusCountTest extends FunSpec with TupleConversions {
   val statusType2Bytes = Bytes.toBytes(statusType2)
 
   val sampleData : List[List[Array[Byte]]] = List(
+    // TODO(bnewbold): now to express a null (empty value) in this list?
     List(Bytes.toBytes("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"), statusType1Bytes),
     List(Bytes.toBytes("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"), statusType1Bytes),
     List(Bytes.toBytes("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT"), statusType2Bytes),
