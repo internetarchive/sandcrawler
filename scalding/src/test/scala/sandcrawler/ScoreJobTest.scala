@@ -150,8 +150,9 @@ class ScoreJobTest extends FlatSpec with Matchers {
     JsonString.replace("<<TITLE>>", "Title 2")
   )
 
-  val Ok = "200"
-  val Bad = "400"
+  // bnewbold: status codes aren't strings, they are uint64
+  val Ok : Long = 200
+  val Bad : Long = 400
   val StatusCodes = List(Ok, Ok, Ok, Bad, Ok, Bad)
 
   val SampleData : List[List[Array[Byte]]] = (Sha1Strings, JsonStrings, StatusCodes)
