@@ -34,10 +34,18 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
     titleToSlug("a:b:c") shouldBe "a"
     titleToSlug(
       "If you're happy and you know it, clap your hands!") shouldBe "ifyourehappyandyouknowitclapyourhands"
+    titleToSlug(":;\"\'") shouldBe Scorable.NoSlug
+  }
+
+  it should "strip special characters" in {
+    titleToSlug(":;!',|\"\'`.#?!-@*/\\=+~%$^{}()[]<>-_…") shouldBe Scorable.NoSlug
+    // TODO: titleToSlug("©™₨№") shouldBe Scorable.NoSlug
+    // TODO: titleToSlug("πµΣσ") shouldBe Scorable.NoSlug
   }
 
   it should "remove whitespace" in {
     titleToSlug("foo bar : baz ::") shouldBe "foobar"
     titleToSlug("\na\t:b:c") shouldBe "a"
+    titleToSlug("\n \t \r  ") shouldBe Scorable.NoSlug
   }
 }
