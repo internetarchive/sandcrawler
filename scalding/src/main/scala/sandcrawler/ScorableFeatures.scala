@@ -6,7 +6,10 @@ import scala.util.parsing.json.JSONObject
 // with a second ScorableFeatures).
 class ScorableFeatures(title : String, year: Int = 0, doi : String = "", sha1: String = "") {
   def toMap() : Map[String, Any] = {
-    Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
+    Map("title" -> (if (title == null) "" else title),
+        "year" -> year,
+        "doi" -> (if (doi == null) "" else doi),
+        "sha1" -> (if (sha1 == null) "" else sha1))
   }
 
   override def toString() : String = {

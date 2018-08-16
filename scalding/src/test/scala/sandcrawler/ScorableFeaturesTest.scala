@@ -8,6 +8,11 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
     new ScorableFeatures(title = s).toSlug
   }
 
+  "toMapFeatures()" should "work with gnarly inputs" in {
+    new ScorableFeatures(title = null).toMapFeatures
+    new ScorableFeatures(title = "something", doi = null, sha1 = null, year = 123).toMapFeatures
+  }
+
   "mapToSlug()" should "extract the parts of titles before a colon" in {
     titleToSlug("HELLO:there") shouldBe "hello"
   }
