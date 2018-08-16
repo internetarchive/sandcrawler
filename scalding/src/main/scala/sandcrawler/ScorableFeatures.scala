@@ -2,9 +2,20 @@ package sandcrawler
 
 import scala.util.parsing.json.JSONObject
 
+
 // Contains features needed to make slug and to score (in combination
 // with a second ScorableFeatures).
 class ScorableFeatures(title : String, year: Int = 0, doi : String = "", sha1: String = "") {
+
+  val slugBlacklist = Set( "abbreviations", "abstract", "acknowledgements",
+    "article", "authorreply", "authorsreply", "bookreview", "bookreviews",
+    "casereport", "commentary", "commentaryon", "commenton", "commentto",
+    "contents", "correspondence", "dedication", "editorialadvisoryboard",
+    "focus", "hypothesis", "inbrief", "introduction", "introductiontotheissue",
+    "lettertotheeditor", "listofabbreviations", "note", "overview", "preface",
+    "references", "results", "review", "reviewarticle", "summary", "title",
+    "name")
+
   def toMap() : Map[String, Any] = {
     Map("title" -> (if (title == null) "" else title),
         "year" -> year,
@@ -23,7 +34,7 @@ class ScorableFeatures(title : String, year: Int = 0, doi : String = "", sha1: S
       val unaccented = StringUtilities.removeAccents(title)
       // Remove punctuation after splitting on colon.
       val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase())).replaceAll("\\s", "")
-      if (slug.isEmpty || slug == null) Scorable.NoSlug else slug
+      if (slug.isEmpty || slug == null || (slugBlacklist contains slug)) Scorable.NoSlug else slug
     }
   }
 

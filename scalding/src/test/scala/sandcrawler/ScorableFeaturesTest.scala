@@ -37,6 +37,12 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
     titleToSlug(":;\"\'") shouldBe Scorable.NoSlug
   }
 
+  it should "filter stub titles" in {
+    titleToSlug("abstract") shouldBe Scorable.NoSlug
+    titleToSlug("title!") shouldBe Scorable.NoSlug
+    titleToSlug("a real title which is not on blacklist") shouldBe "arealtitlewhichisnotonblacklist"
+  }
+
   it should "strip special characters" in {
     titleToSlug(":;!',|\"\'`.#?!-@*/\\=+~%$^{}()[]<>-_…") shouldBe Scorable.NoSlug
     // TODO: titleToSlug("©™₨№") shouldBe Scorable.NoSlug
