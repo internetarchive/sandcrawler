@@ -25,6 +25,7 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
       .read
       // Can't just "fromBytesWritable" because we have multiple types?
       .toTypedPipe[(ImmutableBytesWritable,ImmutableBytesWritable,ImmutableBytesWritable)](new Fields("key", "tei_json", "status_code"))
+      .filter { case (_, tei_json, status_code) => tei_json != null && status_code != null }
       .map { case (key, tei_json, status_code) =>
         (Bytes.toString(key.copyBytes()), Bytes.toString(tei_json.copyBytes()), Bytes.toLong(status_code.copyBytes()))
       }

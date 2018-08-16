@@ -155,10 +155,15 @@ class ScoreJobTest extends FlatSpec with Matchers {
   val Bad : Long = 400
   val StatusCodes = List(Ok, Ok, Ok, Bad, Ok, Bad)
 
-  val SampleData : List[List[Array[Byte]]] = (Sha1Strings, JsonStrings, StatusCodes)
+  val SampleDataHead : List[Tuple] = (Sha1Strings, JsonStrings, StatusCodes)
     .zipped
     .toList
     .map { case (sha, json, status) => List(Bytes.toBytes(sha), Bytes.toBytes(json), Bytes.toBytes(status)) }
+    .map { l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*) }
+
+  // Add example of lines without GROBID data
+  val SampleData = SampleDataHead :+ new Tuple(
+    new ImmutableBytesWritable(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAA88888888888")), null, null)
 
   JobTest("sandcrawler.ScoreJob")
     .arg("test", "")
@@ -168,8 +173,7 @@ class ScoreJobTest extends FlatSpec with Matchers {
     .arg("zookeeper-hosts", testHost)
     .arg("crossref-input", input)
     .arg("debug", "true")
-    .source[Tuple](GrobidScorable.getHBaseSource(testTable, testHost),
-      SampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
+    .source[Tuple](GrobidScorable.getHBaseSource(testTable, testHost), SampleData)
     .source(TextLine(input), List(
       0 -> CrossrefStrings(0),
       1 -> CrossrefStrings(1),
