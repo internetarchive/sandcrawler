@@ -32,8 +32,8 @@ class ScorableFeatures(title : String, year: Int = 0, doi : String = "", sha1: S
       Scorable.NoSlug
     } else {
       val unaccented = StringUtilities.removeAccents(title)
-      // Remove punctuation after splitting on colon.
-      val slug = StringUtilities.removePunctuation((unaccented.split(":")(0).toLowerCase())).replaceAll("\\s", "")
+      // Remove punctuation
+      val slug = StringUtilities.removePunctuation((unaccented.toLowerCase())).replaceAll("\\s", "")
       if (slug.isEmpty || slug == null || (slugBlacklist contains slug)) Scorable.NoSlug else slug
     }
   }

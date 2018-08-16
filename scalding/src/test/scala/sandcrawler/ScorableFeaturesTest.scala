@@ -14,7 +14,7 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
   }
 
   "mapToSlug()" should "extract the parts of titles before a colon" in {
-    titleToSlug("HELLO:there") shouldBe "hello"
+    titleToSlug("HELLO:there") shouldBe "hellothere"
   }
 
   it should "extract an entire colon-less string" in {
@@ -30,8 +30,8 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
   }
 
   it should "strip punctuation" in {
-    titleToSlug("HELLO!:the:re") shouldBe "hello"
-    titleToSlug("a:b:c") shouldBe "a"
+    titleToSlug("HELLO!:the:re") shouldBe "hellothere"
+    titleToSlug("a:b:c") shouldBe "abc"
     titleToSlug(
       "If you're happy and you know it, clap your hands!") shouldBe "ifyourehappyandyouknowitclapyourhands"
     titleToSlug(":;\"\'") shouldBe Scorable.NoSlug
@@ -44,14 +44,14 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
   }
 
   it should "strip special characters" in {
-    titleToSlug(":;!',|\"\'`.#?!-@*/\\=+~%$^{}()[]<>-_…") shouldBe Scorable.NoSlug
-    // TODO: titleToSlug("©™₨№") shouldBe Scorable.NoSlug
+    titleToSlug(":;!',|\"\'`.#?!-@*/\\=+~%$^{}()[]<>-_") shouldBe Scorable.NoSlug
+    // TODO: titleToSlug("©™₨№…") shouldBe Scorable.NoSlug
     // TODO: titleToSlug("πµΣσ") shouldBe Scorable.NoSlug
   }
 
   it should "remove whitespace" in {
-    titleToSlug("foo bar : baz ::") shouldBe "foobar"
-    titleToSlug("\na\t:b:c") shouldBe "a"
+    titleToSlug("foo bar : baz ::") shouldBe "foobarbaz"
+    titleToSlug("\na\t:b:c") shouldBe "abc"
     titleToSlug("\n \t \r  ") shouldBe Scorable.NoSlug
   }
 }
