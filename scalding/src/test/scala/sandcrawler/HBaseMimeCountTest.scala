@@ -1,15 +1,18 @@
 package sandcrawler
 
-import cascading.tuple.{Tuple, Fields}
-import com.twitter.scalding.{JobTest, Tsv, TupleConversions}
+import cascading.tuple.Fields
+import cascading.tuple.Tuple
+import com.twitter.scalding.JobTest
+import com.twitter.scalding.Tsv
+import com.twitter.scalding.TupleConversions
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
 import org.junit.runner.RunWith
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
 import org.slf4j.LoggerFactory
-import parallelai.spyglass.hbase.HBaseSource
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
+import parallelai.spyglass.hbase.HBaseSource
 import scala._
 
 @RunWith(classOf[JUnitRunner])

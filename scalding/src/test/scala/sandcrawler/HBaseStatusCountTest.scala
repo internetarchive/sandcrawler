@@ -1,15 +1,19 @@
 package sandcrawler
 
-import cascading.tuple.{Tuple, Fields}
-import com.twitter.scalding.{JobTest, Tsv, TypedTsv, TupleConversions}
+import cascading.tuple.Fields
+import cascading.tuple.Tuple
+import com.twitter.scalding.JobTest
+import com.twitter.scalding.Tsv
+import com.twitter.scalding.TupleConversions
+import com.twitter.scalding.TypedTsv
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
 import org.junit.runner.RunWith
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
 import org.slf4j.LoggerFactory
-import parallelai.spyglass.hbase.HBaseSource
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
+import parallelai.spyglass.hbase.HBaseSource
 import scala._
 
 @RunWith(classOf[JUnitRunner])
@@ -25,7 +29,8 @@ class HBaseStatusCountTest extends FunSpec with TupleConversions {
   val statusType1Bytes = Bytes.toBytes(statusType1)
   val statusType2Bytes = Bytes.toBytes(statusType2)
 
-  val sampleData = List(
+  val sampleData : List[List[Array[Byte]]] = List(
+    // TODO(bnewbold): now to express a null (empty value) in this list?
     List(Bytes.toBytes("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"), statusType1Bytes),
     List(Bytes.toBytes("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"), statusType1Bytes),
     List(Bytes.toBytes("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT"), statusType2Bytes),
