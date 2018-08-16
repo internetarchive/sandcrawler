@@ -4,6 +4,15 @@ import java.text.Normalizer
 import java.util.regex.Pattern
 
 object StringUtilities {
+  // bnewbold: I propose that we:
+  // 1. keep only \p{Ideographic}, \p{Alphabetic}, and \p{Digit}
+  // 2. strip accents
+  // 3. "lower-case" (unicode-aware)
+  // 4. do any final custom/manual mappings
+  //
+  // We should check (test) that null bytes are handled, in addition to other
+  // more obvious characters
+
   // Adapted from https://git-wip-us.apache.org/repos/asf?p=commons-lang.git;a=blob;f=src/main/java/org/apache/commons/lang3/StringUtils.java;h=1d7b9b99335865a88c509339f700ce71ce2c71f2;hb=HEAD#l934
   def removeAccents(s : String) : String = {
     val replacements = Map(
