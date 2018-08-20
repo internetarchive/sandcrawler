@@ -29,17 +29,17 @@ class HBaseStatusCountTest extends FunSpec with TupleConversions {
   val statusType1Bytes = Bytes.toBytes(statusType1)
   val statusType2Bytes = Bytes.toBytes(statusType2)
 
-  val sampleData : List[List[Array[Byte]]] = List(
-    // TODO(bnewbold): now to express a null (empty value) in this list?
-    List(Bytes.toBytes("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q"), statusType1Bytes),
-    List(Bytes.toBytes("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU"), statusType1Bytes),
-    List(Bytes.toBytes("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT"), statusType2Bytes),
-    List(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56"), statusType2Bytes),
-    List(Bytes.toBytes("sha1:885C3YNNEGH5WAG5ZAAXWA8BNXJWT6CZ"), statusType2Bytes),
-    List(Bytes.toBytes("sha1:00904C3YNNEGH5WAG5ZA9XWAEBNXJWT6"), statusType2Bytes),
-    List(Bytes.toBytes("sha1:249C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ"), statusType1Bytes),
-    List(Bytes.toBytes("sha1:095893C3YNNEGH5WAG5ZAAXWAEBNXJWT"), statusType2Bytes)
-  )
+  // TODO(bnewbold): now to express a null (empty value) in this list?
+    val sampleData : List[List[Array[Byte]]] = List(
+      ("sha1:K2DKSSVTXWPRMFDTWSTCQW3RVWRIOV3Q", statusType1Bytes),
+      ("sha1:C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ3WU", statusType1Bytes),
+      ("sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT", statusType2Bytes),
+      ("sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56", statusType2Bytes),
+      ("sha1:885C3YNNEGH5WAG5ZAAXWA8BNXJWT6CZ", statusType2Bytes),
+      ("sha1:00904C3YNNEGH5WAG5ZA9XWAEBNXJWT6", statusType2Bytes),
+      ("sha1:249C3YNNEGH5WAG5ZAAXWAEBNXJWT6CZ", statusType1Bytes),
+      ("sha1:095893C3YNNEGH5WAG5ZAAXWAEBNXJWT", statusType2Bytes))
+        .map(pair => List(Bytes.toBytes(pair._1), pair._2))
 
   val statusType1Count = sampleData.count(lst => lst(1) == statusType1Bytes)
   val statusType2Count = sampleData.count(lst => lst(1) == statusType2Bytes)
