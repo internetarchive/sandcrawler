@@ -5,12 +5,12 @@ import org.scalatest._
 // scalastyle:off null
 class ScorableFeaturesTest extends FlatSpec with Matchers {
   private def titleToSlug(s : String) : String = {
-    new ScorableFeatures(title = s).toSlug
+    ScorableFeatures.create(title = s).toSlug
   }
 
   "toMapFeatures()" should "work with gnarly inputs" in {
-    new ScorableFeatures(title = null).toMapFeatures
-    new ScorableFeatures(title = "something", doi = null, sha1 = null, year = 123).toMapFeatures
+    ScorableFeatures.create(title = null).toMapFeatures
+    ScorableFeatures.create(title = "something", doi = null, sha1 = null, year = 123).toMapFeatures
   }
 
   "mapToSlug()" should "extract the parts of titles before a colon" in {
