@@ -45,7 +45,7 @@ object GrobidScorable {
       case None => MapFeatures(Scorable.NoSlug, json)
       case Some(map) => {
         if (map contains "title") {
-          new ScorableFeatures(Scorable.getString(map, "title"), sha1=key).toMapFeatures
+          ScorableFeatures.create(title=Scorable.getString(map, "title"), sha1=key).toMapFeatures
         } else {
           MapFeatures(Scorable.NoSlug, json)
         }

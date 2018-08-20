@@ -35,7 +35,7 @@ object CrossrefScorable {
             new MapFeatures(Scorable.NoSlug, json)
           } else {
             // bnewbold: not checking that titles(0) is non-null/non-empty; case would be, in JSON, "title": [ null ]
-            val sf : ScorableFeatures = new ScorableFeatures(title=titles(0), doi=doi)
+            val sf : ScorableFeatures = ScorableFeatures.create(title=titles(0), doi=doi)
             new MapFeatures(sf.toSlug, sf.toString)
           }
         } else {
