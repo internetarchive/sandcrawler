@@ -189,6 +189,7 @@ def main():
         sys.exit(-1)
     if not (args.prod or args.qa) or (args.prod and args.qa):
         print("must pass one of --prod or --qa")
+        sys.exit(-1)
     if args.prod:
         args.env = "prod"
     if args.qa:
