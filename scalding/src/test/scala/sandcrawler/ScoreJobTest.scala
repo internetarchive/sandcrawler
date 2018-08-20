@@ -162,6 +162,7 @@ class ScoreJobTest extends FlatSpec with Matchers {
     .map { l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*) }
 
   // Add example of lines without GROBID data
+  // scalastyle:off null
   val SampleData = SampleDataHead :+ new Tuple(
     new ImmutableBytesWritable(Bytes.toBytes("sha1:35985C3YNNEGH5WAG5ZAA88888888888")), null, null)
 
