@@ -3,6 +3,7 @@ package sandcrawler
 import scala.util.parsing.json.JSONObject
 
 object ScorableFeatures {
+  // Static factory method
   def create(title : String, year : Int = 0, doi : String = "", sha1 : String = "") : ScorableFeatures = {
     new ScorableFeatures(
       title=if (title == null) "" else title,
@@ -24,16 +25,11 @@ class ScorableFeatures private(title : String, year: Int = 0, doi : String = "",
     "references", "results", "review", "reviewarticle", "summary", "title",
     "name")
 
-  def toMap() : Map[String, Any] = Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
+  def toMap() : Map[String, Any] =
+    Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
 
-  override def toString() : String = {
-    val myMap = toMap()
-    assert(myMap("title") != null)
-    assert(myMap("year") != null)
-    assert(myMap("doi") != null)
-    assert(myMap("sha1") != null)
-    JSONObject(myMap).toString
-  }
+  override def toString() : String =
+    JSONObject(toMap).toString
 
   def toSlug() : String = {
     if (title == null) {
@@ -46,7 +42,6 @@ class ScorableFeatures private(title : String, year: Int = 0, doi : String = "",
     }
   }
 
-  def toMapFeatures : MapFeatures = {
+  def toMapFeatures : MapFeatures =
     MapFeatures(toSlug, toString)
-  }
 }
