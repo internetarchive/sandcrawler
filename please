@@ -95,6 +95,27 @@ def run_rowcount(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+def run_statuscodecount(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting statuscodecount job...")
+    output = "{}/output-{}/{}-statuscodecount".format(
+        HDFS_DIR,
+        args.env,
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    cmd = """hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.HBaseStatusCodeCountJob \
+        --hdfs \
+        --app.conf.path scalding/ia_cluster.conf \
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env)
+    subprocess.call(cmd, shell=True)
+
 def run_statuscount(args):
     if args.rebuild:
         rebuild_scalding()
@@ -218,6 +239,9 @@ def main():
 
     sub_statuscount = subparsers.add_parser('status-count')
     sub_statuscount.set_defaults(func=run_statuscount)
+
+    sub_statuscodecount = subparsers.add_parser('status-code-count')
+    sub_statuscodecount.set_defaults(func=run_statuscodecount)
 
     sub_matchcrossref = subparsers.add_parser('match-crossref')
     sub_matchcrossref.set_defaults(func=run_matchcrossref)
