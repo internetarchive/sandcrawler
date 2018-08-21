@@ -194,7 +194,7 @@ def run_colcount(args):
         HDFS_DIR,
         args.env,
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"),
-        args.column)
+        args.column.replace(':', '_'))
     cmd = """hadoop jar \
         scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
         com.twitter.scalding.Tool sandcrawler.HBaseColCountJob \
