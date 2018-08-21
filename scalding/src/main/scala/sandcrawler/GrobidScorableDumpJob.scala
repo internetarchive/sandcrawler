@@ -1,17 +1,16 @@
 
 package sandcrawler
 
-import cascading.pipe.Pipe
-import com.twitter.scalding._
-import com.twitter.scalding.typed.TDsl._
-import parallelai.spyglass.base.JobBase
-
 import cascading.flow.FlowDef
+import cascading.pipe.Pipe
 import cascading.tuple.Fields
 import com.twitter.scalding._
+import com.twitter.scalding._
+import com.twitter.scalding.typed.TDsl._
 import com.twitter.scalding.typed.TDsl._
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
+import parallelai.spyglass.base.JobBase
 import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
@@ -28,7 +27,7 @@ class GrobidScorableDumpJob(args: Args) extends JobBase(args) {
     // Can't just "fromBytesWritable" because we have multiple types?
     .toTypedPipe[(ImmutableBytesWritable,ImmutableBytesWritable,ImmutableBytesWritable)](new Fields("key", "metadata", "status_code"))
     .filter { case (_, metadata, status_code) =>
-      grobidHbaseRows.inc 
+      grobidHbaseRows.inc
       metadata != null && status_code != null
     }
     .map { case (key, metadata, status_code) =>
@@ -40,12 +39,12 @@ class GrobidScorableDumpJob(args: Args) extends JobBase(args) {
       (key, json)
     }
     .map { entry : (String, String) =>
-      parsedGrobidRows.inc 
+      parsedGrobidRows.inc
       GrobidScorable.jsonToMapFeatures(entry._1, entry._2)
     }
     .filter { entry => Scorable.isValidSlug(entry.slug) }
-    .map { entry => 
-      validGrobidRows.inc 
+    .map { entry =>
+      validGrobidRows.inc
       entry
     }
     // XXX: this groupBy after the map?
