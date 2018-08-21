@@ -1,9 +1,30 @@
 package sandcrawler
 
+import java.io.InputStream
+
+import scala.io.Source
+
 import org.scalatest._
 
 // scalastyle:off null
 class ScorableFeaturesTest extends FlatSpec with Matchers {
+
+  // TODO: Remove this when we're convinced that our file-reading code
+  // works. (I'm already convinced. --Ellen)
+  "read slugs" should "work" in {
+    val SlugBlacklist = Set( "abbreviations", "abstract", "acknowledgements",
+      "article", "authorreply", "authorsreply", "bookreview", "bookreviews",
+      "casereport", "commentary", "commentaryon", "commenton", "commentto",
+      "contents", "correspondence", "dedication", "editorialadvisoryboard",
+      "focus", "hypothesis", "inbrief", "introduction", "introductiontotheissue",
+      "lettertotheeditor", "listofabbreviations", "note", "overview", "preface",
+      "references", "results", "review", "reviewarticle", "summary", "title",
+      "name")
+
+    ScorableFeatures.SlugBlacklist.size shouldBe SlugBlacklist.size
+    for (s <- ScorableFeatures.SlugBlacklist) SlugBlacklist should contain (s)
+  }
+
   private def titleToSlug(s : String) : String = {
     ScorableFeatures.create(title = s).toSlug
   }

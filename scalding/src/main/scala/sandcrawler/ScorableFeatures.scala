@@ -1,8 +1,16 @@
 package sandcrawler
 
+import java.io.InputStream
+
+import scala.io.Source
 import scala.util.parsing.json.JSONObject
 
 object ScorableFeatures {
+  // TODO: Add exception handling.
+  val fileStream : InputStream = getClass.getResourceAsStream("/slug-blacklist.txt")
+  val SlugBlacklist : Set[String] = Source.fromInputStream(fileStream).getLines.toSet
+  fileStream.close
+
   // Static factory method
   def create(title : String, year : Int = 0, doi : String = "", sha1 : String = "") : ScorableFeatures = {
     new ScorableFeatures(
@@ -16,14 +24,6 @@ object ScorableFeatures {
 // Contains features needed to make slug and to score (in combination
 // with a second ScorableFeatures). Create with above static factory method.
 class ScorableFeatures private(title : String, year: Int = 0, doi : String = "", sha1: String = "") {
-  val SlugBlacklist = Set( "abbreviations", "abstract", "acknowledgements",
-    "article", "authorreply", "authorsreply", "bookreview", "bookreviews",
-    "casereport", "commentary", "commentaryon", "commenton", "commentto",
-    "contents", "correspondence", "dedication", "editorialadvisoryboard",
-    "focus", "hypothesis", "inbrief", "introduction", "introductiontotheissue",
-    "lettertotheeditor", "listofabbreviations", "note", "overview", "preface",
-    "references", "results", "review", "reviewarticle", "summary", "title",
-    "name")
 
   def toMap() : Map[String, Any] =
     Map("title" -> title, "year" -> year, "doi" -> doi, "sha1" -> sha1)
@@ -38,7 +38,7 @@ class ScorableFeatures private(title : String, year: Int = 0, doi : String = "",
       val unaccented = StringUtilities.removeAccents(title)
       // Remove punctuation
       val slug = StringUtilities.removePunctuation((unaccented.toLowerCase())).replaceAll("\\s", "")
-      if (slug.isEmpty || slug == null || (SlugBlacklist contains slug)) Scorable.NoSlug else slug
+      if (slug.isEmpty || slug == null || (ScorableFeatures.SlugBlacklist contains slug)) Scorable.NoSlug else slug
     }
   }
 
