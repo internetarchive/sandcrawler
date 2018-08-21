@@ -24,10 +24,10 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
     getSource(args)
       .read
       // Can't just "fromBytesWritable" because we have multiple types?
-      .toTypedPipe[(ImmutableBytesWritable,ImmutableBytesWritable,ImmutableBytesWritable)](new Fields("key", "tei_json", "status_code"))
-      .filter { case (_, tei_json, status_code) => tei_json != null && status_code != null }
-      .map { case (key, tei_json, status_code) =>
-        (Bytes.toString(key.copyBytes()), Bytes.toString(tei_json.copyBytes()), Bytes.toLong(status_code.copyBytes()))
+      .toTypedPipe[(ImmutableBytesWritable,ImmutableBytesWritable,ImmutableBytesWritable)](new Fields("key", "metadata", "status_code"))
+      .filter { case (_, metadata, status_code) => metadata != null && status_code != null }
+      .map { case (key, metadata, status_code) =>
+        (Bytes.toString(key.copyBytes()), Bytes.toString(metadata.copyBytes()), Bytes.toLong(status_code.copyBytes()))
       }
       // TODO: Should I combine next two stages for efficiency?
       .collect { case (key, json, StatusOK) => (key, json) }
@@ -37,7 +37,7 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
 
 object GrobidScorable {
   def getHBaseSource(table : String, host : String) : HBaseSource = {
-    HBaseBuilder.build(table, host, List("grobid0:tei_json", "grobid0:status_code"), SourceMode.SCAN_ALL)
+    HBaseBuilder.build(table, host, List("grobid0:metadata", "grobid0:status_code"), SourceMode.SCAN_ALL)
   }
 
   def jsonToMapFeatures(key : String, json : String) : MapFeatures = {
