@@ -17,7 +17,7 @@ import parallelai.spyglass.hbase.HBaseSource
 import scala._
 
 @RunWith(classOf[JUnitRunner])
-class HBaseStatusCountTest extends FunSpec with TupleConversions {
+class HBaseStatusCodeCountTest extends FunSpec with TupleConversions {
 
   val output = "/tmp/testOutput"
   val (testTable, testHost) = ("test-table", "dummy-host:2181")
@@ -44,7 +44,7 @@ class HBaseStatusCountTest extends FunSpec with TupleConversions {
   val statusType1Count = sampleData.count(lst => lst(1) == statusType1Bytes)
   val statusType2Count = sampleData.count(lst => lst(1) == statusType2Bytes)
 
-  JobTest("sandcrawler.HBaseStatusCountJob")
+  JobTest("sandcrawler.HBaseStatusCodeCountJob")
     .arg("test", "")
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
@@ -55,7 +55,7 @@ class HBaseStatusCountTest extends FunSpec with TupleConversions {
       sampleData.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
     .sink[Tuple](TypedTsv[(Long, Long)](output)) {
       outputBuffer =>
-      it("should return a 2-element list.") {
+      it("should return a correct number of elements.") {
         assert(outputBuffer.size === 2)
       }
 

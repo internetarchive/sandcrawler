@@ -20,13 +20,13 @@ class HBaseStatusCountJob(args: Args) extends JobBase(args) with HBasePipeConver
     args("zookeeper-hosts"),
     "grobid0:status")
 
-  val statusPipe : TypedPipe[Long] = source
+  val statusPipe : TypedPipe[String] = source
     .read
     .toTypedPipe[(ImmutableBytesWritable,ImmutableBytesWritable)]('key, 'status)
-    .map { case (key, raw_status) => Bytes.toString(raw_code.copyBytes()) }
+    .map { case (key, raw_status) => Bytes.toString(raw_status.copyBytes()) }
 
   statusPipe.groupBy { identity }
     .size
     .debug
-    .write(TypedTsv[(Long,String)](args("output")))
+    .write(TypedTsv[(String,Long)](args("output")))
 }

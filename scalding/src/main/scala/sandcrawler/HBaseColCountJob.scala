@@ -17,7 +17,7 @@ class HBaseColCountJob(args: Args) extends JobBase(args) with HBasePipeConversio
   HBaseColCountJob.getHBaseSource(
     args("hbase-table"),
     args("zookeeper-hosts"),
-    args("column")
+    args("column"))
     .read
     .debug
     .groupAll { _.size('count) }
