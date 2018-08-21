@@ -163,7 +163,7 @@ class MRExtractCdxGrobid(MRJob):
                 extra=grobid_response.text)
 
         info['grobid0:status'] = {'status': 'partial'}
-        info['grobid0:tei_xml'] = grobid_response.text
+        info['grobid0:tei_xml'] = grobid_response.content
 
         # Convert TEI XML to JSON
         try:
