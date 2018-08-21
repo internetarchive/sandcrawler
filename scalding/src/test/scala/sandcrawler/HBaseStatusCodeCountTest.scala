@@ -17,15 +17,17 @@ import parallelai.spyglass.hbase.HBaseSource
 import scala._
 
 @RunWith(classOf[JUnitRunner])
-class HBaseStatusCodeCountTest extends FunSpec with TupleConversions {
+class HBaseStatusCountTest extends FunSpec with TupleConversions {
 
   val output = "/tmp/testOutput"
   val (testTable, testHost) = ("test-table", "dummy-host:2181")
 
   val log = LoggerFactory.getLogger(this.getClass.getName)
 
-  val statusType1Bytes = Bytes.toBytes("""{"status": "success"}""")
-  val statusType2Bytes = Bytes.toBytes("""{"status": "partial"}""")
+  val statusType1 : Long = 200
+  val statusType2 : Long = 404
+  val statusType1Bytes = Bytes.toBytes(statusType1)
+  val statusType2Bytes = Bytes.toBytes(statusType2)
 
   // TODO(bnewbold): now to express a null (empty value) in this list?
     val sampleData : List[List[Array[Byte]]] = List(
@@ -42,7 +44,7 @@ class HBaseStatusCodeCountTest extends FunSpec with TupleConversions {
   val statusType1Count = sampleData.count(lst => lst(1) == statusType1Bytes)
   val statusType2Count = sampleData.count(lst => lst(1) == statusType2Bytes)
 
-  JobTest("sandcrawler.HBaseStatusCodeCountJob")
+  JobTest("sandcrawler.HBaseStatusCountJob")
     .arg("test", "")
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
