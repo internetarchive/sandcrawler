@@ -10,27 +10,28 @@ import parallelai.spyglass.hbase.HBaseConstants.SourceMode
 import parallelai.spyglass.hbase.HBasePipeConversions
 import parallelai.spyglass.hbase.HBaseSource
 
-class GrobidMetadataCountJob(args: Args) extends JobBase(args) with HBasePipeConversions {
+class HBaseColCountJob(args: Args) extends JobBase(args) with HBasePipeConversions {
 
   val output = args("output")
 
-  GrobidMetadataCountJob.getHBaseSource(
+  HBaseColCountJob.getHBaseSource(
     args("hbase-table"),
-    args("zookeeper-hosts"))
+    args("zookeeper-hosts"),
+    args("column")
     .read
     .debug
     .groupAll { _.size('count) }
     .write(Tsv(output))
 }
 
-object GrobidMetadataCountJob {
+object HBaseColCountJob {
 
   // eg, "wbgrp-journal-extract-0-qa",7 "mtrcs-zk1.us.archive.org:2181"
-  def getHBaseSource(hbaseTable: String, zookeeperHosts: String) : HBaseSource = {
+  def getHBaseSource(hbaseTable: String, zookeeperHosts: String, col: String) : HBaseSource = {
     HBaseBuilder.build(
       hbaseTable,
       zookeeperHosts,
-      List("grobid0:metadata"),
+      List(col),
       SourceMode.SCAN_ALL)
   }
 }
