@@ -49,7 +49,7 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
   }
 
   it should "strip special characters" in {
-    titleToSlug(":;!',|\"\'`.#?!-@*/\\=+~%$^{}()[]<>-_") shouldBe Scorable.NoSlug
+    titleToSlug(":;!',|\"\'`.#?!-@*/\\=+~%$^{}()[]<>-_’·“”‘’“”«»「」") shouldBe Scorable.NoSlug
     // TODO: titleToSlug("©™₨№…") shouldBe Scorable.NoSlug
     // TODO: titleToSlug("πµΣσ") shouldBe Scorable.NoSlug
   }
