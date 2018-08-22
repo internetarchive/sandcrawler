@@ -19,29 +19,53 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
   def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
     getSource(args).read
       .toTypedPipe[String](new Fields("line"))
+      .filter { CrossrefScorable.keepRecord(_) }
       .map { CrossrefScorable.jsonToMapFeatures(_) }
   }
 }
 
 object CrossrefScorable {
+  def keepRecord(json : String) : Boolean = {
+    Scorable.jsonToMap(json) match {
+      case None => false
+      case Some(map) => {
+        mapToTitle(map) match {
+          case None => false
+          case Some(title) => title.length <= Scorable.MaxTitleLength
+        }
+      }
+    }
+  }
+
+  // Returns None if title is null, empty, or too long.
+  def mapToTitle(map : Map[String, Any]) : Option[String] = {
+    if (map contains "title") {
+      val titles = map("title").asInstanceOf[List[String]]
+      if (titles.isEmpty || titles == null) {
+        None
+      } else {
+        val title = titles(0)
+        if (title == null || title.isEmpty || title.length > Scorable.MaxTitleLength) None else Some(title)
+      }
+    } else None
+  }
+
   def jsonToMapFeatures(json : String) : MapFeatures = {
     Scorable.jsonToMap(json) match {
       case None => MapFeatures(Scorable.NoSlug, json)
-      case Some(map) => {
-        if ((map contains "title") && (map contains "DOI")) {
-          val titles = map("title").asInstanceOf[List[String]]
-          val doi = Scorable.getString(map, "DOI")
-          if (titles.isEmpty || titles == null || doi.isEmpty || doi == null) {
-            new MapFeatures(Scorable.NoSlug, json)
-          } else {
-            // bnewbold: not checking that titles(0) is non-null/non-empty; case would be, in JSON, "title": [ null ]
-            val sf : ScorableFeatures = ScorableFeatures.create(title=titles(0), doi=doi)
-            new MapFeatures(sf.toSlug, sf.toString)
+      case Some(map) => 
+        mapToTitle(map) match {
+          case None => MapFeatures(Scorable.NoSlug, json)
+          case Some(title) => {
+            val doi = Scorable.getString(map, "DOI")
+            if (doi.isEmpty || doi == null) {
+              MapFeatures(Scorable.NoSlug, json)
+            } else {
+              val sf : ScorableFeatures = ScorableFeatures.create(title=title, doi=doi)
+              MapFeatures(sf.toSlug, sf.toString)
+            }
           }
-        } else {
-          new MapFeatures(Scorable.NoSlug, json)
         }
-      }
     }
   }
 }

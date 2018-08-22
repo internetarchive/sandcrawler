@@ -66,7 +66,10 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
 }
 """
   // scalastyle:on
-  val CrossrefStringWithTitle = CrossrefString.replace("<<TITLE>>", "Some Title")
+  val CrossrefStringWithGoodTitle = CrossrefString.replace("<<TITLE>>", "Some Title")
+  val CrossrefStringWithMaximumTitle = CrossrefString.replace("<<TITLE>>", "T" * Scorable.MaxTitleLength)
+  val CrossrefStringWithExcessiveTitle = CrossrefString.replace("<<TITLE>>", "T" * Scorable.MaxTitleLength + "0")
+  val CrossrefStringWithNullTitle = CrossrefString.replace("\"<<TITLE>>\"", "null")
   val CrossrefStringWithEmptyTitle = CrossrefString.replace("<<TITLE>>", "")
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
@@ -82,13 +85,18 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
     result.slug shouldBe Scorable.NoSlug
   }
 
+  it should "handle null title" in {
+    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithNullTitle)
+    result.slug shouldBe Scorable.NoSlug
+  }
+
   it should "handle empty title" in {
     val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithEmptyTitle)
     result.slug shouldBe Scorable.NoSlug
   }
 
   it should "handle valid input" in {
-    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithTitle)
+    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithGoodTitle)
     result.slug shouldBe "sometitle"
     Scorable.jsonToMap(result.json) match {
       case None => fail()
@@ -96,5 +104,29 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
         map("title").asInstanceOf[String] shouldBe "Some Title"
       }
     }
+  }
+
+  "CrossrefScorable.keepRecord()" should "return true for valid JSON with title" in {
+    CrossrefScorable.keepRecord(CrossrefStringWithGoodTitle) shouldBe true
+  }
+
+  it should "return true for valid JSON with a title of maximum permitted length" in {
+    CrossrefScorable.keepRecord(CrossrefStringWithMaximumTitle) shouldBe true
+  }
+
+  it should "return false for valid JSON with excessively long title" in {
+    CrossrefScorable.keepRecord(CrossrefStringWithExcessiveTitle) shouldBe false
+  }
+
+  it should "return false for valid JSON with null title" in {
+    CrossrefScorable.keepRecord(CrossrefStringWithNullTitle) shouldBe false
+  }
+
+  it should "return false for valid JSON with no title" in {
+    CrossrefScorable.keepRecord(CrossrefStringWithoutTitle) shouldBe false
+  }
+
+  it should "return false for invalid JSON" in {
+    CrossrefScorable.keepRecord(CrossrefStringWithoutTitle) shouldBe false
   }
 }
