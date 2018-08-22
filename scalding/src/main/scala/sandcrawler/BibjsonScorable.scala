@@ -38,7 +38,7 @@ object BibjsonScorable {
           if (title == null || title.isEmpty) {
             new MapFeatures(Scorable.NoSlug, json)
           } else {
-            val sf : ScorableFeatures = new ScorableFeatures(title=title, doi=doi, sha1=sha1)
+            val sf : ScorableFeatures = ScorableFeatures.create(title=title, doi=doi, sha1=sha1)
             new MapFeatures(sf.toSlug, sf.toString)
           }
         } else {
