@@ -226,7 +226,7 @@ def run_keysmissingcol(args):
         args.column.replace(":", "_"))
     cmd = """hadoop jar \
         scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
-        com.twitter.scalding.Tool sandcrawler.MissingColDumpJob \
+        com.twitter.scalding.Tool sandcrawler.MissingColumnDumpJob \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
         --hbase-table wbgrp-journal-extract-0-{env} \
@@ -289,7 +289,7 @@ def main():
         help="column name to use in count")
 
     sub_keysmissingcol = subparsers.add_parser('keys-missing-col')
-    sub_keysmissingcol.set_defaults(func=run_matchcrossref)
+    sub_keysmissingcol.set_defaults(func=run_keysmissingcol)
     sub_keysmissingcol.add_argument('column',
         help="column to SCAN for missing keys")
 
