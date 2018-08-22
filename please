@@ -147,10 +147,15 @@ def run_matchcrossref(args):
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
     # Notes: -D options must come after Tool but before class name
     # https://github.com/twitter/scalding/wiki/Frequently-asked-questions#how-do-i-pass-parameters-to-my-hadoop-job-number-of-reducers--memory-options--etc-
+    # Compression: changed due to errors in production
+    # https://stackoverflow.com/a/11336820/4682349
     cmd = """hadoop jar \
         scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
         com.twitter.scalding.Tool \
         -Dmapred.reduce.tasks={reducers} \
+        -Dcascading.spill.list.threshold=500000 \
+        -D mapred.output.compress=false \
+        -Dmapred.compress.map.output=true\
         sandcrawler.ScoreJob \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
