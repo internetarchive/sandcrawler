@@ -58,6 +58,7 @@ class GrobidScorableTest extends FlatSpec with Matchers {
 }
 """
   val GrobidStringWithGoodTitle = GrobidString.replace("<<TITLE>>", "Dummy Example File")
+  val GrobidStringWithMaximumTitle = GrobidString.replace("<<TITLE>>", "T" * Scorable.MaxTitleLength)
   val GrobidStringWithExcessiveTitle = GrobidString.replace("<<TITLE>>", "T" * Scorable.MaxTitleLength + "0")
   val GrobidStringWithNullTitle = GrobidString.replace("\"<<TITLE>>\"", "null")
   val GrobidStringWithoutTitle = GrobidString.replace("title", "nottitle")
@@ -95,6 +96,10 @@ class GrobidScorableTest extends FlatSpec with Matchers {
 
   "GrobidScorable.keepRecord()" should "return true for valid JSON with title" in {
     GrobidScorable.keepRecord(GrobidStringWithGoodTitle) shouldBe true
+  }
+
+  it should "return true for valid JSON with a title of maximum permitted length" in {
+    GrobidScorable.keepRecord(GrobidStringWithMaximumTitle) shouldBe true
   }
 
   it should "return false for valid JSON with excessively long title" in {
