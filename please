@@ -215,6 +215,30 @@ def run_colcount(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+def run_keysmissingcol(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting keysmissingcol job...")
+    output = "{}/output-{}/{}-keysmissingcol-{}".format(
+        HDFS_DIR,
+        args.env,
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"),
+        args.column.replace(":", "_"))
+    cmd = """hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.MissingColDumpJob \
+        --hdfs \
+        --app.conf.path scalding/ia_cluster.conf \
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --column {column} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            column=args.column,
+            env=args.env)
+    subprocess.call(cmd, shell=True)
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -263,6 +287,11 @@ def main():
     sub_colcount.set_defaults(func=run_colcount)
     sub_colcount.add_argument('column',
         help="column name to use in count")
+
+    sub_keysmissingcol = subparsers.add_parser('keys-missing-col')
+    sub_keysmissingcol.set_defaults(func=run_matchcrossref)
+    sub_keysmissingcol.add_argument('column',
+        help="column to SCAN for missing keys")
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
