@@ -47,13 +47,15 @@ object CrossrefScorable {
         val title = titles(0)
         if (title == null || title.isEmpty || title.length > Scorable.MaxTitleLength) None else Some(title)
       }
-    } else None
+    } else {
+      None
+    }
   }
 
   def jsonToMapFeatures(json : String) : MapFeatures = {
     Scorable.jsonToMap(json) match {
       case None => MapFeatures(Scorable.NoSlug, json)
-      case Some(map) => 
+      case Some(map) =>
         mapToTitle(map) match {
           case None => MapFeatures(Scorable.NoSlug, json)
           case Some(title) => {

@@ -188,8 +188,7 @@ class ScoreJobTest extends FlatSpec with Matchers {
       2 -> CrossrefStrings(2),
       3 -> CrossrefStrings(3),
       4 -> CrossrefStrings(4)))
-    .sink[(String, ReduceFeatures)](TypedTsv[(String, ReduceFeatures)](output + ".trapped")) {
-        _ => () }
+    .sink[(String, ReduceFeatures)](TypedTsv[(String, ReduceFeatures)](output + ".trapped")) { _ => () }
     .sink[(String, Int, String, String)](TypedTsv[(String, Int, String, String)](output)) {
       // Grobid titles and slugs (in parentheses):
       //   Title 1                       (title1)
