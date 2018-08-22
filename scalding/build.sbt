@@ -42,7 +42,7 @@ lazy val root = (project in file(".")).
     libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion,
     libraryDependencies += "org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % hadoopVersion classifier "tests",
     libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion,
-    libraryDependencies += "parallelai" % "parallelai.spyglass" % "2.11_0.17.2_cdh5.3.1",
+    libraryDependencies += "parallelai" % "parallelai.spyglass" % "2.11_0.17.2_cdh5.3.1-p1",
 
     // cargo-culted from twitter/scalding's build.sbt
     // hint via https://stackoverflow.com/questions/23280494/sbt-assembly-error-deduplicate-different-file-contents-found-in-the-following#23280952
