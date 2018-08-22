@@ -117,6 +117,7 @@ class ScoreJobTest extends FlatSpec with Matchers {
 }
 """
   // scalastyle:on
+  val TooLongOfTitle = "X" * Scorable.MaxTitleLength + "Y"  // arbitrary long string
   val CrossrefStringWithTitle = CrossrefString.replace("<<TITLE>>", "SomeTitle")
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
@@ -124,7 +125,8 @@ class ScoreJobTest extends FlatSpec with Matchers {
     CrossrefString.replace("<<TITLE>>", "Title 2: TNG").replace("<<DOI>>", "DOI-0"),
     CrossrefString.replace("<<TITLE>>", "Title 1: TNG 2A").replace("<<DOI>>", "DOI-0.5"),
     CrossrefString.replace("<<TITLE>>", "Title 1: TNG 3").replace("<<DOI>>", "DOI-0.75"),
-    CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"))
+    CrossrefString.replace("<<TITLE>>", "Title 2: Rebooted").replace("<<DOI>>", "DOI-1"),
+    CrossrefString.replace("<<TITLE>>", TooLongOfTitle).replace("<<DOI>>", "DOI-1"))
 
   //  Pipeline tests
   val output = "/tmp/testOutput"
@@ -137,7 +139,8 @@ class ScoreJobTest extends FlatSpec with Matchers {
     "sha1:SDKUVHC3YNNEGH5WAG5ZAAXWAEBNX4WT",
     "sha1:35985C3YNNEGH5WAG5ZAAXWAEBNXJW56",
     "sha1:93187A85273589347598473894839443",
-    "sha1:024937534094897039547e9824382943")
+    "sha1:024937534094897039547e9824382943",
+    "sha1:93229759932857982837892347893892")
 
   val JsonStrings : List[String] = List(
     JsonString.replace("<<TITLE>>", "Title 1"),
@@ -147,13 +150,15 @@ class ScoreJobTest extends FlatSpec with Matchers {
     JsonString.replace("<<TITLE>>", "Title 1"),
     MalformedJsonString,
     // This will have bad status.
-    JsonString.replace("<<TITLE>>", "Title 2")
+    JsonString.replace("<<TITLE>>", "Title 2"),
+    // This is in both sources but too long.
+    JsonString.replace("<<TITLE>>", TooLongOfTitle)
   )
 
   // bnewbold: status codes aren't strings, they are uint64
   val Ok : Long = 200
   val Bad : Long = 400
-  val StatusCodes = List(Ok, Ok, Ok, Bad, Ok, Bad)
+  val StatusCodes = List(Ok, Ok, Ok, Bad, Ok, Bad, Ok)
 
   val SampleDataHead : List[Tuple] = (Sha1Strings, JsonStrings, StatusCodes)
     .zipped
@@ -181,7 +186,8 @@ class ScoreJobTest extends FlatSpec with Matchers {
       0 -> CrossrefStrings(0),
       1 -> CrossrefStrings(1),
       2 -> CrossrefStrings(2),
-      3 -> CrossrefStrings(3)))
+      3 -> CrossrefStrings(3),
+      4 -> CrossrefStrings(4)))
     .sink[(String, ReduceFeatures)](TypedTsv[(String, ReduceFeatures)](output + ".trapped")) {
         _ => () }
     .sink[(String, Int, String, String)](TypedTsv[(String, Int, String, String)](output)) {
@@ -189,11 +195,13 @@ class ScoreJobTest extends FlatSpec with Matchers {
       //   Title 1                       (title1)
       //   Title 2: TNG                  (title2tng)
       //   Title 3: The Sequel           (title3thesequel)
+      //   <too long of a title>
       // crossref titles and slugs (in parentheses):
       //   Title 2: TNG                  (title2tng)
       //   Title 1: TNG 2A               (title1tng2a)
       //   Title 1: TNG 3                (title1tng3)
       //   Title 2: Rebooted             (title2rebooted)
+      //   <too long of a title>
       // XXX: Join should have 3 "title1" slugs and 1 "title2tng" slug
       outputBuffer =>
       "The pipeline" should "return a 1-element list" in {
