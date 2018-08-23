@@ -31,11 +31,27 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
       }
       // TODO: Should I combine next two stages for efficiency?
       .collect { case (key, json, StatusOK) => (key, json) }
+      .filter { case (key, json) => GrobidScorable.keepRecord(json) }
       .map { entry : (String, String) => GrobidScorable.jsonToMapFeatures(entry._1, entry._2) }
   }
 }
 
 object GrobidScorable {
+  def keepRecord(json : String) : Boolean = {
+    Scorable.jsonToMap(json) match {
+      case None => false
+      case Some(map) => {
+        if (map contains "title") {
+          val title = Scorable.getString(map, "title")
+          title != null && title.length <= Scorable.MaxTitleLength
+        } else {
+          false
+        }
+      }
+    }
+  }
+
+
   def getHBaseSource(table : String, host : String) : HBaseSource = {
     HBaseBuilder.build(table, host, List("grobid0:metadata", "grobid0:status_code"), SourceMode.SCAN_ALL)
   }

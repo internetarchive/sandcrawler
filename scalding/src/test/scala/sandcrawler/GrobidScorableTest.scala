@@ -57,7 +57,10 @@ class GrobidScorableTest extends FlatSpec with Matchers {
   "annex": null
 }
 """
-  val GrobidStringWithTitle = GrobidString.replace("<<TITLE>>", "Dummy Example File")
+  val GrobidStringWithGoodTitle = GrobidString.replace("<<TITLE>>", "Dummy Example File")
+  val GrobidStringWithMaximumTitle = GrobidString.replace("<<TITLE>>", "T" * Scorable.MaxTitleLength)
+  val GrobidStringWithExcessiveTitle = GrobidString.replace("<<TITLE>>", "T" * Scorable.MaxTitleLength + "0")
+  val GrobidStringWithNullTitle = GrobidString.replace("\"<<TITLE>>\"", "null")
   val GrobidStringWithoutTitle = GrobidString.replace("title", "nottitle")
   val MalformedGrobidString = GrobidString.replace("}", "")
   val Key = "Dummy Key"
@@ -69,13 +72,18 @@ class GrobidScorableTest extends FlatSpec with Matchers {
     result.slug shouldBe Scorable.NoSlug
   }
 
+  it should "handle null title" in {
+    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithNullTitle)
+    result.slug shouldBe Scorable.NoSlug
+  }
+
   it should "handle missing title" in {
     val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithoutTitle)
     result.slug shouldBe Scorable.NoSlug
   }
 
   it should "handle valid input" in {
-    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithTitle)
+    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithGoodTitle)
     result.slug shouldBe "dummyexamplefile"
     Scorable.jsonToMap(result.json) match {
       case None => fail()
@@ -84,5 +92,29 @@ class GrobidScorableTest extends FlatSpec with Matchers {
         map("title").asInstanceOf[String] shouldBe "Dummy Example File"
       }
     }
+  }
+
+  "GrobidScorable.keepRecord()" should "return true for valid JSON with title" in {
+    GrobidScorable.keepRecord(GrobidStringWithGoodTitle) shouldBe true
+  }
+
+  it should "return true for valid JSON with a title of maximum permitted length" in {
+    GrobidScorable.keepRecord(GrobidStringWithMaximumTitle) shouldBe true
+  }
+
+  it should "return false for valid JSON with excessively long title" in {
+    GrobidScorable.keepRecord(GrobidStringWithExcessiveTitle) shouldBe false
+  }
+
+  it should "return false for valid JSON with null title" in {
+    GrobidScorable.keepRecord(GrobidStringWithNullTitle) shouldBe false
+  }
+
+  it should "return false for valid JSON with no title" in {
+    GrobidScorable.keepRecord(GrobidStringWithoutTitle) shouldBe false
+  }
+
+  it should "return false for invalid JSON" in {
+    GrobidScorable.keepRecord(GrobidStringWithoutTitle) shouldBe false
   }
 }
