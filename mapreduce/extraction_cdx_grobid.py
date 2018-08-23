@@ -162,16 +162,18 @@ class MRExtractCdxGrobid(MRJob):
             return info, dict(status="error", reason="non-200 GROBID HTTP status",
                 extra=grobid_response.text)
 
-        info['grobid0:status'] = {'status': 'success'}
+        info['grobid0:status'] = {'status': 'partial'}
         info['grobid0:tei_xml'] = grobid_response.content
 
         # Convert TEI XML to JSON
         try:
-            info['grobid0:tei_json'] = teixml2json(grobid_response.content, encumbered=True)
+            info['grobid0:tei_json'] = teixml2json(info['grobid0:tei_xml'], encumbered=True)
         except xml.etree.ElementTree.ParseError:
-            return info, dict(status="fail", reason="GROBID 200 XML parse error")
+            info['grobid0:status'] = dict(status="fail", reason="GROBID 200 XML parse error")
+            return info, info['grobid0:status']
         except ValueError:
-            return info, dict(status="fail", reason="GROBID 200 XML non-TEI content")
+            info['grobid0:status'] = dict(status="fail", reason="GROBID 200 XML non-TEI content")
+            return info, info['grobid0:status']
 
         tei_metadata = info['grobid0:tei_json'].copy()
         for k in ('body', 'annex'):
@@ -183,6 +185,7 @@ class MRExtractCdxGrobid(MRJob):
         # TODO:
 
         info['grobid0:quality'] = None
+        info['grobid0:status'] = {'status': 'success'}
 
         return info, None
 
