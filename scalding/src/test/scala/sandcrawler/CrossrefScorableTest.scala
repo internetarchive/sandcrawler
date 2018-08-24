@@ -74,6 +74,8 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
   val CrossrefStringWithNoAuthors = CrossrefString.replace("<<TITLE>>", "Some Valid Title").replace("author", "no-author")
+  val CrossrefStringWrongType = CrossrefString.replace("<<TITLE>>", "Some Valid Title").replace("journal-article", "other")
+  val CrossrefStringNoType = CrossrefString.replace("<<TITLE>>", "Some Valid Title").replace("type", "not-type")
 
   // Unit tests
   "CrossrefScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
@@ -138,5 +140,12 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
 
   it should "return false for invalid JSON" in {
     CrossrefScorable.keepRecord(CrossrefStringWithoutTitle) shouldBe false
+  }
+
+  it should "handle content types" in {
+    val resultWrong = CrossrefScorable.jsonToMapFeatures(CrossrefStringWrongType)
+    resultWrong.slug shouldBe Scorable.NoSlug
+    val resultMissing = CrossrefScorable.jsonToMapFeatures(CrossrefStringNoType)
+    resultMissing.slug shouldBe Scorable.NoSlug
   }
 }

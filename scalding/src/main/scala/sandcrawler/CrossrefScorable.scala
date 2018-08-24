@@ -26,6 +26,21 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
 }
 
 object CrossrefScorable {
+
+  val ContentTypeWhitelist: Set[String] = Set(
+    "book",
+    "book-chapter",
+    "dataset",
+    "dissertation",
+    "journal-article",
+    "letter",
+    "monograph",
+    "posted-content",
+    "pre-print",
+    "proceedings-article",
+    "report",
+    "working-paper")
+
   def keepRecord(json : String) : Boolean = {
     Scorable.jsonToMap(json) match {
       case None => false
@@ -90,7 +105,8 @@ object CrossrefScorable {
             val doi = Scorable.getString(map, "DOI")
             val authors: List[String] = mapToAuthorList(map)
             val year: Int = mapToYear(map).getOrElse(0)
-            if (doi.isEmpty || doi == null || authors.length == 0) {
+            val contentType: String = map.get("type").map(e => e.asInstanceOf[String]).getOrElse("MISSING-CONTENT-TYPE")
+            if (doi.isEmpty || doi == null || authors.length == 0 || !(ContentTypeWhitelist contains contentType)) {
               MapFeatures(Scorable.NoSlug, json)
             } else {
               val sf : ScorableFeatures = ScorableFeatures.create(title=title, authors=authors, doi=doi.toLowerCase(), year=year)
