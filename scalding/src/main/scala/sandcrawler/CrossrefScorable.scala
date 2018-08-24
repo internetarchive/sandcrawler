@@ -90,7 +90,7 @@ object CrossrefScorable {
             val doi = Scorable.getString(map, "DOI")
             val authors: List[String] = mapToAuthorList(map)
             val year: Int = mapToYear(map).getOrElse(0)
-            if (doi.isEmpty || doi == null) {
+            if (doi.isEmpty || doi == null || authors.length == 0) {
               MapFeatures(Scorable.NoSlug, json)
             } else {
               val sf : ScorableFeatures = ScorableFeatures.create(title=title, authors=authors, doi=doi.toLowerCase(), year=year)

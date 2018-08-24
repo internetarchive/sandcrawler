@@ -73,6 +73,7 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
   val CrossrefStringWithEmptyTitle = CrossrefString.replace("<<TITLE>>", "")
   val CrossrefStringWithoutTitle = CrossrefString.replace("title", "nottitle")
   val MalformedCrossrefString = CrossrefString.replace("}", "")
+  val CrossrefStringWithNoAuthors = CrossrefString.replace("<<TITLE>>", "Some Valid Title").replace("author", "no-author")
 
   // Unit tests
   "CrossrefScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
@@ -92,6 +93,11 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
 
   it should "handle empty title" in {
     val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithEmptyTitle)
+    result.slug shouldBe Scorable.NoSlug
+  }
+
+  it should "handle missing authors" in {
+    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithNoAuthors)
     result.slug shouldBe Scorable.NoSlug
   }
 
