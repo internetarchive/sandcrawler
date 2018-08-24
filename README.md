@@ -6,34 +6,29 @@
       \ooooooo|  |___/\__,_|_| |_|\__,_|\___|_|  \__,_| \_/\_/ |_|\___|_|   
 
 
-This repo contains hadoop tasks (mapreduce and pig), luigi jobs, and other
-scripts and code for the internet archive (web group) journal ingest pipeline.
+This repo contains hadoop jobs, luigi tasks, and other scripts and code for the
+internet archive web group's journal ingest pipeline.
 
-This repository is potentially public.
+Code in tihs repository is potentially public!
 
 Archive-specific deployment/production guides and ansible scripts at:
 [journal-infra](https://git.archive.org/bnewbold/journal-infra)
 
-## Python Setup
+**./python/** contains Hadoop streaming jobs written in python using the
+`mrjob` library. Most notably, the **extraction** scripts, which fetch PDF
+files from wayback/petabox, process them with GROBID, and store the result in
+HBase.
 
-Pretty much everything here uses python/pipenv. To setup your environment for
-this, and python in general:
+**./scalding/** contains Hadoop jobs written in Scala using the Scalding
+framework. The intent is to write new non-trivial Hadoop jobs in Scala, which
+brings type safety and compiled performance.
 
-    # libjpeg-dev is for some wayback/pillow stuff
-    sudo apt install -y python3-dev python3-pip python3-wheel libjpeg-dev build-essential
-    pip3 install --user pipenv
+**./pig/** contains a handful of Pig scripts, as well as some unittests
+implemented in python.
 
-On macOS:
+## Running Hadoop Jobs
 
-    brew install libjpeg pipenv
+The `./please` python3 wrapper script is a helper for running jobs (python or
+scalding) on the IA Hadoop cluster. You'll need to run the setup/dependency
+tasks first; see README files in subdirectories.
 
-Each directory has it's own environment. Do something like:
-
-    cd python
-    pipenv install --dev
-    pipenv shell
-
-## Possible Issues with Setup
-
-Bryan had `~/.local/bin` in his `$PATH`, and that seemed to make everything
-work.
