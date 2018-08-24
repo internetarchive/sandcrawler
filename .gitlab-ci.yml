@@ -25,7 +25,7 @@ test_scalding:
 # Needs fixing
 #test_pig:
 #  script:
+#    - ./fetch_hadoop.sh
 #    - cd pig
-#    - ./fetch_deps.sh
 #    - pipenv install --dev --deploy
 #    - JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::") pipenv run pytest
