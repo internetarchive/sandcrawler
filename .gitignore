@@ -3,6 +3,7 @@ mapreduce-*.tar.gz
 *,cover
 htmlcov/
 mapreduce/venv-current.tar.gz
+*.test
 
 *.o
 *.a
