@@ -1,0 +1,17 @@
+
+"Out of 944 lines"...
+
+## Git 92584ec4201ecc27af423cbff7b4bc1573edf175
+
+76.27% match.
+
+    time ./please --qa match-benchmark match_test_data/crossref_sample.bibjson match_test_data/grobid_sample.bibjson out.test
+
+    real    0m56.061s
+    user    1m3.852s
+    sys     0m3.924s
+
+    720 lines
+    720 uniq DOI
+    720 uniq SHA1
+
