@@ -28,33 +28,3 @@ class ScoreJob(args: Args) extends JobBase(args) {
     .map { entry => (entry.slug, entry.score, entry.json1, entry.json2) }
     .write(TypedTsv[(String, Int, String, String)](args("output")))
 }
-
-/*
-// Ugly hack to get non-String information into ScoreJob above.
-object ScoreJob {
-  var scorable1 : Option[Scorable] = None
-  var scorable2 : Option[Scorable] = None
-
-  def setScorable1(s : Scorable) {
-    scorable1 = Some(s)
-  }
-
-  def getScorable1() : Scorable = {
-    scorable1  match {
-      case Some(s) => s
-      case None => null
-    }
-  }
-
-  def setScorable2(s: Scorable) {
-    scorable2 = Some(s)
-  }
-
-  def getScorable2() : Scorable = {
-    scorable2 match {
-      case Some(s) => s
-      case None => null
-    }
-  }
-}
- */
