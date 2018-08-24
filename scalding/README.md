@@ -1,12 +1,13 @@
 This directory contains Hadoop map/reduce jobs written in Scala (compiled to
-the JVM) using the Scalding framework.
+the JVM) using the Scalding framework. Scalding builds on the Java Cascading
+library, which itself builds on the Java Hadoop libraries.
 
 See the other markdown files in this directory for more background and tips.
 
 ## Dependencies
 
-Locally, you need to have the JVM (eg, OpenJDK 1.8), `sbt` build tool, and
-might need (exactly) Scala version 2.11.8.
+To develop locally, you need to have the JVM (eg, OpenJDK 1.8), `sbt` build
+tool, and might need (exactly) Scala version 2.11.8.
 
 On a debian/ubuntu machine:
 
@@ -15,24 +16,32 @@ On a debian/ubuntu machine:
     sudo apt-get update
     sudo apt install scala sbt
 
+It's also helpful to have a local copy of the `hadoop` binary for running
+benchmarks. The `fetch_hadoop.sh` script in the top level directory will fetch
+an appropriate version.
+
 ## Building and Running
 
-Run tests:
+You can run `sbt` commands individually:
 
+    # run all test
     sbt test
 
-Build a jar and upload to a cluster machine (from which to run in production):
-
+    # build a jar (also runs tests)
     sbt assembly
-    scp target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar devbox:
 
-Run on cluster:
+Or you can start a session and run commands within that, which is *much*
+faster:
 
-    devbox$ touch thing.conf
-    devbox$ hadoop jar sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
-        com.twitter.scalding.Tool sandcrawler.HBaseRowCountJob --hdfs \
-        --app.conf.path thing.conf \
-        --output hdfs:///user/bnewbold/spyglass_out_test 
+    sbt -mem 2048
+
+    sbt> test
+    sbt> assembly
+    sbt> testOnly sandcrawler.SomeTestClassName
+
+On the cluster, you usually use the `please` script to kick off jobs. Be sure
+to build the jars first, or pass `--rebuild` to do it automatically. You need
+`hadoop` on your path for this.
 
 ## Troubleshooting
 
@@ -42,3 +51,4 @@ If your `sbt` task fails with this error:
 
 try restarting `sbt` with more memory (e.g., `sbt -mem 2048`).
 
+See `scalding-debugging.md` or maybe `../notes/` for more.
