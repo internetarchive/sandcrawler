@@ -15,3 +15,16 @@
     720 uniq DOI
     720 uniq SHA1
 
+## Git aa2f905d65713a581c7630ef2f931045059200ef
+
+    real    0m56.347s
+    user    1m3.328s
+    sys     0m4.000s
+
+    bnewbold@orithena$ wc -l out.test 
+    722 out.test
+    bnewbold@orithena$ cut -f3 out.test | jq .doi -r | sort -u | wc -l
+    722
+    bnewbold@orithena$ cut -f4 out.test | jq .sha1 -r | sort -u | wc -l
+    722
+
