@@ -1,0 +1,52 @@
+
+## URL pattern regexing
+
+/user/bnewbold/pdfs/gwb-pdf-20171227034923-surt-filter/part*
+
+N  https://nsarchive2.gwu.edu//rus/text_files/Volkogonov/1918.10.13%20Speech%20by%20BK,%20to%20Red%20Army%20Soldiers,%20R13977.pdf  speech, russian
+
+edu tilde:
+    N  http://www.d.umn.edu/~kgilbert/ened3342-1/Field%20Interp%202/snow/CloudIDKey.pdf homework?
+    N  http://www.mech.utah.edu/~minor/BIOSKETCH-minor-october%202007.pdf CV
+    N  http://web.archive.org/web/20030724175610/http://www.ssc.wisc.edu:80/~sseverin/lect12f01.pdf slides
+    N  http://web.archive.org/web/20050117195001/http://www.csie.ntu.edu.tw:80/~b90013/DBhw7.pdf
+    Y  http://web.archive.org/web/20040220222413/http://homepages.uc.edu:80/~lukovib/aiaa_02_0857.pdf
+    Y  http://www.kki.yamanashi.ac.jp/~ohbuchi/online_pubs/IEEE_bigMM2015_Matsuda/BigMM_20150224b_web.pdf
+
+other words:
+    N  https://files.eric.ed.gov/fulltext/ED069848.pdf tech report?
+    N  http://istitutocomprensivopescara2.gov.it/attachments/article/164/griglia_osservativa_bes_terza_fascia.pdf table
+    M  https://jfjustice.net/userfiles/file/Research/Report%20of%20the%20Outreach%20Forums%20on%20the%20PIL%20Cases%20on%20Sexual%20Gender%20Based%20Violence.pdf report
+    M  http://www.iitk.ac.in/nicee/wcee/article/13_9035.pdf filler page? like a paper
+    Y  http://www.dtic.mil/dtic/tr/fulltext/u2/314095.pdf
+    Y  https://www.casact.org/pubs/proceed/proceed25/25400.pdf
+    Y  http://circres.ahajournals.org/content/circresaha/111/8/1002.full.pdf
+    Y  http://web.archive.org/web/20170313034332/http://thixomet.ru/UserFiles/File/Articles/1/2.CHM_2006_02-2.pdf
+    Y  http://www.redalyc.org/pdf/873/87313713019.pdf
+    Y  http://ukacc.group.shef.ac.uk/proceedings/control2004/Papers/213.pdf
+    Y  http://periodicos.uem.br:80/ojs/index.php/RbhrAnpuh/article/download/23988/13095
+    Y  http://w3.uqo.ca/photonique/papers/measurement.pdf
+    Y  http://web.archive.org/web/20140312150030/http://afms.org.au/proceedings/9/Griffiths.pdf
+    Y  http://www.hal.inserm.fr/file/index/docid/580194/filename/PROSTATE_SEGMENTATION_IN_HIFU_THERAPY.pdf
+    Y  http://journal.ipb.ac.id/index.php/jmht/article/download/6003/4658
+
+publications:
+    N  http://web.archive.org/web/20060527120026/http://www.merenkulkulaitos.fi:80/e/services/informationservices/publications/bulletin/avaa.php?id=336 treaty?
+    N  http://orbit.dtu.dk/en/publications/status-for-skarven-i-danmark(8ffaf614-387e-429f-9fd4-4677ee5016ae).pdf?nofollow=true&rendering=standard related to a paper?
+    N  http://community.trinity.nsw.edu.au/navbar/publications/docs/news/2_pn/2016/ps160103.pdf newsletter
+    N  http://web.archive.org/web/20170216001602/https://www.nass.usda.gov/Statistics_by_State/New_Mexico/Publications/Annual_Statistical_Bulletin/2005/03_05.pdf report
+    N  http://web.archive.org/web/20110109080048/http://www.ipria.org/publications/on-line-bulletins/austdev/AusDevsBulletin07.09.pdf
+    N  http://web.archive.org/web/20060930192249/http://www.nmmfa.org/publications/CensusTracts/35031940200.pdf
+    N  http://web.archive.org/web/20100621152841/http://psychologymatters.org/workforce/publications/01-doc-empl/table-11.pdf
+    N  http://www.dtce.org.pk/DTCE/Publications/PN2 final report-dr8-F.pdf
+    Y  https://www.frbatlanta.org/-/media/Documents/research/publications/wp/1995/wp9513.pdf
+    Y  http://irrec.ifas.ufl.edu/IRSWS/publications/Lu_ESPR_2011.pdf
+
+doi:
+    M  https://page-one.live.cf.public.springer.com/pdf/preview/10.1007/s11229-012-0117-8  paper, but only fragment (!?!?!)
+
+
+TODO:
+- drop "publications", "research", "pubs"
+- edu tilde is borderline... but keep it for now
+- black-list page-one.*

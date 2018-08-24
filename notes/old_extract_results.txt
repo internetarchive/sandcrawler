@@ -1,0 +1,50 @@
+
+command:
+
+    ./extraction_cdx_grobid.py         --hbase-table wbgrp-journal-extract-0-qa         --hbase-host bnewbold-dev.us.archive.org         --grobid-uri http://wbgrp-svc096.us.archive.org:8070 -r hadoop -c mrjob.conf --archive $VENVSHORT.tar.gz#venv hdfs:///user/bnewbold/journal_crawl_cdx/citeseerx_crawl_2017.cdx --jobconf mapred.line.input.format.linespermap=8000 --jobconf mapreduce.job.queuename=extraction
+
+Started:    Wed Apr 11 05:54:54 UTC 2018
+Finished:   Sun Apr 15 20:42:37 UTC 2018
+(late saturday night PST fixed grobid parallelism)
+
+Elapsed: 110hrs, 47mins, 42sec
+
+line counts:
+    error	3896
+    existing	311209
+    invalid	2311343	
+    skip	195641
+    success	1143094
+    total	3,965,183
+
+## Against prod table
+
+Started:    Sun Apr 15 21:38:24 UTC 2018
+Finished:   Wed Apr 18 17:36:44 UTC 2018
+Elapsed:    67hrs, 58mins, 20sec
+
+lines   
+    error   143
+    existing    213292
+    invalid 2311343
+    skip    195641
+    success 1,244,764
+    total   3,965,183
+
+## TARGETED
+
+Job job_1513499322977_358533 failed with state FAILED due to: Task failed task_1513499322977_358533_m_000323
+
+Started:	Thu Apr 19 05:21:25 UTC 2018
+Finished:	Sat Apr 21 11:01:58 UTC 2018
+Elapsed:	53hrs, 40mins, 33sec
+
+lines   
+        error=4093
+        existing=55448
+        invalid=688873
+        skip=257533
+        success=1,282,053
+        total=2,288,000
+
+

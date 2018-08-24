@@ -1,0 +1,22 @@
+
+Background context needed:
+- CDX text file format
+- rough arch outline (what runs where)
+- basic hadoop+hbase overview
+- hbase schema
+- quick look at hadoop and hbase web interfaces
+- maybe quick re-profile?
+
+Plan/Steps:
+x together: get *any* JVM map/reduce thing to build and run on cluster
+x together: get something to build that talks to hbase
+x basic JVM test infra; HBase mockup. "shopping"
+    => scalding and/or cascading
+x simple hbase scan report generation (counts/stats)
+x CDX parsing
+- complete backfill script
+
+Spec for CDX backfill script:
+- input is CDX, output to HBase table
+- filter input before anything ("defensive"; only PDF, HTTP 200, size limit)
+- reads HBase before insert; don't overwrite
