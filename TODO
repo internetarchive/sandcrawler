@@ -1,5 +1,10 @@
 
+- "author counts match" in scoring
+- refactor "scorable" to "matchable"
+- look at refactoring to reduce JSON serializations
+
 scalding:
+- better JSON library
 - less verbose sbt test output (set log level to WARN)
 - auto-formatting: addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "1.6.0-RC3")
 
