@@ -18,6 +18,7 @@ test_python_mapreduce:
 
 test_scalding:
   script:
+    - ./please -h
     - cd scalding
     - sbt -mem 1024 test
     - sbt -mem 1024 assembly
