@@ -1,0 +1,13 @@
+
+Converted older .tsv from pdf-extraction comparison work with:
+
+    cat 1k_random_identified_combined.tsv | jq -c --slurp --raw-input --raw-output 'split("\n") | .[:-1] | map(split("\t")) | map({"doi": .[0], "title": .[1], "authors": ( .[2] | split(";") ), "year": .[3], "journal": .[4], "publisher": .[5], "subject": .[6], "type": .[7], "sha": .[8]}) | .[]' > crossref_sample.bibjson
+
+Note that neither bibjson file is a superset of the either:
+
+  944 unique SHA1 which exist in both lists
+  964 in crossref_sample.sha1
+  979 in grobid_sample.sha1
+
+So scoring should be on a basis of "out of 944 lines". If this is confusing we
+can trim the files down.

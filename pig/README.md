@@ -12,12 +12,13 @@ by `fetch_deps.sh`) due to [dependency/jar issues][pig-bug] in local mode of
 
 To run tests, you need Java installed and `JAVA_HOME` configured.
 
-Fetch dependencies (pig):
+Fetch dependencies (including pig) from top-level directory:
 
-    ./fetch_deps.sh
+    ./fetch_hadoop.sh
 
-Write .pig scripts here, and add a pytho wrapper test to `./tests/` when done.
-Test vector files (input/output) can go in `./tests/files/`.
+Write `.pig` scripts in this directory, and add a python wrapper test to
+`./tests/` when done.  Test vector files (input/output) can go in
+`./tests/files/`.
 
 Run the tests with:
 

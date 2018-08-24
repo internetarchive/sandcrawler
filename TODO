@@ -8,8 +8,7 @@ pig:
 - play with test image on older releases (eg, trusty)
 
 - how to get argument (like --hbase-table) into mrjob.conf, or similar?
-- fix pig gitlab-ci tests (JAVA_HOME). also make fetch_deps *way* more quiet
-- sentry: https://github.com/getsentry/raven-python
+- fix pig gitlab-ci tests (JAVA_HOME)
 
 potential helpers:
 - https://github.com/martinblech/xmltodict

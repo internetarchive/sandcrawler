@@ -215,6 +215,24 @@ def run_colcount(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+run_matchbenchmark(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting matchbenchmark job...")
+    cmd = """./pig/deps/hadoop/bin/hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool \
+        sandcrawler.MatchBenchmarkJob \
+        --local \
+        --app.conf.path scalding/ia_cluster.conf \
+        --left-bibjson {left_bibjson} \
+        --right-bibjson {right_bibjson} \
+        --output {output}""".format(
+            output=args.output,
+            left_bibjson=args.left_bibjson,
+            right_bibjson=args.right_bibjson)
+    subprocess.call(cmd, shell=True)
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -264,12 +282,22 @@ def main():
     sub_colcount.add_argument('column',
         help="column name to use in count")
 
+sub_matchbenchmark = subparsers.add_parser('match-benchmark')
+    sub_matchbenchmark.set_defaults(func=run_matchbenchmark)
+    sub_matchbenchmark.add_argument('left_bibjson',
+        help="First bibjson file")
+    sub_matchbenchmark.add_argument('right_bibjson',
+        help="Second bibjson file")
+    sub_matchbenchmark.add_argument('output',
+        help="where to write output")
+
     args = parser.parse_args()
     if not args.__dict__.get("func"):
         print("tell me what to do! (try --help)")
         sys.exit(-1)
     if not (args.prod or args.qa) or (args.prod and args.qa):
         print("must pass one of --prod or --qa")
+        sys.exit(-1)
     if args.prod:
         args.env = "prod"
     if args.qa:
