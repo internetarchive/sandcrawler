@@ -1,0 +1,10 @@
+
+potential helpers:
+- https://github.com/martinblech/xmltodict
+- https://github.com/trananhkma/fucking-awesome-python#text-processing
+- https://github.com/blaze/blaze (for catalog/analytics)
+- validation: https://github.com/pyeve/cerberus
+- testing (to replace nose):
+    - https://github.com/CleanCut/green
+    - pytest
+    - mamba ("behavior driven")

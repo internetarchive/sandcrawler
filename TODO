@@ -1,21 +1,14 @@
 
+scalding:
+- less verbose sbt test output (set log level to WARN)
+- auto-formatting: addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "1.6.0-RC3")
+
 pig:
 - potentially want to *not* de-dupe CDX lines by uniq sha1 in all cases; run
   this as a second-stage filter? for example, may want many URL links in fatcat
   for a single file (different links, different policies)
-
-- include input file name (and chunk? and CDX?) in sentry context
-- play with test image on older releases (eg, trusty)
-
-- how to get argument (like --hbase-table) into mrjob.conf, or similar?
 - fix pig gitlab-ci tests (JAVA_HOME)
 
-potential helpers:
-- https://github.com/martinblech/xmltodict
-- https://github.com/trananhkma/fucking-awesome-python#text-processing
-- https://github.com/blaze/blaze (for catalog/analytics)
-- validation: https://github.com/pyeve/cerberus
-- testing (to replace nose):
-    - https://github.com/CleanCut/green
-    - pytest
-    - mamba ("behavior driven")
+python:
+- include input file name (and chunk? and CDX?) in sentry context
+- how to get argument (like --hbase-table) into mrjob.conf, or similar?
