@@ -10,6 +10,7 @@ object ScorableFeatures {
   val fileStream : InputStream = getClass.getResourceAsStream("/slug-blacklist.txt")
   val SlugBlacklist : Set[String] = Source.fromInputStream(fileStream).getLines.toSet
   fileStream.close
+  val MinSlugLength = 8
 
   // Static factory method
   def create(title : String, year : Int = 0, doi : String = "", sha1 : String = "") : ScorableFeatures = {
@@ -38,7 +39,10 @@ class ScorableFeatures private(title : String, year: Int = 0, doi : String = "",
       val unaccented = StringUtilities.removeAccents(title)
       // Remove punctuation
       val slug = StringUtilities.removePunctuation((unaccented.toLowerCase())).replaceAll("\\s", "")
-      if (slug.isEmpty || slug == null || (ScorableFeatures.SlugBlacklist contains slug)) Scorable.NoSlug else slug
+      if (slug.isEmpty
+          || slug == null
+          || (ScorableFeatures.SlugBlacklist contains slug)
+          || (slug.length < ScorableFeatures.MinSlugLength)) Scorable.NoSlug else slug
     }
   }
 

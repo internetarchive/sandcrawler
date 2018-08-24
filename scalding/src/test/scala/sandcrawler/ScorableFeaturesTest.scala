@@ -36,7 +36,7 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
 
   it should "strip punctuation" in {
     titleToSlug("HELLO!:the:re") shouldBe "hellothere"
-    titleToSlug("a:b:c") shouldBe "abc"
+    titleToSlug("a:b:cdefgh") shouldBe "abcdefgh"
     titleToSlug(
       "If you're happy and you know it, clap your hands!") shouldBe "ifyourehappyandyouknowitclapyourhands"
     titleToSlug(":;\"\'") shouldBe Scorable.NoSlug
@@ -56,7 +56,12 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
 
   it should "remove whitespace" in {
     titleToSlug("foo bar : baz ::") shouldBe "foobarbaz"
-    titleToSlug("\na\t:b:c") shouldBe "abc"
+    titleToSlug("\na\t:b:cdefghi") shouldBe "abcdefghi"
     titleToSlug("\n \t \r  ") shouldBe Scorable.NoSlug
+  }
+
+  it should "skip very short slugs" in {
+    titleToSlug("short") shouldBe Scorable.NoSlug
+    titleToSlug("a longer, more in depth title") shouldBe "alongermoreindepthtitle"
   }
 }

@@ -78,14 +78,14 @@ class GrobidScorableDumpJobTest extends FlatSpec with Matchers {
     "sha1:024937534094897039547e9824382943")  // bad status
 
   val JsonStrings : List[String] = List(
-    JsonString.replace("<<TITLE>>", "Title 1"),
+    JsonString.replace("<<TITLE>>", "Title 1: The Classic"),
     JsonString.replace("<<TITLE>>", "Title 2: TNG"),
     JsonString.replace("<<TITLE>>", "Title 3: The Sequel"),
     // This will have bad status.
-    JsonString.replace("<<TITLE>>", "Title 1"),
+    JsonString.replace("<<TITLE>>", "Title 1: The Classic"),
     MalformedJsonString,
     // This will have bad status.
-    JsonString.replace("<<TITLE>>", "Title 2")
+    JsonString.replace("<<TITLE>>", "Title 2: Not TNG")
   )
 
   // bnewbold: status codes aren't strings, they are uint64
