@@ -2,8 +2,8 @@
 """
 Helper script for running Sandcrawler (journal pipeline) tasks in production.
 
-This is basically a Makefile. Be sure to only use python3 standard library
-modules, so there are no dependencies.
+This is basically a Makefile. If you edit this file, be sure to only use
+python3 standard library modules, so there are no dependencies.
 """
 
 import sys
