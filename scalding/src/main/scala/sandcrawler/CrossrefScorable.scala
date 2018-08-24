@@ -2,6 +2,7 @@ package sandcrawler
 
 import scala.math
 import scala.util.parsing.json.JSON
+import scala.util.parsing.json.JSONArray
 import scala.util.parsing.json.JSONObject
 
 import cascading.flow.FlowDef
@@ -52,6 +53,33 @@ object CrossrefScorable {
     }
   }
 
+  def mapToAuthorList(map : Map[String, Any]) : List[String] = {
+    if (map contains "author") {
+      val objArray = map("author").asInstanceOf[List[Any]].map(e => e.asInstanceOf[Map[String,Any]])
+      // TODO(bnewbold): combine given and family names?
+      objArray
+        .filter(e => e contains "family")
+        .map(e => e.get("family").get.asInstanceOf[String])
+    } else {
+      List()
+    }
+  }
+
+  def mapToYear(map : Map[String, Any]) : Option[Int] = {
+    map.get("created") match {
+      case None => None
+      case Some(created) => {
+        Some(created.asInstanceOf[Map[String,Any]]
+                    .get("date-parts")
+                    .get
+                    .asInstanceOf[List[Any]](0)
+                    .asInstanceOf[List[Any]](0)
+                    .asInstanceOf[Double]
+                    .toInt)
+      }
+    }
+  }
+
   def jsonToMapFeatures(json : String) : MapFeatures = {
     Scorable.jsonToMap(json) match {
       case None => MapFeatures(Scorable.NoSlug, json)
@@ -60,10 +88,12 @@ object CrossrefScorable {
           case None => MapFeatures(Scorable.NoSlug, json)
           case Some(title) => {
             val doi = Scorable.getString(map, "DOI")
+            val authors: List[String] = mapToAuthorList(map)
+            val year: Int = mapToYear(map).getOrElse(0)
             if (doi.isEmpty || doi == null) {
               MapFeatures(Scorable.NoSlug, json)
             } else {
-              val sf : ScorableFeatures = ScorableFeatures.create(title=title, doi=doi)
+              val sf : ScorableFeatures = ScorableFeatures.create(title=title, authors=authors, doi=doi.toLowerCase(), year=year)
               MapFeatures(sf.toSlug, sf.toString)
             }
           }

@@ -51,6 +51,16 @@ object GrobidScorable {
     }
   }
 
+  def mapToAuthorList(map : Map[String, Any]) : List[String] = {
+    if (map contains "authors") {
+      val objArray = map("authors").asInstanceOf[List[Any]].map(e => e.asInstanceOf[Map[String,Any]])
+      objArray
+        .filter(e => e contains "name")
+        .map(e => e.get("name").get.asInstanceOf[String])
+    } else {
+      List()
+    }
+  }
 
   def getHBaseSource(table : String, host : String) : HBaseSource = {
     HBaseBuilder.build(table, host, List("grobid0:metadata", "grobid0:status_code"), SourceMode.SCAN_ALL)
@@ -61,7 +71,9 @@ object GrobidScorable {
       case None => MapFeatures(Scorable.NoSlug, json)
       case Some(map) => {
         if (map contains "title") {
-          ScorableFeatures.create(title=Scorable.getString(map, "title"), sha1=key).toMapFeatures
+          val authors: List[String] = mapToAuthorList(map)
+          val title = Scorable.getString(map, "title")
+          ScorableFeatures.create(title=title, authors=authors, sha1=key).toMapFeatures
         } else {
           MapFeatures(Scorable.NoSlug, json)
         }

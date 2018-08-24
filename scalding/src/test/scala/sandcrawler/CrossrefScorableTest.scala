@@ -64,7 +64,7 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
   "issn-type" : [ { "value" : "0987-7983", "type" : "print" } ],
   "subject" : [ "Pediatrics, Perinatology, and Child Health" ]
 }
-"""
+""".replace("<<DOI>>", "10.123/aBc")
   // scalastyle:on
   val CrossrefStringWithGoodTitle = CrossrefString.replace("<<TITLE>>", "Some Title")
   val CrossrefStringWithMaximumTitle = CrossrefString.replace("<<TITLE>>", "T" * Scorable.MaxTitleLength)
@@ -102,6 +102,10 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
       case None => fail()
       case Some(map) => {
         map("title").asInstanceOf[String] shouldBe "Some Title"
+        map("doi").asInstanceOf[String] shouldBe "10.123/abc"
+        // TODO: full name? not just a string?
+        map("authors").asInstanceOf[List[String]] shouldBe List("Gaier")
+        map("year").asInstanceOf[Double].toInt shouldBe 2002
       }
     }
   }

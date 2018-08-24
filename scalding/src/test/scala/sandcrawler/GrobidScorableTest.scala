@@ -90,6 +90,7 @@ class GrobidScorableTest extends FlatSpec with Matchers {
       case Some(map) => {
         map should contain key "title"
         map("title").asInstanceOf[String] shouldBe "Dummy Example File"
+        map("authors").asInstanceOf[List[String]] shouldBe List("Brewster Kahle", "J Doe")
       }
     }
   }
