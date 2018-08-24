@@ -29,7 +29,7 @@ On macOS:
 
 Each directory has it's own environment. Do something like:
 
-    cd mapreduce
+    cd python
     pipenv install --dev
     pipenv shell
 

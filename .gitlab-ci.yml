@@ -9,9 +9,9 @@ before_script:
   - pip3 install pipenv
   - pipenv --version
 
-test_python_mapreduce:
+test_python:
   script:
-    - cd mapreduce
+    - cd python
     - pipenv install --dev --deploy
     - pipenv run pytest --cov
     - pipenv run pylint --disable bad-continuation,arguments-differ,unidiomatic-typecheck *.py
