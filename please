@@ -215,7 +215,7 @@ def run_colcount(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
-run_matchbenchmark(args):
+def run_matchbenchmark(args):
     if args.rebuild:
         rebuild_scalding()
     print("Starting matchbenchmark job...")
@@ -282,7 +282,7 @@ def main():
     sub_colcount.add_argument('column',
         help="column name to use in count")
 
-sub_matchbenchmark = subparsers.add_parser('match-benchmark')
+    sub_matchbenchmark = subparsers.add_parser('match-benchmark')
     sub_matchbenchmark.set_defaults(func=run_matchbenchmark)
     sub_matchbenchmark.add_argument('left_bibjson',
         help="First bibjson file")
