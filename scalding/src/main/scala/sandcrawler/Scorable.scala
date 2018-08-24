@@ -30,7 +30,7 @@ abstract class Scorable {
 }
 
 object Scorable {
-  val MaxTitleLength = 255
+  val MaxTitleLength = 1023
   val NoSlug = "NO SLUG" // Used for slug if title is empty or unparseable
 
   def isValidSlug(slug : String) : Boolean = {
