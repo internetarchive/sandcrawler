@@ -5,8 +5,6 @@ import cascading.flow.FlowDef
 import cascading.pipe.Pipe
 import cascading.tuple.Fields
 import com.twitter.scalding._
-import com.twitter.scalding._
-import com.twitter.scalding.typed.TDsl._
 import com.twitter.scalding.typed.TDsl._
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
