@@ -1,0 +1,232 @@
+
+## Notes on HBase features
+
+Decent one-page introduction:
+https://www.tutorialspoint.com/hbase/hbase_overview.htm
+
+Question: what version of hbase are we running? what on-disk format?
+
+=> Server: HBase 0.98.6-cdh5.3.1
+=> Client: HBase 0.96.1.1-cdh5.0.1
+=> As of 2018, 1.2 is stable and 2.0 is released.
+
+Question: what are our servers? how can we monitor?
+
+=> http://ia802402.us.archive.org:6410/master-status
+
+I haven't been able to find a simple table of hbase version and supported/new
+features over the years (release notes are too detailed).
+
+Normal/online mapreduce over tables sounds like it goes through a "region
+server" and is slow. Using snapshots allows direct access to underlying
+tablets on disk? Or is access always direct?
+
+Could consider "Medium-sized Object" support for 100 KByte to 10 MByte sized
+files. This seems to depend on HBase v3, which was added in HBase 0.98, so we
+can't use it yet.
+
+Do we need to decide on on-disk format? Just stick with defaults.
+
+Looks like we use the `happybase` python package to write. This is packaged in
+debian, but only for python2. There is also a `starbase` python library
+wrapping the REST API.
+
+There is a "bulk load" mechanism for going directly from HDFS into HBase, by
+creating HFiles that can immediately be used by HBase.
+
+## Specific "Queries" needed
+
+"Identifier" will mostly want to get "new" (unprocessed) rows to process. It
+can do so by 
+
+Question: if our columns are mostly "dense" within a column group (aka, mostly
+all or none set), what is the value of splitting out columns instead of using a
+single JSON blob or something like that? Not needing to store the key strings?
+Being able to do scan filters? The later obviously makes sense in some
+contexts.
+
+- is there a visible distinction between "get(table, group:col)" being
+  zero-length (somebody put() an empty string (like "") versus that column not
+  having being written to?
+
+## Conversation with Noah about Heritrix De-Dupe
+
+AIT still uses HBase for url-agnostic de-dupe, but may move away from it. Does
+about 250 reads/sec (estimate based on URL hits per quarter). Used to have more
+problems (region servers?) but haven't for a while. If a crawler can't reach
+HBase, it will "fail safe" and retain the URL. However, Heritrix has trouble
+starting up if it can't connect at start. Uses the native JVM drivers.
+
+Key is "sha1:<base32>-<crawlid>", so in theory they can control whether to
+dedupe inside or outside of individual crawls (or are they account IDs?). IIRC
+all columns were in one family, and had short names (single character). Eg:
+
+    hbase(main):012:0> scan 'ait-prod-digest-history',{LIMIT=>5,STARTROW=>'sha1:A'}
+    sha1:A22222453XRJ63AC7YCSK46APWHTJKFY-2312                  column=f:c, timestamp=1404151869546, value={"c":1,"u":"http://www.theroot.com/category/views-tags/black-fortune-500-ceos","d":"2012-02-23T08:27:10Z","o":8867552,"f":"ARCHIVEIT-REDACTED-20120223080317-00009-crawling201.us.archive.org-6681.warc.gz"}
+
+Code for url-agnostic dedupe is in:
+
+    heritrix3/contrib/src/main/java/org/archive/modules/recrawl/hbase/HBaseContentDigestHistory.java
+
+Crawl config snippet:
+
+    [...]
+    <bean id="iaWbgrpHbase" class="org.archive.modules.recrawl.hbase.HBase">      
+      <property name="properties">                                                
+        <map>                                                                     
+          <entry key="hbase.zookeeper.quorum" value="mtrcs-zk1,mtrcs-zk2,mtrcs-zk3,mtrcs-zk4,mtrcs-zk5"/> 
+          <entry key="hbase.zookeeper.property.clientPort" value="2181"/>         
+          <entry key="hbase.client.retries.number" value="2"/>                    
+        </map>                                                                    
+      </property>                                                                 
+    </bean>                                                                       
+    <bean id="hbaseDigestHistoryTable" class="org.archive.modules.recrawl.hbase.HBaseTable"> 
+      <property name="name" value="ait-prod-digest-history"/>                     
+      <property name="create" value="true"/>                                      
+      <property name="hbase">                                                     
+        <ref bean="iaWbgrpHbase"/>                                                
+      </property>                                                                 
+    </bean>                                                                       
+    <bean id="hbaseDigestHistory" class="org.archive.modules.recrawl.hbase.HBaseContentDigestHistory"> 
+      <property name="addColumnFamily" value="true"/>                             
+      <property name="table">                                                     
+        <ref bean="hbaseDigestHistoryTable"/>                                     
+      </property>                                                                 
+      <property name="keySuffix" value="-1858"/>                                  
+    </bean>                                                                       
+    <bean id="dispositionProcessors" class="org.archive.modules.DispositionChain">
+      <property name="processors">                                                
+        <list>                                                                    
+          <bean class="org.archive.modules.recrawl.ContentDigestHistoryLoader">   
+            <property name="contentDigestHistory">                                
+              <ref bean="hbaseDigestHistory"/>                                    
+            </property>                                                           
+          </bean>                                                                 
+          <ref bean="warcWriter"/>                                                
+          <bean class="org.archive.modules.recrawl.ContentDigestHistoryStorer"/> 
+    [...]
+
+## Kenji Conversation (global wayback)
+
+Spoke with Kenji, who had previous experience trying to use HBase for crawl
+de-dupe. Take away was that it didn't perform well for them even back then,
+with 3000+ req/sec. AIT today is more like 250 req/sec.
+
+Apparently CDX API is just the fastest thing ever; stable slow latency on reads
+(~200ms!), and it takes an hour for "writes" (bulk deltacdx or whatever).
+
+Sounds like HBase in particular struggled with concurrent heavy reads and
+writes; frequent re-compaction caused large tail latencies, and when region
+servers were loaded they would time-out of zookeeper.
+
+He pushed to use elasticsearch instead of hbase to store extracted fulltext, as
+a persistant store, particularly if we end up using it for fulltext someday. He
+thinks it operates really well as a datastore. I am not really comfortable with
+this usecase, or depending on elastic as a persistant store in general, and it
+doesn't work for the crawl dedupe case.
+
+He didn't seem beholden to the tiny column name convention.
+
+
+## Google BigTable paper (2006)
+
+Hadn't read this paper in a long time, and didn't really understand it at the
+time. HBase is a clone of BigTable.
+
+They used bigtable to store crawled HTML! Very similar use-case to our journal
+stuff. Retained multiple crawls using versions; version timestamps are crawl
+timestamps, aha.
+
+Crazy to me how the whole hadoop world is Java (garbage collected), while all
+the google stuff is C++. So many issues with hadoop are performance/latency
+sensitive; having garbage collection in a situation when RAM is tight and
+network timeouts are problematic seems like a bad combination for operability
+(median/optimistic performance is probably fine)
+
+"Locality" metadata important for actually separating column families. Column
+name scarcity doesn't seem to be a thing/concern. Compression settings
+important. Key selection to allow local compression seems important to them.
+
+Performance probably depends a lot on 1) relative rate of growth (slow if
+re-compressing, etc), 2) 
+
+Going to want/need table-level monitoring, probably right from the start.
+
+## Querying/Aggregating/Stats
+
+We'll probably want to be able to run simple pig-style queries over HBase. How
+will that work? A couple options:
+
+- query hbase using pig via HBaseStorage and HBaseLoader
+- hive runs on map/reduce like pig
+- drill is an online/fast SQL query engine with HBase back-end support. Not
+  map/reduce based; can run from a single server. Supports multiple "backends".
+  Somewhat more like pig; "schema-free"/JSON.
+- impala supports HBase backends
+- phoenix is a SQL engine on top of HBase
+
+## Hive Integration
+
+Run `hive` from a hadoop cluster machine:
+
+    bnewbold@ia802405$ hive --version
+    Hive 0.13.1-cdh5.3.1
+    Subversion file:///var/lib/jenkins/workspace/generic-package-ubuntu64-12-04/CDH5.3.1-Packaging-Hive-2015-01-27_16-23-36/hive-0.13.1+cdh5.3.1+308-1.cdh5.3.1.p0.17~precise -r Unknown
+    Compiled by jenkins on Tue Jan 27 16:38:11 PST 2015
+    From source with checksum 1bb86e4899928ce29cbcaec8cf43c9b6
+
+Need to create mapping tables:
+
+    CREATE EXTERNAL TABLE journal_extract_qa(rowkey STRING, grobid_status STRING, file_size STRING)
+    STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+    WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,grobid0:status_code,file:size')
+    TBLPROPERTIES ('hbase.table.name' = 'wbgrp-journal-extract-0-qa');
+
+Maybe:
+
+    SET hive.aux.jars.path = file:///home/webcrawl/hadoop-2/hive/lib/hive-hbase-handler-0.13.1-cdh5.3.1.jar,file:///home/webcrawl/hadoop-2/hive/lib/hbase-client-0.96.1.1-cdh5.0.1.jar;
+    SELECT * from journal_extract_qa LIMIT 10;
+
+Or?
+
+    ADD jar /usr/lib/hive/lib/hive-hbase-handler-0.13.1-cdh5.3.1.jar;
+    ADD jar /usr/lib/hive/lib/hive-shims-common-secure-0.13.1-cdh5.3.1.jar;
+    ADD jar /usr/lib/hadoop-hdfs/hadoop-hdfs-2.5.0-cdh5.3.1.jar;
+    ADD jar /usr/lib/hbase/hbase-client-0.98.6-cdh5.3.1.jar;
+    ADD jar /usr/lib/hbase/hbase-common-0.98.6-cdh5.3.1.jar;
+
+Or, from a real node?
+
+    SET hive.aux.jars.path = file:///usr/lib/hive/lib/hive-hbase-handler-0.13.1-cdh5.3.1.jar,file:///usr/lib/hbase/lib/hbase-client-0.98.6-cdh5.3.1.jar,file:///usr/lib/hadoop-hdfs/hadoop-hdfs-2.5.0-cdh5.3.1.jar;
+    SELECT * from journal_extract_qa LIMIT 10;
+
+Getting an error:
+
+    Exception in thread "main" java.lang.NoSuchMethodError: org.apache.hadoop.hdfs.client.HdfsAdmin.getEncryptionZoneForPath(Lorg/apache/hadoop/fs/Path;)Lorg/apache/hadoop/hdfs/protocol/EncryptionZone;
+
+The HdfsAdmin admin class is in hadoop-hdfs, but `getEncryptionZoneForPath`
+isn't in there. See upstream commit:
+
+    https://github.com/apache/hadoop/commit/20dcb841ce55b0d414885ceba530c30b5b528b0f
+
+## Debugging
+
+List hbase tables known to zookeeper (as opposed to `list` from `hbase shell`):
+
+    hbase zkcli ls /hbase/table
+
+Look for jar files with a given symbol:
+
+    rg HdfsAdmin -a /usr/lib/*/*.jar
+
+## Performance
+
+Should pre-allocate regions for tables that are going to be non-trivially
+sized, otherwise all load hits a single node. From the shell, this seems to
+involve specifying the split points (key prefixes) manually. From the docs:
+
+  http://hbase.apache.org/book.html#precreate.regions
+
+There is an ImportTsv tool which might have been useful for original CDX
+backfill, but :shrug:. It is nice to have only a single pipeline and have it
+work well.
