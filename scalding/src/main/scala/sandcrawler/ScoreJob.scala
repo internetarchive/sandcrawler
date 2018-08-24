@@ -19,12 +19,12 @@ class ScoreJob(args: Args) extends JobBase(args) {
     .map { entry =>
       val (slug : String, (features1 : ReduceFeatures, features2 : ReduceFeatures)) = entry
       new ReduceOutput(
-      slug,
-      Scorable.computeSimilarity(features1, features2),
-      features1.json,
-      features2.json)
+        slug,
+        Scorable.computeSimilarity(features1, features2),
+        features1.json,
+        features2.json)
     }
-    //TypedTsv doesn't work over case classes.
+    // TypedTsv doesn't work over case classes.
     .map { entry => (entry.slug, entry.score, entry.json1, entry.json2) }
     .write(TypedTsv[(String, Int, String, String)](args("output")))
 }
