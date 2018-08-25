@@ -16,20 +16,19 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
   val StatusOK = 200
 
   def getSource(args : Args) : Source = {
-    // TODO: Generalize args so there can be multiple grobid pipes in one job.
+    // TODO: Generalize args so there can be multiple grobid pipes in one job
     GrobidScorable.getHBaseSource(args("hbase-table"), args("zookeeper-hosts"))
   }
 
   def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
     getSource(args)
       .read
-      // Can't just "fromBytesWritable" because we have multiple types?
+      // Can't just "fromBytesWritable" because we have multiple types
       .toTypedPipe[(ImmutableBytesWritable,ImmutableBytesWritable,ImmutableBytesWritable)](new Fields("key", "metadata", "status_code"))
       .filter { case (_, metadata, status_code) => metadata != null && status_code != null }
       .map { case (key, metadata, status_code) =>
         (Bytes.toString(key.copyBytes()), Bytes.toString(metadata.copyBytes()), Bytes.toLong(status_code.copyBytes()))
       }
-      // TODO: Should I combine next two stages for efficiency?
       .collect { case (key, json, StatusOK) => (key, json) }
       .filter { case (key, json) => GrobidScorable.keepRecord(json) }
       .map { entry : (String, String) => GrobidScorable.jsonToMapFeatures(entry._1, entry._2) }

@@ -45,7 +45,6 @@ class GrobidScorableDumpJob(args: Args) extends JobBase(args) {
       validGrobidRows.inc
       entry
     }
-    // XXX: this groupBy after the map?
     .groupBy { case MapFeatures(slug, json) => slug }
     .map { tuple =>
       val (slug : String, features : MapFeatures) = tuple

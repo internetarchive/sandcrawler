@@ -8,9 +8,6 @@ import cascading.flow.FlowDef
 import cascading.tuple.Fields
 import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
-// XXX: import parallelai.spyglass.hbase.HBasePipeConversions
-
-// XXX: class BibjsonScorable extends Scorable with HBasePipeConversions {
 
 class BibjsonScorable extends Scorable {
 

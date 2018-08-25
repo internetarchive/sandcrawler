@@ -12,10 +12,6 @@ class ScoreJob(args: Args) extends JobBase(args) {
   val grobidRowCount = Stat("grobid-rows-filtered", "sandcrawler")
   val crossrefRowCount = Stat("crossref-rows-filtered", "sandcrawler")
   val joinedRowCount = Stat("joined-rows", "sandcrawler")
-  /* TODO:
-  val uniqueDoiCount = Stat("unique-doi-count", "sandcrawler")
-  val uniqueSha1Count = Stat("unique-sha1-count", "sandcrawler")
-  */
 
   val grobidScorable : Scorable = new GrobidScorable()
   val crossrefScorable : Scorable = new CrossrefScorable()
@@ -35,18 +31,6 @@ class ScoreJob(args: Args) extends JobBase(args) {
   val joinedPipe = grobidPipe
     .addTrap(TypedTsv(args("output") + ".trapped"))
     .join(crossrefPipe)
-
-  /* TODO:
-  // Reduces to count unique SHA1 and DOI
-  joinedPipe
-    .map { case (_, (grobidFeatures, _)) => grobidFeatures.sha }
-    .distinct
-    .map { _ => uniqueSha1Count.inc }
-  joinedPipe
-    .map { case (_, (_, crossrefFeatures)) => crossrefFeatures.doi }
-    .distinct
-    .map { _ => uniqueDoiCount.inc }
-  */
 
   // TypedTsv doesn't work over case classes.
   joinedPipe
