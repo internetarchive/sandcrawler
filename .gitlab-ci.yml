@@ -9,6 +9,10 @@ before_script:
   - pip3 install pipenv
   - pipenv --version
 
+variables:
+  LC_ALL: "C.UTF-8"
+  LANG: "C.UTF-8"
+
 test_python:
   script:
     - cd python
