@@ -257,6 +257,27 @@ def run_keysmissingcol(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+def run_dumpungrobided(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting dumpungrobided job...")
+    output = "{}/output-{}/{}-dumpungrobided".format(
+        HDFS_DIR,
+        args.env,
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    cmd = """hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.DumpUnGrobidedJob \
+        --hdfs \
+        --app.conf.path scalding/ia_cluster.conf \
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env)
+    subprocess.call(cmd, shell=True)
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -319,6 +340,9 @@ def main():
     sub_keysmissingcol.set_defaults(func=run_keysmissingcol)
     sub_keysmissingcol.add_argument('column',
         help="column to SCAN for missing keys")
+
+    sub_dumpungrobided = subparsers.add_parser('dump-ungrobided')
+    sub_dumpungrobided.set_defaults(func=run_dumpungrobided)
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
