@@ -26,3 +26,17 @@ To interact with this config, use happybase (python) config:
     # Test connection
     conn.tables()
 
+## Queries From Shell
+
+Fetch all columns for a single row:
+
+    hbase> get 'wbgrp-journal-extract-0-qa', 'sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ'
+
+Fetch multiple columns for a single row, using column families:
+
+    hbase> get 'wbgrp-journal-extract-0-qa', 'sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ', 'f', 'file'
+
+Scan a fixed number of rows (here 5) starting at a specific key prefix, all
+columns:
+
+    hbase> scan 'wbgrp-journal-extract-0-qa',{LIMIT=>5,STARTROW=>'sha1:A'}
