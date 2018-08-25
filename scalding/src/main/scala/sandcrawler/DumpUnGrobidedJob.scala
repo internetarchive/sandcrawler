@@ -15,19 +15,19 @@ import parallelai.spyglass.hbase.HBaseSource
 // full CDX metadata, and dumps to a TSV for later extraction by the
 // "extraction-ungrobided" job.
 //
-// Does the same horrible join thing that UnGrobidedDumpJob does.
-class UnGrobidedDumpJob(args: Args) extends JobBase(args) with HBasePipeConversions {
+// Does the same horrible join thing that DumpUnGrobidedJob does.
+class DumpUnGrobidedJob(args: Args) extends JobBase(args) with HBasePipeConversions {
 
   val output = args("output")
 
-  val allKeys : TypedPipe[(String,String,String,String)] = UnGrobidedDumpJob.getHBaseKeySource(
+  val allKeys : TypedPipe[(String,String,String,String)] = DumpUnGrobidedJob.getHBaseKeySource(
     args("hbase-table"),
     args("zookeeper-hosts"))
     .read
     .fromBytesWritable('key, 'c, 'mime, 'cdx)
     .toTypedPipe[(String,String,String,String)]('key, 'c, 'mime, 'cdx)
 
-  val existingKeys : TypedPipe[(String,Boolean)] = UnGrobidedDumpJob.getHBaseColSource(
+  val existingKeys : TypedPipe[(String,Boolean)] = DumpUnGrobidedJob.getHBaseColSource(
     args("hbase-table"),
     args("zookeeper-hosts"))
     .read
@@ -46,7 +46,7 @@ class UnGrobidedDumpJob(args: Args) extends JobBase(args) with HBasePipeConversi
 
 }
 
-object UnGrobidedDumpJob {
+object DumpUnGrobidedJob {
 
   // eg, "wbgrp-journal-extract-0-qa",7 "mtrcs-zk1.us.archive.org:2181"
   def getHBaseColSource(hbaseTable: String, zookeeperHosts: String) : HBaseSource = {

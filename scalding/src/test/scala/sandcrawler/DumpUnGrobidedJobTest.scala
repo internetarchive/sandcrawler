@@ -17,7 +17,7 @@ import parallelai.spyglass.hbase.HBaseSource
 import scala._
 
 @RunWith(classOf[JUnitRunner])
-class UnGrobidedDumpJobTest extends FunSpec with TupleConversions {
+class DumpUnGrobidedJobTest extends FunSpec with TupleConversions {
 
   val output = "/tmp/testOutput"
   val (testTable, testHost) = ("test-table", "dummy-host:2181")
@@ -50,16 +50,16 @@ class UnGrobidedDumpJobTest extends FunSpec with TupleConversions {
                         Bytes.toBytes(pair._3),
                         Bytes.toBytes(pair._4)))
 
-  JobTest("sandcrawler.UnGrobidedDumpJob")
+  JobTest("sandcrawler.DumpUnGrobidedJob")
     .arg("test", "")
     .arg("app.conf.path", "app.conf")
     .arg("output", output)
     .arg("hbase-table", testTable)
     .arg("zookeeper-hosts", testHost)
     .arg("debug", "true")
-    .source[Tuple](UnGrobidedDumpJob.getHBaseColSource(testTable, testHost),
+    .source[Tuple](DumpUnGrobidedJob.getHBaseColSource(testTable, testHost),
       sampleDataGrobid.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
-    .source[Tuple](UnGrobidedDumpJob.getHBaseKeySource(testTable, testHost),
+    .source[Tuple](DumpUnGrobidedJob.getHBaseKeySource(testTable, testHost),
       sampleDataFile.map(l => new Tuple(l.map(s => {new ImmutableBytesWritable(s)}):_*)))
     .sink[Tuple](TypedTsv[(String,String,String,String)](output)) {
       outputBuffer =>
