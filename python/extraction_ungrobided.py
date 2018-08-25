@@ -133,4 +133,4 @@ class MRExtractUnGrobided(MRExtractCdxGrobid):
 
 
 if __name__ == '__main__': # pragma: no cover
-    MRExtractCdxGrobid.run()
+    MRExtractUnGrobided.run()
