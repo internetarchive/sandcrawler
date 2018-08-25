@@ -74,6 +74,31 @@ def run_extract(args):
                 grobid_uri=GROBID_URI)
     subprocess.call(cmd, shell=True)
 
+def run_extract_ungrobided(args):
+    if args.rebuild:
+        rebuild_python()
+    print("Starting extractungrobided job...")
+    output = "{}/output-{}/{}-extract-ungrobided".format(
+        HDFS_DIR,
+        args.env,
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    cmd = """cd python;
+        pipenv run ./extraction_ungrobided.py \
+            --hbase-host {hbase_host} \
+            --hbase-table wbgrp-journal-extract-0-{env} \
+            --grobid-uri {grobid_uri} \
+            -r hadoop \
+            -c mrjob.conf \
+            --archive venv-current.tar.gz#venv \
+            --jobconf mapred.line.input.format.linespermap=8000 \
+            --jobconf mapreduce.job.queuename=extraction \
+            --jobconf mapred.task.timeout=3600000 \
+            {input_ungrobided}
+            """.format(hbase_host=HBASE_HOST, env=args.env,
+                input_ungrobided=args.input_ungrobided,
+                grobid_uri=GROBID_URI)
+    subprocess.call(cmd, shell=True)
+
 def run_rowcount(args):
     if args.rebuild:
         rebuild_scalding()
@@ -301,6 +326,11 @@ def main():
     sub_extract.set_defaults(func=run_extract)
     sub_extract.add_argument('input_cdx',
         help="full HDFS path of CDX file to extract")
+
+    sub_extractungrobided = subparsers.add_parser('extract-ungrobided')
+    sub_extractungrobided.set_defaults(func=run_extract_ungrobided)
+    sub_extractungrobided.add_argument('input_ungrobided',
+        help="full HDFS path of 'ungrobided' file to extract")
 
     sub_rowcount = subparsers.add_parser('row-count')
     sub_rowcount.set_defaults(func=run_rowcount)
