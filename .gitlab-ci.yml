@@ -1,4 +1,4 @@
-image: python:3.6-stretch
+image: ubuntu:xenial
 before_script:
   - apt update -qy
   - apt install -y apt-transport-https
