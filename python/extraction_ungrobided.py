@@ -29,13 +29,13 @@ from extraction_cdx_grobid import MRExtractCdxGrobid, KEY_BLACKLIST, \
 
 class MRExtractUnGrobided(MRExtractCdxGrobid):
 
-    # CDX lines in; JSON status out
+    # "ungrobided" TSV lines in; JSON status out
     #HADOOP_INPUT_FORMAT = 'org.apache.hadoop.mapred.lib.NLineInputFormat'
     #INPUT_PROTOCOL = mrjob.protocol.RawProtocol
     INPUT_PROTOCOL = mrjob.protocol.RawValueProtocol
     OUTPUT_PROTOCOL = mrjob.protocol.JSONValueProtocol
 
-    def parse_line(self, raw_line):
+    def parse_ungrobided_line(self, raw_line):
         """Line should be TSV and have non-null fields:
 
             - key (string)
@@ -74,7 +74,7 @@ class MRExtractUnGrobided(MRExtractCdxGrobid):
         self.increment_counter('lines', 'total')
 
         # Parse line and filter down
-        info, status = self.parse_line(raw_line)
+        info, status = self.parse_ungrobided_line(raw_line)
         if info is None:
             self.increment_counter('lines', status['status'])
             yield _, status
