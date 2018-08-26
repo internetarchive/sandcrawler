@@ -64,12 +64,15 @@ def run_extract(args):
             --grobid-uri {grobid_uri} \
             -r hadoop \
             -c mrjob.conf \
+            --output-dir {output} \
+            --no-output \
             --archive venv-current.tar.gz#venv \
             --jobconf mapred.line.input.format.linespermap=8000 \
             --jobconf mapreduce.job.queuename=extraction \
             --jobconf mapred.task.timeout=3600000 \
             {input_cdx}
             """.format(hbase_host=HBASE_HOST, env=args.env,
+                output=output,
                 input_cdx=args.input_cdx,
                 grobid_uri=GROBID_URI)
     subprocess.call(cmd, shell=True)
@@ -89,6 +92,8 @@ def run_extract_ungrobided(args):
             --grobid-uri {grobid_uri} \
             -r hadoop \
             -c mrjob.conf \
+            --output-dir {output} \
+            --no-output \
             --archive venv-current.tar.gz#venv \
             --jobconf mapred.line.input.format.linespermap=8000 \
             --jobconf mapreduce.job.queuename=extraction \
@@ -96,6 +101,7 @@ def run_extract_ungrobided(args):
             {input_ungrobided}
             """.format(hbase_host=HBASE_HOST, env=args.env,
                 input_ungrobided=args.input_ungrobided,
+                output=output,
                 grobid_uri=GROBID_URI)
     subprocess.call(cmd, shell=True)
 
