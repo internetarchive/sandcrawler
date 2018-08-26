@@ -32,8 +32,14 @@ from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
 from common import parse_ungrobided_line
 from grobid2json import teixml2json
-from extraction_cdx_grobid import KEY_BLACKLIST, sentry_client
 
+# Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
+sentry_client = raven.Client()
+
+# Specific poison-pill rows we should skip
+KEY_BLACKLIST = (
+    'sha1:DLCCSMMVTCCIR6LRXHEQLZ4PWO6NG2YT',    # "failed to guess ARC header format"
+)
 
 class MRExtractUnGrobided(MRJob):
 
@@ -62,9 +68,6 @@ class MRExtractUnGrobided(MRJob):
                               type=str,
                               default='https://archive.org/serve/',
                               help='URI where WARCs can be found')
-        self.add_passthru_arg('--force-existing',
-                              action="store_true",
-                              help='Re-processes (with GROBID) existing lines')
 
     def __init__(self, *args, **kwargs):
         super(MRExtractUnGrobided, self).__init__(*args, **kwargs)
