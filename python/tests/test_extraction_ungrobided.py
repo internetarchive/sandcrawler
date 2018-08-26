@@ -139,28 +139,28 @@ def test_parse_ungrobided_invalid(job):
 
     print("space-prefixed line")
     raw = " com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz"
-    info, status = job.parse_line(raw)
+    info, status = job.parse_ungrobided_line(raw)
     assert info is None
     assert status['status'] == "invalid"
     assert 'prefix' in status['reason']
 
     print("commented line")
     raw = "#com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf application/pdf 200 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz"
-    info, status = job.parse_line(raw)
+    info, status = job.parse_ungrobided_line(raw)
     assert info is None
     assert status['status'] == "invalid"
     assert 'prefix' in status['reason']
 
     print("wrong column count")
     raw = "a b c d e"
-    info, status = job.parse_line(raw)
+    info, status = job.parse_ungrobided_line(raw)
     assert info is None
     assert status['status'] == "invalid"
     assert 'parse' in status['reason']
 
     print("CDX line, somehow")
     raw = "com,sagepub,cep)/content/28/9/960.full.pdf 20170705062200 http://cep.sagepub.com/content/28/9/960.full.pdf - 200 3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ - - 401 313356621 CITESEERX-CRAWL-2017-06-20-20170705061647307-00039-00048-wbgrp-svc284/CITESEERX-CRAWL-2017-06-20-20170705062052659-00043-31209~wbgrp-svc284.us.archive.org~8443.warc.gz"
-    info, status = job.parse_line(raw)
+    info, status = job.parse_ungrobided_line(raw)
     assert info is None
     print(status)
     assert status['status'] == "invalid"
