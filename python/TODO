@@ -1,4 +1,1 @@
-- quality scoring (of JSON output)
-- use pre-mapper `grep` command to filter down, eg, by status?
-- automation/docs for bundling virtualenv along
-- think about speedups
+- refactor extractor common code into a shared file
