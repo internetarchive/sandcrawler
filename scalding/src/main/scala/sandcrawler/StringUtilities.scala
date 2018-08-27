@@ -36,7 +36,7 @@ object StringUtilities {
 
   // Source: https://stackoverflow.com/a/30076541/631051
   def removePunctuation(s: String) : String = {
-    s.replaceAll("""[\p{Punct}’·“”‘’“”«»「」]""", "")
+    s.replaceAll("""[\p{Punct}’·“”‘’“”«»「」¿–±§ʿ]""", "")
   }
 
   // Adapted from: https://stackoverflow.com/a/16018452/631051
