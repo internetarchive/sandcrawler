@@ -60,7 +60,28 @@ object CrossrefScorable {
       if (titles.isEmpty || titles == null) {
         None
       } else {
-        val title = titles(0)
+        val baseTitle: String = titles(0)
+        // TODO(bnewbold): this code block is horrible
+        val baseSubtitle: String = if (map contains "subtitle") {
+          val subtitles = map("subtitle").asInstanceOf[List[String]]
+          if (!subtitles.isEmpty && subtitles != null) {
+            val sub = subtitles(0)
+            if (sub != null && !sub.isEmpty && baseTitle != null) {
+              sub
+            } else {
+              ""
+            }
+          } else {
+            ""
+          }
+        } else {
+          ""
+        }
+        val title = if (baseSubtitle.isEmpty) {
+          baseTitle
+        } else {
+          baseTitle.concat(": ".concat(baseSubtitle))
+        }
         if (title == null || title.isEmpty || title.length > Scorable.MaxTitleLength) None else Some(title)
       }
     } else {

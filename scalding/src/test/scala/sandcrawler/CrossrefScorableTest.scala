@@ -98,6 +98,24 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
     result.slug shouldBe Scorable.NoSlug
   }
 
+  it should "handle subtitle" in {
+    val result = CrossrefScorable.jsonToMapFeatures(
+      """{"title": ["short but not too short"], "subtitle": ["just right!"], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""")
+    result.slug shouldBe "shortbutnottooshortjustright"
+  }
+
+  it should "handle empty subtitle" in {
+    val result = CrossrefScorable.jsonToMapFeatures(
+      """{"title": ["short but not too short"], "subtitle": [""], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""")
+    result.slug shouldBe "shortbutnottooshort"
+  }
+
+  it should "handle null subtitle" in {
+    val result = CrossrefScorable.jsonToMapFeatures(
+      """{"title": ["short but not too short"], "subtitle": [null], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""")
+    result.slug shouldBe "shortbutnottooshort"
+  }
+
   it should "handle missing authors" in {
     val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithNoAuthors)
     result.slug shouldBe Scorable.NoSlug
