@@ -70,4 +70,12 @@ class ScorableTest extends FlatSpec with Matchers {
       new ReduceFeatures(JsonString), new ReduceFeatures(JsonString))
     score shouldBe Scorable.MaxScore
   }
+
+  "computeOutput()" should "be case-insensitive" in {
+    val left = JsonString.replace("<<TITLE>>", "A TITLE UPPER CASE")
+    val right = JsonString.replace("<<TITLE>>", "a title upper case")
+    val score = Scorable.computeSimilarity(
+      new ReduceFeatures(left), new ReduceFeatures(right))
+    score shouldBe Scorable.MaxScore
+  }
 }

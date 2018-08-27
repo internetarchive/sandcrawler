@@ -72,7 +72,7 @@ object Scorable {
         getStringOption(json2, "title") match {
           case None => 0
           case Some(title2) =>
-            (StringUtilities.similarity(title1, title2) * MaxScore).toInt
+            (StringUtilities.similarity(title1.toLowerCase, title2.toLowerCase) * MaxScore).toInt
         }
       }
     }
