@@ -1,0 +1,95 @@
+
+### QA matchcrossref
+
+[D8C7F2CA7620450991838D540489948D/8B17786779BE44579C98D8A325AC5959] sandcrawler.ScoreJob/(1/1) ...-24-2102.32-matchcrossref
+
+Submitted:  Fri Aug 24 21:03:09 UTC 2018
+Started:    Fri Aug 24 21:03:20 UTC 2018
+Finished:   Sat Aug 25 09:46:55 UTC 2018
+Elapsed:    12hrs, 43mins, 34sec
+Diagnostics:    
+Average Map Time    24mins, 31sec
+Average Shuffle Time    15sec
+Average Merge Time  21sec
+Average Reduce Time 7mins, 17sec
+
+Map 2312    2312
+Reduce  100 100
+
+crossref-rows-filtered  73901964    0   73901964
+grobid-rows-filtered    1092992 0   1092992
+joined-rows 0   623837  623837
+
+cascading.flow.StepCounters 
+Tuples_Read 94831255    0   94831255
+Tuples_Written  0   623837  623837
+
+Read_Duration   7108430 352241  7460671
+Tuples_Read 94831255    74994956    169826211
+Tuples_Written  74994956    623837  75618793
+Write_Duration  7650302 21468   7671770
+
+## QA UnGrobided
+
+Submitted:  Sat Aug 25 01:23:22 UTC 2018
+Started:    Sat Aug 25 05:06:36 UTC 2018
+Finished:   Sat Aug 25 05:13:45 UTC 2018
+Elapsed:    7mins, 8sec
+Diagnostics:    
+Average Map Time    1mins, 20sec
+Average Shuffle Time    12sec
+Average Merge Time  15sec
+Average Reduce Time 29sec
+
+Map 48  48
+Reduce  1   1
+
+bnewbold@bnewbold-dev$ gohdfs du -sh sandcrawler/output-qa/2018-08-25-0122.54-dumpungrobided/part*
+56.8M   /user/bnewbold/sandcrawler/output-qa/2018-08-25-0122.54-dumpungrobided/part-00000
+
+## Prod UnGrobided
+
+[D76F6BF91D894E879E747C868B0DEDE7/394A1AFC44694992B71E6920AF8BA3FB] sandcrawler.DumpUnGrobidedJob/(1/1) ...26-0910.25-dumpungrobided
+
+Map    278 278
+Reduce  1   1
+
+Submitted:  Sun Aug 26 09:10:51 UTC 2018
+Started:    Sun Aug 26 09:18:21 UTC 2018
+Finished:   Sun Aug 26 10:29:28 UTC 2018
+Elapsed:    1hrs, 11mins, 7sec
+Diagnostics:    
+Average Map Time    4mins, 48sec
+Average Shuffle Time    24mins, 17sec
+Average Merge Time  14sec
+Average Reduce Time 13mins, 54sec
+
+
+cading.flow.StepCounters    
+Name
+Map
+Reduce
+Total
+Tuples_Read 64510564    0   64510564
+Tuples_Written  0   21618164    21618164
+
+## Prod Crossref Match
+
+[6C063C0809244446BA8602C3BE99CEC2/5FE5D87899154F38991A1ED58BEB34D4] sandcrawler.ScoreJob/(1/1) ...-25-1753.01-matchcrossref
+
+Map 2427    2427
+Reduce  50  50
+
+Submitted:  Sat Aug 25 17:53:50 UTC 2018
+Started:    Sat Aug 25 17:53:59 UTC 2018
+Finished:   Sun Aug 26 11:22:52 UTC 2018
+Elapsed:    17hrs, 28mins, 52sec
+Diagnostics:    
+Average Map Time    31mins, 20sec
+Average Shuffle Time    1mins, 21sec
+Average Merge Time  41sec
+Average Reduce Time 3hrs, 14mins, 39sec
+
+crossref-rows-filtered  73901964    0   73901964
+grobid-rows-filtered    14222226    0   14222226
+joined-rows 0   14115453    14115453
