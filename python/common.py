@@ -1,4 +1,5 @@
 
+import json
 from datetime import datetime
 
 NORMAL_MIME = (
@@ -71,3 +72,28 @@ def parse_cdx_line(raw_cdx):
     # 'i' intentionally not set
     heritrix = dict(u=url, d=dt_iso, f=warc_file, o=int(offset), c=1)
     return {'key': key, 'file:mime': mime, 'file:cdx': info, 'f:c': heritrix}
+
+def parse_ungrobided_line(raw_line):
+
+    line = raw_line.strip().split("\t")
+    if len(line) != 4:
+        return None
+
+    key = line[0]
+    mime = normalize_mime(line[2])
+    try:
+        f_c = json.loads(line[1])
+        cdx = json.loads(line[3])
+    except json.JSONDecodeError:
+        return None
+
+    if not (key[5:].isalnum() and len(key) == 37 and mime != None):
+        print(mime)
+        print(key)
+        print("FAIL")
+        return None
+
+    if '-' in (key, mime, f_c, cdx):
+        return None
+
+    return {'key': key, 'file:mime': mime, 'file:cdx': cdx, 'f:c': f_c}
