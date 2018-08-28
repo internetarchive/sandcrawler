@@ -17,7 +17,7 @@ class CrossrefScorable extends Scorable with HBasePipeConversions {
     TextLine(args("crossref-input"))
   }
 
-  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
+  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[Option[MapFeatures]] = {
     getSource(args).read
       .toTypedPipe[String](new Fields("line"))
       .filter { CrossrefScorable.keepRecord(_) }
@@ -116,22 +116,25 @@ object CrossrefScorable {
     }
   }
 
-  def jsonToMapFeatures(json : String) : MapFeatures = {
+  def jsonToMapFeatures(json : String) : Option[MapFeatures] = {
     Scorable.jsonToMap(json) match {
-      case None => MapFeatures(Scorable.NoSlug, json)
+      case None => None
       case Some(map) =>
         mapToTitle(map) match {
-          case None => MapFeatures(Scorable.NoSlug, json)
+          case None => None
           case Some(title) => {
             val doi = Scorable.getString(map, "DOI")
             val authors: List[String] = mapToAuthorList(map)
             val year: Int = mapToYear(map).getOrElse(0)
             val contentType: String = map.get("type").map(e => e.asInstanceOf[String]).getOrElse("MISSING-CONTENT-TYPE")
             if (doi.isEmpty || doi == null || authors.length == 0 || !(ContentTypeWhitelist contains contentType)) {
-              MapFeatures(Scorable.NoSlug, json)
+              None
             } else {
               val sf : ScorableFeatures = ScorableFeatures.create(title=title, authors=authors, doi=doi.toLowerCase(), year=year)
-              MapFeatures(sf.toSlug, sf.toString)
+              sf.toSlug match {
+                case None => None
+                case Some(slug) => Some(MapFeatures(slug, sf.toString))
+              }
             }
           }
         }
