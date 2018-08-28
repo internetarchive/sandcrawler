@@ -79,59 +79,64 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
 
   // Unit tests
   "CrossrefScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
-    val result = CrossrefScorable.jsonToMapFeatures(MalformedCrossrefString)
-    result.slug shouldBe Scorable.NoSlug
+    CrossrefScorable.jsonToMapFeatures(MalformedCrossrefString) should be (None)
   }
 
   it should "handle missing title" in {
-    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithoutTitle)
-    result.slug shouldBe Scorable.NoSlug
+    CrossrefScorable.jsonToMapFeatures(CrossrefStringWithoutTitle) should be (None)
   }
 
   it should "handle null title" in {
-    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithNullTitle)
-    result.slug shouldBe Scorable.NoSlug
+    CrossrefScorable.jsonToMapFeatures(CrossrefStringWithNullTitle) should be (None)
   }
 
   it should "handle empty title" in {
-    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithEmptyTitle)
-    result.slug shouldBe Scorable.NoSlug
+    CrossrefScorable.jsonToMapFeatures(CrossrefStringWithEmptyTitle) should be (None)
   }
 
   it should "handle subtitle" in {
-    val result = CrossrefScorable.jsonToMapFeatures(
-      """{"title": ["short but not too short"], "subtitle": ["just right!"], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""")
-    result.slug shouldBe "shortbutnottooshortjustright"
+    CrossrefScorable.jsonToMapFeatures(
+      """{"title": ["short but not too short"], "subtitle": ["just right!"], "DOI": "10.123/asdf", "type":"journal-article","author":[{ "given" : "W", "family" : "Gaier"}]}""") match {
+      case None => fail()
+      case Some(result) => result.slug shouldBe "shortbutnottooshortjustright"
+    }
   }
 
   it should "handle empty subtitle" in {
-    val result = CrossrefScorable.jsonToMapFeatures(
-      """{"title": ["short but not too short"], "subtitle": [""], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""")
-    result.slug shouldBe "shortbutnottooshort"
+    CrossrefScorable.jsonToMapFeatures(
+      """{"title": ["short but not too short"], "subtitle": [""], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""") match {
+      case None => fail()
+      case Some(result) => result.slug shouldBe "shortbutnottooshort"
+    }
   }
 
   it should "handle null subtitle" in {
-    val result = CrossrefScorable.jsonToMapFeatures(
-      """{"title": ["short but not too short"], "subtitle": [null], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""")
-    result.slug shouldBe "shortbutnottooshort"
+    CrossrefScorable.jsonToMapFeatures(
+      """{"title": ["short but not too short"], "subtitle": [null], "DOI": "10.123/asdf", "type":"journal-article", "author":[{ "given" : "W", "family" : "Gaier"}]}""") match {
+      case None => fail()
+      case Some(result) => result.slug shouldBe "shortbutnottooshort"
+    }
   }
 
   it should "handle missing authors" in {
-    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithNoAuthors)
-    result.slug shouldBe Scorable.NoSlug
+    CrossrefScorable.jsonToMapFeatures(CrossrefStringWithNoAuthors) should be (None)
   }
 
   it should "handle valid input" in {
-    val result = CrossrefScorable.jsonToMapFeatures(CrossrefStringWithGoodTitle)
-    result.slug shouldBe "sometitle"
-    Scorable.jsonToMap(result.json) match {
+    CrossrefScorable.jsonToMapFeatures(CrossrefStringWithGoodTitle) match {
       case None => fail()
-      case Some(map) => {
-        map("title").asInstanceOf[String] shouldBe "Some Title"
-        map("doi").asInstanceOf[String] shouldBe "10.123/abc"
-        // TODO: full name? not just a string?
-        map("authors").asInstanceOf[List[String]] shouldBe List("Gaier")
-        map("year").asInstanceOf[Double].toInt shouldBe 2002
+      case Some(result) => {
+        result.slug shouldBe "sometitle"
+        Scorable.jsonToMap(result.json) match {
+          case None => fail()
+          case Some(map) => {
+            map("title").asInstanceOf[String] shouldBe "Some Title"
+            map("doi").asInstanceOf[String] shouldBe "10.123/abc"
+            // TODO: full name? not just a string?
+            map("authors").asInstanceOf[List[String]] shouldBe List("Gaier")
+            map("year").asInstanceOf[Double].toInt shouldBe 2002
+          }
+        }
       }
     }
   }
@@ -161,9 +166,7 @@ class CrossrefScorableTest extends FlatSpec with Matchers {
   }
 
   it should "handle content types" in {
-    val resultWrong = CrossrefScorable.jsonToMapFeatures(CrossrefStringWrongType)
-    resultWrong.slug shouldBe Scorable.NoSlug
-    val resultMissing = CrossrefScorable.jsonToMapFeatures(CrossrefStringNoType)
-    resultMissing.slug shouldBe Scorable.NoSlug
+    CrossrefScorable.jsonToMapFeatures(CrossrefStringWrongType) should be (None)
+    CrossrefScorable.jsonToMapFeatures(CrossrefStringNoType) should be (None)
   }
 }
