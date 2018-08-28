@@ -55,37 +55,45 @@ object CrossrefScorable {
 
   // Returns None if title is null, empty, or too long.
   def mapToTitle(map : Map[String, Any]) : Option[String] = {
-    if (map contains "title") {
-      val titles = map("title").asInstanceOf[List[String]]
-      if (titles.isEmpty || titles == null) {
-        None
+    def getTitle : Option[String] = {
+      if (map contains "title") {
+        val titles = map("title").asInstanceOf[List[String]]
+        if (titles.isEmpty || titles == null) None else Some(titles(0))
       } else {
-        val baseTitle: String = titles(0)
-        // TODO(bnewbold): this code block is horrible
-        val baseSubtitle: String = if (map contains "subtitle") {
-          val subtitles = map("subtitle").asInstanceOf[List[String]]
-          if (!subtitles.isEmpty && subtitles != null) {
-            val sub = subtitles(0)
-            if (sub != null && !sub.isEmpty && baseTitle != null) {
-              sub
-            } else {
-              ""
-            }
-          } else {
-            ""
-          }
-        } else {
-          ""
-        }
-        val title = if (baseSubtitle.isEmpty) {
-          baseTitle
-        } else {
-          baseTitle.concat(": ".concat(baseSubtitle))
-        }
-        if (title == null || title.isEmpty || title.length > Scorable.MaxTitleLength) None else Some(title)
+        None
       }
-    } else {
-      None
+    }
+
+    def getSubtitle : Option[String] = {
+      if (map contains "subtitle") {
+        val subtitles = map("subtitle").asInstanceOf[List[String]]
+        if (subtitles.isEmpty || subtitles == null) {
+          None
+        } else {
+          val sub = subtitles(0)
+          if (sub == null || sub.isEmpty) {
+            None
+          } else {
+            Some(sub)
+          }
+        }
+      } else {
+        None
+      }
+    }
+
+    getTitle match {
+      case None => None
+      case Some(baseTitle) => {
+        if (baseTitle == null) {
+          None
+        } else {
+          getSubtitle match {
+            case None => Some(baseTitle)
+            case Some(baseSubtitle) => Some(baseTitle.concat(":".concat(baseSubtitle)))
+          }
+        }
+      }
     }
   }
 
@@ -106,37 +114,39 @@ object CrossrefScorable {
       case None => None
       case Some(created) => {
         Some(created.asInstanceOf[Map[String,Any]]
-                    .get("date-parts")
-                    .get
-                    .asInstanceOf[List[Any]](0)
-                    .asInstanceOf[List[Any]](0)
-                    .asInstanceOf[Double]
-                    .toInt)
+          .get("date-parts")
+          .get
+          .asInstanceOf[List[Any]](0)
+          .asInstanceOf[List[Any]](0)
+          .asInstanceOf[Double]
+          .toInt)
       }
     }
   }
 
   def jsonToMapFeatures(json : String) : Option[MapFeatures] = {
+    def makeMapFeatures(title : String, doi : String, authors : List[String], year : Int, contentType : String) : Option[MapFeatures] = {
+      if (doi.isEmpty || doi == null || authors.length == 0 || !(ContentTypeWhitelist contains contentType)) {
+        None
+      } else {
+        val sf : ScorableFeatures = ScorableFeatures.create(title=title, authors=authors, doi=doi.toLowerCase(), year=year)
+        sf.toSlug match {
+          case None => None
+          case Some(slug) => Some(MapFeatures(slug, sf.toString))
+        }
+      }
+    }
     Scorable.jsonToMap(json) match {
       case None => None
       case Some(map) =>
         mapToTitle(map) match {
           case None => None
-          case Some(title) => {
-            val doi = Scorable.getString(map, "DOI")
-            val authors: List[String] = mapToAuthorList(map)
-            val year: Int = mapToYear(map).getOrElse(0)
-            val contentType: String = map.get("type").map(e => e.asInstanceOf[String]).getOrElse("MISSING-CONTENT-TYPE")
-            if (doi.isEmpty || doi == null || authors.length == 0 || !(ContentTypeWhitelist contains contentType)) {
-              None
-            } else {
-              val sf : ScorableFeatures = ScorableFeatures.create(title=title, authors=authors, doi=doi.toLowerCase(), year=year)
-              sf.toSlug match {
-                case None => None
-                case Some(slug) => Some(MapFeatures(slug, sf.toString))
-              }
-            }
-          }
+          case Some(title) => makeMapFeatures(
+            title=title,
+            doi=Scorable.getString(map, "DOI"),
+            authors=mapToAuthorList(map),
+            year=mapToYear(map).getOrElse(0),
+            contentType=map.get("type").map(e => e.asInstanceOf[String]).getOrElse("MISSING-CONTENT-TYPE"))
         }
     }
   }

@@ -43,9 +43,13 @@ class ScorableFeatures private(title : String, authors : List[Any] = List(), yea
       // Remove punctuation
       val slug = StringUtilities.removePunctuation((unaccented.toLowerCase())).replaceAll("\\s", "")
       if (slug.isEmpty
-          || slug == null
-          || (ScorableFeatures.SlugBlacklist contains slug)
-          || (slug.length < ScorableFeatures.MinSlugLength)) None else Some(slug)
+        || slug == null
+        || (ScorableFeatures.SlugBlacklist contains slug)
+        || (slug.length < ScorableFeatures.MinSlugLength)) {
+        None
+      } else {
+        Some(slug)
+      }
     }
   }
 
