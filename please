@@ -353,7 +353,7 @@ def main():
         help="full HDFS path of Crossref JSON dump")
     sub_matchcrossref.add_argument('--reducers',
         help="number of reducers to run",
-        type=int, default=30)
+        type=int, default=200)
 
     sub_grobidscorabledump = subparsers.add_parser('grobid-scorable-dump')
     sub_grobidscorabledump.set_defaults(func=run_grobidscorabledump)
