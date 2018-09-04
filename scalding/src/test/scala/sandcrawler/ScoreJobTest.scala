@@ -222,21 +222,17 @@ class ScoreJobTest extends FlatSpec with Matchers {
       }
 
       def bundle(slug : String, grobidIndex : Int, crossrefIndex : Int) : (String, Int, String, String) = {
-        GrobidScorable.jsonToMapFeatures(
+        val mfg : Option[MapFeatures] = GrobidScorable.jsonToMapFeatures(
           Sha1Strings(grobidIndex),
-          JsonStrings(grobidIndex)) match {
-          case None => fail()
-          case Some(mf1) => {
-            CrossrefScorable.jsonToMapFeatures(CrossrefStrings(crossrefIndex)) match {
-              case None => fail()
-              case Some(mf2) => {
-                val score = Scorable.computeSimilarity(
-                  ReduceFeatures(mf1.json),
-                  ReduceFeatures(mf2.json))
-                (slug, score, mf1.json, mf2.json)
-              }
-            }
-          }
+          JsonStrings(grobidIndex))
+        val mfc : Option[MapFeatures] = CrossrefScorable.jsonToMapFeatures(CrossrefStrings(crossrefIndex))
+        if (mfg.isEmpty || mfc.isEmpty) {
+          fail()
+        } else {
+          val score = Scorable.computeSimilarity(
+            ReduceFeatures(mfg.get.json),
+            ReduceFeatures(mfc.get.json))
+          (slug, score, mfg.get.json, mfc.get.json)
         }
       }
 
