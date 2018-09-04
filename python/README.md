@@ -27,6 +27,28 @@ Check test coverage with:
     pytest --cov --cov-report html
     # open ./htmlcov/index.html in a browser
 
+## Troubleshooting
+
+If you get pipenv errors like:
+
+    AttributeError: '_NamespacePath' object has no attribute 'sort'
+        
+    ----------------------------------------
+
+    Command "python setup.py egg_info" failed with error code 1 in /1/tmp/pip-install-h7lb6tqz/proto-google-cloud-datastore-v1/
+
+     ☤  ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ 0/8 — 00:00:03
+     bnewbold@bnewbold-dev$ 
+     bnewbold@bnewbold-dev$ pipenv install --deploy --dev
+     Installing dependencies from Pipfile.lock (e82980)…
+     An error occurred while installing proto-google-cloud-logging-v2==0.91.3! Will try again.
+     An error occurred while installing gapic-google-cloud-error-reporting-v1beta1==0.15.3! Will try again.
+     An error occurred while installing gapic-google-cloud-datastore-v1==0.15.3! Will try again.
+     An error occurred while installing proto-google-cloud-datastore-v1==0.90.4! Will try again.
+
+Then something has gone horribly wrong with your pip/pipenv/python setup. Don't
+have a good workaround yet.
+
 ## Running Python Jobs on Hadoop
 
 The `../please` script automates these steps; you should use that instead.
