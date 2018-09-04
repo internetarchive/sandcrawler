@@ -16,11 +16,11 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
   private def titleToSlug(s : String) : Option[String] = ScorableFeatures.create(title = s).toSlug
 
   "mapToSlug()" should "extract the parts of titles before a colon" in {
-    titleToSlug("HELLO:there") shouldBe (Some("hellothere"))
+    titleToSlug("HELLO:there") shouldBe Some("hellothere")
   }
 
   it should "extract an entire colon-less string" in {
-    titleToSlug("hello THERE") shouldBe (Some("hellothere"))
+    titleToSlug("hello THERE") shouldBe Some("hellothere")
   }
 
   it should "return Scorable.NoSlug if given empty string" in {
