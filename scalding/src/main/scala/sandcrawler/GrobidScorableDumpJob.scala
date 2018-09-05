@@ -40,11 +40,11 @@ class GrobidScorableDumpJob(args: Args) extends JobBase(args) {
       parsedGrobidRows.inc
       GrobidScorable.jsonToMapFeatures(entry._1, entry._2)
     }
-    .filter { entry => Scorable.isValidSlug(entry.slug) }
-    .map { entry =>
+    .filterNot { entry => entry.isEmpty }
+    .map { entry => {
       validGrobidRows.inc
-      entry
-    }
+      entry.get
+    }}
     .groupBy { case MapFeatures(slug, json) => slug }
     .map { tuple =>
       val (slug : String, features : MapFeatures) = tuple

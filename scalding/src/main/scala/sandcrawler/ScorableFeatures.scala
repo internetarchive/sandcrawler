@@ -35,20 +35,27 @@ class ScorableFeatures private(title : String, authors : List[Any] = List(), yea
     JSONObject(toMap).toString
   }
 
-  def toSlug() : String = {
+  def toSlug() : Option[String] = {
     if (title == null) {
-      Scorable.NoSlug
+      None
     } else {
       val unaccented = StringUtilities.removeAccents(title)
       // Remove punctuation
       val slug = StringUtilities.removePunctuation((unaccented.toLowerCase())).replaceAll("\\s", "")
       if (slug.isEmpty
-          || slug == null
-          || (ScorableFeatures.SlugBlacklist contains slug)
-          || (slug.length < ScorableFeatures.MinSlugLength)) Scorable.NoSlug else slug
+        || slug == null
+        || (ScorableFeatures.SlugBlacklist contains slug)
+        || (slug.length < ScorableFeatures.MinSlugLength)) {
+        None
+      } else {
+        Some(slug)
+      }
     }
   }
 
-  def toMapFeatures : MapFeatures =
-    MapFeatures(toSlug, toString)
+  def toMapFeatures : Option[MapFeatures] =
+    toSlug match {
+      case None => None
+      case Some(slug) => Some(MapFeatures(slug, toString))
+    }
 }

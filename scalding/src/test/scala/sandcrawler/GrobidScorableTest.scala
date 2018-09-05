@@ -68,29 +68,30 @@ class GrobidScorableTest extends FlatSpec with Matchers {
   // Unit tests
 
   "GrobidScorable.jsonToMapFeatures()" should "handle invalid JSON" in {
-    val result = GrobidScorable.jsonToMapFeatures(Key, MalformedGrobidString)
-    result.slug shouldBe Scorable.NoSlug
+    GrobidScorable.jsonToMapFeatures(Key, MalformedGrobidString) should be (None)
   }
 
   it should "handle null title" in {
-    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithNullTitle)
-    result.slug shouldBe Scorable.NoSlug
+    GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithNullTitle) should be (None)
   }
 
   it should "handle missing title" in {
-    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithoutTitle)
-    result.slug shouldBe Scorable.NoSlug
+    GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithoutTitle) should be (None)
   }
 
   it should "handle valid input" in {
-    val result = GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithGoodTitle)
-    result.slug shouldBe "dummyexamplefile"
-    Scorable.jsonToMap(result.json) match {
+    GrobidScorable.jsonToMapFeatures(Key, GrobidStringWithGoodTitle) match {
       case None => fail()
-      case Some(map) => {
-        map should contain key "title"
-        map("title").asInstanceOf[String] shouldBe "Dummy Example File"
-        map("authors").asInstanceOf[List[String]] shouldBe List("Brewster Kahle", "J Doe")
+      case Some(result) => {
+        result.slug shouldBe "dummyexamplefile"
+        Scorable.jsonToMap(result.json) match {
+          case None => fail()
+          case Some(map) => {
+            map should contain key "title"
+            map("title").asInstanceOf[String] shouldBe "Dummy Example File"
+            map("authors").asInstanceOf[List[String]] shouldBe List("Brewster Kahle", "J Doe")
+          }
+        }
       }
     }
   }

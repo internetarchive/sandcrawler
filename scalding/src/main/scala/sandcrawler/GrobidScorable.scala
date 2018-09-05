@@ -20,7 +20,7 @@ class GrobidScorable extends Scorable with HBasePipeConversions {
     GrobidScorable.getHBaseSource(args("hbase-table"), args("zookeeper-hosts"))
   }
 
-  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[MapFeatures] = {
+  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[Option[MapFeatures]] = {
     getSource(args)
       .read
       // Can't just "fromBytesWritable" because we have multiple types
@@ -65,16 +65,16 @@ object GrobidScorable {
     HBaseBuilder.build(table, host, List("grobid0:metadata", "grobid0:status_code"), SourceMode.SCAN_ALL)
   }
 
-  def jsonToMapFeatures(key : String, json : String) : MapFeatures = {
+  def jsonToMapFeatures(key : String, json : String) : Option[MapFeatures] = {
     Scorable.jsonToMap(json) match {
-      case None => MapFeatures(Scorable.NoSlug, json)
+      case None => None
       case Some(map) => {
         if (map contains "title") {
           val authors: List[String] = mapToAuthorList(map)
           val title = Scorable.getString(map, "title")
           ScorableFeatures.create(title=title, authors=authors, sha1=key).toMapFeatures
         } else {
-          MapFeatures(Scorable.NoSlug, json)
+          None
         }
       }
     }
