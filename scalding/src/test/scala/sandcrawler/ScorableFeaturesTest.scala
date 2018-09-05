@@ -42,7 +42,7 @@ class ScorableFeaturesTest extends FlatSpec with Matchers {
   it should "filter stub titles" in {
     titleToSlug("abstract") shouldBe (None)
     titleToSlug("title!") shouldBe (None)
-    titleToSlug("a real title which is not on blacklist") shouldBe Some("arealtitlewhichisnotonblacklist")
+    titleToSlug("a real title which is not on denylist") shouldBe Some("arealtitlewhichisnotondenylist")
   }
 
   it should "strip special characters" in {

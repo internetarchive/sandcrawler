@@ -8,8 +8,8 @@ import scala.util.parsing.json.JSONObject
 
 object ScorableFeatures {
   // TODO: Add exception handling.
-  val fileStream : InputStream = getClass.getResourceAsStream("/slug-blacklist.txt")
-  val SlugBlacklist : Set[String] = Source.fromInputStream(fileStream).getLines.toSet
+  val fileStream : InputStream = getClass.getResourceAsStream("/slug-denylist.txt")
+  val SlugDenylist : Set[String] = Source.fromInputStream(fileStream).getLines.toSet
   fileStream.close
   val MinSlugLength = 8
 
@@ -44,7 +44,7 @@ class ScorableFeatures private(title : String, authors : List[Any] = List(), yea
       val slug = StringUtilities.removePunctuation((unaccented.toLowerCase())).replaceAll("\\s", "")
       if (slug.isEmpty
         || slug == null
-        || (ScorableFeatures.SlugBlacklist contains slug)
+        || (ScorableFeatures.SlugDenylist contains slug)
         || (slug.length < ScorableFeatures.MinSlugLength)) {
         None
       } else {

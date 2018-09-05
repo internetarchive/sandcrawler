@@ -37,7 +37,7 @@ from grobid2json import teixml2json
 sentry_client = raven.Client()
 
 # Specific poison-pill rows we should skip
-KEY_BLACKLIST = (
+KEY_DENYLIST = (
     'sha1:DLCCSMMVTCCIR6LRXHEQLZ4PWO6NG2YT',    # "failed to guess ARC header format"
 )
 
@@ -210,9 +210,9 @@ class MRExtractCdxGrobid(MRJob):
             yield _, status
             return
         key = info['key']
-        if key in KEY_BLACKLIST:
-            self.increment_counter('lines', 'blacklist')
-            yield _, dict(status='blacklist', key=key)
+        if key in KEY_DENYLIST:
+            self.increment_counter('lines', 'denylist')
+            yield _, dict(status='denylist', key=key)
             return
 
         # Note: this may not get "cleared" correctly
