@@ -1,7 +1,18 @@
 
+- paper match heuristic: include 10.1007%2F978-3-319-49304-6_18 (URL-escaped slash)
+- catch EOFFail fetching from wayback
 - "author counts match" in scoring
 - refactor "scorable" to "matchable"
 - look at refactoring to reduce JSON serializations
+- QA tool for matches (PDF + Crossref JSON + landing page?)
+    => python; talks directly to HBase
+- author counts should match (+/- one?)
+
+match strategies (hbase columns)
+- legacy_doi
+- url_doi
+- grobid_crossref (doi)
+- grobid_fatcat (fatcat ID)
 
 scalding:
 - better JSON library
