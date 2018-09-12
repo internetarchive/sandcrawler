@@ -176,6 +176,10 @@ def run_matchcrossref(args):
         HDFS_DIR,
         args.env,
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    if args.fatcat_insertable:
+        jobclass = "ScoreInsertableJob"
+    else:
+        jobclass = "ScoreJob"
     # Notes: -D options must come after Tool but before class name
     # https://github.com/twitter/scalding/wiki/Frequently-asked-questions#how-do-i-pass-parameters-to-my-hadoop-job-number-of-reducers--memory-options--etc-
     # Compression: changed due to errors in production
@@ -187,7 +191,7 @@ def run_matchcrossref(args):
         -Dcascading.spill.list.threshold=500000 \
         -D mapred.output.compress=false \
         -Dmapred.compress.map.output=true\
-        sandcrawler.ScoreJob \
+        sandcrawler.{jobclass} \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
         --hbase-table wbgrp-journal-extract-0-{env} \
@@ -195,6 +199,7 @@ def run_matchcrossref(args):
         --crossref-input {crossref_input} \
         --output {output}""".format(
             output=output,
+            jobclass=jobclass,
             zookeeper_hosts=ZOOKEEPER_HOSTS,
             env=args.env,
             reducers=args.reducers,
@@ -354,6 +359,9 @@ def main():
     sub_matchcrossref.add_argument('--reducers',
         help="number of reducers to run",
         type=int, default=200)
+    sub_matchcrossref.add_argument('--fatcat-insertable',
+        help="whether to include CDX and other metadata in output",
+        action='store_true')
 
     sub_grobidscorabledump = subparsers.add_parser('grobid-scorable-dump')
     sub_grobidscorabledump.set_defaults(func=run_grobidscorabledump)
