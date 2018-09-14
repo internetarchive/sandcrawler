@@ -227,6 +227,27 @@ def run_grobidscorabledump(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+def run_dumpfilemeta(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting dumpfilemeta job...")
+    output = "{}/output-{}/{}-dumpfilemeta".format(
+        HDFS_DIR,
+        args.env,
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    cmd = """hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.DumpFileMetaJob \
+        --hdfs \
+        --app.conf.path scalding/ia_cluster.conf \
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env)
+    subprocess.call(cmd, shell=True)
+
 def run_colcount(args):
     if args.rebuild:
         rebuild_scalding()
@@ -365,6 +386,9 @@ def main():
 
     sub_grobidscorabledump = subparsers.add_parser('grobid-scorable-dump')
     sub_grobidscorabledump.set_defaults(func=run_grobidscorabledump)
+
+    sub_dumpfilemeta = subparsers.add_parser('dump-file-meta')
+    sub_dumpfilemeta.set_defaults(func=run_dumpfilemeta)
 
     sub_colcount = subparsers.add_parser('col-count')
     sub_colcount.set_defaults(func=run_colcount)
