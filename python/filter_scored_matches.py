@@ -34,6 +34,10 @@ def tokenize(s, remove_whitespace=False):
     return s.encode('ascii', 'replace').replace(b'?', b'')
 
 def check_authors(left, right):
+    """
+    Intended to check GROBID extracted authors (right) against "known good"
+    (but maybe not perfect) Crossref metadata authors ("left").
+    """
     if len(left) == 0:
         return False
     if len(left) > len(right):
@@ -59,8 +63,9 @@ def test_check_authors():
     assert True == check_authors(['one two'], ['One Two'])
     assert True == check_authors(['two'], ['One Two'])
     assert True == check_authors(['two'], ['two, one'])
-    assert True == check_authors(['Mr. Magoo'], ['mago'])
-    assert True == check_authors(['one', 'two', 'three'], ['one', 'tw', 'thr'])
+    assert True == check_authors(['mago'], ['Mr. Magoo'])
+    assert True == check_authors(['Mr. Magoo'], ['Mr Magoo'])
+    assert True == check_authors(['one', 'tw', 'thr'], ['one', 'two', 'three'])
 
 # Rows are (score, grobid, crossref)
 def process_group(rows):
