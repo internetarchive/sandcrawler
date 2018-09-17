@@ -126,7 +126,16 @@ class MRExtractUnGrobided(MRJob):
             gwb_record = rstore.load_resource(warc_uri, offset, c_size)
         except wayback.exception.ResourceUnavailable:
             return None, dict(status="error",
-                reason="failed to load file contents from wayback/petabox")
+                reason="failed to load file contents from wayback/petabox (ResourceUnavailable)")
+        except ValueError as ve:
+            return None, dict(status="error",
+                reason="failed to load file contents from wayback/petabox (ValueError: {})".format(ve))
+        except EOFError as eofe:
+            return None, dict(status="error",
+                reason="failed to load file contents from wayback/petabox (EOFError: {})".format(eofe))
+        # Note: could consider a generic "except Exception" here, as we get so
+        # many petabox errors. Do want jobs to fail loud and clear when the
+        # whole cluster is down though.
 
         if gwb_record.get_status()[0] != 200:
             return None, dict(status="error",
