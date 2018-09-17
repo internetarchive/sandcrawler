@@ -59,7 +59,7 @@ tarball can be done like:
 
     export PIPENV_VENV_IN_PROJECT=1
     pipenv install --deploy
-    tar -czf venv-current.tar.gz -C .venv ."""
+    tar -czf venv-current.tar.gz -C .venv .
 
 ### Extraction Task
 
