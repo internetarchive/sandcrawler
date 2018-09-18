@@ -38,34 +38,34 @@ def check_authors(left, right):
     Intended to check GROBID extracted authors (right) against "known good"
     (but maybe not perfect) Crossref metadata authors ("left").
     """
-    if len(left) == 0:
+    if not left:
         return False
     if len(left) > len(right):
         return False
     right_all = tokenize(" ".join(right))
     for i in range(len(left)):
         l = left[i].lower().replace('jr.', '').split()
-        if len(l) == 0:
+        if not l:
             return False
         l = tokenize(l[-1])
         if len(l) <= 1:
             # weird author name (single char)
             return False
-        if not l in right_all:
+        if l not in right_all:
             #print("MISSING: {} from {}".format(l.decode('utf8'), right_all.decode('utf8')))
             return False
     return True
 
 def test_check_authors():
-    assert False == check_authors([], [])
-    assert False == check_authors([], ['one'])
-    assert True == check_authors(['one'], ['one'])
-    assert True == check_authors(['one two'], ['One Two'])
-    assert True == check_authors(['two'], ['One Two'])
-    assert True == check_authors(['two'], ['two, one'])
-    assert True == check_authors(['mago'], ['Mr. Magoo'])
-    assert True == check_authors(['Mr. Magoo'], ['Mr Magoo'])
-    assert True == check_authors(['one', 'tw', 'thr'], ['one', 'two', 'three'])
+    assert not check_authors([], [])
+    assert not check_authors([], ['one'])
+    assert check_authors(['one'], ['one'])
+    assert check_authors(['one two'], ['One Two'])
+    assert check_authors(['two'], ['One Two'])
+    assert check_authors(['two'], ['two, one'])
+    assert check_authors(['mago'], ['Mr. Magoo'])
+    assert check_authors(['Mr. Magoo'], ['Mr Magoo'])
+    assert check_authors(['one', 'tw', 'thr'], ['one', 'two', 'three'])
 
 # Rows are (score, grobid, crossref)
 def process_group(rows):
@@ -89,7 +89,7 @@ def process_group(rows):
         l = keepers.get(sha1, list())
         l.append(doi)
         keepers[sha1] = l
-    for key, value in keepers.items():
+    for value in keepers.values():
         print("{}\t{}".format(sha1, json.dumps(value)))
 
 def run():
@@ -100,15 +100,16 @@ def run():
     # group lines by slug, and process in batches
     for line in sys.stdin:
         line = line.strip().split('\t')
-        assert(len(line) == 4)
+        assert len(line) == 4
         slug = line[0]
-        if last_slug and slug != last_slug and len(lines) > 0:
+        if last_slug and slug != last_slug and lines:
             process_group(lines)
             lines = []
         last_slug = slug
         lines.append(line[1:])
 
-    if len(lines) > 0:
+    # catch any remaining
+    if lines:
         process_group(lines)
 
 if __name__=='__main__':

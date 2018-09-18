@@ -13,7 +13,6 @@ to JSON format for fast fatcat importing.
 import sys
 import json
 import sqlite3
-import itertools
 
 # iterate over rows in files metadata...
 # 1. select all identified DOIs
@@ -24,23 +23,22 @@ import itertools
 def or_none(s):
     if s is None:
         return None
-    elif type(s) == str and (len(s) == 0 or s == "\\N" or s == "-"):
+    elif type(s) == str and ((not s) or s == "\\N" or s == "-"):
         return None
-    else:
-        return s
+    return s
 
 def process_db(db_path):
-    
+
     db = sqlite3.connect(db_path)
 
     for row in db.execute("SELECT sha1, mimetype, size_bytes, md5 FROM files_metadata"):
         sha1 = row[0]
         dois = db.execute("SELECT doi FROM files_id_doi WHERE sha1=?", [sha1]).fetchall()
         dois = [d[0] for d in dois]
-        if len(dois) == 0:
+        if not dois:
             continue
         urls = db.execute("SELECT url, datetime FROM urls WHERE sha1=?", [sha1]).fetchall()
-        if len(urls) == 0:
+        if not urls:
             continue
         cdx = [dict(url=row[0], dt=row[1]) for row in urls]
         obj = dict(
