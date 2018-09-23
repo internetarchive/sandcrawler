@@ -89,8 +89,8 @@ def process_group(rows):
         l = keepers.get(sha1, list())
         l.append(doi)
         keepers[sha1] = l
-    for value in keepers.values():
-        print("{}\t{}".format(sha1, json.dumps(value)))
+    for sha1, doi_list in keepers.items():
+        print("{}\t{}".format(sha1, json.dumps(doi_list)))
 
 def run():
 
