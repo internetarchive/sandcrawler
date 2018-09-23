@@ -14,6 +14,6 @@ Reduce down the scored matches to just {sha1, dois}, sorted:
 
 Join/merge the output:
 
-    zcat 2018-09-14-0559.05-dumpfilemeta.tsv.gz | LC_ALL=C join -t$'\t' 2018-08-27-2352.17-matchcrossref.filtered.tsv - | pv -l | enrich_scored_matches.py | gzip > 2018-08-27-2352.17-matchcrossref.insertable.json.gz
+    zcat 2018-09-14-0559.05-dumpfilemeta.tsv.gz | LC_ALL=C join -t$'\t' 2018-08-27-2352.17-matchcrossref.filtered.tsv - | pv -l | ./enrich_scored_matches.py | gzip > 2018-08-27-2352.17-matchcrossref.insertable.json.gz
     # 5.79M 0:09:09 [10.5k/s]
 
