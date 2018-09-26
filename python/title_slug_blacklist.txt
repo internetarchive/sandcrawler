@@ -1,0 +1,1 @@
+../scalding/src/main/resources/slug-denylist.txt
