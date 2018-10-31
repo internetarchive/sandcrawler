@@ -30,8 +30,8 @@ class DumpGrobidXmlJob(args: Args) extends JobBase(args) with HBasePipeConversio
        JSONObject(
         Map(
           "pdf_hash" -> Bytes.toString(key.copyBytes()),
-          "cdx_metadata" -> Bytes.toString(key.copyBytes()),
-          "tei_xml" -> Bytes.toString(key.copyBytes())
+          "cdx_metadata" -> Bytes.toString(cdx.copyBytes()),
+          "tei_xml" -> Bytes.toString(tei_xml.copyBytes())
         )).toString
       )
     };
