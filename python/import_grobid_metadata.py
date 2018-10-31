@@ -7,11 +7,10 @@ import datetime
 MAX_ABSTRACT_BYTES=4096
 
 def parse_grobid_json(obj):
-    
+
     if not obj.get('title'):
         return None
 
-    release = dict()
     extra = dict()
 
     if obj.get('abstract') and len(obj.get('abstract')) < MAX_ABSTRACT_BYTES:
@@ -55,15 +54,15 @@ def parse_grobid_json(obj):
 
     release_type = "journal-article"
     release_date = None
-    if raw.get('date'):
+    if obj.get('date'):
         # TODO: only returns year, ever? how to handle?
-        release_date = datetime.datetime(year=raw['date'], month=1, day=1)
+        release_date = datetime.datetime(year=obj['date'], month=1, day=1)
 
-    if raw.get('doi'):
-        extra['doi'] = raw['doi']
-    if raw['journal'].get('name'):
-        extra['container_name'] = raw['journal']['name']
-    
+    if obj.get('doi'):
+        extra['doi'] = obj['doi']
+    if obj['journal'].get('name'):
+        extra['container_name'] = obj['journal']['name']
+
     extra['is_longtail_oa'] = True
 
     # TODO: ISSN/eISSN handling? or just journal name lookup?
@@ -80,6 +79,8 @@ def parse_grobid_json(obj):
         volume=obj['journal'].get('volume'),
         issue=obj['journal'].get('issue'),
         abstracts=abstracts,
+        release_type=release_type,
+        release_date=release_date,
         extra=extra)
 
 def run():
