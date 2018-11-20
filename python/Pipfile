@@ -25,6 +25,7 @@ requests = "*"
 wayback = {version=">=0.2.1.2", index="ia"}
 xmltodict = "*"
 raven = "*"
+pykafka = "*"
 
 [requires]
 python_version = "3.5"

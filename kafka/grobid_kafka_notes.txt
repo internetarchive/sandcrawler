@@ -22,3 +22,21 @@ this...
 Need to ensure we have compression enabled, for the GROBID output in
 particular! Probably worth using "expensive" GZIP compression to get extra disk
 savings; latency shouldn't be a big deal here.
+
+## Commands
+
+Load up some example lines, without partition key:
+
+    head -n10 python/tests/files/example_ungrobided.tsv | kafkacat -P -b localhost:9092 -t sandcrawler-qa.ungrobided
+
+Load up some example lines, with partition key:
+
+    head -n10 python/tests/files/example_ungrobided.tsv | awk -F'\t' '{print $1 "\t" $0}' | kafkacat -K$'\t' -P -b localhost:9092 -t sandcrawler-qa.ungrobided
+
+Check ungrobided topic:
+
+    kafkacat -C -b localhost:9092 -t sandcrawler-qa.ungrobided
+
+Check grobid output:
+
+    kafkacat -C -b localhost:9092 -t sandcrawler-qa.grobided
