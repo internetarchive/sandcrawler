@@ -1,0 +1,24 @@
+
+Will want to be able to scale to 100-200+ fully-utilized cores running GROBID;
+how best to achieve this? will need *many* workers going concurrent HTTP GETs,
+POSTs, and Kafka publishes.
+
+I'm pretty confident we can relax "at least once"/"at most once" constraints in
+this case: infrequent re-processing and missing a tiny fraction of processed
+works should be acceptable, because we will have higher-level checks (eg, the
+'ungrobided' HBase filter/dump).
+
+For the 'ungrobided' topic, use a reasonably large number of partitions, say
+50. This sets max number of worker *processes*, and may be enough for initial
+single-host worker. We can have a python wrapper spawn many child processes
+using multiprocessing library, with completely independent kafka client
+connections in each.
+
+To get more concurrency, each consumer *process* creates a thread pool (or
+process pool?), and a Queue with fixed size. Consumes messages, pushes to
+Queue, workers threads pull and do the rest. golang sure would be nice for
+this...
+
+Need to ensure we have compression enabled, for the GROBID output in
+particular! Probably worth using "expensive" GZIP compression to get extra disk
+savings; latency shouldn't be a big deal here.
