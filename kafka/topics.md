@@ -17,7 +17,7 @@ retention (on both a size and time basis).
         => 50x partitions (huge! for worker parallelism)
         => key: "sha1:<base32>"
 
-    sandcrawler-ENV.grobided
+    sandcrawler-ENV.grobid-output
         => output of GROBID processing (from pdf-ungrobided feed)
         => could get big; 16x partitions (to distribute data)
         => use GZIP compression (worth the overhead)
@@ -65,11 +65,15 @@ retention (on both a size and time basis).
 
 ## Create fatcat QA topics
 
+If you run these commands for an existing topic, you'll get something like
+`Error while executing topic command : Topic 'fatcat-qa.changelog' already
+exists`; this seems safe, and the settings won't be over-ridden.
+
     ssh misc-vm
     cd /srv/kafka-broker/kafka_2.12-2.0.0/bin/
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 50 --topic sandcrawler-qa.ungrobided
-    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 16 --topic sandcrawler-qa.grobided --config compression.type=gzip
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 16 --topic sandcrawler-qa.grobid-output --config compression.type=gzip
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.changelog
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.release-updates

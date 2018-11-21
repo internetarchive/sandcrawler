@@ -39,4 +39,4 @@ Check ungrobided topic:
 
 Check grobid output:
 
-    kafkacat -C -b localhost:9092 -t sandcrawler-qa.grobided
+    kafkacat -C -b localhost:9092 -t sandcrawler-qa.grobid-output
