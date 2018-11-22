@@ -73,7 +73,8 @@ def test_mapper_single_line(mock_fetch, job):
     row = job.hb_table.row(b'sha1:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ')
 
     assert struct.unpack("!q", row[b'file:size'])[0] == len(FAKE_PDF_BYTES)
-    assert row[b'file:mime'] == b"application/pdf"
+    # file:mime should actually not get clobbered by GROBID updater
+    #assert row[b'file:mime'] == b"application/pdf"
     assert struct.unpack("!q", row[b'grobid0:status_code'])[0] == 200
     # TODO: assert row[b'grobid0:quality'] == None
     status = json.loads(row[b'grobid0:status'].decode('utf-8'))
@@ -124,7 +125,8 @@ sha1:23RJIHUIOYY5747CR6YYCTMACXDCFYTT\t{"c": 1, "d": "2014-06-07T18:00:56", "f":
 
     row = job.hb_table.row(b'sha1:23RJIHUIOYY5747CR6YYCTMACXDCFYTT')
     assert struct.unpack("!q", row[b'file:size'])[0] == len(FAKE_PDF_BYTES)
-    assert row[b'file:mime'] == b"application/pdf"
+    # file:mime should actually not get clobbered by GROBID updater
+    #assert row[b'file:mime'] == b"application/pdf"
     assert struct.unpack("!q", row[b'grobid0:status_code'])[0] == 200
     status = json.loads(row[b'grobid0:status'].decode('utf-8'))
     assert type(status) == type(dict())
