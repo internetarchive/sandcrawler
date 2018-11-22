@@ -159,7 +159,7 @@ class KafkaGrobidWorker:
         info['grobid0:tei_xml'] = grobid_response.content
         info['grobid0:status'] = {'status': 'success'}
 
-        return info
+        return info, None
 
     def do_work(self, raw_line):
         """
@@ -199,6 +199,10 @@ class KafkaGrobidWorker:
             return None, status
         extraction_status = status
 
+        # Need to encode 'bytes' as 'str' for JSON serialization
+        if info.get('grobid0:tei_xml'):
+            info['grobid0:tei_xml'] = info['grobid0:tei_xml'].decode('utf-8')
+
         #self.increment_counter('lines', 'success')
 
         grobid_status_code = info.get('grobid0:status_code', None)
@@ -236,7 +240,7 @@ class KafkaGrobidWorker:
                 print("got a line! ")
                 grobid_output, status = self.do_work(msg.value.decode('utf-8'))
                 if grobid_output:
-                    producer.produce(json.dumps(work).encode('utf-8'))
+                    producer.produce(json.dumps(grobid_output).encode('utf-8'))
                     sequential_failures = 0
                 else:
                     print("failed to extract: {}".format(status))
