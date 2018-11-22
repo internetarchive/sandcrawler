@@ -32,6 +32,7 @@ Requires:
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
+import sys
 import xml
 import json
 import raven
@@ -227,7 +228,7 @@ class KafkaGrobidWorker:
             consumer = consume_topic.get_balanced_consumer(
                 consumer_group=self.consumer_group,
                 managed=True,
-                fetch_message_max_bytes=10000, # only ~10kbytes at a time
+                #fetch_message_max_bytes=100000, # only ~100kbytes at a time
                 auto_commit_enable=True,
                 auto_commit_interval_ms=60000, # 60 seconds
                 compacted_topic=True)
