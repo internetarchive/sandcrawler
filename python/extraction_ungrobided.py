@@ -242,7 +242,7 @@ class MRExtractUnGrobided(MRJob):
         # Basically, don't overwrite backfill fields.
         grobid_status_code = info.get('grobid0:status_code', None)
         for k in list(info.keys()):
-            if k.encode('utf-8') in ('f:c', 'file:mime', 'file:cdx'):
+            if k in ('f:c', 'file:mime', 'file:cdx'):
                 info.pop(k)
 
         # Convert fields to binary
