@@ -62,7 +62,7 @@ class KafkaGrobidWorker:
     def __init__(self, kafka_hosts, consume_topic, produce_topic, **kwargs):
         self.consume_topic = consume_topic
         self.produce_topic = produce_topic
-        self.consumer_group = kwargs.get('consumer_group', 'extraction')
+        self.consumer_group = kwargs.get('consumer_group', 'grobid-extraction')
         self.kafka_hosts = kafka_hosts or 'localhost:9092'
         self.grobid_uri = kwargs.get('grobid_uri')
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix')
