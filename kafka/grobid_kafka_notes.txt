@@ -40,3 +40,15 @@ Check ungrobided topic:
 Check grobid output:
 
     kafkacat -C -b localhost:9092 -t sandcrawler-qa.grobid-output
+
+## Performance
+
+On 2018-11-21, using grobid-vm (svc096) with 30 cores, and running with 50x
+kafka-grobid-worker processes (using systemd parallelization), achieved:
+
+- 2044 PDFs extracted in 197 seconds, or about 10/second
+- that's about 28 hours to process 1 million PDFs
+
+I think this is about all the single machine can handle. To get more throughput
+with multiple machines, might need to tweak worker to use a worker thread-pool
+or some other concurrent pattern (async?).
