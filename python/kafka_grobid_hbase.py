@@ -153,8 +153,11 @@ def main():
     parser.add_argument('--kafka-hosts',
                         default="localhost:9092",
                         help="list of Kafka brokers (host/port) to use")
+    parser.add_argument('--kafka-env',
+                        default="qa",
+                        help="eg, 'qa' or 'prod'")
     parser.add_argument('--consume-topic',
-                        default="sandcrawler-qa.grobid-output",
+                        default=None,
                         help="Kafka topic to consume from")
     parser.add_argument('--hbase-table',
                         type=str,
@@ -165,6 +168,9 @@ def main():
                         default='localhost',
                         help='HBase thrift API host to connect to')
     args = parser.parse_args()
+
+    if args.consume_topic is None:
+        args.consume_topic = "sandcrawler-{}.ungrobided".format(args.kafka_env)
 
     worker = KafkaGrobidHbaseWorker(**args.__dict__)
     worker.run()

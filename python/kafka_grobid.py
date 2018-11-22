@@ -261,10 +261,10 @@ def main():
                         default="qa",
                         help="eg, 'qa' or 'prod'")
     parser.add_argument('--consume-topic',
-                        default="sandcrawler-qa.ungrobided",
+                        default=None,
                         help="Kafka topic to consume from")
     parser.add_argument('--produce-topic',
-                        default="sandcrawler-qa.grobid-output",
+                        default=None,
                         help="Kafka topic to produce to")
     parser.add_argument('--grobid-uri',
                         type=str,
