@@ -18,7 +18,7 @@ test_python:
     - cd python
     - pipenv install --dev --deploy
     - pipenv run pytest --cov
-    - pipenv run pylint --disable bad-continuation,arguments-differ,unidiomatic-typecheck *.py
+    - pipenv run pylint -E *.py
 
 test_scalding:
   script:
