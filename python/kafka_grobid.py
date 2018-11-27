@@ -41,6 +41,7 @@ import requests
 import argparse
 import pykafka
 import wayback.exception
+from http.client import IncompleteRead
 from wayback.resource import Resource
 from wayback.resource import ArcResource
 from wayback.resourcestore import ResourceStore
@@ -114,6 +115,9 @@ class KafkaGrobidWorker:
         except EOFError as eofe:
             return None, dict(status="error",
                 reason="failed to load file contents from wayback/petabox (EOFError: {})".format(eofe))
+        except TypeError as te:
+            return None, dict(status="error",
+                reason="failed to load file contents from wayback/petabox (TypeError: {}; likely a bug in wayback python code)".format(eofe))
         # Note: could consider a generic "except Exception" here, as we get so
         # many petabox errors. Do want jobs to fail loud and clear when the
         # whole cluster is down though.
@@ -122,7 +126,13 @@ class KafkaGrobidWorker:
             return None, dict(status="error",
                 reason="archived HTTP response (WARC) was not 200",
                 warc_status=gwb_record.get_status()[0])
-        return gwb_record.open_raw_content().read(), None
+
+        try:
+            raw_content = gwb_record.open_raw_content().read()
+        except IncompleteRead as ire:
+            return None, dict(status="error",
+                reason="failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
+        return raw_content, None
 
     def extract(self, info):
 
