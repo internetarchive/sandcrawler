@@ -117,7 +117,7 @@ class KafkaGrobidWorker:
                 reason="failed to load file contents from wayback/petabox (EOFError: {})".format(eofe))
         except TypeError as te:
             return None, dict(status="error",
-                reason="failed to load file contents from wayback/petabox (TypeError: {}; likely a bug in wayback python code)".format(eofe))
+                reason="failed to load file contents from wayback/petabox (TypeError: {}; likely a bug in wayback python code)".format(te))
         # Note: could consider a generic "except Exception" here, as we get so
         # many petabox errors. Do want jobs to fail loud and clear when the
         # whole cluster is down though.
