@@ -40,7 +40,7 @@ class KafkaGrobidHbaseWorker:
 
     def __init__(self, kafka_hosts, consume_topic, **kwargs):
         self.consume_topic = consume_topic
-        self.consumer_group = kwargs.get('consumer_group', 'grobid-hbase-insert')
+        self.consumer_group = kwargs.get('consumer_group', 'grobid-hbase-insert2')
         self.kafka_hosts = kafka_hosts or 'localhost:9092'
         self.hbase_host = kwargs['hbase_host']
         self.hbase_table = kwargs['hbase_table']
