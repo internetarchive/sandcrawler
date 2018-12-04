@@ -199,7 +199,12 @@ class KafkaGrobidWorker:
             return None, dict(status='denylist', key=key)
 
         # Note: this may not get "cleared" correctly
-        sentry_client.extra_context(dict(row_key=key))
+        sentry_client.extra_context(dict(
+            row_key=key,
+            cdx_url=info['file:cdx']['url'],
+            cdx_dt=info['file:cdx']['dt'],
+            cdx_warc=info['file:cdx']['warc'],
+        ))
 
         # Do the extraction
         info, status = self.extract(info)
