@@ -145,6 +145,8 @@ class KafkaGrobidHbaseWorker:
             consumer_group=self.consumer_group,
             managed=True,
             auto_commit_enable=True,
+            # LATEST because best to miss processing than waste time re-process
+            auto_offset_reset=pykafka.common.OffsetType.LATEST,
             compacted_topic=True)
         print("Kafka consuming {} in group {}".format(
             self.consume_topic,

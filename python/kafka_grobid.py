@@ -69,6 +69,7 @@ class KafkaGrobidWorker:
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix')
         self.mime_filter = ['application/pdf']
         self.rstore = None
+        self.produce_max_request_size = 20000000  # Kafka producer batch size tuning; also limit on size of single extracted document
 
     def grobid_process_fulltext(self, content):
         r = requests.post(self.grobid_uri + "/api/processFulltextDocument",
@@ -243,14 +244,26 @@ class KafkaGrobidWorker:
         consume_topic = kafka.topics[self.consume_topic]
 
         sequential_failures = 0
-        with produce_topic.get_producer(compression=pykafka.common.CompressionType.GZIP, sync=False) as producer:
+        # Configure producer to basically *immediately* publish messages,
+        # one-at-a-time, but asynchronously (don't block). Fetch and GROBID
+        # process takes a while, and we want to send as soon as processing is
+        # done.
+        with produce_topic.get_producer(sync=False,
+                                        compression=pykafka.common.CompressionType.GZIP,
+                                        retry_backoff_ms=250,
+                                        max_queued_messages=20,
+                                        min_queued_messages=1,
+                                        linger_ms=0,
+                                        max_request_size=self.produce_max_request_size) as producer:
             print("Producing to: {}".format(self.produce_topic))
             consumer = consume_topic.get_balanced_consumer(
                 consumer_group=self.consumer_group,
                 managed=True,
-                #fetch_message_max_bytes=100000, # only ~100kbytes at a time
                 auto_commit_enable=True,
-                auto_commit_interval_ms=60000, # 60 seconds
+                auto_commit_interval_ms=30000, # 30 seconds
+                # LATEST because best to miss processing than waste time re-process
+                auto_offset_reset=pykafka.common.OffsetType.LATEST,
+                queued_max_messages=20,
                 compacted_topic=True)
             print("Consuming from: {} as {}".format(self.consume_topic, self.consumer_group))
             sys.stdout.flush()
