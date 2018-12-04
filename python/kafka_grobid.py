@@ -251,9 +251,9 @@ class KafkaGrobidWorker:
         with produce_topic.get_producer(sync=False,
                                         compression=pykafka.common.CompressionType.GZIP,
                                         retry_backoff_ms=250,
-                                        max_queued_messages=20,
-                                        min_queued_messages=3,
-                                        linger_ms=2000,
+                                        max_queued_messages=50,
+                                        min_queued_messages=10,
+                                        linger_ms=5000,
                                         max_request_size=self.produce_max_request_size) as producer:
             print("Producing to: {}".format(self.produce_topic))
             consumer = consume_topic.get_balanced_consumer(
@@ -263,7 +263,7 @@ class KafkaGrobidWorker:
                 auto_commit_interval_ms=30000, # 30 seconds
                 # LATEST because best to miss processing than waste time re-process
                 auto_offset_reset=pykafka.common.OffsetType.LATEST,
-                queued_max_messages=20,
+                queued_max_messages=50,
                 compacted_topic=True)
             print("Consuming from: {} as {}".format(self.consume_topic, self.consumer_group))
             sys.stdout.flush()
