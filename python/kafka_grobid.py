@@ -252,8 +252,8 @@ class KafkaGrobidWorker:
                                         compression=pykafka.common.CompressionType.GZIP,
                                         retry_backoff_ms=250,
                                         max_queued_messages=20,
-                                        min_queued_messages=1,
-                                        linger_ms=0,
+                                        min_queued_messages=3,
+                                        linger_ms=2000,
                                         max_request_size=self.produce_max_request_size) as producer:
             print("Producing to: {}".format(self.produce_topic))
             consumer = consume_topic.get_balanced_consumer(
