@@ -41,6 +41,12 @@ Check grobid output:
 
     kafkacat -C -b localhost:9092 -t sandcrawler-qa.grobid-output
 
+## Actual Production Commands
+
+    gohdfs get sandcrawler/output-prod/2018-11-30-2125.55-dumpungrobided/part-00000
+    mv part-00000 2018-11-30-2125.55-dumpungrobided.tsv
+    cat 2018-11-30-2125.55-dumpungrobided.tsv | kafkacat -P -b localhost:9092 -t sandcrawler-prod.ungrobided
+
 ## Performance
 
 On 2018-11-21, using grobid-vm (svc096) with 30 cores, and running with 50x

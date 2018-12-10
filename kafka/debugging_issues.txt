@@ -1,0 +1,39 @@
+
+## 2018-12-02
+
+Had been having some troubles with consumer group partition assignments with
+the grobid-output group and grobid-hbase-insert consumer group. Tried deleting
+and re-creating, which was probbaly a mistake. Also tried to use kafka-broker
+shell scripts to cleanup/debug and didn't work well.
+
+In the end, after re-building the topic, decided to create a new consumer group
+(grobid-hbase-insert2) to get rid of history/crap. Might need to do this again
+in the future, oh well.
+
+A few things learned:
+
+- whatever pykafka "native python" is producing to consumer group offsets
+  doesn't work great with kafka-manager or the shell scripts: consumer instance
+  names don't show. this is an error in shell scripts, and blank/red in
+  kafka-manager
+- restarting kafka-manager takes a while (for it to refresh data?) and it shows
+  inconsistent stuff during that period, but it does result in cleaned up
+  consumer group cached metadata (aka, old groups are cleared)
+- kafka-manager can't fetch JXM info, either due to lack of config or port
+  blocking. should try to fix this for metrics etc
+- it would be nice to be using recent librdkafka everywhere. pykafka can
+  optionally use this, and many other tools do automatically. however, this is
+  a system package, and xenial doesn't have backports (debian stretch does).
+  the version in bionic looks "good enough", so many should try that?
+- there has been a minor release of kafka (2.1) since I installed (!)
+- the burrow (consumer group monitoring) tool is packaged for some version of
+  ubuntu
+
+In general, not feally great about the current setup. Very frustrating that the
+debug/status tools are broken with pykafka native output. Need to at least
+document things a lot better.
+
+Separately, came up with an idea to do batched processing with GROBID: don't
+auto-commit, instead consume a batch (10? or until block), process those, then
+commit. This being a way to get "the batch size returned".
+
