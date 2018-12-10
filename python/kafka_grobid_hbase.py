@@ -146,7 +146,7 @@ class KafkaGrobidHbaseWorker:
             managed=True,
             auto_commit_enable=True,
             # needed to avoid MessageSet decode errors
-            fetch_message_max_bytes=32*1024*1024,
+            fetch_message_max_bytes=4*1024*1024,
             # LATEST because best to miss processing than waste time re-process
             auto_offset_reset=pykafka.common.OffsetType.LATEST,
             compacted_topic=True)
