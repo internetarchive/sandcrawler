@@ -189,8 +189,9 @@ def run_matchcrossref(args):
         com.twitter.scalding.Tool \
         -Dmapred.reduce.tasks={reducers} \
         -Dcascading.spill.list.threshold=500000 \
-        -D mapred.output.compress=false \
-        -Dmapred.compress.map.output=true\
+        -Dmapred.output.compress=false \
+        -Dmapred.compress.map.output=true \
+        -Dmapred.task.timeout=3600000 \
         sandcrawler.{jobclass} \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
