@@ -1,0 +1,31 @@
+
+Ran in aitio:/schnell/iamine-journals in December 2018.
+
+Output uploaded to https://archive.org/details/ia-petabox-journal-metadata-2018
+
+Commands:
+
+    # didn't work!
+    #ia-mine --search collection:journals --itemlist > journals.20181218.itemlist   
+
+    # fetched manually via metamgr, using prefix matches
+    cat metamgr-* > metamgr-journals-loose.20181218.items
+
+    ia-mine metamgr-journals-loose.20181218.items > journals.20181218.json
+
+    export LC_ALL=C
+    cat journals-ia.20181218.json | jq 'select(.files) | .files[] | select(.format == "Text PDF") | .sha1' -r | sort -u > journals-ia.20181218.pdf-sha1.tsv
+
+Size/results:
+
+    bnewbold@ia601101$ wc -l journals-ia.20181218.json metamgr-journals-loose.20181218.items
+    2043877 journals-ia.20181218.json
+    2044362 metamgr-journals-loose.20181218.items
+
+    # missed about 500; meh
+
+    -rw-rw-r--  1 bnewbold bnewbold 9.5G Dec 19 23:26 journals-ia.20181218.json
+
+    bnewbold@ia601101$ wc -l journals-ia.20181218.pdf-sha1.tsv 
+    1748645 journals-ia.20181218.pdf-sha1.tsv
+
