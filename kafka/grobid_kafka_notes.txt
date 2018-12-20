@@ -45,7 +45,7 @@ Check grobid output:
 
     gohdfs get sandcrawler/output-prod/2018-11-30-2125.55-dumpungrobided/part-00000
     mv part-00000 2018-11-30-2125.55-dumpungrobided.tsv
-    cat 2018-11-30-2125.55-dumpungrobided.tsv | kafkacat -P -b localhost:9092 -t sandcrawler-prod.ungrobided
+    cat 2018-11-30-2125.55-dumpungrobided.tsv | kafkacat -P -b 127.0.0.1:9092 -t sandcrawler-prod.ungrobided
 
 ## Performance
 
