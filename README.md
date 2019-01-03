@@ -12,7 +12,7 @@ internet archive web group's journal ingest pipeline.
 Code in tihs repository is potentially public!
 
 Archive-specific deployment/production guides and ansible scripts at:
-[journal-infra](https://git.archive.org/bnewbold/journal-infra)
+[journal-infra](https://git.archive.org/webgroup/journal-infra)
 
 **./python/** contains Hadoop streaming jobs written in python using the
 `mrjob` library. Most notably, the **extraction** scripts, which fetch PDF
