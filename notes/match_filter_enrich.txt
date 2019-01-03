@@ -17,3 +17,15 @@ Join/merge the output:
     zcat 2018-09-14-0559.05-dumpfilemeta.tsv.gz | LC_ALL=C join -t$'\t' 2018-08-27-2352.17-matchcrossref.filtered.tsv - | pv -l | ./enrich_scored_matches.py | gzip > 2018-08-27-2352.17-matchcrossref.insertable.json.gz
     # 5.79M 0:09:09 [10.5k/s]
 
+## Fatcat Insertable
+
+I can't remember now what the plan was for the 'insertable' output mode, which
+bundles {key, cdx, mime, and size} info along with the {slug, score, json1,
+json2} columns from the regular match script. The filter_scored_matches.py
+doesn't know what to do with those columns at the moment, and the output isn't
+sorted by slug... need to tweak scripts to fix this.
+
+In the meanwhile, as a work around just take the columns we want and resort:
+
+    export LC_ALL=C
+    zcat 2018-12-18-2237.09-matchcrossref.insertable.tsv.gz | cut -f2-5 | sort -u | gzip > 2018-12-18-2237.09-matchcrossref.tsv.gz
