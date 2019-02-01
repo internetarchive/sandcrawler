@@ -14,7 +14,7 @@ Commands:
     ia-mine metamgr-journals-loose.20181218.items > journals.20181218.json
 
     export LC_ALL=C
-    cat journals-ia.20181218.json | jq 'select(.files) | .files[] | select(.format == "Text PDF") | .sha1' -r | sort -u > journals-ia.20181218.pdf-sha1.tsv
+    cat journals-ia.20181218.json | jq 'select(.files) | .files[] | select(.format == "Text PDF") | .sha1' -r | sort -S 4G -u > journals-ia.20181218.pdf-sha1.tsv
 
 Size/results:
 

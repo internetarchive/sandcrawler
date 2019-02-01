@@ -9,7 +9,7 @@ somewhere.
 
 Reduce down the scored matches to just {sha1, dois}, sorted:
 
-    zcat 2018-08-27-2352.17-matchcrossref.tsv.gz | ./filter_scored_matches.py | pv -l | sort > 2018-08-27-2352.17-matchcrossref.filtered.tsv
+    zcat 2018-08-27-2352.17-matchcrossref.tsv.gz | ./filter_scored_matches.py | pv -l | sort -S 8G > 2018-08-27-2352.17-matchcrossref.filtered.tsv
     # 5.79M 0:18:54 [5.11k/s]
 
 Join/merge the output:
@@ -25,7 +25,7 @@ json2} columns from the regular match script. The filter_scored_matches.py
 doesn't know what to do with those columns at the moment, and the output isn't
 sorted by slug... need to tweak scripts to fix this.
 
-In the meanwhile, as a work around just take the columns we want and resort:
+In the meanwhile, as a work around just take the columns we want and re-sort:
 
     export LC_ALL=C
-    zcat 2018-12-18-2237.09-matchcrossref.insertable.tsv.gz | cut -f2-5 | sort -u | gzip > 2018-12-18-2237.09-matchcrossref.tsv.gz
+    zcat 2018-12-18-2237.09-matchcrossref.insertable.tsv.gz | cut -f2-5 | sort -S 8G -u | gzip > 2018-12-18-2237.09-matchcrossref.tsv.gz
