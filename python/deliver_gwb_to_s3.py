@@ -14,6 +14,11 @@ AWS S3 credentials are passed via environment variables (AWS_ACCESS_KEY_ID, AWS_
 
 GWB credentials end up under /opt/.petabox/ (!)
 
+20x threads on a single machine can process about 340k files in 3 hours; that's
+roughly 6 hours per million per host with 32 threads, or 5k files an hour
+(1.6/second) per thread. Two large machines should be able to upload 10 million
+files in about 30 hours.
+
 Output:
 - errors/stats to stderr
 - log to stdout (redirect to file), prefixed by sha1
@@ -100,6 +105,7 @@ class DeliverGwbS3():
     def run(self, manifest_file):
         sys.stderr.write("Starting...\n")
         for line in manifest_file:
+            self.count['total'] += 1
             line = line.strip().split('\t')
             if len(line) != 2:
                 self.count['skip-line'] += 1
@@ -117,7 +123,7 @@ class DeliverGwbS3():
             blob, status = self.fetch_warc_content(file_cdx['warc'], file_cdx['offset'], file_cdx['c_size'])
             if blob is None and status:
                 print("{}\terror petabox\t{}\t{}".format(sha1_hex, file_cdx['warc'], status['reason']))
-                self.count['err-petabox'] += 1
+                self.count['err-petabox-fetch'] += 1
                 continue
             elif not blob:
                 print("{}\tskip-empty-blob".format(sha1_hex))
@@ -128,7 +134,7 @@ class DeliverGwbS3():
                 #assert sha1_hex == hashlib.sha1(blob).hexdigest()
                 #sys.stderr.write("{}\terror petabox-mismatch\n".format(sha1_hex))
                 print("{}\terror petabox-hash-mismatch".format(sha1_hex))
-                self.count['petabox-hash-mismatch'] += 1
+                self.count['err-petabox-hash-mismatch'] += 1
 
             self.count['petabox-ok'] += 1
             # upload to AWS S3
