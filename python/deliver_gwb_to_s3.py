@@ -24,6 +24,7 @@ Requires:
 - wayback/GWB libraries
 """
 
+import os
 import sys
 import json
 import base64
@@ -49,6 +50,11 @@ class DeliverGwbS3():
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix')
         self.rstore = None
         self.count = Counter()
+        # /serve/ instead of /download/ doesn't record view count
+        self.petabox_base_url = kwargs.get('petabox_base_url', 'http://archive.org/serve/')
+        # gwb library will fall back to reading from /opt/.petabox/webdata.secret
+        self.petabox_webdata_secret = kwargs.get('petabox_webdata_secret', os.environ.get('PETABOX_WEBDATA_SECRET'))
+        print("petabox_webdata_secret: {}".format(self.petabox_webdata_secret))
         self.s3_bucket = s3_bucket
         self.s3_prefix = kwargs.get('s3_prefix', 'pdf/')
         self.s3_suffix = kwargs.get('s3_suffix', '.pdf')
@@ -58,7 +64,9 @@ class DeliverGwbS3():
     def fetch_warc_content(self, warc_path, offset, c_size):
         warc_uri = self.warc_uri_prefix + warc_path
         if not self.rstore:
-            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory())
+            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
+                webdata_secret=self.petabox_webdata_secret,
+                download_base_url=self.petabox_base_url))
         try:
             gwb_record = self.rstore.load_resource(warc_uri, offset, c_size)
         except wayback.exception.ResourceUnavailable:
