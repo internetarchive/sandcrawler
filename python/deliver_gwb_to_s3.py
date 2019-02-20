@@ -6,13 +6,13 @@ See unpaywall delivery README (in bnewbold's scratch repo) for notes on running
 this script for that specific use-case.
 
 Script takes:
-- input TSV: `sha1, file:cdx (json)`
+- input TSV: `sha1_hex, file:cdx (json)`
     => usually from dumpfilemeta, filtered down (eg, by join by SHA-1) to a specific manifest
 - AWS S3 bucket and prefix
 
 AWS S3 credentials are passed via environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
 
-GWB credentials end up under /opt/.petabox/ (!)
+GWB credentials from environment variable PETABOX_WEBDATA_SECRET, else looks in /opt/.petabox/.
 
 20x threads on a single machine can process about 340k files in 3 hours; that's
 roughly 6 hours per million per host with 32 threads, or 5k files an hour
@@ -145,7 +145,7 @@ class DeliverGwbS3():
                     sha1_hex,
                     self.s3_suffix),
                 Body=blob)
-            print("{}\tsuccess\t{}".format(sha1_hex, obj.key))
+            print("{}\tsuccess\t{}\t{}".format(sha1_hex, obj.key, len(blob)))
             self.count['success-s3'] += 1
         sys.stderr.write("{}\n".format(self.count))
 
