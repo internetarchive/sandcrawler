@@ -115,9 +115,13 @@ class DeliverGwbS3():
                 continue
             # fetch from GWB/petabox via HTTP range-request
             blob, status = self.fetch_warc_content(file_cdx['warc'], file_cdx['offset'], file_cdx['c_size'])
-            if not blob:
+            if blob is None and status:
                 print("{}\terror petabox\t{}\t{}".format(sha1_hex, file_cdx['warc'], status['reason']))
                 self.count['err-petabox'] += 1
+                continue
+            elif not blob:
+                print("{}\tskip-empty-blob".format(sha1_hex)
+                self.count['skip-empty-blob'] += 1
                 continue
             # verify sha1
             if sha1_hex != hashlib.sha1(blob).hexdigest():
