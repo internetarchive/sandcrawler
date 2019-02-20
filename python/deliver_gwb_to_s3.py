@@ -2,10 +2,12 @@
 """
 Tool for bulk copying of PDFs (or other files) from GWB to AWS S3.
 
-Script should take:
-- input TSV: `(sha1, datetime, terminal_url)` (can be exported from arabesque sqlite3 output)
-    => sha1_hex, warc_path, offset, c_size
-- GWB credentials
+See unpaywall delivery README (in bnewbold's scratch repo) for notes on running
+this script for that specific use-case.
+
+Script takes:
+- input TSV: `sha1, file:cdx (json)`
+    => usually from dumpfilemeta, filtered down (eg, by join by SHA-1) to a specific manifest
 - AWS S3 bucket and prefix
 
 AWS S3 credentials are passed via environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
@@ -17,6 +19,8 @@ Output:
 - log to stdout (redirect to file), prefixed by sha1
 
 Requires:
+- raven (sentry)
+- boto3 (AWS S3 client library)
 - wayback/GWB libraries
 """
 
@@ -43,7 +47,6 @@ class DeliverGwbS3():
 
     def __init__(self, s3_bucket, **kwargs):
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix')
-        self.mime_filter = ['application/pdf']
         self.rstore = None
         self.count = Counter()
         self.s3_bucket = s3_bucket
