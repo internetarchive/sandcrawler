@@ -120,7 +120,7 @@ class DeliverGwbS3():
                 self.count['err-petabox'] += 1
                 continue
             elif not blob:
-                print("{}\tskip-empty-blob".format(sha1_hex)
+                print("{}\tskip-empty-blob".format(sha1_hex))
                 self.count['skip-empty-blob'] += 1
                 continue
             # verify sha1
