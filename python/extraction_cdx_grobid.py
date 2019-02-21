@@ -17,6 +17,7 @@ Requires:
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
+import os
 import xml
 import json
 import raven
@@ -119,11 +120,11 @@ class MRExtractCdxGrobid(MRJob):
         return info, None
 
     def fetch_warc_content(self, warc_path, offset, c_size):
-        warc_uri = self.warc_uri_prefix + warc_path
+        warc_uri = self.options.warc_uri_prefix + warc_path
         if not self.rstore:
             self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
                 webdata_secret=self.petabox_webdata_secret,
-                download_base_url=self.petabox_base_url))
+                download_base_url=self.options.warc_uri_prefix))
         try:
             gwb_record = self.rstore.load_resource(warc_uri, offset, c_size)
         except wayback.exception.ResourceUnavailable:

@@ -8,7 +8,7 @@ import responses
 import happybase_mock
 import wayback.exception
 from unittest import mock
-from extraction_cdx_grobid import MRExtractCdxGrobid, Resource
+from extraction_cdx_grobid import MRExtractCdxGrobid
 
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)

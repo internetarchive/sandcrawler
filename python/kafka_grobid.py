@@ -32,6 +32,7 @@ Requires:
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
+import os
 import sys
 import xml
 import json
