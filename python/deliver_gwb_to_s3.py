@@ -29,6 +29,10 @@ Requires:
 - wayback/GWB libraries
 """
 
+# XXX: some broken MRO thing going on in here due to python3 object wrangling
+# in `wayback` library. Means we can't run pylint.
+# pylint: skip-file
+
 import os
 import sys
 import json
@@ -40,8 +44,7 @@ from collections import Counter
 import boto3
 import raven
 import wayback.exception
-from wayback.resource import Resource
-from wayback.resource import ArcResource
+from http.client import IncompleteRead
 from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
 
@@ -49,7 +52,7 @@ from gwb.loader import CDXLoaderFactory
 sentry_client = raven.Client()
 
 
-class DeliverGwbS3():
+class DeliverGwbS3:
 
     def __init__(self, s3_bucket, **kwargs):
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix')
@@ -59,7 +62,6 @@ class DeliverGwbS3():
         self.petabox_base_url = kwargs.get('petabox_base_url', 'http://archive.org/serve/')
         # gwb library will fall back to reading from /opt/.petabox/webdata.secret
         self.petabox_webdata_secret = kwargs.get('petabox_webdata_secret', os.environ.get('PETABOX_WEBDATA_SECRET'))
-        print("petabox_webdata_secret: {}".format(self.petabox_webdata_secret))
         self.s3_bucket = s3_bucket
         self.s3_prefix = kwargs.get('s3_prefix', 'pdf/')
         self.s3_suffix = kwargs.get('s3_suffix', '.pdf')
