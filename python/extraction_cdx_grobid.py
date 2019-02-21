@@ -26,10 +26,10 @@ import happybase
 import mrjob
 from mrjob.job import MRJob
 import wayback.exception
-from wayback.resource import Resource
-from wayback.resource import ArcResource
+from http.client import IncompleteRead
 from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
+
 from common import parse_cdx_line
 from grobid2json import teixml2json
 
@@ -74,8 +74,10 @@ class MRExtractCdxGrobid(MRJob):
 
     def __init__(self, *args, **kwargs):
         super(MRExtractCdxGrobid, self).__init__(*args, **kwargs)
-        self.mime_filter = ['application/pdf']
         self.hb_table = None
+        self.petabox_webdata_secret = kwargs.get('petabox_webdata_secret', os.environ.get('PETABOX_WEBDATA_SECRET'))
+        self.mime_filter = ['application/pdf']
+        self.rstore = None
 
     def grobid_process_fulltext(self, content):
         r = requests.post(self.options.grobid_uri + "/api/processFulltextDocument",
@@ -117,10 +119,13 @@ class MRExtractCdxGrobid(MRJob):
         return info, None
 
     def fetch_warc_content(self, warc_path, offset, c_size):
-        warc_uri = self.options.warc_uri_prefix + warc_path
+        warc_uri = self.warc_uri_prefix + warc_path
+        if not self.rstore:
+            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
+                webdata_secret=self.petabox_webdata_secret,
+                download_base_url=self.petabox_base_url))
         try:
-            rstore = ResourceStore(loaderfactory=CDXLoaderFactory())
-            gwb_record = rstore.load_resource(warc_uri, offset, c_size)
+            gwb_record = self.rstore.load_resource(warc_uri, offset, c_size)
         except wayback.exception.ResourceUnavailable:
             return None, dict(status="error",
                 reason="failed to load file contents from wayback/petabox (ResourceUnavailable)")
@@ -130,6 +135,9 @@ class MRExtractCdxGrobid(MRJob):
         except EOFError as eofe:
             return None, dict(status="error",
                 reason="failed to load file contents from wayback/petabox (EOFError: {})".format(eofe))
+        except TypeError as te:
+            return None, dict(status="error",
+                reason="failed to load file contents from wayback/petabox (TypeError: {}; likely a bug in wayback python code)".format(te))
         # Note: could consider a generic "except Exception" here, as we get so
         # many petabox errors. Do want jobs to fail loud and clear when the
         # whole cluster is down though.
@@ -138,7 +146,13 @@ class MRExtractCdxGrobid(MRJob):
             return None, dict(status="error",
                 reason="archived HTTP response (WARC) was not 200",
                 warc_status=gwb_record.get_status()[0])
-        return gwb_record.open_raw_content().read(), None
+
+        try:
+            raw_content = gwb_record.open_raw_content().read()
+        except IncompleteRead as ire:
+            return None, dict(status="error",
+                reason="failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
+        return raw_content, None
 
     def extract(self, info):
 

@@ -37,13 +37,11 @@ import xml
 import json
 import raven
 import struct
-import requests
 import argparse
+import requests
 import pykafka
 import wayback.exception
 from http.client import IncompleteRead
-from wayback.resource import Resource
-from wayback.resource import ArcResource
 from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
 
@@ -66,6 +64,10 @@ class KafkaGrobidWorker:
         self.consumer_group = kwargs.get('consumer_group', 'grobid-extraction')
         self.kafka_hosts = kafka_hosts or 'localhost:9092'
         self.grobid_uri = kwargs.get('grobid_uri')
+        # /serve/ instead of /download/ doesn't record view count
+        self.petabox_base_url = kwargs.get('petabox_base_url', 'http://archive.org/serve/')
+        # gwb library will fall back to reading from /opt/.petabox/webdata.secret
+        self.petabox_webdata_secret = kwargs.get('petabox_webdata_secret', os.environ.get('PETABOX_WEBDATA_SECRET'))
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix')
         self.mime_filter = ['application/pdf']
         self.rstore = None
@@ -104,7 +106,9 @@ class KafkaGrobidWorker:
     def fetch_warc_content(self, warc_path, offset, c_size):
         warc_uri = self.warc_uri_prefix + warc_path
         if not self.rstore:
-            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory())
+            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
+                webdata_secret=self.petabox_webdata_secret,
+                download_base_url=self.petabox_base_url))
         try:
             gwb_record = self.rstore.load_resource(warc_uri, offset, c_size)
         except wayback.exception.ResourceUnavailable:
