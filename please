@@ -157,7 +157,9 @@ def run_statuscount(args):
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
     cmd = """hadoop jar \
         scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
-        com.twitter.scalding.Tool sandcrawler.HBaseStatusCountJob \
+        com.twitter.scalding.Tool \
+        -Dmapred.task.timeout=3600000 \
+        sandcrawler.HBaseStatusCountJob \
         --hdfs \
         --app.conf.path scalding/ia_cluster.conf \
         --hbase-table wbgrp-journal-extract-0-{env} \
