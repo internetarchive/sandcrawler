@@ -30,7 +30,7 @@ cdx = FILTER cdx
         OR surt matches '(?i).+\\).*/(pubs|research|publications?|articles?|proceedings?|papers?|fulltext)/.*'
 
         -- words in domains 
-        OR surt matches '.*(,hal|,eprint|scielo|redalyc|revues|revistas|research|journal).*\\).*'
+        OR surt matches '.*(,hal|,eprint|,ojs|,dspace|scielo|redalyc|revues|revistas|research|journal).*\\).*'
 
         -- DOI-like pattern in URL
         OR surt matches '.*\\).*/10\\.\\d{3,5}/.*';
