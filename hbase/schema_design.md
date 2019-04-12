@@ -40,6 +40,14 @@ Column families:
         - `warc` (item and file name)
         - `offset`
         - `c_size` (compressed size)
+    - `meta` (json string)
+        - `size` (int)
+        - `mime` (str)
+        - `magic` (str)
+        - `magic_mime` (str)
+        - `sha1` (hex str)
+        - `md5` (hex str)
+        - `sha256` (hex str)
 - `grobid0`: processing status, version, XML and JSON fulltext, JSON metadata. timestamp. Should be compressed! `COMPRESSION => SNAPPY`
     - `status_code` (signed int; HTTP status from grobid)
     - `quality` (int or string; we define the meaning ("good"/"marginal"/"bad")
