@@ -251,6 +251,27 @@ def run_dumpfilemeta(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+def run_dumpgrobidstatuscode(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting dumpgrobidstatuscode job...")
+    output = "{}/output-{}/{}-dumpgrobidstatuscode".format(
+        HDFS_DIR,
+        args.env,
+        datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
+    cmd = """hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.DumpGrobidStatusCodeJob \
+        --hdfs \
+        --app.conf.path scalding/ia_cluster.conf \
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --output {output}""".format(
+            output=output,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env)
+    subprocess.call(cmd, shell=True)
+
 def run_dumpgrobidmetainsertable(args):
     if args.rebuild:
         rebuild_scalding()
@@ -434,6 +455,9 @@ def main():
 
     sub_dumpfilemeta = subparsers.add_parser('dump-file-meta')
     sub_dumpfilemeta.set_defaults(func=run_dumpfilemeta)
+
+    sub_dumpgrobidstatuscode = subparsers.add_parser('dump-grobid-status-code')
+    sub_dumpgrobidstatuscode.set_defaults(func=run_dumpgrobidstatuscode)
 
     sub_dumpgrobidmetainsertable = subparsers.add_parser('dump-grobid-meta-insertable')
     sub_dumpgrobidmetainsertable.set_defaults(func=run_dumpgrobidmetainsertable)
