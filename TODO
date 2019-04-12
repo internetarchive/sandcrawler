@@ -1,4 +1,25 @@
 
+## Kafka Pipelines
+
+- after network split, mass restarting import/harvest stuff seemed to
+  completely reset consumergroups (!). bunch of LeaderNotFoundError
+    => change/update consumer group config
+    => ensure we are recording timestamps to allow timestamp-based resets
+- refactor python kafka clients (slack convo with kenji+dvd)
+    => try librdkafka?
+    => switch to python-kafka?
+- monitoring/alerting of consumergroup offsets
+    => start with crude python script?
+- document: need to restart all consumers after brokers restart
+- operate on batches, using threads/async, and reduce worker (process) counts
+  dramatically
+
+source of kafka-manager weirdness?
+    Dec 02 01:05:40 wbgrp-svc263.us.archive.org kafka-manager[7032]: org.apache.kafka.common.protocol.types.SchemaException: Error reading field 'user_data': java.nio.BufferUnderflowException
+    Dec 02 01:05:40 wbgrp-svc263.us.archive.org kafka-manager[7032]: [error] k.m.a.c.KafkaManagedOffsetCache - Failed to get member metadata from group summary and member summary : grobid-hbase-insert : MemberSummary(pykafka-8128e0be-4952-4e79-8644-a52987421259,pykafka,/207.241.225.228,[B@6c368f37,[B@2b007e01)
+
+## Other
+
 - paper match heuristic: include 10.1007%2F978-3-319-49304-6_18 (URL-escaped slash)
 - catch EOFFail fetching from wayback
 - "author counts match" in scoring
@@ -8,7 +29,7 @@
     => python; talks directly to HBase
 - author counts should match (+/- one?)
 
-match strategies (hbase columns)
+match strategies (hbase columns):
 - legacy_doi
 - url_doi
 - grobid_crossref (doi)
