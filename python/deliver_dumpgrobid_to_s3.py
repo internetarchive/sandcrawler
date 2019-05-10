@@ -38,6 +38,16 @@ import raven
 sentry_client = raven.Client()
 
 
+def b32_hex(s):
+    """copy/pasta from elsewhere"""
+    s = s.strip().split()[0].lower()
+    if s.startswith("sha1:"):
+        s = s[5:]
+    if len(s) != 32:
+        return s
+    return base64.b16encode(base64.b32decode(s.upper())).lower().decode('utf-8')
+
+
 class DeliverDumpGrobidS3():
 
     def __init__(self, s3_bucket, **kwargs):
@@ -58,6 +68,8 @@ class DeliverDumpGrobidS3():
                 self.count['skip-line'] += 1
                 continue
             sha1_hex, grobid_json = line[0], line[1]
+            if len(sha1_hex) != 40:
+                sha1_hex = b32_hex(sha1_hex)
             assert len(sha1_hex) == 40
             grobid = json.loads(grobid_json)
             tei_xml = grobid.get('tei_xml')
