@@ -11,7 +11,7 @@ Run script from scratch repo:
 
 Assuming we're just looking at PDFs:
 
-    zcat CRAWL-2000.cdx.gz | rg -i pdf | sort -S 4G -u | gzip > CRAWL-2000.sorted.cdx.gz
+    zcat CRAWL-2000.cdx.gz | rg -i pdf | sort -S 4G -u > CRAWL-2000.sorted.cdx
 
 ## Old Way
 
