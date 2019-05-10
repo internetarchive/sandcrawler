@@ -46,6 +46,7 @@ class DeliverDumpGrobidS3():
         self.s3_bucket = s3_bucket
         self.s3_prefix = kwargs.get('s3_prefix', 'grobid/')
         self.s3_suffix = kwargs.get('s3_suffix', '.tei.xml')
+        self.s3_storage_class = kwargs.get('s3_storage_class', 'STANDARD')
         self.s3 = boto3.resource('s3')
         self.bucket = self.s3.Bucket(self.s3_bucket)
 
@@ -71,7 +72,8 @@ class DeliverDumpGrobidS3():
                     self.s3_prefix,
                     sha1_hex[0:4],
                     sha1_hex,
-                    self.s3_suffix),
+                    self.s3_suffix,
+                    StorageClass=self.s3_storage_class),
                 Body=tei_xml)
             print("{}\tsuccess\t{}\t{}".format(sha1_hex, obj.key, len(tei_xml)))
             self.count['success-s3'] += 1
@@ -93,6 +95,10 @@ def main():
                         type=str,
                         default=".tei.xml",
                         help='file suffix for created objects')
+    parser.add_argument('--s3-storage-class',
+                        type=str,
+                        default="STANDARD",
+                        help='AWS S3 storage class (redundancy) to use')
     parser.add_argument('dump_file',
                         help="TSV/JSON dump file",
                         default=sys.stdin,
