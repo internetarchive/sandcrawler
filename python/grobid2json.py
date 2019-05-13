@@ -31,9 +31,13 @@ import xml.etree.ElementTree as ET
 ns = "http://www.tei-c.org/ns/1.0"
 
 def all_authors(elem):
-    names = [' '.join([e.findtext('./{%s}forename' % ns) or '', e.findtext('./{%s}surname' % ns) or '']).strip()
-            for e in elem.findall('.//{%s}author/{%s}persName' % (ns, ns))]
-    return [dict(name=n) for n in names]
+    names = []
+    for e in elem.findall('.//{%s}author/{%s}persName' % (ns, ns)):
+        given_name = e.findtext('./{%s}forename' % ns) or None
+        surname = e.findtext('./{%s}surname' % ns) or None
+        full_name = '{} {}'.format(given_name or '', surname or '').strip()
+        names.append(dict(name=full_name, given_name=given_name, surname=surname))
+    return names
 
 
 def journal_info(elem):

@@ -1,8 +1,8 @@
 {
   "title": "Dummy Example File",
   "authors": [
-    {"name": "Brewster Kahle"},
-    {"name": "J Doe"}
+    {"name": "Brewster Kahle", "given_name": "Brewster", "surname": "Kahle"},
+    {"name": "J Doe", "given_name": "J", "surname": "Doe"}
   ],
   "journal": {
     "name": "Dummy Example File. Journal of Fake News. pp. 1-2. ISSN 1234-5678",
@@ -15,7 +15,7 @@
   "date": "2000",
   "doi": null,
   "citations": [
-    { "authors": [{"name": "A Seaperson"}],
+    { "authors": [{"name": "A Seaperson", "given_name": "A", "surname": "Seaperson"}],
       "date": "2001",
       "id": "b0",
       "index": 0,
