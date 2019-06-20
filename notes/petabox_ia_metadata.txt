@@ -29,3 +29,28 @@ Size/results:
     bnewbold@ia601101$ wc -l journals-ia.20181218.pdf-sha1.tsv 
     1748645 journals-ia.20181218.pdf-sha1.tsv
 
+## June 2019 Ingest
+
+    bnewbold@ia601101$ pwd
+    /schnell/iamine-journals
+
+    zcat journals-ia.20181218.json.gz | rg '"identifier": "arxiv-' > arxiv.json
+    zcat journals-ia.20181218.json.gz | rg '"identifier": "jstor-' > jstor.json
+    zcat journals-ia.20181218.json.gz | rg '"identifier": "paper-doi-10_' > paper-doi.json
+    zcat journals-ia.20181218.json.gz | rg '"identifier": "pubmed-PMC' > pmc.json
+
+    cat arxiv.json | ./ia_pdf_match.py > arxiv.match.json
+    cat jstor.json | ./ia_pdf_match.py > jstor.match.json
+    cat paper-doi.json | ./ia_pdf_match.py > paper-doi.match.json
+    cat pmc.json | ./ia_pdf_match.py > pmc.match.json
+
+    bnewbold@ia601101$ wc -l arxiv.*json jstor.*json paper-doi.*json pmc.*json 
+        1076012 arxiv.json
+         740970 arxiv.match.json
+         451204 jstor.json
+         451204 jstor.match.json
+          77838 paper-doi.json
+          23736 paper-doi.match.json
+         209787 pmc.json
+         189093 pmc.match.json
+
