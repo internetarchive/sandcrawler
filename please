@@ -16,6 +16,10 @@ HBASE_HOST = "wbgrp-svc263.us.archive.org"
 ZOOKEEPER_HOSTS = "mtrcs-zk1.us.archive.org:2181"
 GROBID_URI = "http://wbgrp-svc096.us.archive.org:8070"
 
+# Staging config
+#HBASE_HOST = "wbgrp-svc312.us.archive.org"
+#ZOOKEEPER_HOSTS = "wbgrp-svc312.us.archive.org:2181"
+
 def rebuild_python():
     print("Rebuilding python venv...")
     cmd = """cd python;
