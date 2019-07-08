@@ -62,6 +62,15 @@ retention (on both a size and time basis).
         => v03 is newer v0.3.0 API schema (backwards incompatible)
         => key: fcid
         => 8x partitions
+    fatcat-ENV.work-updates
+        => key: fcid
+        => 8x partitions
+    fatcat-ENV.container-updates
+        => key: fcid
+        => 4x partitions
+    fatcat-ENV.file-updates
+        => key: fcid
+        => 4x partitions
 
 
 ## Create fatcat QA topics
