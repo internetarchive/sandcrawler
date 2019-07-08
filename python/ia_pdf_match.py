@@ -13,8 +13,8 @@ Ouput is insertable fatcat "match" JSON
 
 - dois (list)
 - pmcid
-- jstor_id
-- arxiv_id
+- jstor
+- arxiv
 
 When invoking import matched, be sure to:
 
@@ -33,7 +33,7 @@ def parse(obj):
     extid_type = None
     extid = None
     if obj['metadata']['identifier'].startswith('arxiv-'):
-        extid_type = 'arxiv_id'
+        extid_type = 'arxiv'
         extid = obj['metadata'].get('source')
         if not extid:
             sys.stderr.write('skip: no source\n')
@@ -55,7 +55,7 @@ def parse(obj):
         assert extid.startswith("PMC")
         int(extid[3:])
     elif obj['metadata']['identifier'].startswith('jstor-'):
-        extid_type = 'jstor_id'
+        extid_type = 'jstor'
         extid = obj['metadata']['identifier'].replace('jstor-', '')
         int(extid)
     else:
