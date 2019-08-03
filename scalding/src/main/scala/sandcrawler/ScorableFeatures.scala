@@ -14,22 +14,24 @@ object ScorableFeatures {
   val MinSlugLength = 8
 
   // Static factory method
-  def create(title : String, authors : List[Any] = List(), year : Int = 0, doi : String = "", sha1 : String = "") : ScorableFeatures = {
+  def create(title : String, authors : List[Any] = List(), year : Int = 0, doi : String = "", fatcat_release : String = "", fatcat_work : String = "", sha1 : String = "") : ScorableFeatures = {
     new ScorableFeatures(
       title=if (title == null) "" else title,
       authors=if (authors == null) List() else authors.map(a => if (a == null) "" else a),
       year=year,
       doi=if (doi == null) "" else doi,
+      fatcat_release=if (fatcat_release == null) "" else fatcat_release,
+      fatcat_work=if (fatcat_work == null) "" else fatcat_work,
       sha1=if (sha1 == null) "" else sha1)
   }
 }
 
 // Contains features needed to make slug and to score (in combination
 // with a second ScorableFeatures). Create with above static factory method.
-class ScorableFeatures private(title : String, authors : List[Any] = List(), year: Int = 0, doi : String = "", sha1: String = "") {
+class ScorableFeatures private(title : String, authors : List[Any] = List(), year: Int = 0, doi : String = "", fatcat_release : String = "", fatcat_work : String = "", sha1: String = "") {
 
   def toMap() : Map[String, Any] =
-    Map("title" -> title, "authors" -> JSONArray(authors), "year" -> year, "doi" -> doi, "sha1" -> sha1)
+    Map("title" -> title, "authors" -> JSONArray(authors), "year" -> year, "doi" -> doi, "fatcat_release" -> fatcat_release, "fatcat_work" -> fatcat_work, "sha1" -> sha1)
 
   override def toString() : String = {
     JSONObject(toMap).toString

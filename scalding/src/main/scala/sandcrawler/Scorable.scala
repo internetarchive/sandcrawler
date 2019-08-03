@@ -60,6 +60,25 @@ object Scorable {
 
   val MaxScore = 1000
 
+  def selfMatchable(features1 : ReduceFeatures, features2 : ReduceFeatures) : Boolean = {
+    val json1 = jsonToMap(features1.json)
+    val json2 = jsonToMap(features2.json)
+
+    (
+      getStringOption(json1, "fatcat_release") != None &&
+      getStringOption(json2, "fatcat_release") != None &&
+      getStringOption(json1, "fatcat_release") != getStringOption(json2, "fatcat_release") &&
+      (getStringOption(json1, "fatcat_work") match {
+        case None => false
+        case Some(work1) => getStringOption(json2, "fatcat_work") match {
+          case None => false
+          // this last check ensures we don't double-match
+          case Some(work2) => work1 > work2
+        }
+      })
+    )
+  }
+
   def computeSimilarity(features1 : ReduceFeatures, features2 : ReduceFeatures) : Int = {
     val json1 = jsonToMap(features1.json)
     val json2 = jsonToMap(features2.json)
