@@ -1,5 +1,5 @@
 
-CREATE TABLE cdx (
+CREATE TABLE IF NOT EXISTS cdx (
     url                 TEXT NOT NULL CHECK (octet_length(url) >= 1),
     datetime            TEXT NOT NULL CHECK (octet_length(datetime) = 14),
     sha1hex             TEXT NOT NULL CHECK (octet_length(sha1hex) = 40),
@@ -10,10 +10,10 @@ CREATE TABLE cdx (
     row_created         TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     PRIMARY KEY(url, datetime)
 );
-CREATE INDEX cdx_sha1hex_idx ON cdx(sha1hex);
-CREATE INDEX cdx_row_created_idx ON cdx(row_created);
+CREATE INDEX IF NOT EXISTS cdx_sha1hex_idx ON cdx(sha1hex);
+CREATE INDEX IF NOT EXISTS cdx_row_created_idx ON cdx(row_created);
 
-CREATE TABLE file_meta (
+CREATE TABLE IF NOT EXISTS file_meta (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     sha256hex           TEXT CHECK (octet_length(sha256hex) = 64),
     md5hex              TEXT CHECK (octet_length(md5hex) = 32),
@@ -21,13 +21,13 @@ CREATE TABLE file_meta (
     mimetype            TEXT CHECK (octet_length(mimetype) >= 1)
 );
 
-CREATE TABLE fatcat_file (
+CREATE TABLE IF NOT EXISTS fatcat_file (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     file_ident          TEXT CHECK (octet_length(file_ident) = 26),
     first_release_ident TEXT CHECK (octet_length(first_release_ident) = 26)
 );
 
-CREATE TABLE petabox (
+CREATE TABLE IF NOT EXISTS petabox (
     item                TEXT NOT NULL CHECK (octet_length(item) >= 1),
     path                TEXT NOT NULL CHECK (octet_length(path) >= 1),
     sha1hex             TEXT NOT NULL CHECK (octet_length(sha1hex) = 40),
@@ -35,7 +35,7 @@ CREATE TABLE petabox (
 );
 CREATE INDEX petabox_sha1hex_idx ON petabox(sha1hex);
 
-CREATE TABLE grobid (
+CREATE TABLE IF NOT EXISTS grobid (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     grobid_version      TEXT NOT NULL CHECK (octet_length(grobid_version) >= 1),
@@ -46,7 +46,7 @@ CREATE TABLE grobid (
 );
 -- CREATE INDEX grobid_fatcat_release_idx ON grobid(fatcat_release);
 
-CREATE TABLE shadow (
+CREATE TABLE IF NOT EXISTS shadow (
     sha1hex             TEXT NOT NULL CHECK (octet_length(sha1hex) = 40),
     shadow_corpus       TEXT NOT NULL CHECK (octet_length(shadow_corpus) >= 1),
     shadow_id           TEXT CHECK (octet_length(shadow_id) >= 1),
