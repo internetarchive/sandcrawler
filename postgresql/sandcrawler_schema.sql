@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS cdx (
     cdx_sha1hex         TEXT CHECK (octet_length(cdx_sha1hex) = 40),
     mimetype            TEXT CHECK (octet_length(mimetype) >= 1),
     warc_path           TEXT CHECK (octet_length(warc_path) >= 1),
+    warc_csize          BIGINT,
     warc_offset         BIGINT,
     row_created         TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     PRIMARY KEY(url, datetime)
@@ -38,7 +39,7 @@ CREATE INDEX petabox_sha1hex_idx ON petabox(sha1hex);
 CREATE TABLE IF NOT EXISTS grobid (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-    grobid_version      TEXT NOT NULL CHECK (octet_length(grobid_version) >= 1),
+    grobid_version      TEXT CHECK (octet_length(grobid_version) >= 1),
     status_code         INT NOT NULL,
     status              TEXT CHECK (octet_length(status) >= 1),
     fatcat_release      TEXT CHECK (octet_length(fatcat_release) = 26),
