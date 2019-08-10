@@ -1,0 +1,80 @@
+
+upstream postgrest {
+   server localhost:3030;
+   keepalive 64;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name  sandcrawler-db.fatcat.wiki db.sandcrawler.org;
+
+    ssl_certificate /etc/letsencrypt/live/sandcrawler-minio.fatcat.wiki/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/sandcrawler-minio.fatcat.wiki/privkey.pem;
+
+    #add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'";
+    add_header X-Frame-Options "SAMEORIGIN";       # 'always' if nginx > 1.7.5
+    add_header X-Content-Type-Options "nosniff";   # 'always' if nginx > 1.7.5
+    add_header X-Xss-Protection "1";
+    # Enable STS with one year period (breaks http; optional)
+    #add_header Strict-Transport-Security "max-age=31557600; includeSubDomains";
+
+    error_log   /var/log/nginx/sandcrawler-errors.log;
+    access_log  /dev/null;
+
+    if ($scheme = http) {
+        return 301 https://$server_name$request_uri;
+    }
+
+    location / {
+
+        default_type  application/json;
+
+        if ($request_method !~ "GET") {
+            return 403;
+            break;
+        }
+
+        proxy_redirect off;
+
+        proxy_http_version 1.1;
+        proxy_set_header  Connection "";
+        proxy_set_header  X-Real-IP  $remote_addr;
+        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header  Host $http_host;
+
+        proxy_pass http://postgrest/;
+    }
+
+    # support /endpoint/:id url style for sha1hex lookups
+    location ~ "^/(file_meta|grobid|fatcat_file)/([a-f0-9]{40})$" {
+
+        if ($request_method !~ "GET") {
+            return 403;
+            break;
+        }
+
+        # assuming an upstream named "postgrest"
+	# doing this rewrite as part of the proxy_pass line itself didn't seem
+	# to work, so doing a formal rewrite here
+        rewrite "/([a-z_]+)/([a-f0-9]{40})" /$1?sha1hex=eq.$2 break;
+        proxy_pass http://postgrest;
+
+        # make the response singular
+        #default_type  application/vnd.pgrst.object+json;
+        proxy_set_header Accept "application/vnd.pgrst.object+json";
+
+        proxy_http_version 1.1;
+        proxy_set_header  Connection "";
+        proxy_set_header  X-Real-IP  $remote_addr;
+        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Let's Encrypt SSL Certs
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt;
+        autoindex off;
+    }
+}
