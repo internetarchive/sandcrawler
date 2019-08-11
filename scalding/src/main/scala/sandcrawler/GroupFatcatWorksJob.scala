@@ -7,7 +7,7 @@ import com.twitter.scalding.TypedPipe
 import com.twitter.scalding.TypedTsv
 import parallelai.spyglass.base.JobBase
 
-class ScoreSelfFatcatJob(args: Args) extends JobBase(args) {
+class GroupFatcatWorksJob(args: Args) extends JobBase(args) {
 
   val fatcatRowCount = Stat("fatcat-rows-filtered", "sandcrawler")
   val joinedRowCount = Stat("joined-rows", "sandcrawler")
