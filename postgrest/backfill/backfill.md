@@ -65,6 +65,7 @@ NOTE: these largely didn't work; will need to write a batch importer.
 Batch import process:
 
     cat UNPAYWALL-PDF-CRAWL-2018-07.filtered.cdx MSAG-PDF-CRAWL-2017.cdx TARGETED-PDF-CRAWL-2017.cdx UNPAYWALL-PDF-CRAWL-2019-04.pdfs_sorted.cdx | ./backfill_cdx.py
+    # Done: Counter({'raw_lines': 123254127, 'total': 51365599, 'batches': 51365})
 
 ## `fatcat_file`
 
@@ -102,7 +103,24 @@ Quick test:
 
 Run big batch:
 
-    ls /bigger/unpaywall-transfer/2019-07-17-1741.30-dumpgrobidxml/part*gz |arallel --progress -j8 'zcat {} | cut -f2 | ./backfill_grobid.py'
+    ls /bigger/unpaywall-transfer/2019-07-17-1741.30-dumpgrobidxml/part*gz | parallel --progress -j8 'zcat {} | cut -f2 | ./backfill_grobid.py'
+    # [...]
+    # Done: Counter({'minio-success': 161605, 'total': 161605, 'raw_lines': 161605, 'batches': 161})
+    # [...]
+
+Was running slow with lots of iowait and 99% jdb2. This seems to be disk I/O. Going to try:
+
+    sudo mount /dev/sdc1 /sandcrawler-minio/ -o data=writeback,noatime,nobarrier
+
+    # -j8: 20+ M/s write, little jdb2
+    # -j16: 30+ M/s write, little jdb2
+    # -j12: 30+ M/s write, going with this
+
+For general use should go back to:
+
+    sudo mount /dev/sdc1 /sandcrawler-minio/ -o data=noatime
+
+    # -j4: Still pretty slow, only ~3-5 M/s disk write. jbd2 consistently at 99%, 360 K/s write
 
 ## rough table sizes
 
