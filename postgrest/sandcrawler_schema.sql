@@ -48,11 +48,12 @@ CREATE TABLE IF NOT EXISTS grobid (
 -- CREATE INDEX grobid_fatcat_release_idx ON grobid(fatcat_release);
 
 CREATE TABLE IF NOT EXISTS shadow (
-    sha1hex             TEXT NOT NULL CHECK (octet_length(sha1hex) = 40),
     shadow_corpus       TEXT NOT NULL CHECK (octet_length(shadow_corpus) >= 1),
-    shadow_id           TEXT CHECK (octet_length(shadow_id) >= 1),
+    shadow_id           TEXT NOT NULL CHECK (octet_length(shadow_id) >= 1),
+    sha1hex             TEXT NOT NULL CHECK (octet_length(sha1hex) = 40),
     doi                 TEXT CHECK (octet_length(doi) >= 1),
     pmid                TEXT CHECK (octet_length(pmid) >= 1),
     isbn13              TEXT CHECK (octet_length(isbn13) >= 1),
-    PRIMARY KEY(sha1hex, shadow_corpus)
+    PRIMARY KEY(shadow_corpus, shadow_id)
 );
+CREATE INDEX shadow_sha1hex_idx ON shadow(sha1hex);
