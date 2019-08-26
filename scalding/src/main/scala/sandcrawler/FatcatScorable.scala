@@ -11,6 +11,21 @@ import com.twitter.scalding._
 import com.twitter.scalding.typed.TDsl._
 import parallelai.spyglass.hbase.HBasePipeConversions
 
+
+class FatcatScorableRight extends Scorable {
+
+  def getSource(args : Args) : Source = {
+    TextLine(args("fatcat-release-input-right"))
+  }
+
+  def getFeaturesPipe(args : Args)(implicit mode : Mode, flowDef : FlowDef) : TypedPipe[Option[MapFeatures]] = {
+    getSource(args).read
+      .toTypedPipe[String](new Fields("line"))
+      .filter { FatcatScorable.keepRecord(_) }
+      .map { FatcatScorable.jsonToMapFeatures(_) }
+  }
+}
+
 class FatcatScorable extends Scorable with HBasePipeConversions {
 
   def getSource(args : Args) : Source = {
