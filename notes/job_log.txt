@@ -93,3 +93,11 @@ Average Reduce Time 3hrs, 14mins, 39sec
 crossref-rows-filtered  73901964    0   73901964
 grobid-rows-filtered    14222226    0   14222226
 joined-rows 0   14115453    14115453
+
+## "Prod" Fatcat Group Works (run 2019-08-10)
+
+    ./please --prod groupworks-fatcat hdfs:///user/bnewbold/release_export.2019-07-07.json
+
+    job_1559844455575_118299
+    http://ia802401.us.archive.org:6988/proxy/application_1559844455575_118299
+
