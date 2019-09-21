@@ -101,11 +101,15 @@ def teixml2json(content, encumbered=True):
     header = tei.find('.//{%s}teiHeader' % ns)
     if header is None:
         raise ValueError("XML does not look like TEI format")
+    application_tag = header.findall('.//{%s}appInfo/{%s}application' % (ns, ns))[0]
+    info['grobid_version'] = application_tag.attrib['version']
+    info['grobid_timestamp'] = application_tag.attrib['when']
     info['title'] = header.findtext('.//{%s}analytic/{%s}title' % (ns, ns))
     info['authors'] = all_authors(header.find('.//{%s}sourceDesc/{%s}biblStruct' % (ns, ns)))
     info['journal'] = journal_info(header)
     date = header.find('.//{%s}date[@type="published"]' % ns)
     info['date'] = (date != None) and date.attrib.get('when')
+    info['fatcat_release'] = header.findtext('.//{%s}idno[@type="fatcat"]' % ns)
     info['doi'] = header.findtext('.//{%s}idno[@type="DOI"]' % ns)
     if info['doi']:
         info['doi'] = info['doi'].lower()
@@ -135,7 +139,7 @@ def main():   # pragma no cover
         usage="%(prog)s [options] <teifile>...")
     parser.add_argument("--no-encumbered",
         action="store_true",
-        help="ignore errors loading individual WARC files")
+        help="don't include ambiguously copyright encumbered fields (eg, abstract, body)")
     parser.add_argument("teifiles", nargs='+')
 
     args = parser.parse_args()
