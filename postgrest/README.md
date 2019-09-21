@@ -118,3 +118,9 @@ Questions we might want to answer
 - load full fatcat file dump (TSV transform)
 - load dumpfilemeta
 
+## Example Useful Lookups
+
+
+    http get :3030/cdx?url=eq.https://coleccionables.mercadolibre.com.ar/arduino-pdf_Installments_NoInterest_BestSellers_YES
+    http get :3030/file_meta?sha1hex=eq.120582c855a7cc3c70a8527c560d7f27e6027278
+
