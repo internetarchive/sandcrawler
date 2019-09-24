@@ -21,13 +21,19 @@ pylint = "*"
 globalwayback = {version=">=0.3", index="ia"}
 happybase = "*"
 mrjob = "*"
-requests = "*"
+requests = ">=2"
 wayback = {version=">=0.2.1.2", index="ia"}
-xmltodict = "*"
 raven = "*"
 pykafka = "*"
+confluent-kafka = "*"
 python-snappy = "*"
 boto3 = "*"
+minio = "*"
+psycopg2 = "*"
+bs4 = "*"
+python-magic = "*"
+ftfy = "*"
+internetarchive = "*"
 
 [requires]
 python_version = "3.5"
