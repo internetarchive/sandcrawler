@@ -14,14 +14,20 @@ Code in tihs repository is potentially public!
 Archive-specific deployment/production guides and ansible scripts at:
 [journal-infra](https://git.archive.org/webgroup/journal-infra)
 
-**./python/** contains Hadoop streaming jobs written in python using the
-`mrjob` library. Most notably, the **extraction** scripts, which fetch PDF
-files from wayback/petabox, process them with GROBID, and store the result in
-HBase.
+**./python/** contains scripts and utilities for 
+
+**./sql/** contains schema, queries, and backfill scripts for a Postgres SQL
+database index (eg, file metadata, CDX, and GROBID status tables).
+
+**./minio/** contains docs on how to setup and use a minio S3-compatible blob
+store (eg, for GROBID XML output)
 
 **./scalding/** contains Hadoop jobs written in Scala using the Scalding
 framework. The intent is to write new non-trivial Hadoop jobs in Scala, which
 brings type safety and compiled performance.
+
+**./python_hadoop/** contains Hadoop streaming jobs written in python using the
+`mrjob` library. Considered deprecated!
 
 **./pig/** contains a handful of Pig scripts, as well as some unittests
 implemented in python.
