@@ -75,6 +75,11 @@ def test_normalize_mime():
 
 
 def parse_cdx_line(raw_cdx, normalize=True):
+    """
+    This method always filters a few things out:
+
+    - non-HTTP requests, based on lack of status code (eg, whois)
+    """
 
     cdx = raw_cdx.split()
     if len(cdx) < 11:
@@ -84,8 +89,6 @@ def parse_cdx_line(raw_cdx, normalize=True):
     dt = cdx[1]
     url = cdx[2]
     mime = normalize_mime(cdx[3])
-    if normalize:
-        mime = normalize_mime(mime)
     http_status = cdx[4]
     sha1b32 = cdx[5]
     c_size = cdx[8]
@@ -102,6 +105,9 @@ def parse_cdx_line(raw_cdx, normalize=True):
     if mime is None or mime == '-':
         mime = "application/octet-stream"
 
+    if normalize:
+        mime = normalize_mime(mime)
+
     sha1hex = b32_hex(sha1b32)
     http_status = int(http_status)
     c_size = int(c_size)
@@ -115,9 +121,9 @@ def parse_cdx_line(raw_cdx, normalize=True):
         http_status=http_status,
         sha1b32=sha1b32,
         sha1hex=sha1hex,
-        c_size=c_size,
-        offset=offset,
-        warc=warc,
+        warc_csize=c_size,
+        warc_offset=offset,
+        warc_path=warc,
     )
 
 def parse_cdx_datetime(dt_str):
