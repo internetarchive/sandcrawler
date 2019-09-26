@@ -10,20 +10,16 @@ verify_ssl = true
 
 [dev-packages]
 ipython = "*"
-happybase-mock = "*"
-pytest = "*"
+pytest = ">=4"
 pytest-pythonpath = "*"
-responses = "*"
+pytest-pylint = "*"
+responses = ">=0.10"
 pytest-cov = "*"
 pylint = "*"
 
 [packages]
-globalwayback = {version=">=0.3", index="ia"}
-happybase = "*"
-mrjob = "*"
 requests = ">=2"
-wayback = {version=">=0.2.1.2", index="ia"}
-raven = "*"
+raven = {extras = ['flask'],version = "*"}
 pykafka = "*"
 confluent-kafka = "*"
 python-snappy = "*"
@@ -34,6 +30,15 @@ bs4 = "*"
 python-magic = "*"
 ftfy = "*"
 internetarchive = "*"
+Flask = ">=1"
 
 [requires]
 python_version = "3.5"
+
+[packages.globalwayback]
+version = ">=0.3"
+index = "ia"
+
+[packages.wayback]
+version = ">=0.2.1.2"
+index = "ia"
