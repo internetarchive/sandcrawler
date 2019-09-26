@@ -212,7 +212,7 @@ class JsonLinePusher(RecordPusher):
             record = json.loads(line)
             if self.batch_size:
                 batch.append(record)
-                if len(batch) > self.batch_size:
+                if len(batch) >= self.batch_size:
                     self.worker.push_batch(batch)
                     self.counts['pushed'] += len(batch)
                     batch = []
