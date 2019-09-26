@@ -57,6 +57,7 @@ class GrobidWorker(SandcrawlerWorker):
         self.consolidate_mode = 1
 
     def process(self, record):
+        self.counts['total'] += 1
         if record.get('warc_path') and record.get('warc_offset'):
             # it's a full CDX dict. fetch using WaybackClient
             if not self.wayback_client:
@@ -81,6 +82,7 @@ class GrobidWorker(SandcrawlerWorker):
         result['file_meta'] = gen_file_metadata(blob)
         result['source'] = record
         result['key'] = result['file_meta']['sha1hex']
+        self.counts[result['status']] += 1
         return result
 
 class GrobidBlobWorker(SandcrawlerWorker):
@@ -96,9 +98,11 @@ class GrobidBlobWorker(SandcrawlerWorker):
         self.consolidate_mode = 1
 
     def process(self, blob):
+        self.counts['total'] += 1
         assert blob
         result = self.grobid_client.process_fulltext(blob, consolidate_mode=self.consolidate_mode)
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']
+        self.counts[result['status']] += 1
         return result
 
