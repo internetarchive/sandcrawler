@@ -22,7 +22,7 @@ GROBID_URI = "http://wbgrp-svc096.us.archive.org:8070"
 
 def rebuild_python():
     print("Rebuilding python venv...")
-    cmd = """cd python;
+    cmd = """cd python_hadoop;
         export PIPENV_VENV_IN_PROJECT=1;
         pipenv install --deploy
         tar -czf venv-current.tar.gz -C .venv ."""
@@ -41,7 +41,7 @@ def run_backfill(args):
         HDFS_DIR,
         args.env,
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
-    cmd = """cd python;
+    cmd = """cd python_hadoop;
         pipenv run ./backfill_hbase_from_cdx.py \
             --hbase-host {hbase_host} \
             --hbase-table wbgrp-journal-extract-0-{env} \
@@ -61,7 +61,7 @@ def run_extract(args):
         HDFS_DIR,
         args.env,
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
-    cmd = """cd python;
+    cmd = """cd python_hadoop;
         pipenv run ./extraction_cdx_grobid.py \
             --hbase-host {hbase_host} \
             --hbase-table wbgrp-journal-extract-0-{env} \
@@ -89,7 +89,7 @@ def run_extract_ungrobided(args):
         HDFS_DIR,
         args.env,
         datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M.%S"))
-    cmd = """cd python;
+    cmd = """cd python_hadoop;
         pipenv run ./extraction_ungrobided.py \
             --hbase-host {hbase_host} \
             --hbase-table wbgrp-journal-extract-0-{env} \
