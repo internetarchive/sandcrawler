@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 /srv/grobid/grobid-0.5.1/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.5.1-SNAPSHOT" ident="GROBID" when="2018-04-02T00:31+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Dummy Example File</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+				<date type="published" when="2000">2000</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Brewster</forename><surname>Kahle</surname></persName>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Doe</surname></persName>
+						</author>
+						<author>
+							<affiliation key="aff0">
+								<orgName type="institution">Internet Archive</orgName>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Dummy Example File</title>
+					</analytic>
+					<monogr>
+						<title level="m">Dummy Example File. Journal of Fake News. pp. 1-2. ISSN 1234-5678</title>
+						<imprint>
+							<date type="published" when="2000">2000</date>
+						</imprint>
+					</monogr>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<textClass>
+				<keywords>
+					<term>Fake Data</term>
+				</keywords>
+			</textClass>
+			<abstract>
+				<p>Everything you ever wanted to know about nothing</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>
+Everything starts somewhere, as somebody<ref type="bibr" target="#b0">[1]</ref> once said.</p></div>
+
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">In Depth</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.1">Meat</head><p>
+You know, for kids.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.2">Potatos</head><p>
+QED.</p></div>
+		</body>
+		<back>
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Everything is Wonderful</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="middle">A</forename><surname>Seaperson</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Letters in the Alphabet</title>
+		<imprint>
+			<biblScope unit="volume">20</biblScope>
+			<biblScope unit="page" from="1" to="11" />
+			<date type="published" when="2001" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">All about Facts</title>
+	</analytic>
+	<monogr>
+		<title level="j">The Dictionary</title>
+		<imprint>
+			<biblScope unit="volume">14</biblScope>
+			<date type="published" when="2011-03-28" />
+		</imprint>
+	</monogr>
+	<note>None</note>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

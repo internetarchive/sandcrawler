@@ -1,0 +1,2004 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 /srv/grobid/grobid-0.5.1/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.5.1-SNAPSHOT" ident="GROBID" when="2018-04-02T00:31+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">DYNAMICS OF RAILWAY FREIGHT VEHICLES</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+				<date type="published" when="2015">2015</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Original Citation Iwnicki</surname></persName>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Orlova</surname></persName>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Hecht</surname></persName>
+						</author>
+						<author>
+							<affiliation key="aff0">
+								<orgName type="institution">University of Huddersfield Repository</orgName>
+							</affiliation>
+						</author>
+						<title level="a" type="main">DYNAMICS OF RAILWAY FREIGHT VEHICLES</title>
+					</analytic>
+					<monogr>
+						<title level="m">Dynamics of railway freight vehicles. Vehicle System Dynamics. pp. 1­39. ISSN 0042­3114</title>
+						<imprint>
+							<date type="published" when="2015">2015</date>
+						</imprint>
+					</monogr>
+					<note>Dynamics of railway freight vehicles</note>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<textClass>
+				<keywords>
+					<term>Freight wagon</term>
+					<term>Vehicle dynamics</term>
+					<term>Computer simulation</term>
+					<term>Rail Freight</term>
+					<term>Running Gear Design</term>
+					<term>Freight Bogies</term>
+				</keywords>
+			</textClass>
+			<abstract>
+				<p>This paper summarises the historical development of railway freight vehicles and how vehicle designers have tackled the difficult challenges of producing running gear which can accommodate the very high tare to laden mass of typical freight wagons whilst maintaining stable running at the maximum required speed and good curving performance. The most common current freight bogies are described in detail and recent improvements in techniques used to simulate the dynamic behaviour of railway vehicles are summarised and examples of how these have been used to improve freight vehicle dynamic behaviour are included. A number of recent developments and innovative components and sub systems are outlined and finally two new developments are presented in more detail: the LEILA bogie and the SUSTRAIL bogie.</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>DYNAMICS OF RAILWAY FREIGHT VEHICLES</head><p>Iwnicki S.D. 1 , Stichel S. <ref type="bibr" target="#b1">2</ref> , Orlova A. 3 , Hecht M. <ref type="bibr" target="#b3">4</ref> </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>From their inception railways have been predominant in the carriage of bulk goods and railway wagons have been designed to allow this to be effected efficiently on different types of railway infrastructure. In more recent times with changes in industrial needs and competition from road and air transport railways have carried an ever declining share of freight. Although there is some evidence in some countries that this trend has started to change recently due to road congestion there is still not yet a widespread evidence of a major modal shift from road to rail which politicians have indicated is desirable. For example the European Transport White paper 2011 <ref type="bibr" target="#b0">[1]</ref> sets a target for modal shift of 30% by 2030 and 50% by 2050 from road freight to other modes such as rail or waterborne transport for distances over 300 km.</p><p>The barriers to this increased modal shift from road to rail seem to be largely due to the requirements from modern shippers for shorter end-to-end times but even more the demand is for high reliability of service and for additional features such as tracking and tracing of shipments, security and temperature control. As Hecht <ref type="bibr" target="#b1">[2]</ref> points out the lower speeds for rail freight compared with passenger services are not mainly related to lower vehicle speed capability but are more due to the fact that freight trains often travel on lower speed lines or are held for passenger traffic to pass and due to complex and lengthy shunting and handling operations and motive power and crew changes.</p><p>Nevertheless if freight vehicle speeds and acceleration and braking capabilities could allow them to be fully integrated with passenger traffic this would bring a step change in end to end freight train speeds as well as overall system capacity. A key factor in obtaining this increased speed is to ensure that the dynamic performance of freight vehicles can allow safe and reliable operation on track with different levels of irregularities and support conditions. Running gear has evolved with the experience of operation on different railways and more recently the use of computer simulation tools and several standardised designs are now ubiquitous. Several research projects and teams have recently been trying to advance from this position using innovative designs adapted from passenger vehicles or using other novel techniques. The use of computer simulations is now established for design of running gear and is also becoming accepted as part of the vehicle acceptance processes in many countries.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">Early developments of freight wagons</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.1">Background</head><p>Designers of freight vehicle running gear face many challenges but not least of these is the fact that the ratio of the laden to tare mass of a freight vehicle can be as much as 5:1 compared with a more manageable 1.5:1 for typical passenger vehicles. This effectively means that the suspension system has to be designed for two different vehicles (and every stage in between). A number of clever designs have evolved over the years and the most successful of these are now summarised.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.2">UIC double link</head><p>Freight wagons with link type suspensions have existed for more than 100 years, as can be seen in <ref type="figure" target="#fig_0">figure 1</ref>, and the link suspension is probably still the most common suspension type for two axle freight wagons in Europe today. As early as 1890 the principle of the link suspension was defined as a standard. A review of freight wagons with link suspension can be found in <ref type="bibr" target="#b2">[3]</ref>. After World War II the UIC double link suspension was defined as a standard <ref type="bibr" target="#b4">[5]</ref>. In the beginning of the 1980s a number of improvements were made. The axle load was increased to 22.5 tonnes and the parabolic leaf spring was introduced as standard component <ref type="bibr" target="#b5">[6]</ref>, <ref type="bibr" target="#b6">[7]</ref>. The UIC double link suspension in figure 2 mainly consists of three parts: Leaf springs, links and axle guards. The vehicle is connected to the parabolic or leaf spring by double links. The leaf spring rests on the axle box. This arrangement allows the axle box to move in both the longitudinal and lateral direction relative to the wagon body. The axle guard restricts the horizontal motion of the axle box. The principle of the suspension is that of a pendulum. In the longitudinal direction the suspension links are inclined, whereas in the lateral direction they are in a vertical plane when the vehicle body is in nominal position <ref type="bibr" target="#b0">[1]</ref>, <ref type="bibr" target="#b7">[8]</ref>, <ref type="bibr" target="#b8">[9]</ref>, <ref type="bibr" target="#b9">[10]</ref>. The characteristics of the double-link suspension are quite complex. The main components are shown in <ref type="figure">Figure 3</ref>.  One of the main advantages of the link running gear is that it is simple, robust and cheap and also takes up little space in both lateral and vertical directions. Both stiffness and damping are provided by one system and are load dependent. The quasistatic curving performance of the single axle running gear with link suspension is good. For a typical two-axle freight wagon with a wheelbase of 9m on dry rails good steering performance down to 300 m curve radius can be achieved <ref type="bibr" target="#b9">[10]</ref>.</p><p>The running behaviour of two-axle freight wagons with link suspension can be rather poor mainly due to vehicle hunting. The amount of damping provided in the horizontal plane is often not sufficient. Additionally the characteristics of the suspension change during the life of the vehicle, due to suspension wear, and with the running conditions <ref type="bibr" target="#b9">[10]</ref>. The link suspension takes quite a lot of longitudinal space and is a poor isolator for sound and vibration.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.3">Link suspension bogies</head><p>The leaf spring and link suspension of the single-axle running gear has also been used on bogies since about 1925 <ref type="bibr" target="#b0">[1]</ref>. More recently it has been standardised with for example bogie type 931 (figure 4), developed in the 1950s by Deutsche Bahn with a wheelbase of 2000 mm and a wheel diameter of 1000 mm. This bogie was developed to run at 100 km/h with an axle load of 20 t and was the first bogie standardised by UIC <ref type="bibr" target="#b5">[6]</ref>, <ref type="bibr" target="#b6">[7]</ref>. In the beginning of the 1980s DB bogie type 665 was introduced with new features like parabolic leaf springs, 22.5 t permissible axle load and shorter links as shown in figure 5 <ref type="bibr" target="#b6">[7]</ref>. The bogie frame is a welded steel design but in some places forged components are used. The frame is connected to parabolic or trapezoidal leaf springs, that rest on the axlebox, being connected by swing links. Nominally the suspension links are positioned in a longitudinal vertical plane and inclined in this plane. During vehicle operation the links swing in that plane and also laterally <ref type="bibr" target="#b0">[1]</ref>, <ref type="bibr" target="#b5">[6]</ref>, <ref type="bibr" target="#b6">[7]</ref>, <ref type="bibr" target="#b10">[11]</ref>. A spherical centre-pivot and two side bearers connect the bogie frame and the wagon body. The side bearers can be either rigid or vertically suspended and have three functions:</p><p> to act as static support for the carbody.  to act as roll stiffness.  to provide friction damping between carbody and bogie The quasistatic curving performance of a bogie with link suspension is generally very good due to:</p><p> the short wheelset distance in the bogie of 1.8 m.  the soft longitudinal primary suspension.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.4">The Y25 Standard Bogie</head><p>Most railway vehicles have bogies or trucks which allow longer vehicles supported on two bogies while still keeping attack angles between wheels and rail in curves to reasonable levels. This arrangement also allows two stages of suspension with the 'primary' suspension between wheelset and bogie and secondary suspension between bogie and coach or wagon body. The primary suspension can isolate the bogie from short wavelength irregularities while the secondary suspension deals with the longer wavelength, lower frequency excitations.</p><p>As previously mentioned, a specific challenge for designers of freight vehicle running gear is the large difference between tare and laden vehicle mass. In the Y25 bogie progressive damping with vertical load is effected by the use of 'Lenoir links' which take part of the vertical load through an angled link and a pusher onto a vertical friction surface. This gives a level of damping which is broadly proportional to the vehicle mass. The Y25 bogie design originated in France in 1948 and was standardised by the ORE steering committee in 1967. It is shown in <ref type="figure">figure 6</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Figure 6: A Y25 type bogie</head><p>The design has been hugely successful and Y25 type bogies are the most predominant freight bogie in Europe.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.5">'three-piece' Freight Bogies</head><p>The three-piece bogies were first developed in 1930s and seemed to originate simultaneously in the USA (Barber bogie) and the Soviet Union (Hanin bogie). Now the three-piece bogie and its more sophisticated descendents are the most common suspension for freight wagons across North and South Americas, CIS countries, China, Africa, India and Australia. Maximum axle loads range between 7 and 36 t. The most common standards for three-piece bogies are AAR <ref type="bibr" target="#b12">[13]</ref> for 1435 mm gauge and GOST <ref type="bibr" target="#b13">[14]</ref> for 1520 mm gauge. A review of three-piece bogies can be found in <ref type="bibr" target="#b14">[15]</ref>.</p><p>The Russian model 18-100 bogie shown in <ref type="figure">figure 7</ref> is a good example of an early type of three-piece bogie. The term 'three-piece' refers to the design of the bogie frame which consists of three interconnected parts: two side frames and one bolster. The frame parts are usually cast.</p><p>The bogie is equipped with central suspension between the side frames and the bolster that consists of a set of springs and wedge friction dampers working in vertical and lateral direction and keeping the frame square. The side frames with their flat surfaces rest on the axle-boxes (or bearing adapters). The size of the opening in the side frame provides clearances in longitudinal and lateral direction within which the axle-box moves resisted by dry friction forces. The car body rests on the flat center bowl, its roll motion relative to the bolster is limited by side bearers which are usually stiff vertical stops including clearance when the wagon body is in the central position. The three-piece bogie is a very robust design with the advantage of being low cost in production, operation and repair. The following items are considered as disadvantages of traditional three-piece bogie and attempts have been made to address these in its further developments <ref type="bibr" target="#b14">[15]</ref>, <ref type="bibr" target="#b15">[16]</ref>, <ref type="bibr" target="#b16">[17]</ref>:</p><p> Limited critical speed of the empty wagon )with sway oscillation of car body being the major loss of stability mode);  Wheel flange contact in curves produced by warping between side frames and bolster;  Side frames adding to the unsprung mass and thus increasing track impact on short wavelength irregularities;  Deterioration of ride performance with wear of friction wedges and other friction surfaces.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Computer simulation</head><p>Computer simulation of freight vehicles is not at all as common as for passenger vehicles. Since many of the European freight vehicles are standardized very little new development has been carried out and the manufacturers do in general not perform a simulation analysis of the running behaviour of freight wagon. However, in several research groups at universities and research institutes and at some consulting companies computer simulation of freight vehicles is now performed.</p><p>Since manufacturers do not usually build simulation models of freight vehicles themselves one of the main challenges in modelling a freight wagon is to obtain all the input parameters required. Another aspect is that most suspension elements are strongly non-linear and in many cases even mathematically non-smooth. This makes it very difficult to build up simulation models that provide good results compared to measurement results. Some of the phenomena observed during simulation of freight vehicles will be discussed below.</p><p>Further, as described in Section 3.1, the characteristics of the suspension elements can vary during operation due to wear or environmental effects such as for example surface contamination changing the friction coefficient in sliding surfaces.</p><p>The main purpose of simulation studies of freight vehicles is very often a stability analysis (see Section 3.2) or an investigation of the curving behaviour of the freight wagon (see Section 3.3). Since the axle loads of freight wagons are usually high, the investigation of wheel or rail wear and rolling contact fatigue is often the primary reason for a simulation study in curves.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1">Suspension components</head><p>The suspension in most freight vehicles relies on friction damping. Friction elements are low cost, require little maintenance and are usually load dependent. This means that the level of friction damping changes with axle load, an important feature in freight wagons due to the high tare to laden ratio already mentioned. Surveys of modelling of friction components in freight wagon can be found for example in <ref type="bibr" target="#b17">[18]</ref>- <ref type="bibr" target="#b21">[22]</ref>. Papers <ref type="bibr" target="#b17">[18]</ref> and <ref type="bibr" target="#b18">[19]</ref> are general reviews of rail vehicle suspension components, while <ref type="bibr" target="#b19">[20]</ref> is focused on freight vehicles and also discusses issues such as stability and curving of freight vehicles. Papers <ref type="bibr" target="#b20">[21]</ref> and <ref type="bibr" target="#b21">[22]</ref> are focussed on modelling friction wedges of three-piece bogies. Also in the proceedings from the Euromech 500 colloquium <ref type="bibr" target="#b22">[23]</ref> many valuable contributions on the topic of non-smooth suspension elements can be found. Various arrangements of suspension elements to simulate vehicle suspensions are documented in <ref type="bibr" target="#b23">[24]</ref>, <ref type="bibr" target="#b24">[25]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.1">Friction damping</head><p>In most freight vehicle simulation models friction is modelled as dry Coulomb friction, where the friction force is proportional to the normal load. The friction coefficient is assumed to be constant, see force-deflection curve in <ref type="figure">figure 8</ref>, left. The disadvantage of the Coulomb model is that it is non-smooth, i.e. multi-valued and non-differentiable. Another way to model friction is with a linear spring in series with a friction slider as in <ref type="figure" target="#fig_8">figure 9</ref> with the resulting force-displacement characteristic in <ref type="figure">figure 8</ref>, right. Since most friction damper arrangements have a finite flexibility, such models could also be regarded as more realistic. Note, however that the model with a spring in series is still non-smooth. To avoid the difficulties mentioned above regularization methods are often applied, see for example <ref type="bibr" target="#b25">[26]</ref>, <ref type="bibr" target="#b26">[27]</ref> and <ref type="bibr" target="#b27">[28]</ref>.  Piotrowski developed a non-smooth rheological model <ref type="bibr" target="#b28">[29]</ref>, <ref type="bibr" target="#b29">[30]</ref>, which employs the notion of the differential succession involving a contingent derivative of the non- smooth, multi-valued characteristics of Coulomb friction. Tan and Rogers <ref type="bibr" target="#b30">[31]</ref> proposed equivalent viscous damping models to avoid the numerical problems of Coulomb friction. They claim that this substitution works very well for cases where sliding motions predominate.</p><p>In many running gear arrangements two-dimensional friction elements are needed, e.g. in the Y25 and in the three-piece bogie. In these designs motions in two directions tangential to the friction surfaces are possible. Two-dimensional Coulomb friction models can be found e.g. in <ref type="bibr" target="#b31">[32]</ref>, <ref type="bibr" target="#b32">[33]</ref>.</p><p>Another phenomenon that is important to take into account is stochastic excitations that smooth the dry friction damping. Also mid frequency excitation generated in the wheel rail contact - often called dither - can smoothen dry friction and therefore have a significant influence on the simulation results, see for example <ref type="bibr" target="#b29">[30]</ref>, <ref type="bibr" target="#b32">[33]</ref>.</p><p>True and Asmund <ref type="bibr" target="#b32">[33]</ref> investigated the effects of dry friction in the suspension of a simple freight vehicle. They used a relatively simple model of dry friction and found that the stable behaviour for the system with friction exhibited a laterally oscillating motion which makes the system sensitive to external periodic forcing. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.2">Wagons with link suspension</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.2.1">Basic model of leaf spring and link suspension</head><p>Leaf springs are often used as vertical suspension. In multibody simulation models they are usually regarded as rigid in both the longitudinal and lateral directions. For dynamic displacements around a static equilibrium position leaf springs are characterized by a relatively high stiffness for small displacements and a significantly lower stiffness for larger displacement, (figure 10). Leaf springs are described in the ORE reports <ref type="bibr" target="#b33">[34]</ref>, <ref type="bibr" target="#b34">[35]</ref>. Since link suspensions show very similar characteristics they are often modelled in a similar way to leaf springs, at least for the lateral link behaviour. The initial higher stiffness k 1 in leaf springs is caused by friction, i.e. the leaves of a leaf spring stick together for small displacements and start to slide on each other for larger displacements. In the same way the link rolls in the end bearing as long as there is no sliding in the contact area. The lower stiffness k 2 is the value for sliding in the leaf spring or the so called pendulum stiffness of a link. The force F d determines the amount of damping in the hysteresis. A commonly used model to represent the two different stiffness values with the hysteresis is to use a linear spring and a friction element in series, in parallel with another linear spring, as shown in <ref type="figure" target="#fig_0">figure 11</ref>. It should be taken into account that the characteristics of leaf springs vary due to wear in running or deterioration or lubrication state.</p><p>The three parameters in the model described above can be derived from measurements. This model, however, is simplified since the shape of the hysteresis curve is usually rounded as shown in <ref type="figure" target="#fig_0">figure 10</ref>. Measurement results and more detailed descriptions of link suspensions can be found in <ref type="bibr" target="#b33">[34]</ref>- <ref type="bibr" target="#b47">[48]</ref>. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.2.2">Advanced simulation models</head><p>For lateral displacements of a double-link all four joints are assumed to start to slide at the same time; therefore the model in <ref type="figure" target="#fig_0">figure 11</ref> is sufficient. In the longitudinal direction, however, it is more likely that the joints start to slide at different displacements as shown e.g. by Piotrowski <ref type="bibr" target="#b28">[29]</ref>. He uses a set of four sliders and spring elements with different breakout forces in parallel to describe these characteristics. Also in a model used by Stiepel several elements in parallel are used <ref type="bibr" target="#b43">[44]</ref>.</p><p>To give a better representation of the rounded shape of the hysteresis curves, Fancher developed a model for truck leaf springs <ref type="bibr" target="#b44">[45]</ref>, <ref type="bibr" target="#b45">[46]</ref> using exponential expressions. Jönsson <ref type="bibr" target="#b41">[42]</ref> used a similar approach, where the total force over the suspension component is separated into piece-wise elastic and friction forces. The model is used for both leaf springs and double-links.</p><p>Another possibility to describe hysteresis with rounded shape for link suspensions is to use rolling contact theory, which has been proposed by <ref type="bibr">Piotrowski [33]</ref>. Based on the slip velocity the creepage in the contact is calculated.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.3">Modelling the three-piece bogie</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.3.1">Models of the central suspension</head><p>Most of the research in modelling three-piece bogies, such as <ref type="bibr" target="#b20">[21]</ref>, <ref type="bibr" target="#b21">[22]</ref>, is focussed on the central suspension element of the three-piece truck that provides damping with friction wedges. Early models of friction wedge suspensions recognized only vertical load-dependent friction force, later models included two-dimensional friction in the vertical and lateral directions <ref type="bibr" target="#b45">[46]</ref>, <ref type="bibr" target="#b49">[50]</ref>.</p><p>The first approach to account for possible angular and longitudinal displacements of bolster relative to the side frames is to introduce warping and longitudinal nonlinear resistance characteristics into the model, as it is done in <ref type="bibr" target="#b14">[15]</ref>, <ref type="bibr" target="#b16">[17]</ref>. In such case the wedges are not modelled as separate bodies, but the equivalent force against displacement characteristics are introduced accounting for wedge parameters, such as inclination angle, width of the vertical surface, width of the inclined surface, friction coefficients on inclined and vertical surfaces, etc.</p><p>The second approach to account for all possible degrees of freedom between side frame and bolster is to introduce multiple contact points mapped along the edges of the wedge with two-dimensional friction force elements in each of them. Such an approach was used by Ballew et al <ref type="bibr" target="#b45">[46]</ref>, it is implemented in simulation tools such as VAMPIRE <ref type="bibr" target="#b51">[52]</ref>, and the Universal Mechanism software <ref type="bibr" target="#b51">[52]</ref>. Numerous contact elements require an efficient numerical simulation algorithm to be implemented into the software that provides fast solution to resulting stiff system of equations, such as the one developed by Pogorelov <ref type="bibr" target="#b56">[57]</ref>. The wedges are treated as massless. Contact type models allow the study of such complicated phenomenon as uneven distribution of contact forces over the wedge surfaces, implementation of resilient pads on wedge surfaces, jamming and wedging <ref type="bibr" target="#b53">[54]</ref>. In paper <ref type="bibr" target="#b55">[56]</ref> the authors included the mass of the wedge into consideration to study its dynamic properties.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.3.2">Models of the axle to side frame interaction</head><p>In the first approach similar to friction wedges the axle to side frame interaction can be described by nonlinear equivalent characteristics as in <ref type="bibr" target="#b14">[15]</ref>, <ref type="bibr" target="#b16">[17]</ref>. The dry friction interaction between the axle box crown and the side frame pedestal is modelled by two dimensional dry friction element in parallel with another nonlinear element that describes bumpstops in longitudinal and lateral dimension. A typical characteristic of the bumpstop element is presented in <ref type="figure" target="#fig_0">figure 12</ref>. To improve numerical integration the transition from clearance to bumpstop is often smoothed.</p><p>If the interaction between the crown and pedestal is a flat surface, then its width can result in roll stiffness that is produced by gravity. Such stiffness can be introduced into the model depending on the axle load. The second approach is to introduce multiple contact points on the edges of the crown with two-dimensional friction elements in them. The bumpstops are then also the contact elements between the axle box or adapter and the stops in the side frame jaws. Such approach is used in <ref type="bibr" target="#b56">[57]</ref> as well as in Universal Mechanism software <ref type="bibr" target="#b51">[52]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.3.3">Models of the centre bowl and side bearers</head><p>The same approaches can be applied to models of the centre bowl to centre plate interaction and at the side bearers.</p><p>In the first approach, see <ref type="bibr" target="#b14">[15]</ref>, <ref type="bibr" target="#b16">[17]</ref>, centre plate to centre bowl interaction works simultaneously as one dimensional yaw friction and nonlinear roll and pitch torque with soft characteristics as shown in <ref type="figure" target="#fig_0">figure 13</ref>. Knowing the clearance in the side bearers the nonlinear roll characteristic can be linearized. The second approach is to introduce multiple contact points on the edges of the centre plate with two-dimensional friction elements in them. The interaction with the centre bowl rim is then also the contact elements. Such an approach is used in <ref type="bibr" target="#b56">[57]</ref> as well as in Universal Mechanism software <ref type="bibr" target="#b51">[52]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2">Stability</head><p>Freight vehicles in most cases operate at much lower speeds than passenger vehicles. Typical running speeds are at around 100 km/h. This suggests that stability investigations are not as important as for faster passenger vehicles. On the other hand freight vehicles often are much less damped than passenger vehicles and stability investigations are therefore necessary. Several of the wagon types introduced above can - in unfavourable running conditions - show significant hunting behaviour at speeds as low as 70 km/h.</p><p>In a bogie vehicle basically three types of hunting motion can arise:</p><p> Wheelset hunting where one wheelset performs the hunting motion.</p><formula xml:id="formula_0"> M 0  M   c Mg  </formula><p> Bogie hunting where a whole bogie is taking over the hunting motion.  Carbody hunting where the carbody performs a yaw motion and the two bogies mainly follow the carbody with lateral motions, i.e. the whole vehicle takes over the hunting motion.</p><p>Carbody hunting is often a type of resonance phenomenon, where the Klingel hunting frequency given mainly by vehicle speed and conicity in the contact coincides with the yaw eigenfrequency of the carbody.</p><p>Hunting motion with a non-zero limit cycle depends on the wheel-rail geometry, the suspension and the masses and inertias of the vehicle. Since the mass and inertia, and in most cases the suspension stiffness and damping of the freight wagon will significantly change with load, the type of hunting motion observed usually differs between an empty and a loaded wagon. Since the stiffness values between axlebox and bogie frame (in a bogie vehicle) are lower in an unloaded vehicle, the risk for wheelset or bogie hunting is higher. In loaded vehicles, vehicle hunting can often be observed. Since the frequency of wheelset hunting is usually low (typically between 1 and 2 Hz) the wheel rail forces induced are relatively low and in most cases below the limit values stipulated in standards. Therefore, the vehicle design in reality allows for the carbody instability to happen in some conditions. Otherwise the suspension needs to be so stiff that the curving performance would suffer, and the amount of wear and RCF would increase significantly. The risk of carbody hunting can vary with the type of load since this can influence the yaw eigenfrequency of the carbody.</p><p>Due to the significant inherent non-linearity and non-smoothness of the suspension elements linearization of the models is usually not realistic. It is therefore necessary to perform time steppig integration with the full non-linear model. The task is in general to find the non-linear critical speed v B of the wagon as can be seen in the generic bifurcation diagram in figure 14.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Figure 14: Generic bifurcation diagram</head><p>In complex models it is very difficult to find the exact critical speed, for example with a path following method <ref type="bibr" target="#b57">[58]</ref>. Therefore other engineering methods are used. One possibility that has been suggested e.g. by <ref type="bibr">Polach [59]</ref> is to excite the vehicle with an initial disturbance that can either be deterministic or stochastic. After the initial disturbance the vehicle is run on ideal smooth track. If the oscillation vanishes the vehicle is regarded as stable. The simulations have to be repeated with increasing speed until the oscillations do not disappear. In that case the non-linear critical speed v b ( <ref type="figure" target="#fig_0">figure  15</ref>) is reached. A risk with this method is that the initial disturbance is not high enough to initiate a limit cycle oscillation and that the critical speed detected is higher than the real non-linear critical speed.</p><p>Another method to detect the non-linear critical speed is start the simulations at a very high speed to be sure that the vehicle has reached the non-zero attractor (limit cycle). Then the speed is continuously reduced until the limit cycle behaviour disappears. Polach also describes this method. It has been used for example by Boronenko et al <ref type="bibr" target="#b14">[15]</ref> to tune the suspension of three-piece bogies.</p><p>A similar method, shown in <ref type="figure" target="#fig_0">figure 15</ref>, is suggested in <ref type="bibr" target="#b59">[60]</ref> to determine the so-called non-linear critical speed. The difference to the method introduced above is that the speed is not reduced continuously but in discrete steps as suggested by True <ref type="bibr" target="#b98">[98]</ref>.  <ref type="figure" target="#fig_0">Figure 16</ref> shows the bifurcation diagram for a loaded two-axle vehicle calculated with this method. It can be observed that only the stable branches of the bifurcation diagram can be determined, not the unstable part. The zero solution is also possible at least up to a speed of 120 km/h (bold solid line). This was simulated using the procedure above, starting from low speed and increasing the speed stepwise. Hoffman also investigated the stability of a two-axle wagon with link suspension <ref type="bibr" target="#b42">[43]</ref>, <ref type="bibr" target="#b60">[61]</ref>. He uses the link model developed by Piotrowski <ref type="bibr" target="#b28">[29]</ref>. The leaf springs model is based on Fancher et al <ref type="bibr" target="#b45">[46]</ref>.  Gialleonardo et al <ref type="bibr" target="#b61">[62]</ref> extended this type of stability analysis for a two-axle wagon with link suspension on curved track. As can be seen in <ref type="figure" target="#fig_0">figure 18</ref>. the leading wheelset (y lw )</p><p>shows much smaller oscillation amplitudes than the trailing wheelset (y tw ) and the carbody. This is because the outer wheel of the leading wheelset experiences flange contact. In general the results show the presence of large periodic oscillations in narrow curves at commercial operating speeds. It is also shown in the paper that the coupling forces between wagon assemblies significantly reduce the oscillation amplitudes. Zhai et al <ref type="bibr" target="#b62">[63]</ref> extended the stability analysis for a freight wagon with three-piece bogies to also include a visoelastic track structure. The stability analysis is performed according to the methodology suggested by Polach, which is explained above. The authors found that a lower critical hunting speed is obtained on elastic track compared with the rigid track case. The difference in the critical hunting speeds between the elastic track base and the rigid track base is 4.4% for the loaded freight car.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3">Curving</head><p>As indicated above simulations of the running behaviour of freight wagons in curves are often performed to investigate the risk of wheel wear and Rolling Contact Fatigue (RCF).</p><p>For passenger vehicles curving simulations are often performed on ideal track, i.e. the stochastic track irregularities are neglected. Authors are in this case interested in the quasistatic behaviour of the vehicle, i.e. the mean wheelset attack angles or the mean energy dissipation in the contact points. For freight vehicles with non-linear and non- smooth suspension this can lead to significant mistakes as shown in the example from Jönsson <ref type="bibr" target="#b41">[42]</ref>. On ideal track the friction surfaces might stick together and force the wheelset into a more unfavourable position. Track irregularities help to get relative motion in the friction surfaces, which usually leads to better - and more realistic - steering behaviour of the vehicle. As seen in <ref type="figure" target="#fig_0">figure 19</ref>, the energy dissipation as a measure for the amount of wear or RCF, is much lower when simulating running with track irregularities. In one of their numerous studies on three-piece bogies Boronenko et al <ref type="bibr" target="#b14">[15]</ref> investigate the reason for excessive flange wear in some of the Russian wagons. One conclusion is that the main reason for flange wear is the unstable behaviour of the bogies in curves (rutting mode) <ref type="bibr" target="#b15">[16]</ref>, when the bogie is flanging with a two-point contact situation instead of negotiating the curve using the wheel conicity. The flanging is the result of bogie warping, which increases the angle of attack compared to a radial position. In the article a number of different designs are discussed. Among others it is concluded that a bogie design with radial arms significantly reduces the angle of attack and the wear number in curves, see <ref type="figure" target="#fig_1">figure 20</ref>. Berghuvud [64] investigated the curving behaviour of different types of three-piece bogie with and without braking. He concluded that the influence of braking on the curving behaviour is complex. Braking can have a positive effect on the angle of attack of the wheelsets in a curve since it helps to overcome the static friction in the primary suspension. It can also increase the angle of attack if large longitudinal forces push the wheelset longitudinally towards the limit of the play and thus lock the wheelset in an unfavourable position.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3.1">Vehicle Resistance</head><p>Radially steering bogies do not only reduce flange wear in curves but also reduce the required traction energy. The inner leading wheel is less affected and the trailing wheelset has much smaller values. With radial steering, ( <ref type="figure" target="#fig_1">figure 22</ref>) the leading axle also has very small creepages. This results in lower wear and running resistance. As a result on track with tight curves more than 20% of the overall running resistance can be reduced with similar levels of energy saving <ref type="bibr" target="#b65">[66]</ref>.</p><p>Of course radial steering may affect running stability on straight track. Therefore bogie designs with cross anchors such as the TVP 2007 or the Leila bogie have an advantage over individual radial steering axles as in the swing hanger bogie.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3.2">Influence of curving on wheel and rail damage phenomena</head><p>As mentioned in the introduction to this section the curving performance of a freight wagon is very important for the level of wheel and rail damage. This means in turn that the vehicle track interaction in curves determines to a large extent the maintenance cost for the whole system. In <ref type="bibr" target="#b65">[66]</ref> Fröhling discusses the influence of, among others, bogie design, bogie maintenance and the wheel/rail interface in heavy haul operation on different damage phenomena on wheels and rails. In a later publication Fergusson et al <ref type="bibr" target="#b67">[67]</ref> present an analysis of wheel wear as a function of the relationship between the lateral and longitudinal primary suspension stiffness and the coefficient of friction at the centre plate between the wagon body and the bolster to minimise the wheel wear rate of a self-steering three-piece bogie without compromising vehicle stability. Simulation results indicate that wheel wear is theoretically the lowest for low lateral and longitudinal primary suspension stiffness and no friction at the centre plate. Casanueva et al <ref type="bibr" target="#b68">[68]</ref> extend the wear prediction methodology for freight wagons to also include switches and crossings. It is concluded that wear on some parts of the wheel profile can only be explained with running through switches.</p><p>Tunna and Urban <ref type="bibr" target="#b69">[69]</ref> carried out a parametric study to quantify the effects of various freight vehicle parameters on the generation of RCF. Three different freight suspensions wer considered: an enhanced three-piece bogie, a rigid-frame bogie with primary suspension, and a two-axle vehicle with leaf springs. Simulations were performed for track curvature ranging from 400 to 10 000 m. To judge the generation of RCF the Tgamma model from Burstow <ref type="bibr" target="#b70">[70]</ref> was used. It is stated that parameters that clearly need to be considered when evaluating rail surface damage are curve distribution, track quality, conicity, vehicle type and loading state of the wagon. Since several parameters are line dependent it is concluded that a route based analysis is necessary.</p><p>In <ref type="bibr" target="#b71">[71]</ref> a simulation model of an iron ore wagon with three-piece bogie is developed to investigate the risk of RCF on the Swedish and Norwegian iron ore line. 43 load cases with various conditions were used as inputs. The risk for RCF was estimated with the so-called shakedown map. The wear number, which is the product of creepages and creep forces, was calculated to estimate where initiated cracks develop or are worn away. In <ref type="figure" target="#fig_1">figure 23</ref> areas on the wheel profile with high risk of RCF can be seen. The area on the wheel tread coincides very well with field observations of RCF but the areas in the flange root and on the flange did not show RCF damage. It can be concluded that the energy dissipation is high enough to wear away initiated cracks. It seems that simulation of the curving behaviour of freight wagons can provide valuable information about the risk of wheel damage for specific operating conditions.</p><p>In <ref type="bibr" target="#b71">[71]</ref> a simulation by Dukkipati and Dong examine the effects of a freight wagon running over a dipped joint. In a very recent paper Wang and Gao investigate the wheel wear of a freight vehicle with three-piece bogie in curves <ref type="bibr" target="#b99">[99]</ref>. It is shown that wear is most severe on the outer leading wheel in the bogie. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.4">Parameter identification</head><p>The establishment of the correct parameters for use in computer models is clearly of great importance. Some parameters can easily be measured or provided by the manufacturers but others are very difficult to establish. Ren et el <ref type="bibr" target="#b74">[74]</ref> demonstrate the use of a test rig with a sliding plate underneath one wheelset to establish key parameters. The sliding plate is moved with actuators and forces measured to allow the lateral, shear and warp stiffness to be established as well as the friction characteristics of the bogie.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4">Modern Developments</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.1">The British Rail HSF Bogies</head><p>Wickens and colleagues at British Rail Research carried out theoretical and practical work aimed at understanding the dynamic performance of two axle freight vehicles <ref type="bibr" target="#b75">[75]</ref>, <ref type="bibr" target="#b76">[76]</ref>. The aim was to increase the operating speed of freight vehicles and reduce the rate of derailments. A series of experimental two axle vehicles were constructed to confirm the results of the analysis. They included coil springs and viscous dampers and longitudinal rods to control yaw motion and were initially tested on a full size roller rig.</p><p>Computer simulations of curving and stability were carried out with various damper configurations and on-track tests of several prototypes were undertaken</p><p>The result of this work was the prototype 'HSFV.4' high speed freight vehicle with viscous damping ( <ref type="figure" target="#fig_1">figure 24)</ref> which was tested at speeds of up to 120 km/h and proved to run without hunting for a wide range of effective conicity values. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2">The Unitruck running gear</head><p>The Unitruck single-axle running gear with lateral "swing hangers" was first developed for the American market and in the 1990's adjusted to suit European conditions. Vehicles with Unitruck running gear <ref type="bibr" target="#b76">[76]</ref> are today used both in North America and Europe. They have only one stage suspension, which also includes friction damping. As in the Y25 bogie, the vertical force in the primary suspension is used to preload the different friction components via an inclined surface. <ref type="figure" target="#fig_1">Figure 25</ref> left shows the wedge element, which is in series with one of the coil springs and in contact with the carbody via an inclined friction surface; the vertical surface in contact with the saddle is also a friction surface. Newer designs have substituted the inclined friction surface by a roller (figure 25 left) <ref type="bibr" target="#b77">[77]</ref>, thus enabling the displacement in the longitudinal direction, but reducing longitudinal damping. Also, adding a coupling plate in the centre of the coil springs increases longitudinal stiffness <ref type="figure" target="#fig_1">(Figure 25</ref> right), which improves critical speed compared to the running gear with rollers and classic coil springs. The 'Swing Motion' bogie ( <ref type="figure" target="#fig_1">figure 26</ref>) is a variant of the three-piece freight bogie and was originally developed for heavy haul operations in North America. In the Swing Motion design an additional cross member or transom is included which connects the two side frames together via pivots at the base of the secondary spring pack. The bolster still sits on the top of the spring packs and is damped through friction wedges. A pivot between the axle boxes and the side frames is also included so that the side frames can pivot or swing to accommodate lateral motion of the bolster. The swing motion gives increased lateral stability at speeds up to 176 km/h and is claimed to reduce wheel and rail wear, reduce rolling resistance and forces on track and vehicle body compared with standard three-piece bogies.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.4">The 'LTF' bogie</head><p>In the 1980s British Rail Research in the UK developed a novel, track friendly bogie using passenger vehicle technology. The LTF25bogie is shown in <ref type="figure" target="#fig_1">figure 27</ref> and is described in <ref type="bibr" target="#b79">[79]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Figure 27: The 'LTF25' bogie</head><p>The LTF25 bogie was specifically designed to reduce dynamic track forces and as part of this effort was made to reduce the unsprung mass. Small wheels (813 mm diameter) were used and inside axle boxes giving a 30% reduction in wheelset mass although this necessitated the use of on-board hotbox detectors.</p><p>Primary suspension is through steel coil springs and secondary suspension is through rubber spring elements and hydraulic dampers.</p><p>The high cost of the LTF25 bogie and concerns about axle fatigue with inboard axle boxes militated against its adoption but Powell Duffryn produced a modified version of the bogies known as the TF25 bogie (shown in <ref type="figure" target="#fig_1">figure 28</ref>) which has achieved considerable production success. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.5">The 'Gigabox' bogie</head><p>The 'Gigabox'bogie uses pedestal units containing progressive rubber springs with integral hydraulic damping as shown in figures 29 and 30). The system was developed by ContiTec and SKF and is claimed not to require maintenance for up to 1million km and to provide good noise and vibration isolation. A reduction of up to 20% in lateral forces is claimed as well as a 2 dB reduction in noise. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.6">The Double Rubber Ring Spring (DRRS) bogie</head><p>Originally designed by Talbot the DRRS bogie uses double rubber torroidal ring springs with load proportional friction damping as shown in <ref type="figure" target="#fig_0">figure 31</ref>. Container wagons with DRRS bogies entered service with the DB 'Inter Cargo Express- System'. Maximum axle-load ranges from 22.5 t at 100 km/h to 18.375 t at 160 km/h. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.7">Advances in three-piece bogies</head><p>The major drivers for advances of AAR three-piece bogies were tightening ride performance and track impact standards, such as M-1001 <ref type="bibr" target="#b79">[79]</ref> and M-976 <ref type="bibr" target="#b80">[80]</ref>, since 2000.</p><p>An overview of improvements in the suspensions is given in <ref type="bibr" target="#b82">[81]</ref>. Suspension springs tend to increase the deflection. Using higher control springs under the wedges increases friction under the empty wagon thus providing its better stability, and makes damping less dependent on the wear of wedges themselves. Different height of the inner and outer springs allows having lower lateral stiffness of the suspension under the empty wagon, thus improving its running performance. Using the set of 9 double springs per each side of the bogie increases warping resistance.</p><p>The innovative designs of the wedges are shown in <ref type="figure" target="#fig_1">figure 32</ref>. Both designs aim to increasing the warping resistance of the bogie. The split wedge consists of two symmetric parts inclined towards each other and interacts with the spatial insert in the bolster pocket. In the spatial wedge the surfaces are inclined in the other direction and they are wider than the vertical surface, which gives the same effect. In the interaction between the side frame and the wheelset axle various elastic components are introduced to reduce unsprung mass as well as to reduce resistance to wheelset displacement in plane, thus reducing the lateral track forces. Some of the designs of elastic shear pads are shown in <ref type="figure">figure 33</ref>.  The rigid side bearings with clearances have transformed in modern three-piece bogies into constant contact side bearings, incorporating the elastic element compressed by the weight of the car body, <ref type="bibr" target="#b83">[82]</ref>. Examples of the design are shown in <ref type="figure" target="#fig_3">figure 34</ref>. Constant contact side bearings provide yaw damping for the bogies on straight track, as well as additional car body roll resistance for better curving performance. The rollers positioned with a clearance provide rigid bumpstop that limits the elastic element deflection without increasing the yaw resistance. There are several devices used to increase warping stiffness of three-piece bogies, the most common of which is using cross-braces between the side frames shown in <ref type="figure" target="#fig_4">figure  35</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Cap</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Elastic element</head><p>Cage Wear resistant element</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Insert</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Roller</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Cap</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Elastic element</head><p>Cage 1 - top brace; 2 - bottom brace; 3 - bolt; 4 - washer; 5 - nut; 6 - fastening unit; 7 - rings; 8 - locking plate; 9 - washer; 10 - bolt; 11 - elastic pad; 12 - safety wire; 13, 14 - bracket; 15, 16, 17 - plate; 18 - key <ref type="figure" target="#fig_4">Figure 35</ref> Cross-braces between side frames.</p><p>Using the concept of shear and bending stiffness of the bogie Scheffel <ref type="bibr" target="#b84">[83]</ref>, developed several novel designs of three-piece bogies (figure 36). At first the horizontal motion of the frame is decoupled from the wheelsets by horizontally soft primary suspension. Then the axle boxes are interconnected through sub-frames or arms by elastic elements that support their radial position in curves, but resist in-phase yaw <ref type="bibr" target="#b85">[84]</ref>. Scheffel bogies having the axle load of 32 t provide mileage between wheel turning of up to 1.5 million kilometres thus proving the high efficiency of the design to reduce track forces.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.8">The Lenoir pusher spring</head><p>Various alternatives to the double Lenoir linkage have been explored with the aim of providing reduced longitudinal stiffness at low cost. One example is the 'Lenoir pusher spring' which consists of a plunger and washer springs mounted opposite the Lenoir pusher ( <ref type="figure" target="#fig_32">figure 37</ref>). This allows more longitudinal motion than the conventional Piotrowski <ref type="bibr" target="#b87">[86]</ref> reports how this arrangement has been shown to give good performance in a prototype vehicle with significant reductions in wheel wear.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.9">The RC25NT Bogie</head><p>Eisenbahn Laufwerke Halle (Germany) has developed the RC25NT self-steering three- piece bogie with direct inter-axle linkages which was presented at the Innotrans exhibition in 2010) <ref type="bibr">[87]</ref> ( <ref type="figure" target="#fig_2">figure 38</ref>). The bogie has horizontally soft rubber bushes in the primary suspension and flexicoil dual rate springs with friction damping in the secondary suspension. The bogie is equipped with disk brakes. The aim of the development was to build a bogie capable of stable running up to 120 km/h, keeping low noise criteria and negotiating curves with minimum of wear. The bogie is designed to replace the Y25 type bogie without changes to the wagon body.</p><p>Simulations have shown that the RC25NT provides better stability on straight track than the Y25 (figure 39) and less wheel and rail wear in curves ( <ref type="figure" target="#fig_3">figure 40</ref>). The bogie was tested according to the UIC 518 standard in Sweden in 2010 for speeds up to 160 km/h. The RC25NT demonstrates that direct inter-axle linkages can allow freight car bogies to run at 120 km/h with proper steering and low wear in curves. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.10">The 'LEILA' Bogie</head><p>The LEILA bogie ('LEIchtes und LärmArmes GüterwagenDrehGestell' with the meaning of light and low noise freight bogie) is a passive radial steering bogie with a maximum axle load of 22.5 t and was developed between 2000 and 2005 during a German and Swiss research project <ref type="bibr" target="#b88">[88]</ref>. The Institute of Rail Vehicles of the Technische Universität Berlin was one of the involved partner. The aim to develop this bogie was:</p><p> to reduce the noise emissions of freight wagons;  to reduce the mass of a bogie to be under 4 t and  to reduce significantly wear and running resistance.</p><p>In addition:</p><p> the reliability and availability of freight wagons;  transparency in the transport chain;  the active and passive safety of the freight traffic and;  the transport velocity should be similarly increased <ref type="bibr" target="#b89">[89]</ref>. The primary layer consists of rubber springs and the load dependent stiffness characteristics are separated in vertical and horizontal working components. The bogie has passive radial steering technology of the wheelsets. Wheelsets are able to rotate about the vertical axis without any external energy but only by the roll radius difference between the inner and outer wheel. Both wheelsets are connected with cross anchors; mounted on opposite axle boxes. The secondary layer is defined UIC centre of pivot and side bearer (latter guarantees the exchangeability to Y25 bogies). In addition, the centre of pivot has an elastically bearing using a secondary rubber spring. The LEILA bogie prototype was examined during various field tests where it demonstrated its advantages compared to a Y25 bogie. The noise emissions were reduced up to 18 dB(A) compared to a Y25 bogie with cast iron brake blocks and up to 8 dB(A) compared to a Y25 bogie with composite blocks (k- blocks). But the bogie failed at that time to enter the market. During the very good ongoing homologation process the producer of the bogie decided to stop the production of new freight wagons and bogies. Therefore the homologation was stopped and not finished just for commercial reasons. Right now as more and more EMUs are produced with inner bearings it is expected that the acceptability of inner bearing bogies with the advantages less weight and lower forces at the axles in curves will be more acceptable.  As with the Leila bogie the cross anchor couples the two axles so that they turn with a phase shift of 180°. This stabilizes the radial steering effect even when the wheel-rail contact is not perfect and the second very important effect is dynamic stabilisation without yaw dampers for high speed straight track running. On curvy track significant flange and running surface wear reduction and also significant reduction of the running resistance occur.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.12">The SUSTRAIL Bogie</head><p>The aim of the SUSTRAIL project is to promote modal shift of freight in Europe from road to rail. The SUSTRAIL project intends to provide the approach, structure, and technical content to support this modal shift through improvements in the railway freight system including innovations in rolling stock in track components. The project includes workpackages focused on market research, vehicles, infrastructure and assessment of cost benefits. The work described here is part of workpackage 3: 'The freight vehicle of the future'.</p><p>The main scientific and technological innovations being considered for the SUSTRAIL freight vehicle are:</p><p> The development of advanced vehicle dynamics concepts based on new wheel profiles and improvements in suspension design responding to the needs of a mixed traffic railway;  Developments in the traction and braking systems for high speed low impact freight operation;  Novel designs and materials for lightweight high performance freight wagon body vehicles and bogie structures;  Advanced condition based predictive maintenance tools for critical components of both railway vehicles and the track;  Identification of performance based design principles to move towards the zero maintenance ideal for the vehicle/track system.</p><p>Partners in the project have carried out a technology review to identify the potential innovative technologies to meet the above requirements and the results have been ranked and two concept vehicles are being designed. The 'Conventional' vehicle will use optimised existing technology and a demonstrator for this is being built as part of the project. The 'Futuristic' vehicle will utilise technology which has not yet been proven in the railway field but has potential to make greater improvements.</p><p>Simulations have been carried out of the dynamic behaviour of the concept design vehicles running on typical track in tare, part laden and fully laden cases. In line with the target of a 50% reduction in lateral forces on the track and stable running at 140 km/h a suspension using double Lenoir linkages, longitudinal linkages between axle boxes and centre pivot suspension has been selected. Computer simulation has been used to optimise the suspension and to select suitable parameters for the various components. Assessment of the results is based on:</p><p> Stability: stable running on typical European track at the design speed of 140km/h must be ensured and ride quality (vertical lateral and longitudinal accelerations experienced by the goods transported) will be assessed.  Reduced track forces: track geometrical deterioration (ballast settlement and horizontal level, alignment and buckling), rail surface damage (wear, rolling contact fatigue -RCF) and track components damage (sleeper cracking, rail pad deterioration, rail fatigue, fastening deterioration) will all be assessed.</p><p>A benchmark vehicle has been selected based on a Y25 bogie and flat bed wagon and has been used to allow quantification of the benefits of the new design.</p><p>A number of radical innovations were considered during the technology review stage of the project but it was decided that the use of double Lenoir link primary suspension as in the Y37 series of bogies (figure 44), would be investigated. The double Lenoir link suspension provides much lower longitudinal primary stiffness while still utilising standard components and methods which are well established within the railway industry. this work A model of the SUSTRAIL vehicle was set up with double Lenoir links using the computer simulation tool Gensys and the influence of variations in the suspension parameters on the critical speed of the wagon was simulated. Straight track was used for this simulation and an initial lateral disturbance was introduced followed by ideal track with no irregularities. Axle load is 22.5 t, wheel profile is S1002 and rail profile UIC60 inclined at 1:40. The wheel rail coefficient of friction is set at 0.35. The wagon speed was reduced from an initial 170 km/h and critical speed assumed to have been reached when the track shifting force (∑ ) drops below 2.5 kN. An example is shown in <ref type="figure" target="#fig_3">figure 46</ref>.   Further variations were carried out and the effect of the friction coefficient and stiffness within the suspension on the maximum contact force is shown in <ref type="figure" target="#fig_3">figure 49</ref>. <ref type="figure" target="#fig_3">Figure 49</ref>: The effect of friction coefficient and spring stiffness on the contact force It can be seen that the maximum vertical contact forces tends to increase with the damping and with the spring stiffness. In order to improve the running behavior of the SUSTRAIL vehicle it was decided to assess the benefit of linkages provividing longitudinal stiffness between the axleboxes using a radial arm. A radial arm designed by <ref type="bibr">Scheffel [90]</ref> was studied previously in the Infra-Radial project <ref type="bibr" target="#b91">[91]</ref> which aimed to develop a bogie for heavy haul vehicles (axle loads over 25T) with reduced life cycle costs. Tests using the radial arm with four different primary suspension types showed good results with stable running and radially aligned wheelsets in curves. Wear of the wheels was seen to reduce significantly <ref type="bibr" target="#b91">[91]</ref>. In the work reported here simulation was carried out using MEDYNA for the SUSTRAIL vehicle with double Lenoir links and modified radial arms. Simulations have confirmed that the radial arm should provide lateral stiffness between the wheelsets and optimised parameters have been defined. A prototype of the SUSTRAIL freight vehicle is being constructed by REMARUL engineering. In addition to Vertical coils spring stiffness <ref type="bibr">[%]</ref> the innovative suspension described in this paper the SUSTRAIL vehicle will have disk brakes with an electronic control system. The bogie design is shown in <ref type="figure" target="#fig_4">figure 50</ref>. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Longitudinal dynamics</head><p>The longitudinal dynamic behaviour of railway vehicles is often neglected as the link to the vehicle track interaction is generally not significant and it has been common to assume that all vehicles of the same type in a train will behave identically. In heavy haul freight applications however where long trains are common the effect of longitudinal dynamics can become significant. In <ref type="bibr" target="#b71">[71]</ref> for example Qi et al model the longitudinal behaviour of a long train including traction and braking and the coupling between vehicles. Belforte et al <ref type="bibr" target="#b93">[93]</ref> also analyse the effects of severe traction and braking forces on longitudinal dynamics.</p><p>There are several areas where longitudinal dynamics can interact with the general vehicle dynamics. These include:</p><p> Wheel unloading on curves due to lateral components of coupler forces;  Wagon body pitch due to coupler impact forces and  Bogie pitch due to coupler impact forces Cole <ref type="bibr" target="#b94">[94]</ref> describes how these effects can be assessed in different cases and McClanachan <ref type="bibr" target="#b95">[95]</ref> and El Sibaie <ref type="bibr" target="#b96">[96]</ref> present results of computer simulations including coupler models.</p><p>Freight vehicles have to provide satisfactory performance at low cost in tare and laden condition on varying track quality. This has resulted in several standard designs including the Y25 and the three-piece bogie. These designs use friction damping proportional to the vehicle mass to provide good dynamic performance at all loading conditions. In recent years vehicle designers have tried to improve on the dynamic performance of freight wagons and the use of computer tools have helped to overcome the compromise between good curving performance and stability at higher speeds. This has resulted in a number of innovative designs with demonstrable performance improvements but it is notable that few of these have yet to make significant impact in the worldwide freight train fleets.</p><p>A key reason for this lack of adoption is probably the innately conservative nature of the railway industry. Of course this often has a sound basis in, for example, the benefit of using standard components which allow effective maintenance of widely dispersed fleets of vehicles but in order to allow the benefits of the innovative techniques and designs summarised in this paper it is time to reconsider the design of freight vehicles. This could allow increases in speed with lower impact on track and environment and a resulting step change in performance of the railway system. One encouraging sign is the establishment in some countries of track access charging which benefits the use of vehicles with 'track friendly' suspension. Together with emerging legislation and growing pressures on system capacity it is likely that the demand for freight vehicles with higher dynamic performance will climb rapidly.</p><p>Rail freight only can contribute in mitigating the environmental impacts of transportation if the knowledge and todays experience for innovative products is used. Some basic thoughts can be found here and in <ref type="bibr" target="#b97">[97]</ref>. Optimising performance through the development of innovative products is to be planned and procured carefully. This paper has demonstrated that freight vehicle designers have innovative designs of running gear and computer simulation tools ready for this challenge.</p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head>Figure 1 :</head><label>1</label><figDesc>Figure 1: Freight wagon from Kockums Sweden, built in 1882 [4].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Figure 2 :</head><label>2</label><figDesc>Figure 2: UIC double link suspension.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Figure 3 : Double link suspension [ 8 ]. Parts of double link (a), assembled double link (b) and mounted double link (c).</head><label>38</label><figDesc>Figure 3: Double link suspension [8]. Parts of double link (a), assembled double link (b) and mounted double link (c).</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Figure 4 :</head><label>4</label><figDesc>Figure 4:. DB bogie Type 931 [7].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_4"><head>Figure 5 :</head><label>5</label><figDesc>Figure 5: DB bogie Type 665 [7].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_5"><head>Figure 7 : Model 18- 100 bogie: a - general view, b - central suspension scheme, c - primary 'suspension' scheme ( 1 - wheelset; 2 - side frame; 3 - bolster; 4 - braking leverage; 5 - central pivot; 6 - rigid side bearings; 7 - suspension springs; 8 - friction wedge; 9 -</head><label>7100123456789</label><figDesc>Figure 7: Model 18-100 bogie: a-general view, b-central suspension scheme, cprimary 'suspension' scheme (1-wheelset; 2-side frame; 3-bolster; 4-braking leverage; 5-central pivot; 6-rigid side bearings; 7-suspension springs; 8friction wedge; 9-axle-box)</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_7"><head>Figure 8 : Force-displacement curve of Coulomb friction model (left) and Coulomb model with spring in series as in [ 29 ]</head><label>829</label><figDesc>Figure 8: Force-displacement curve of Coulomb friction model (left) and Coulomb model with spring in series as in [29] (right).</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_8"><head>Figure 9 : Friction element with spring in series.</head><label>9</label><figDesc>Figure 9: Friction element with spring in series.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_10"><head>Figure 10 : Typical force-displacement diagram of leaf spring/link suspension. Example of curve for small displacements around static equilibrium.</head><label>10</label><figDesc>Figure 10: Typical force-displacement diagram of leaf spring/link suspension. Example of curve for small displacements around static equilibrium.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_11"><head>Figure 11 : Model for leaf spring or link suspension as used for example by KTH [ 40 ]. See figure 10 for definition of k1 and k2.</head><label>114010</label><figDesc>Figure 11: Model for leaf spring or link suspension as used for example by KTH [40]. See figure 10 for definition of k1 and k2.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_12"><head>Figure 12 Model for bumpstop element (∆ - clearance, - stiffness of the bumpstop)</head><label>12</label><figDesc>Figure 12 Model for bumpstop element (∆-clearance,-stiffness of the bumpstop)</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_13"><head>Figure 13 Model for center plate element (∆ - distance between center plate edge and car body center of gravity, - roll angle, - weight of the car body per one center plate, - roll torque, - equivalent roll stiffness)</head><label>13</label><figDesc>Figure 13 Model for center plate element (∆-distance between center plate edge and car body center of gravity,-roll angle,-weight of the car body per one center plate,-roll torque,-equivalent roll stiffness)</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_14"><head>Figure 15 : Procedure to find the non-linear critical speed [ 60 ].</head><label>1560</label><figDesc>Figure 15: Procedure to find the non-linear critical speed [60].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_15"><head>Figure 16 : Bifurcation diagram for a loaded two-axle vehicle with link suspension ( 21 t axle load) Wheel: somewhat worn S1002. Rail: Nominal UIC60 [ 42 ].</head><label>162142</label><figDesc>Figure 16: Bifurcation diagram for a loaded two-axle vehicle with link suspension (21 t axle load) Wheel: somewhat worn S1002. Rail: Nominal UIC60 [42].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_16"><head>Figure 17 .</head><label>17</label><figDesc>shows attractors for two different types of freight wagons. The results are in principle quite similar to those in figure 16.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_17"><head>Figure 17 : Attractors for the Hbbills 311 and the G69 freight wagons. The model with the measured characteristics of the UIC links is damping less than the model with the cylindrical characteristics. The hunting attractor exists even for low speeds [61].</head><label>17</label><figDesc>Figure 17: Attractors for the Hbbills 311 and the G69 freight wagons. The model with the measured characteristics of the UIC links is damping less than the model with the cylindrical characteristics. The hunting attractor exists even for low speeds [61].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_18"><head>Figure 18 Map of lateral oscillation amplitude in single wagon as function of curve radius [62].</head><label>18</label><figDesc>Figure 18 Map of lateral oscillation amplitude in single wagon as function of curve radius [62].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_19"><head>Figure 19 : Energy dissipation. Comparative simulation with and without track irregularities. Two-axle vehicle with link suspension. 22 . 5 t axle load [ 42 ].</head><label>1922542</label><figDesc>Figure 19: Energy dissipation. Comparative simulation with and without track irregularities. Two-axle vehicle with link suspension. 22.5 t axle load [42].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_20"><head>Figure 20 : Angle of attack (a) and wear number (b) for wagons in a curve of 200 m radius at 60 km/h with 18- 100 bogies respectively bogies with radial arm upgrade [ 15 ].</head><label>2010015</label><figDesc>Figure 20: Angle of attack (a) and wear number (b) for wagons in a curve of 200 m radius at 60 km/h with 18-100 bogies respectively bogies with radial arm upgrade [15].</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_21"><head>Figure 21 : Y25 bogie running in a 300m curve Wheel slip lateral and longitudinal at all wheel rail contact points, 90 t tank car with a Y25-Bogie in a 300 m curve, speed 80 km/h, lateral acceleration aq= 0, 67 m/s², s1002 Wheel profile, UIC 60E1, 1 Figure 22 : Radially steered bogie running in a 300 m curve Wheel slip lateral and longitudinal at all wheel- rail contact points, 90 t tank car with a Leila-Bogie in a 300 m curve, speed 80 km/h, lateral acceleration aq= 0, 67 m/s², s1002 Wheel profile, UIC 60E1, 1</head><label>21903006712230090300671</label><figDesc>Figure 21: Y25 bogie running in a 300m curve Wheel slip lateral and longitudinal at all wheel rail contact points, 90 t tank car with a Y25-Bogie in a 300 m curve, speed 80 km/h, lateral acceleration aq= 0,67 m/s², s1002 Wheel profile, UIC 60E1, 1:40 rail inclination</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_22"><head>Figure 23 : Calculated RCF positions of the wheel with corresponding average wear number. The far-left line is also reported as the observed approximate location for RCF initiation.</head><label>23</label><figDesc>Figure 23: Calculated RCF positions of the wheel with corresponding average wear number. The far-left line is also reported as the observed approximate location for RCF initiation.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_23"><head>Figure 24 :</head><label>24</label><figDesc>Figure 24: The HSFV.1 experimental freight wagon</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_24"><head>Figure 25 :</head><label>25</label><figDesc>Figure 25: Unitruck running gear (left) and modifications for improving curving behaviour (right).</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_25"><head>Figure 28 :</head><label>28</label><figDesc>Figure 28: The TF25 bogie</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_26"><head>Figure 29 : The Gigabox bogie Figure 30 :</head><label>2930</label><figDesc>Figure 29: The Gigabox bogie</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_27"><head>Figure 31 : The DRRS bogie and cross section</head><label>31</label><figDesc>Figure 31: The DRRS bogie and cross section</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_28"><head>Figure 32 :</head><label>32</label><figDesc>Figure 32: Split wedge (left) and spatial wedge (right).</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_30"><head>Figure 33 : Adapter Plus ® by Amsted (left) and layered shear pad in Russian 18- 9800 bogie (right).</head><label>339800</label><figDesc>Figure 33: Adapter Plus ® by Amsted (left) and layered shear pad in Russian 189800 bogie (right).</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_31"><head>Figure 34 : Constant contact side bearing with springs (left) and with non-metal element and roller (right).</head><label>34</label><figDesc>Figure 34: Constant contact side bearing with springs (left) and with non-metal element and roller (right).</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_32"><head>Figure 37 :</head><label>37</label><figDesc>Figure 37: The Lenoir pusher spring</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_33"><head>Figure 38 : RC25NT bogie with direct inter-axle linkages Figure 39 : Simulation stability results for RC25NT bogie vs. Y25 bogie (upper figure = high conicity, lower figure = low conicity)Figure 40 : Simulated wear number for RC25NT bogie vs. Y25 bogie</head><label>383940</label><figDesc>Figure 38: RC25NT bogie with direct inter-axle linkages</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_34"><head>Figure 41</head><label>41</label><figDesc>Figure 41 and 42 show the main components of this bogie. Compared to the standard bogies such as Y25, the LEILA bogie has inner bearings. The resulting better force flow lead to a weight reduction of the bogie frame and wheelset resulting in an overall weight reduction of 750 kg per bogie compared to Y25 bogie. At the web of the wheels (diameter: 920 mm), disc brakes are mounted. The primary layer consists of rubber springs and the load dependent stiffness characteristics are separated in vertical and horizontal working components. The bogie has passive radial steering technology of the wheelsets. Wheelsets are able to rotate about the vertical axis without any external energy but only by the roll radius difference between the inner and outer wheel. Both wheelsets are connected with cross anchors; mounted on opposite axle boxes. The secondary layer is defined UIC centre of pivot and side bearer (latter guarantees the exchangeability to Y25 bogies). In addition, the centre of pivot has an elastically bearing using a secondary rubber spring. The LEILA bogie prototype was examined during various field tests where it demonstrated its advantages compared to a Y25 bogie. The noise emissions were reduced up to 18 dB(A) compared to a Y25 bogie with cast iron brake blocks and up to 8 dB(A) compared to a Y25 bogie with composite blocks (kblocks). But the bogie failed at that time to enter the market. During the very good ongoing homologation process the producer of the bogie decided to stop the production of new freight wagons and bogies. Therefore the homologation was stopped and not finished just for commercial reasons. Right now as more and more EMUs are produced with inner bearings it is expected that the acceptability of inner bearing bogies with the advantages less weight and lower forces at the axles in curves will be more acceptable.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_35"><head>Figure 41 : Main components of LEILA bogie [ 88 ] Figure 42 : Leila Bogie from beneath with the inner bearings, cross anchor and wheel disc brakes clearly visible 4 .</head><label>4188424</label><figDesc>Figure 41: Main components of LEILA bogie [88]</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_36"><head>Figure 43 : TVP2007 bogie by Tatravagónka a.s.</head><label>43</label><figDesc>Figure 43: TVP2007 bogie by Tatravagónka a.s.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_37"><head>Figure 44 :</head><label>44</label><figDesc>Figure 44: A suspension with double Lenoir links</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_38"><head>Figure 46 : A sample simulation results showing the establishment of the critical speed for the SUSTRAIL vehicle with double Lenoir links</head><label>46</label><figDesc>Figure 46: A sample simulation results showing the establishment of the critical speed for the SUSTRAIL vehicle with double Lenoir links</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_39"><head>Figure 47 :</head><label>47</label><figDesc>Figure 47: The effect of Lenoir link angle, length and friction coefficient on the critical speed of the SUSTRAIL vehicle</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_40"><head>Figure 48 : Maximum vertical force on the rail for the SUSTRAIL vehicle running at 120 km/h</head><label>48</label><figDesc>Figure 48: Maximum vertical force on the rail for the SUSTRAIL vehicle running at 120 km/h</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_41"><head>Figure 50 :</head><label>50</label><figDesc>Figure 50: The prototype SUSTRAIL freight bogie</figDesc></figure>
+
+			<note place="foot" n="1">-side frame; 2-bolster; 3-wheelset; 4-primary suspension; 5-elastic connection between sub-frames Figure 36: Scheffel HS bogie (left) and bogie retrofitted with Radial Arm design (right).</note>
+		</body>
+		<back>
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">European freight vehicle running gear: today&apos;s position and future demands</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="middle">M</forename><surname>Hecht</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">PartF, Journal of Rail and Rapid Transit</title>
+		<imprint>
+			<biblScope unit="volume">215</biblScope>
+			<biblScope unit="page" from="1" to="11" />
+			<date type="published" when="2001" />
+		</imprint>
+	</monogr>
+	<note>Proc. Of the Inst. Of Mech. Engrs.</note>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">White Paper-Roadmap to a Single European Transport Area-Towards a competitive and resource efficient transport system</title>
+	</analytic>
+	<monogr>
+		<title level="j">European Commission</title>
+		<imprint>
+			<biblScope unit="volume">144</biblScope>
+			<date type="published" when="2011-03-28" />
+		</imprint>
+	</monogr>
+	<note>COM</note>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<monogr>
+		<title level="m" type="main">Freight Wagon Running Gear-a review, KTH Railway Division</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P.-A</forename><surname>Jönsson</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2002" />
+			<pubPlace>Stockholm</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<monogr>
+				<title level="m">Swedish: Järnvägsfordon från Kockums), Kockums industrier</title>
+		<meeting><address><addrLine>Malmö, Sweden, Pamphlet</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1995" />
+		</imprint>
+	</monogr>
+	<note>Railway vehicles from Kockums</note>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<monogr>
+				<title level="m">UIC Code 517. Wagons-Suspension gear (Standardisation)</title>
+		<imprint/>
+	</monogr>
+	<note>6th edition 1-7-79. Reprint 1-1-89. incorporating 8 amendments</note>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<monogr>
+		<title level="m" type="main">Laufwerkskonstruktion und Erhöhung der Radsatzlasten im Güterverkehr. ZEV-Glasers Annalen 107</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T</forename><surname>Madeyski</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1983" />
+			<biblScope unit="page" from="139" to="147" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L</forename><surname>Müller</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><surname>Niedermeyer</surname></persName>
+		</author>
+		<title level="m">Weiterentwickelte Güterwagendrehgestelle der Deutschen Bundesbahn für 22.5 t Radsatzlast-wieder nach dem Lenkachsenprinzip. ZEV-Glasers Annalen</title>
+		<imprint>
+			<date type="published" when="1987" />
+			<biblScope unit="volume">111</biblScope>
+			<biblScope unit="page" from="188" to="196" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Dynamic analysis of a freight car with standard UIC single-axle running gear</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>Lange</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">KTH Railway Technology</title>
+		<imprint>
+			<biblScope unit="page">34</biblScope>
+			<date type="published" when="1996" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<monogr>
+		<title level="m" type="main">Running behavior of railway freight wagon with single axle running gear</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+		<idno>1998:40</idno>
+		<imprint>
+			<date type="published" when="1998" />
+			<publisher>KTH</publisher>
+		</imprint>
+		<respStmt>
+			<orgName>Division of Railway Technology</orgName>
+		</respStmt>
+	</monogr>
+<note type="report_type">TRITA-FKT Report</note>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<monogr>
+		<title level="m" type="main">How to improve the running behavior of freight wagons with UIC-link suspension. Vehicle System Dynamics Supplement 33</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1999" />
+			<biblScope unit="page" from="394" to="405" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<monogr>
+		<title level="m" type="main">Running behavior of freight wagons with link bogies. TRITA-FKT Report 1999:12, Division of Railway Technology</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1999" />
+			<publisher>KTH</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<monogr>
+		<title level="m" type="main">Neue Erkenntnisse über das Verschleissverhalten von Güterwagendrehgestellen, ZEV Glasers Annalen 111</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><surname>Specht</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1987" />
+			<biblScope unit="page" from="271" to="280" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<monogr>
+		<title level="m" type="main">Association of American Railroads. Manual of standards and recommended practices. Section D. Trucks and truck details</title>
+		<imprint>
+			<date type="published" when="2010" />
+			<biblScope unit="volume">130</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Bogies two-axle three-piece for freight wagons of 1520 mm gauge railways. General technical specifications</title>
+	</analytic>
+	<monogr>
+		<title level="m">GOST 9246-2013</title>
+		<imprint>
+			<biblScope unit="volume">38</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<analytic>
+		<title level="a" type="main">Refining the wedge friction damper of three-piece freight bogies</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Orlova</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Romen</forename><surname>Yu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">46</biblScope>
+			<biblScope unit="page" from="445" to="455" />
+			<date type="published" when="2008" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Influence of construction schemes and parameters of three-piece freight bogies on wagon stability, ride and curving qualities</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Boronenko</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Orlova</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Rudakova</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">44</biblScope>
+			<biblScope unit="page" from="402" to="414" />
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+	<note>Supplement</note>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<analytic>
+		<title level="a" type="main">Identification of parameters for spatial wedge system implemented in freight bogie design</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Orlova</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 10th mini-conference on Vehicle System Dynamics, Identification and Anomalies. Ed. I. Zobory. ISBN 978 963 420 968</title>
+		<meeting>the 10th mini-conference on Vehicle System Dynamics, Identification and Anomalies. Ed. I. Zobory. ISBN 978 963 420 968<address><addrLine>Budapest</addrLine></address></meeting>
+		<imprint>
+			<publisher>Komaromi Nyomda es Kiado Kft</publisher>
+			<date type="published" when="2008" />
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="page" from="245" to="252" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">A review of modeling methods for railway vehicle suspension components. Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B</forename><forename type="middle">M</forename><surname>Eickhoff</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">R</forename><surname>Evans</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">J</forename><surname>Minnis</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Vehicle Mechanics and Mobility</title>
+		<imprint>
+			<biblScope unit="volume">24</biblScope>
+			<biblScope unit="page" from="469" to="496" />
+			<date type="published" when="1995" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Modelling of suspension components in a rail vehicle dynamics context</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Bruni S</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Vinolas</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Berg</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">O</forename><surname>Polach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Stichel</forename><forename type="middle">S</forename></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">49</biblScope>
+			<biblScope unit="issue">7</biblScope>
+			<biblScope unit="page" from="1021" to="1072" />
+			<date type="published" when="2011" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<analytic>
+		<title level="a" type="main">Modeling and Simulation of Freight Wagon with Special attention to the Prediction of Track Damage</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P-A</forename><surname>Jönsson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Casanueva</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Hossein</forename><surname>Nia</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Railway Technology</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">Modelling friction wedges, Part I: The state-of-the-art</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><forename type="middle">E</forename><surname>Klauser</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of IMECE04 2004 ASME International Mechanical Engineering Congress &amp; Exposition</title>
+		<meeting>IMECE04 2004 ASME International Mechanical Engineering Congress &amp; Exposition<address><addrLine>Anaheim (CA</addrLine></address></meeting>
+		<imprint>
+			<publisher>American Society of Mechanical Engineering</publisher>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<analytic>
+		<title level="a" type="main">A review of dynamics modelling of friction wedge suspensions. Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Q</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Cole</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Spiryagin</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Q</forename><surname>Sun</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Vehicle Mechanics and Mobility</title>
+		<imprint>
+			<biblScope unit="volume">52</biblScope>
+			<biblScope unit="issue">11</biblScope>
+			<biblScope unit="page" from="1389" to="1415" />
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<monogr>
+		<title level="m" type="main">Non-smooth Problems in Vehicle Systems Dynamics</title>
+		<imprint>
+			<date type="published" when="2010" />
+			<publisher>Springer</publisher>
+			<pubPlace>Berlin Heidelberg</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<analytic>
+		<title level="a" type="main">Rail Vehicle Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Anderson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Berg</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">KTH Royal Institute of Technology</title>
+		<imprint>
+			<date type="published" when="2013" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b24">
+	<monogr>
+		<title level="m" type="main">Simulation. In: Iwnicki, editor, Handbook of Railway Vehicle Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">O</forename><surname>Polach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Berg</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Iwnicki</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2006" />
+			<publisher>Taylor &amp; Francis</publisher>
+			<biblScope unit="page" from="359" to="421" />
+			<pubPlace>London</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b25">
+	<analytic>
+		<title level="a" type="main">Modelling of wedge dampers in the presence of two-dimensional dry friction</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">F</forename><surname>Xia</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Vehicle system dynamics</title>
+		<meeting><address><addrLine>Lingby, Denmark</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2003" />
+			<biblScope unit="volume">37</biblScope>
+			<biblScope unit="page" from="565" to="578" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b26">
+	<analytic>
+		<title level="a" type="main">Modeling and Dynamics of Friction Wedge Dampers in Railroad Freight Trucks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">B</forename><surname>Kaiser</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">P</forename><surname>Cusumano</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">F</forename><surname>Gardner</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">38</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="55" to="82" />
+			<date type="published" when="2002" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b27">
+	<analytic>
+		<title level="a" type="main">Multibody simulation of a freight bogie with friction dampers</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Bosso</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Gugliotta</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Soma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Railroad Conference</title>
+		<imprint>
+			<publisher>ASME/IEEE Joint</publisher>
+			<date type="published" when="2002" />
+			<biblScope unit="page" from="47" to="56" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b28">
+	<analytic>
+		<title level="a" type="main">Model of the UIC link suspension for freight wagons</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Piotrowski</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Archive of Applied Mechanics</title>
+		<imprint>
+			<biblScope unit="volume">73</biblScope>
+			<biblScope unit="issue">7</biblScope>
+			<biblScope unit="page" from="517" to="532" />
+			<date type="published" when="2003-12" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b29">
+	<monogr>
+		<title level="m" type="main">Smoothing dry friction damping by dither generated in rolling contact of wheel and rail and its influence on ride dynamics of freight wagons, NVSD</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Piotrowski</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2010-06" />
+			<biblScope unit="volume">48</biblScope>
+			<biblScope unit="page" from="675" to="703" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b30">
+	<analytic>
+		<title level="a" type="main">Equivalent viscous damping models of coulomb friction in multi-degree-of-freedom vibration systems</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">X</forename><surname>Tan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">J</forename><surname>Rogers</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Journal of Sound and Vibration</title>
+		<imprint>
+			<biblScope unit="volume">185</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="33" to="50" />
+			<date type="published" when="1995-08" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b31">
+	<analytic>
+		<title level="a" type="main">Modelling of a two-dimensional Coulomb friction oscillator</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">F</forename><surname>Xia</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Journal of Sound and Vibration</title>
+		<imprint>
+			<biblScope unit="volume">265</biblScope>
+			<biblScope unit="issue">5</biblScope>
+			<biblScope unit="page" from="1063" to="1074" />
+			<date type="published" when="2003-08" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b32">
+	<analytic>
+		<title level="a" type="main">A substitute model of two-dimensional dry friction exposed to dither generated by rolling contact of wheel and rail</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Piotrowski</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">50</biblScope>
+			<biblScope unit="issue">10</biblScope>
+			<biblScope unit="page" from="1495" to="1514" />
+			<date type="published" when="2012" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b33">
+	<monogr>
+		<title level="m" type="main">The dynamics of a railway freight wagon wheelset with dry friction damping Vehicle System Dynamics 44 supplement</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>True</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Asmund</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2006" />
+			<biblScope unit="page" from="853" to="861" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b34">
+	<analytic>
+		<title level="a" type="main">Flexibility of trapezoidal springs</title>
+	</analytic>
+	<monogr>
+		<title level="j">ORE</title>
+		<imprint>
+			<date type="published" when="1986" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b35">
+	<monogr>
+		<title level="m" type="main">ORE, Parabolic springs for wagons (design, calculation, treatment)</title>
+		<imprint>
+			<date type="published" when="1988" />
+			<pubPlace>Utrecht, 43</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b36">
+	<analytic>
+		<title level="a" type="main">Improvement of the running stability of existing RIV wagons required to run under any loading conditions at speeds of 80 km/h</title>
+	</analytic>
+	<monogr>
+		<title level="j">ORE</title>
+		<imprint>
+			<date type="published" when="1967" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b37">
+	<monogr>
+		<title level="m" type="main">ORE: Etude de la stabilité transversale d&apos;un véhicule ferroviaire à deux essieux</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><forename type="middle">R</forename><surname>Joly</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1974" />
+			<pubPlace>Utrecht</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b38">
+	<monogr>
+		<title level="m" type="main">Computer simulation of freight vehicles with leaf springs</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">B</forename><surname>Ayasse</surname></persName>
+		</author>
+		<idno>INRETS/RE- 01-046-FR</idno>
+		<imprint>
+			<date type="published" when="2001" />
+		</imprint>
+	</monogr>
+<note type="report_type">Technical report</note>
+	<note>a comparison between different packages, INRETS</note>
+</biblStruct>
+
+<biblStruct xml:id="b39">
+	<analytic>
+		<title level="a" type="main">Modelling and laboratory investigations on freight wagon link suspensions with respect to vehicle-track dynamic interaction</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P.-A</forename><surname>Jönsson</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">KTH</title>
+		<imprint>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+<note type="report_type">Licenciate Thesis</note>
+</biblStruct>
+
+<biblStruct xml:id="b40">
+	<analytic>
+		<title level="a" type="main">Experimental and theoretical analysis of freight wagon link suspension</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P.-A</forename><surname>Jönsson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Andersson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Proceedings of the Institution of Mechanical Engineers</title>
+		<imprint>
+			<biblScope unit="volume">220</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="361" to="372" />
+			<date type="published" when="2006-01" />
+		</imprint>
+	</monogr>
+	<note>Part F: Journal of Rail and Rapid Transit</note>
+</biblStruct>
+
+<biblStruct xml:id="b41">
+	<analytic>
+		<title level="a" type="main">Influence of link suspension characteristics variation on two-axle freight wagon dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P.-A</forename><surname>Jönsson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Andersson</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">NVSD</title>
+		<imprint>
+			<biblScope unit="volume">44</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="415" to="423" />
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b42">
+	<monogr>
+		<title level="m" type="main">New simulation model for freight wagons with UIC link suspension, VSD</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P.-A</forename><surname>Jönsson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Persson</forename><forename type="middle">I</forename></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2008" />
+			<biblScope unit="volume">46</biblScope>
+			<biblScope unit="page" from="695" to="704" />
+		</imprint>
+	</monogr>
+	<note>Suppl. 1</note>
+</biblStruct>
+
+<biblStruct xml:id="b43">
+	<monogr>
+		<title level="m" type="main">Dynamics of European two-axle freight wagons</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Hoffmann</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2006" />
+			<pubPlace>Kongens Lyngby, Denmark</pubPlace>
+		</imprint>
+		<respStmt>
+			<orgName>Technical University of Denmark</orgName>
+		</respStmt>
+	</monogr>
+<note type="report_type">Ph.D. Thesis</note>
+</biblStruct>
+
+<biblStruct xml:id="b44">
+	<monogr>
+		<title level="m" type="main">Freight wagon running gears with leaf spring and ring suspension, presented at the SIMPACK user group meeting</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Stiepel</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Zeipel</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b45">
+	<analytic>
+		<title level="a" type="main">Simulation of the Response of Leaf Springs to Broad Band Random Excitation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Cebon</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">15</biblScope>
+			<biblScope unit="issue">6</biblScope>
+			<biblScope unit="page" from="375" to="390" />
+			<date type="published" when="1986" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b46">
+	<monogr>
+		<title level="m" type="main">Measurement and Representation of the Mechanical Properties of Truck Leaf Springs</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><forename type="middle">S</forename><surname>Fancher</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">D</forename><surname>Ervin</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><forename type="middle">C</forename><surname>Macadam</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Winkler</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1980-08" />
+			<publisher>SAE International</publisher>
+			<pubPlace>Warrendale, PA</pubPlace>
+		</imprint>
+	</monogr>
+	<note>SAE Technical Paper 800905</note>
+</biblStruct>
+
+<biblStruct xml:id="b47">
+	<analytic>
+		<title level="a" type="main">On Application of the Rolling Contact Theory for Modelling of the UIC Link Suspension for Freight Wagons</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Piotrowski</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Zeszyty Naukowe Instytutu Pojazdów</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="issue">50</biblScope>
+			<biblScope unit="page" from="5" to="14" />
+			<date type="published" when="2003" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b48">
+	<analytic>
+		<title level="a" type="main">A new mathematical model of the behaviour of a four-axle freight wagon with UIC single-link suspension</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Matei</surname></persName>
+		</author>
+		<idno type="doi">DOI:10.1177/0954409711398173</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Proceedings of the Institution of Mechanical Engineers</title>
+		<imprint>
+			<biblScope unit="volume">225</biblScope>
+			<biblScope unit="page">637</biblScope>
+			<date type="published" when="2011" />
+		</imprint>
+	</monogr>
+	<note>Part F: Journal of Rail and Rapid Transit</note>
+</biblStruct>
+
+<biblStruct xml:id="b49">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><forename type="middle">V</forename><surname>Vershinsky</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><forename type="middle">N</forename><surname>Danilov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><forename type="middle">N</forename><surname>Chelnokov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><forename type="middle">I</forename></persName>
+		</author>
+		<title level="m">Wagon dynamics. Мoscow, Transport</title>
+		<imprint>
+			<date type="published" when="1972" />
+			<biblScope unit="volume">304</biblScope>
+		</imprint>
+	</monogr>
+	<note>in Russian</note>
+</biblStruct>
+
+<biblStruct xml:id="b50">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B</forename><surname>Ballew</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B</forename><forename type="middle">J</forename><surname>Chan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Sandu</surname></persName>
+		</author>
+		<title level="m">Multibody dynamics modelling of the freight train bogie system Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">49</biblScope>
+			<biblScope unit="page" from="2011" to="501" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b51">
+	<analytic>
+		<title level="a" type="main">Modelling friction wedges, Part II: An improved model. Proceedings of IMECE04</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><forename type="middle">E</forename><surname>Klauser</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ASME International Mechanical Engineering Congress &amp; Exposition</title>
+		<imprint>
+			<date type="published" when="2004-11-13" />
+			<publisher>American Society of Mechanical Engineering</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b52">
+	<analytic>
+		<title level="a" type="main">Freight car models and their computer-aided dynamic analysis</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Kovalev</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Lysikov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">G</forename><surname>Mikheev</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Pogorelov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><surname>Simonov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><surname>Yazykov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Zakharov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><surname>Zharov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><surname>Goryacheva</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Soshenkov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Torskaya</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Multibody System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">22</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="399" to="423" />
+			<date type="published" when="2009" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b53">
+	<analytic>
+		<title level="a" type="main">On Calculation of Jacobian Matrices in Simulation of Multibody Systems</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Pogorelov</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Preprints of the NATO Advanced Study Institute on Virtual Nonlinear Multibody Systems</title>
+		<editor>Schiehlen and Valasek</editor>
+		<meeting><address><addrLine>Prague</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2002" />
+			<biblScope unit="page" from="159" to="164" />
+		</imprint>
+		<respStmt>
+			<orgName>Czech Technical University in Prague</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b54">
+	<analytic>
+		<title level="a" type="main">Possibility of jamming and wedging in the three-piece trucks of a moving freight car</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">D</forename><surname>Mckisic</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><forename type="middle">F</forename><surname>Ushkalov</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Zhechev</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">45</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="61" to="67" />
+			<date type="published" when="2007" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b55">
+	<analytic>
+		<title level="a" type="main">Dynamic models of friction wedge dampers</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">P</forename><surname>Cusumano</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">F</forename><surname>Gardner</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 1997 IEEE/ASME Joint Rail Conference</title>
+		<meeting>the 1997 IEEE/ASME Joint Rail Conference<address><addrLine>Boston, MA</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1920-03-18" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b56">
+	<analytic>
+		<title level="a" type="main">Modelling Freight Wagon Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Mcclanachan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Handoko</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Dhanasekar</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Skerman</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Davey</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics Supplement</title>
+		<imprint>
+			<biblScope unit="volume">41</biblScope>
+			<biblScope unit="page" from="438" to="447" />
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b57">
+	<monogr>
+		<title level="m" type="main">Modeling and dynamics of friction wedge dampers in railroad freight trucks Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">B</forename><surname>Kaiser</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">P</forename><surname>Cusumano</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">F</forename><surname>Gardner</surname></persName>
+		</author>
+		<imprint>
+			<biblScope unit="volume">38</biblScope>
+			<biblScope unit="page" from="2002" to="55" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b58">
+	<analytic>
+		<title level="a" type="main">Chaos in a railway bogie</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><forename type="middle">H</forename><surname>Kaas-Petersen</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Acta Mechanica</title>
+		<imprint>
+			<biblScope unit="volume">61</biblScope>
+			<biblScope unit="page" from="89" to="107" />
+			<date type="published" when="1986" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b59">
+	<analytic>
+		<title level="a" type="main">On non-linear methods of bogie stability assessment using computer simulations</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">O</forename><surname>Polach</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Proceedings of the Institution of Mechanical Engineers</title>
+		<imprint>
+			<biblScope unit="volume">220</biblScope>
+			<biblScope unit="page" from="13" to="27" />
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+	<note>Part F: Journal of Rail and Rapid Transit</note>
+</biblStruct>
+
+<biblStruct xml:id="b60">
+	<analytic>
+		<title level="a" type="main">Limit cycle behaviour and chaotic motions of two-axle freight wagons with friction damping</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Multibody System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">8</biblScope>
+			<biblScope unit="issue">3</biblScope>
+			<biblScope unit="page" from="243" to="255" />
+			<date type="published" when="2002" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b61">
+	<analytic>
+		<title level="a" type="main">Dynamics of two-axle railway freight wagons with UIC standard suspension, Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Hoffmann</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>True</surname></persName>
+		</author>
+		<idno type="doi">DOI:10.1080/00423110600869594</idno>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Vehicle Mechanics and Mobility</title>
+		<imprint>
+			<biblScope unit="volume">44</biblScope>
+			<biblScope unit="page" from="1" to="139" />
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b62">
+	<analytic>
+		<title level="a" type="main">Analysis of the nonlinear dynamics of a 2axle freight wagon in curves, Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Di</forename><surname>Gialleonardo</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Bruni</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>True</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename></persName>
+		</author>
+		<idno type="doi">DOI:10.1080/00423114.2013.863363</idno>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Vehicle Mechanics and Mobility</title>
+		<imprint>
+			<biblScope unit="volume">52</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="125" to="141" />
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b63">
+	<analytic>
+		<title level="a" type="main">Lateral hunting stability of railway vehicles running on elastic track structures</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><forename type="middle">M</forename><surname>Zhai</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K</forename><forename type="middle">Y</forename><surname>Wang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Journal of Computational and Nonlinear Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">5</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="41009" to="41010" />
+			<date type="published" when="2010" />
+		</imprint>
+	</monogr>
+	<note>ASME</note>
+</biblStruct>
+
+<biblStruct xml:id="b64">
+	<analytic>
+		<title level="a" type="main">Freight car curving performance in braked conditions</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Berghuvud</surname></persName>
+		</author>
+		<idno type="doi">23.DOI:10.1243/0954409021531656</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit</title>
+		<imprint>
+			<biblScope unit="volume">216</biblScope>
+			<date type="published" when="2002" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b65">
+	<monogr>
+		<title/>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Hecht</surname></persName>
+		</author>
+		<imprint/>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b66">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Keudel</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename></persName>
+		</author>
+		<title level="m">Verbesserte Energieeffizienz durch radialeinstellendes Fahrwerk, Eisenbahningenieur 05</title>
+		<imprint>
+			<date type="published" when="2006" />
+			<biblScope unit="page" from="42" to="47" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b67">
+	<analytic>
+		<title level="a" type="main">Wheel/rail interface management in heavy haul railway operations-applying science and technology, Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">D</forename><surname>Fröhling</surname></persName>
+		</author>
+		<idno type="doi">DOI:10.1080/00423110701413797</idno>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Vehicle Mechanics and Mobility</title>
+		<imprint>
+			<biblScope unit="volume">45</biblScope>
+			<biblScope unit="issue">7-8</biblScope>
+			<biblScope unit="page" from="649" to="677" />
+			<date type="published" when="2007" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b68">
+	<analytic>
+		<title level="a" type="main">Minimising wheel wear by optimising the primary suspension stiffness and centre plate friction of selfsteering bogies, Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><forename type="middle">N</forename><surname>Fergusson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">D</forename><surname>Fröhling</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>Klopper</surname></persName>
+		</author>
+		<idno type="doi">DOI:10.1080/00423110801993094</idno>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Vehicle Mechanics and Mobility</title>
+		<imprint>
+			<biblScope unit="volume">46</biblScope>
+			<biblScope unit="issue">S1</biblScope>
+			<biblScope unit="page" from="457" to="468" />
+			<date type="published" when="2008" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b69">
+	<analytic>
+		<title level="a" type="main">Influence of switches and crossings on wheel profile evolution in freight vehicles. Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Casanueva</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Doulgerakis</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P.-A</forename><surname>Jönsson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Stichel</surname></persName>
+		</author>
+		<idno type="doi">DOI:10.1080/00423114.2014.898779</idno>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Vehicle Mechanics and Mobility</title>
+		<imprint>
+			<biblScope unit="volume">52</biblScope>
+			<biblScope unit="page" from="317" to="337" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b70">
+	<analytic>
+		<title level="a" type="main">A parametric study of the effects of freight vehicles on rolling contact fatigue of rail</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Tunna</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Urban</surname></persName>
+		</author>
+		<idno type="doi">DOI:10.1243/09544097JRRT228</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Proceedings of the Institution of Mechanical Engineers</title>
+		<imprint>
+			<biblScope unit="volume">223</biblScope>
+			<biblScope unit="page">141</biblScope>
+			<date type="published" when="2009" />
+		</imprint>
+	</monogr>
+	<note>Part F: Journal of Rail and Rapid Transit</note>
+</biblStruct>
+
+<biblStruct xml:id="b71">
+	<analytic>
+		<title level="a" type="main">Whole life rail model application and development for RSSBdevelopment of an RCF damage parameter</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Burstow</surname></persName>
+		</author>
+		<idno>AEATR-ES-2003-832</idno>
+		<ptr target="http://www.rssb.co.uk" />
+	</analytic>
+	<monogr>
+		<title level="j">Rail Safety &amp; Standards Board</title>
+		<imprint>
+			<biblScope unit="volume">1</biblScope>
+			<date type="published" when="2003-10" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b72">
+	<analytic>
+		<title level="a" type="main">Wheel damage on the Swedish iron ore line investigated via multibody simulation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Hossein</forename><surname>Nia</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Jönsson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P.-A</forename><surname>Stichel</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename></persName>
+		</author>
+		<idno type="doi">228:652.DOI:10.1177/0954409714523264</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the Institution of Mechanical Engineers</title>
+		<meeting>the Institution of Mechanical Engineers</meeting>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b73">
+	<analytic>
+		<title level="a" type="main">The dynamic effects of conventional freight car running over a dipped joint</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">V</forename><surname>Dukkipati</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Dong</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">31</biblScope>
+			<biblScope unit="page" from="95" to="111" />
+			<date type="published" when="1999" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b74">
+	<monogr>
+		<title level="m" type="main">A test rig for measuring three piece bogie dynamic parameters applied to freight car application Vehicle System Dynamics 44 supplement</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L</forename><forename type="middle">H</forename><surname>Ren</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">G</forename><surname>Shen</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><forename type="middle">S</forename><surname>Hu</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2006" />
+			<biblScope unit="page" from="853" to="861" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b75">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">H</forename><surname>Wickens</surname></persName>
+		</author>
+		<title level="m">The dynamics of railway vehicles on straight track-fundamental considerations of lateral stability Proceedings of the Institution of Mechanical Engineers Part</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="3" to="1965" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b76">
+	<monogr>
+		<title level="m" type="main">Suspension design for high performance two-axle freight vehicles Proceedings of the Institution of Mechanical Engineers Part</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">H</forename><surname>Wickens</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">O</forename><surname>Gilchrist</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">E W</forename><surname>Hobbs</surname></persName>
+		</author>
+		<idno>3D 1969-70</idno>
+		<imprint>
+			<biblScope unit="volume">184</biblScope>
+			<biblScope unit="page" from="22" to="36" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b77">
+	<monogr>
+		<title level="m" type="main">Tracking truck</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><forename type="middle">B</forename><surname>Webber</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1968-07" />
+			<biblScope unit="volume">339466230</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b78">
+	<monogr>
+		<title level="m" type="main">Uklad zawieszenia pojazdu kolejowego, zwlaszcza dwuosiowego wagonu towarowego</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Greenbrier</forename><surname>Europe</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Wagony</forename><surname>Swidnica</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><forename type="middle">A</forename></persName>
+		</author>
+		<imprint/>
+	</monogr>
+	<note>PL 207920 B1 B61F 5/30 (2006.01</note>
+</biblStruct>
+
+<biblStruct xml:id="b79">
+	<monogr>
+		<title level="m" type="main">Advances in Rail Wagon Design&apos; Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Etwell</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1990-01" />
+			<biblScope unit="volume">204</biblScope>
+			<biblScope unit="page" from="45" to="54" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b80">
+	<monogr>
+		<title level="m" type="main">Association of American Railroads. Manual of standards and recommended practices. Section C-part II. Design, fabrication, and construction of freight cars</title>
+		<imprint/>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b81">
+	<monogr>
+		<title level="m" type="main">Chapter 11: Service worthiness tests and analyses for new freight cars</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M-1001</forename></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2007" />
+			<biblScope unit="volume">374</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b82">
+	<monogr>
+		<title level="m" type="main">Association of American Railroads. Manual of standards and recommended practices. Section D. Trucks and truck details Specification M-976 Truck performance for rail cars</title>
+		<imprint>
+			<date type="published" when="2002" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b83">
+	<analytic>
+		<title level="a" type="main">Comparison of different types of friction wedge suspensions in freight wagons</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Orlova</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Rudakova</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 8-th International Conference on Railway Bogies and Running Gears</title>
+		<meeting>the 8-th International Conference on Railway Bogies and Running Gears<address><addrLine>Budapest: BUTE</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2010" />
+			<biblScope unit="page" from="41" to="50" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b84">
+	<monogr>
+		<title level="m" type="main">Influence of bogie to car body connection parameters on stability and curving of freight vehicle // Extended abstracts 6th international conference Railway bogies and running gears</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Boronenko</forename><forename type="middle">P</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">M</forename><surname>Orlova</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2004-09" />
+			<biblScope unit="page" from="23" to="25" />
+			<pubPlace>Budapest: BUTE</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b85">
+	<monogr>
+		<title level="m" type="main">Shear Stiffner Linkages for Radial Bogies</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>Scheffel</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><forename type="middle">H</forename><surname>Smit</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1997" />
+			<biblScope unit="volume">27</biblScope>
+		</imprint>
+	</monogr>
+	<note>Supplement to Vehicle System Dynamics</note>
+</biblStruct>
+
+<biblStruct xml:id="b86">
+	<analytic>
+		<title level="a" type="main">The influence of inter-axle linkages on stability and guidance of freight bogies</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Boronenko</forename><forename type="middle">P</forename><surname>Yu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 8-th mini conference on vehicle system dynamics, identification and anomalies</title>
+		<meeting>the 8-th mini conference on vehicle system dynamics, identification and anomalies<address><addrLine>Budapest: BUTE</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2002" />
+			<biblScope unit="page" from="175" to="182" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b87">
+	<analytic>
+		<title level="a" type="main">Suspension of freight wagon bogiewith the Lenoir friction damper ensuring low wear of wheels and good lateral dynamics of the wagon</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Piotrowski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Pazdzierniak</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T</forename><surname>Adamczewski</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proc. of XVIII conference &apos;Pojazdy Szynow</title>
+		<meeting>of XVIII conference &apos;Pojazdy Szynow</meeting>
+		<imprint>
+			<date type="published" when="2008" />
+			<biblScope unit="volume">I</biblScope>
+			<biblScope unit="page" from="199" to="211" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b88">
+	<analytic>
+		<title level="a" type="main">Wear and energy-saving freight bogie designs with rubber primary springs: principles and experiences</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Hecht</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">JRRT</title>
+		<imprint>
+			<biblScope unit="volume">227</biblScope>
+			<biblScope unit="page" from="105" to="110" />
+			<date type="published" when="2009" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b89">
+	<analytic>
+		<title level="a" type="main">Innovative Freight Wagons-A Precondition to increase the MarketShare of Rail Freight</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Hecht</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Archives of Transport</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="17" to="26" />
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+	<note>Polish Academy of Sciences, committee of Transport</note>
+</biblStruct>
+
+<biblStruct xml:id="b90">
+	<monogr>
+		<title level="m" type="main">A new design approach for railway vehicle suspension; Rail International</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>Scheffel</surname></persName>
+		</author>
+		<idno>1974. - -№10.-P. 638-651</idno>
+		<imprint/>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b91">
+	<monogr>
+		<title level="m" type="main">Project INFRA-RADIAL-bogies for axle loads of 25 t-test and simulation&apos;; XXI Century Rolling Stock: Ideas, Requirements, Projects Conference</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><surname>Kik</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Scholdan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Stephanides</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2007" />
+			<pubPlace>St. Petersburg</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b92">
+	<monogr>
+		<title level="m" type="main">Simulation of longitudinal dynamics of long freight trains in positioning operations Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Qi</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">X</forename><surname>Kong</surname></persName>
+		</author>
+		<imprint>
+			<biblScope unit="volume">50</biblScope>
+			<biblScope unit="page" from="2012" to="1409" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b93">
+	<monogr>
+		<title level="m" type="main">Numerical and experimental approach for the evaluation of severe longitudinal dynamics of heavy freight trains Vehicle System Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Belforte</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">F</forename><surname>Celi</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">G</forename><surname>Diana</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Melzi</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2008" />
+			<biblScope unit="volume">46</biblScope>
+			<biblScope unit="page" from="937" to="955" />
+		</imprint>
+	</monogr>
+	<note>Supplement</note>
+</biblStruct>
+
+<biblStruct xml:id="b94">
+	<monogr>
+		<title level="m" type="main">Longitudinal train dynamics&apos; in Handbook of Railway Vehicle Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Cole</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1999" />
+		</imprint>
+	</monogr>
+	<note>Iwnicki ed Taylor and Francis</note>
+</biblStruct>
+
+<biblStruct xml:id="b95">
+	<analytic>
+		<title level="a" type="main">An investigation of the effect of bogie and wagon pitch associated with longitudinal train dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Mcclanachan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Cole</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Roach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B</forename><surname>Scown</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">The dynamics of vehicles on roads and on tracks Vehicle System Dynamics Supplement Swets &amp; Zeitlinger Amsterdam</title>
+		<imprint>
+			<date type="published" when="1999" />
+			<biblScope unit="page" from="374" to="385" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b96">
+	<analytic>
+		<title level="a" type="main">Recent advancements in bluff and draft testing techniques</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>El-Sibaie</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Fifth International Heavy Haul Conference</title>
+		<meeting><address><addrLine>Beijing</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1993" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b97">
+	<analytic>
+		<title level="a" type="main">White Paper Innovative Rail Freight Wagon 2030</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Koenig</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Hecht</surname></persName>
+		</author>
+		<ptr target="http://www.schienenfzg.tu-Berlin.de/fileadmin/fg62/Dokumente/Downloads/White_Paper_Innovative_Rail_Freight_Wagon_2030.pdf" />
+	</analytic>
+	<monogr>
+		<title level="j">TU Dresden TU Berlin</title>
+		<imprint>
+			<date type="published" when="2012" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b98">
+	<analytic>
+		<title level="a" type="main">On the Theory of Nonlinear Dynamics and its Applications in Vehicle Systems Dynamics</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>True</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vehicle System Dynamics</title>
+		<imprint>
+			<biblScope unit="volume">31</biblScope>
+			<biblScope unit="issue">5-6</biblScope>
+			<biblScope unit="page" from="393" to="421" />
+			<date type="published" when="1999" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b99">
+	<analytic>
+		<title level="a" type="main">Numerical simulation of wheel wear evolution for heavy haul railway</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L</forename><surname>Gao</surname></persName>
+		</author>
+		<idno type="doi">DOI:10.1007/s11771-015-2510-1</idno>
+	</analytic>
+	<monogr>
+		<title level="j">J. Cent. South Univ</title>
+		<imprint>
+			<biblScope unit="volume">22</biblScope>
+			<biblScope unit="page" from="196" to="207" />
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>
