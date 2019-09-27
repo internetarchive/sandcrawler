@@ -48,7 +48,7 @@ def main():
         default="dev",
         help="Kafka topic namespace to use (eg, prod, qa, dev)")
     parser.add_argument('-j', '--jobs',
-        default=8,
+        default=8, type=int,
         help="parallelism for batch CPU jobs")
     parser.add_argument('--grobid-host',
         default="http://grobid.qa.fatcat.wiki",

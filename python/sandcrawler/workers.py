@@ -28,6 +28,9 @@ class SandcrawlerWorker(object):
         if not result:
             self.counts['failed'] += 1
             return
+        elif type(result) == dict and 'status' in result and len(result['status']) < 32:
+            self.counts[result['status']] += 1
+
         if self.sink:
             self.sink.push_record(result)
             self.counts['pushed'] += 1
@@ -63,6 +66,9 @@ class MultiprocessWrapper(SandcrawlerWorker):
             if not result:
                 self.counts['failed'] += 1
                 return
+            elif type(result) == dict and 'status' in result and len(result['status']) < 32:
+                self.counts[result['status']] += 1
+
             if self.sink:
                 self.sink.push_record(result)
                 self.counts['pushed'] += 1
