@@ -32,11 +32,33 @@ ns = "http://www.tei-c.org/ns/1.0"
 
 def all_authors(elem):
     names = []
-    for e in elem.findall('.//{%s}author/{%s}persName' % (ns, ns)):
-        given_name = e.findtext('./{%s}forename' % ns) or None
-        surname = e.findtext('./{%s}surname' % ns) or None
-        full_name = '{} {}'.format(given_name or '', surname or '').strip()
-        names.append(dict(name=full_name, given_name=given_name, surname=surname))
+    for author in elem.findall('.//{%s}author' % ns):
+        pn = author.find('./{%s}persName' % ns)
+        if not pn:
+            continue
+        given_name = pn.findtext('./{%s}forename' % ns) or None
+        surname = pn.findtext('./{%s}surname' % ns) or None
+        full_name = ' '.join(pn.itertext())
+        obj = dict(name=full_name, given_name=given_name, surname=surname)
+        ae = author.find('./{%s}affiliation' % ns)
+        if ae:
+            affiliation = dict()
+            for on in ae.findall('./{%s}orgName' % ns):
+                affiliation[on.get('type')] = on.text
+            addr_e = ae.find('./{%s}address' % ns)
+            if addr_e:
+                address = dict()
+                for t in addr_e.getchildren():
+                    address[t.tag.split('}')[-1]] = t.text
+                if address:
+                    affiliation['address'] = address
+                #affiliation['address'] = {
+                #    'post_code': addr.findtext('./{%s}postCode' % ns) or None,
+                #    'settlement': addr.findtext('./{%s}settlement' % ns) or None,
+                #    'country': addr.findtext('./{%s}country' % ns) or None,
+                #}
+            obj['affiliation'] = affiliation
+        names.append(obj)
     return names
 
 
