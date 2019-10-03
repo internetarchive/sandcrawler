@@ -4,6 +4,10 @@
 Takes old (HBase) or new (pg) style JSON wrappers of GROBID XML extraction
 output, converts the XML to JSON, filters out raw affiliation strings, and
 dumps these as JSON subset.
+
+Run in bulk like:
+
+    ls /bigger/unpaywall-transfer/2019-07-17-1741.30-dumpgrobidxml/part*gz | parallel --progress -j8 'zcat {} | ./grobid_affiliations.py > {}.affiliations'
 """
 
 import sys
@@ -41,6 +45,7 @@ def run(mode='hbase'):
         if affiliations:
             # don't duplicate affiliations; only the unique ones
             affiliations = list(set([json.dumps(a) for a in affiliations]))
+            affiliations = [json.loads(a) for a in affiliations]
             print('\t'.join([sha1hex, json.dumps(affiliations)]))
 
 if __name__=='__main__':
