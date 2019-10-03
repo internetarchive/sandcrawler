@@ -25,6 +25,16 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 /srv/grobid/grobid-0.5.1/grobid-
 					<analytic>
 						<author>
 							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Brewster</forename><surname>Kahle</surname></persName>
+                                                        <affiliation key="aff0">
+                                                                <orgName type="department">Faculty ofAgricultrial Engineering</orgName>
+                                                                <orgName type="laboratory">Plant Physiology Laboratory</orgName>
+                                                                <orgName type="institution">Technion-Israel Institute of Technology</orgName>
+                                                                <address>
+                                                                        <postCode>32000</postCode>
+                                                                        <settlement>Haifa</settlement>
+                                                                        <country key="IL">Israel</country>
+                                                                </address>
+                                                        </affiliation>
 						</author>
 						<author>
 							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Doe</surname></persName>

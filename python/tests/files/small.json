@@ -1,7 +1,21 @@
 {
   "title": "Dummy Example File",
   "authors": [
-    {"name": "Brewster Kahle", "given_name": "Brewster", "surname": "Kahle"},
+    {
+      "name": "Brewster Kahle",
+      "given_name": "Brewster",
+      "surname": "Kahle",
+      "affiliation": {
+        "department": "Faculty ofAgricultrial Engineering",
+        "laboratory": "Plant Physiology Laboratory",
+        "institution": "Technion-Israel Institute of Technology",
+        "address": {
+          "postCode": "32000",
+          "settlement": "Haifa",
+          "country": "Israel"
+        }
+      }
+    },
     {"name": "J Doe", "given_name": "J", "surname": "Doe"}
   ],
   "journal": {
