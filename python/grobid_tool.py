@@ -3,6 +3,12 @@
 """
 These are generally for running one-off tasks from the command line. Output
 might go to stdout, or might go to Kafka topic.
+
+Example of large parallel run, locally:
+
+    cat /srv/sandcrawler/tasks/ungrobided.2019-09-23.json \
+        | parallel -j6 --pipe \
+        ./grobid_tool.py --kafka-env qa --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j10 extract-json -
 """
 
 import sys
