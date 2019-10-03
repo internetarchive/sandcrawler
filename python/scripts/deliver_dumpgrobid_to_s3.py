@@ -84,9 +84,10 @@ class DeliverDumpGrobidS3():
                     self.s3_prefix,
                     sha1_hex[0:4],
                     sha1_hex,
-                    self.s3_suffix,
-                    StorageClass=self.s3_storage_class),
-                Body=tei_xml)
+                    self.s3_suffix),
+                Body=tei_xml,
+                StorageClass=self.s3_storage_class,
+            )
             print("{}\tsuccess\t{}\t{}".format(sha1_hex, obj.key, len(tei_xml)))
             self.count['success-s3'] += 1
         sys.stderr.write("{}\n".format(self.count))
