@@ -61,18 +61,27 @@ class GrobidWorker(SandcrawlerWorker):
             # it's a full CDX dict. fetch using WaybackClient
             if not self.wayback_client:
                 raise Exception("wayback client not configured for this GrobidWorker")
-            blob = self.wayback_client.fetch_warc_content(record['warc_path'],
-                record['warc_offset'], record['warc_csize'])
+            try:
+                blob = self.wayback_client.fetch_warc_content(record['warc_path'],
+                    record['warc_offset'], record['warc_csize'])
+            except WaybackError as we:
+                return dict(status="error-wayback", error_msg=str(we), source=record)
         elif record.get('url') and record.get('datetime'):
             # it's a partial CDX dict or something? fetch using WaybackClient
             if not self.wayback_client:
                 raise Exception("wayback client not configured for this GrobidWorker")
-            blob = self.wayback_client.fetch_url_datetime(record['url'], record['datetime'])
+            try:
+                blob = self.wayback_client.fetch_url_datetime(record['url'], record['datetime'])
+            except WaybackError as we:
+                return dict(status="error-wayback", error_msg=str(we), source=record)
         elif record.get('item') and record.get('path'):
             # it's petabox link; fetch via HTTP
             resp = requests.get("https://archive.org/serve/{}/{}".format(
                 record['item'], record['path']))
-            resp.raise_for_status()
+            try:
+                resp.raise_for_status()
+            except Exception as e:
+                return dict(status="error-petabox", error_msg=str(e), source=record)
             blob = resp.body
         else:
             raise ValueError("not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")
