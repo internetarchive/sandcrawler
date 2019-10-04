@@ -85,7 +85,8 @@ class GrobidWorker(SandcrawlerWorker):
             blob = resp.body
         else:
             raise ValueError("not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")
-        assert blob
+        if not blob:
+            return dict(status="error", error_msg="empty blob", source=record)
         result = self.grobid_client.process_fulltext(blob, consolidate_mode=self.consolidate_mode)
         result['file_meta'] = gen_file_metadata(blob)
         result['source'] = record
