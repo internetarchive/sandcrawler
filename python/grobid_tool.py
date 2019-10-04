@@ -22,18 +22,25 @@ def run_extract_json(args):
     grobid_client = GrobidClient(host_url=args.grobid_host)
     wayback_client = WaybackClient()
     worker = GrobidWorker(grobid_client, wayback_client, sink=None)
-    multi_worker = MultiprocessWrapper(worker, args.sink)
-    pusher = JsonLinePusher(multi_worker, args.json_file, batch_size=args.jobs)
+    if args.jobs > 1:
+        multi_worker = MultiprocessWrapper(worker, args.sink)
+        pusher = JsonLinePusher(multi_worker, args.json_file, batch_size=args.jobs)
+    else:
+        pusher = JsonLinePusher(worker, args.json_file)
     pusher.run()
 
 def run_extract_cdx(args):
     grobid_client = GrobidClient(host_url=args.grobid_host)
     wayback_client = WaybackClient()
     worker = GrobidWorker(grobid_client, wayback_client, sink=None)
-    multi_worker = MultiprocessWrapper(worker, args.sink)
-    pusher = CdxLinePusher(multi_worker, args.cdx_file,
-        filter_http_statuses=[200], filter_mimetypes=['application/pdf'],
-        batch_size=args.jobs)
+    if args.jobs > 1:
+        multi_worker = MultiprocessWrapper(worker, args.sink)
+        pusher = CdxLinePusher(multi_worker, args.cdx_file,
+            filter_http_statuses=[200], filter_mimetypes=['application/pdf'],
+            batch_size=args.jobs)
+    else:
+        pusher = CdxLinePusher(worker, args.cdx_file,
+            filter_http_statuses=[200], filter_mimetypes=['application/pdf'])
     pusher.run()
 
 def run_extract_zipfile(args):
