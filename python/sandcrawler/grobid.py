@@ -32,7 +32,7 @@ class GrobidClient(object):
             files={
                 'input': blob,
                 'consolidateHeaders': self.consolidate_mode,
-                'consolidateCitations': self.consolidate_mode,
+                'consolidateCitations': 0, # too expensive for now
                 'includeRawCitations': 1,
             }
         )
