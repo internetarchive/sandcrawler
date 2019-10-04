@@ -12,16 +12,18 @@ ENV below is one of `prod` or `qa`.
 All topics should default to `snappy` compression on-disk, and indefinite
 retention (on both a size and time basis).
 
-    sandcrawler-ENV.ungrobided
-        => PDF files in IA needing GROBID processing
-        => 50x partitions (huge! for worker parallelism)
-        => key: "sha1:<base32>"
-
-    sandcrawler-ENV.grobid-output
-        => output of GROBID processing (from pdf-ungrobided feed)
-        => could get big; 16x partitions (to distribute data)
+    sandcrawler-ENV.grobid-output-pg
+        => output of GROBID processing using grobid_tool.py
+        => schema is sandcrawler-db style JSON: TEI-XML as a field
+        => expected to be large; 12 partitions
         => use GZIP compression (worth the overhead)
-        => key: "sha1:<base32>"; could compact
+        => key is sha1hex of PDF; enable key compaction
+
+    sandcrawler-ENV.ungrobided-pg
+        => PDF files in IA needing GROBID processing
+        => schema is sandcrawler-db style JSON. Can be either `cdx` or `petabox` object
+        => fewer partitions with batch mode, but still a bunch (24?)
+        => key is sha1hex of PDF. enable time compaction (6 months?)
 
     fatcat-ENV.api-crossref
     fatcat-ENV.api-datacite
@@ -29,16 +31,6 @@ retention (on both a size and time basis).
         => full raw crossref/datacite API objects (JSON)
         => key: lower-case DOI
         => ~1TB capacity; 8x crossref partitions, 4x datacite
-        => key compaction possible
-
-    fatcat-ENV.oaipmh-pubmed
-    fatcat-ENV.oaipmh-arxiv
-    fatcat-ENV.oaipmh-doaj-journals (DISABLED)
-    fatcat-ENV.oaipmh-doaj-articles (DISABLED)
-        => OAI-PMH harvester output
-        => full XML resource output (just the <<record> part?)
-        => key: identifier
-        => ~1TB capacity; 4x-8x partitions
         => key compaction possible
 
     fatcat-ENV.api-crossref-state
@@ -72,6 +64,28 @@ retention (on both a size and time basis).
         => key: fcid
         => 4x partitions
 
+### Deprecated/Unused Topics
+
+    sandcrawler-ENV.ungrobided
+        => PDF files in IA needing GROBID processing
+        => 50x partitions (huge! for worker parallelism)
+        => key: "sha1:<base32>"
+
+    sandcrawler-ENV.grobid-output
+        => output of GROBID processing (from pdf-ungrobided feed)
+        => could get big; 16x partitions (to distribute data)
+        => use GZIP compression (worth the overhead)
+        => key: "sha1:<base32>"; could compact
+
+    fatcat-ENV.oaipmh-pubmed
+    fatcat-ENV.oaipmh-arxiv
+    fatcat-ENV.oaipmh-doaj-journals (DISABLED)
+    fatcat-ENV.oaipmh-doaj-articles (DISABLED)
+        => OAI-PMH harvester output
+        => full XML resource output (just the <<record> part?)
+        => key: identifier
+        => ~1TB capacity; 4x-8x partitions
+        => key compaction possible
 
 ## Create fatcat QA topics
 
@@ -82,8 +96,8 @@ exists`; this seems safe, and the settings won't be over-ridden.
     ssh misc-vm
     cd /srv/kafka-broker/kafka_2.12-2.0.0/bin/
 
-    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 50 --topic sandcrawler-qa.ungrobided
-    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 16 --topic sandcrawler-qa.grobid-output --config compression.type=gzip
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 24 --topic sandcrawler-qa.ungrobided-pg
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic sandcrawler-qa.grobid-output-pg --config compression.type=gzip --config cleanup.policy=compact
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.changelog
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.release-updates-v03
