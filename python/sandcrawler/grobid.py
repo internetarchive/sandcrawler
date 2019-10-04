@@ -31,7 +31,9 @@ class GrobidClient(object):
             self.host_url + "/api/processFulltextDocument",
             files={
                 'input': blob,
-                'consolidate_mode': self.consolidate_mode,
+                'consolidateHeaders': self.consolidate_mode,
+                'consolidateCitations': self.consolidate_mode,
+                'includeRawCitations': 1,
             }
         )
 
