@@ -56,5 +56,6 @@
   "annex": null,
   "fatcat_release": null,
   "grobid_timestamp": "2018-04-02T00:31+0000",
-  "grobid_version": "0.5.1-SNAPSHOT"
+  "grobid_version": "0.5.1-SNAPSHOT",
+  "language_code": "en"
 }
