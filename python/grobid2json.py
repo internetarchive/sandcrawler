@@ -125,8 +125,8 @@ def teixml2json(content, encumbered=True):
     if header is None:
         raise ValueError("XML does not look like TEI format")
     application_tag = header.findall('.//{%s}appInfo/{%s}application' % (ns, ns))[0]
-    info['grobid_version'] = application_tag.attrib['version']
-    info['grobid_timestamp'] = application_tag.attrib['when']
+    info['grobid_version'] = application_tag.attrib['version'].strip()
+    info['grobid_timestamp'] = application_tag.attrib['when'].strip()
     info['title'] = header.findtext('.//{%s}analytic/{%s}title' % (ns, ns))
     info['authors'] = all_authors(header.find('.//{%s}sourceDesc/{%s}biblStruct' % (ns, ns)))
     info['journal'] = journal_info(header)
