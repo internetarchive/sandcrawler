@@ -6,9 +6,7 @@ might go to stdout, or might go to Kafka topic.
 
 Example of large parallel run, locally:
 
-    cat /srv/sandcrawler/tasks/ungrobided.2019-09-23.json \
-        | parallel -j6 --pipe \
-        ./grobid_tool.py --kafka-env qa --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j10 extract-json -
+    cat /srv/sandcrawler/tasks/ungrobided.2019-09-23.json         | pv -l | parallel -j30 --pipe         ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
 """
 
 import sys
@@ -93,7 +91,7 @@ def main():
 
     args.sink = None
     if args.kafka_mode:
-        produce_topic = "sandcrawler-{}.grobid-output-json".format(args.kafka_env)
+        produce_topic = "sandcrawler-{}.grobid-output-pg".format(args.kafka_env)
         print("Running in kafka output mode, publishing to {}\n".format(produce_topic))
         args.sink = KafkaGrobidSink(kafka_hosts=args.kafka_hosts,
             produce_topic=produce_topic)
