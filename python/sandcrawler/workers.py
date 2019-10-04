@@ -208,6 +208,8 @@ class JsonLinePusher(RecordPusher):
         self.worker = worker
         self.json_file = json_file
         self.batch_size = kwargs.get('batch_size', None)
+        if self.batch_size in (0, 1):
+            self.batch_size = None
 
     def run(self):
         batch = []
@@ -244,6 +246,8 @@ class CdxLinePusher(RecordPusher):
         self.filter_mimetypes = kwargs.get('filter_mimetypes', None)
         self.allow_octet_stream = kwargs.get('allow_octet_stream', False)
         self.batch_size = kwargs.get('batch_size', None)
+        if self.batch_size in (0, 1):
+            self.batch_size = None
 
     def run(self):
         batch = []
@@ -317,6 +321,8 @@ class KafkaJsonPusher(RecordPusher):
         )
         self.poll_interval = kwargs.get('poll_interval', 5.0)
         self.batch_size = kwargs.get('batch_size', 100)
+        if self.batch_size in (0, 1):
+            self.batch_size = 1
         self.batch_worker = kwargs.get('batch_worker', False)
 
     def run(self):
