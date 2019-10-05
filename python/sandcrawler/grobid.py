@@ -10,7 +10,7 @@ class GrobidClient(object):
 
     def __init__(self, host_url="http://grobid.qa.fatcat.wiki", **kwargs):
         self.host_url = host_url
-        self.consolidate_mode = int(kwargs.get('consolidate_mode', 1))
+        self.consolidate_mode = int(kwargs.get('consolidate_mode', 2))
 
     def process_fulltext(self, blob, consolidate_mode=None):
         """
@@ -56,7 +56,7 @@ class GrobidWorker(SandcrawlerWorker):
         self.grobid_client = grobid_client
         self.wayback_client = wayback_client
         self.sink = sink
-        self.consolidate_mode = 1
+        self.consolidate_mode = 2
 
     def process(self, record):
         if record.get('warc_path') and record.get('warc_offset'):
@@ -105,7 +105,7 @@ class GrobidBlobWorker(SandcrawlerWorker):
         super().__init__()
         self.grobid_client = grobid_client
         self.sink = sink
-        self.consolidate_mode = 1
+        self.consolidate_mode = 2
 
     def process(self, blob):
         assert blob

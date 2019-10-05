@@ -217,7 +217,7 @@ def file_metadata(blob):
 def do_grobid(sha1hex, blob):
     grobid_response = requests.post(
         GROBID_ENDPOINT + "/api/processFulltextDocument",
-        files={'input': blob, 'consolidateHeader': '1'},
+        files={'input': blob, 'consolidateHeader': '2'},
     )
 
     info = dict(
