@@ -2,6 +2,7 @@
 import requests
 from collections import Counter
 
+from grobid2json import teixml2json
 from .workers import SandcrawlerWorker
 from .misc import gen_file_metadata
 from .ia import WaybackClient, WaybackError
@@ -48,6 +49,19 @@ class GrobidClient(object):
             info['status'] = 'error'
             info['error_msg'] = grobid_response.text[:10000]
         return info
+
+    def metadata(self, result):
+        if result['status'] != 'success':
+            return None
+        tei_json = teixml2json(result['tei_xml'], encumbered=False)
+        meta = dict()
+        biblio = dict()
+        for k in ('title', 'authors', 'journal', 'date', 'doi', ):
+            biblio[k] = tei_json.get(k)
+        meta['biblio'] = biblio
+        for k in ('grobid_version', 'grobid_timestamp', 'fatcat_release', 'language_code'):
+            meta[k] = tei_json.get(k)
+        return meta
 
 class GrobidWorker(SandcrawlerWorker):
 

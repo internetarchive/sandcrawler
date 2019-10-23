@@ -3,6 +3,10 @@ import base64
 import magic
 import hashlib
 import datetime
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry # pylint: disable=import-error
+
 
 def gen_file_metadata(blob):
     """
@@ -131,3 +135,23 @@ def parse_cdx_datetime(dt_str):
         return datetime.strptime(dt_str, "%Y%m%d%H%M%S")
     except Exception:
         return None
+
+
+def requests_retry_session(retries=10, backoff_factor=3,
+        status_forcelist=(500, 502, 504), session=None):
+    """
+    From: https://www.peterbe.com/plog/best-practice-with-retries-with-requests
+    """
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+

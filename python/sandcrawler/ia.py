@@ -3,13 +3,15 @@
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
-import os, sys
+import os, sys, time
 import requests
 
 import wayback.exception
 from http.client import IncompleteRead
 from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
+
+from .misc import b32_hex, requests_retry_session
 
 class CdxApiError(Exception):
     pass
@@ -19,7 +21,7 @@ class CdxApiClient:
     def __init__(self, host_url="https://web.archive.org/cdx/search/cdx"):
         self.host_url = host_url
 
-    def lookup_latest(self, url):
+    def lookup_latest(self, url, follow_redirects=False):
         """
         Looks up most recent HTTP 200 record for the given URL.
 
@@ -28,15 +30,20 @@ class CdxApiClient:
         XXX: should do authorized lookup using cookie to get all fields
         """
 
-        resp = requests.get(self.host_url, params={
+        params = {
             'url': url,
             'matchType': 'exact',
             'limit': -1,
-            'filter': 'statuscode:200',
             'output': 'json',
-        })
-        if resp.status_code != 200:
-            raise CDXApiError(resp.text)
+        }
+        if not follow_redirects:
+            params['filter'] = 'statuscode:200'
+        resp = requests.get(self.host_url, params=params)
+        if follow_redirects:
+            raise NotImplementedError
+        else:
+            if resp.status_code != 200:
+                raise CdxApiError(resp.text)
         rj = resp.json()
         if len(rj) <= 1:
             return None
@@ -113,23 +120,74 @@ class SavePageNowError(Exception):
 
 class SavePageNowClient:
 
-    def __init__(self, cdx_client=None, endpoint="https://web.archive.org/save/"):
+    def __init__(self, cdx_client=None,
+            v1endpoint="https://web.archive.org/save/",
+            v2endpoint="https://web.archive.org/save"):
         if cdx_client:
             self.cdx_client = cdx_client
         else:
             self.cdx_client = CdxApiClient()
-        self.endpoint = endpoint
+        self.ia_access_key = os.environ.get('IA_ACCESS_KEY')
+        self.ia_secret_key = os.environ.get('IA_SECRET_KEY')
+        self.v1endpoint = v1endpoint
+        self.v2endpoint = v2endpoint
+        self.http_session = requests_retry_session(retries=5, backoff_factor=3)
+        self.http_session.headers.update({
+            'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
+        })
+        self.v2_session = requests_retry_session(retries=5, backoff_factor=3)
+        self.v2_session.headers.update({
+            'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
+            'Accept': 'application/json',
+            'Authorization': 'LOW {}:{}'.format(self.ia_access_key, self.ia_secret_key),
+        })
 
-    def save_url_now(self, url):
+    def save_url_now_v1(self, url):
         """
-        Returns a tuple (cdx, blob) on success, or raises an error on non-success.
-
-        XXX: handle redirects?
+        Returns a tuple (cdx, blob) on success of single fetch, or raises an
+        error on non-success.
         """
-        resp = requests.get(self.endpoint + url)
+        resp = self.http_session.get(self.v1endpoint + url)
         if resp.status_code != 200:
             raise SavePageNowError("HTTP status: {}, url: {}".format(resp.status_code, url))
+        terminal_url = '/'.join(resp.url.split('/')[5:])
         body = resp.content
-        cdx = self.cdx_client.lookup_latest(url)
+        cdx = self.cdx_client.lookup_latest(terminal_url)
+        if not cdx:
+            raise SavePageNowError("SPN was successful, but CDX lookup then failed")
         return (cdx, body)
+
+    def save_url_now_v2(self, url):
+        """
+        Returns a list of cdx objects, or raises an error on non-success.
+        """
+        if not (self.ia_access_key and self.ia_secret_key):
+            raise Exception("SPNv2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
+        resp = self.v2_session.post(
+            self.v2endpoint,
+            data={
+                'url': url,
+                'capture_all': 1,
+                'if_not_archived_within': '1d',
+            },
+        )
+        if resp.status_code != 200:
+            raise SavePageNowError("HTTP status: {}, url: {}".format(resp.status_code, url))
+        resp_json = resp.json()
+        assert resp_json
+
+        # poll until complete
+        for i in range(90):
+            resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, resp_json['job_id']))
+            resp.raise_for_status()
+            status = resp.json()['status']
+            if status == 'success':
+                resp = resp.json()
+                break
+            elif status == 'pending':
+                time.sleep(1.0)
+            else:
+                raise SavePageNowError("SPN2 status:{} url:{}".format(status, url))
+
+        return resp['resources']
 
