@@ -145,7 +145,7 @@ def teixml2json(content, encumbered=True):
     info['citations'] = refs
 
     text = tei.find('.//{%s}text' % (ns))
-    print(text.attrib)
+    #print(text.attrib)
     info['language_code'] = text.attrib['{%s}lang' % xml_ns]  # xml:lang
 
     if encumbered:
