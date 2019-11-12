@@ -109,6 +109,7 @@ def stdin_to_pg():
         info = parse_cdx_line(l)
         if not info:
             continue
+        # XXX: filter to, eg, PDF or octet/stream (derp)
         batch.append(info)
         counts['total'] += 1
         if len(batch) >= 1000:
