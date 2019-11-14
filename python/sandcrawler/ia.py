@@ -68,7 +68,10 @@ class CdxApiClient:
             sha1hex=b32_hex(cdx[5]),
         )
         if follow_redirects and cdx['http_status'] in (301, 302):
-            resp = requests.get(self.wayback_endpoint + cdx['datetime'] + "id_/" + cdx['url'])
+            try:
+                resp = requests.get(self.wayback_endpoint + cdx['datetime'] + "id_/" + cdx['url'])
+            except requests.exceptions.TooManyRedirects:
+                raise CdxApiError("redirect loop (wayback fetch)")
             next_url = '/'.join(resp.url.split('/')[5:])
             if next_url == url:
                 raise CdxApiError("redirect loop (by url)")
