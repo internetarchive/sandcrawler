@@ -1,0 +1,70 @@
+
+In docker:
+
+    kafkacat -C -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.grobid-output-pg | pv -l | rg 'OA-JOURNAL-CRAWL-2019-08' > OA-JOURNAL-CRAWL-2019-08.grobid.json
+    # 5.01M 0:31:04 [2.69k/s]
+    # 277 GByte grobid-output.prod.json
+
+Then:
+
+    cat grobid-output.prod.json | rg 'OA-JOURNAL-CRAWL-2019-08' | pv -l > OA-JOURNAL-CRAWL-2019-08.grobid.json
+    # 265k 0:32:12 [ 137 /s]
+
+    pigz grobid-output.prod.json
+    # 63 GByte grobid-output.prod.json.gz
+
+    cat OA-JOURNAL-CRAWL-2019-08.grobid.json | pv -l | jq "[.key, .status, .status_code, .error_msg] | @tsv" -r | sort -u -S 4G | uniq --check-chars 40 > OA-JOURNAL-CRAWL-2019-08.grobid.tsv
+    # 265k
+
+    wc -l OA-JOURNAL-CRAWL-2019-08.grobid.tsv
+    # 212879 OA-JOURNAL-CRAWL-2019-08.grobid.tsv
+
+    cut -f2 OA-JOURNAL-CRAWL-2019-08.grobid.tsv | sort | uniq -c
+    #  14087 error
+    # 198792 success
+
+In sandcrawler pipenv:
+
+    head -n100 /grande/oa-crawl-grobid/OA-JOURNAL-CRAWL-2019-08.grobid.json | ./grobid_tool.py transform --metadata-only - > /grande/oa-crawl-grobid/OA-JOURNAL-CRAWL-2019-08.metadata.json.sample
+
+    cat /grande/oa-crawl-grobid/OA-JOURNAL-CRAWL-2019-08.grobid.json | parallel --linebuffer --round-robin --pipe -j8 ./grobid_tool.py transform --metadata-only - > /grande/oa-crawl-grobid/OA-JOURNAL-CRAWL-2019-08.metadata.json
+
+    cat OA-JOURNAL-CRAWL-2019-08.metadata.json | rg -v '"fatcat_release": null' > OA-JOURNAL-CRAWL-2019-08.metadata.matched.json
+
+    wc -l OA-JOURNAL-CRAWL-2019-08.metadata.matched.json OA-JOURNAL-CRAWL-2019-08.grobid.tsv
+    #  28162 OA-JOURNAL-CRAWL-2019-08.metadata.matched.json
+    # 212879 OA-JOURNAL-CRAWL-2019-08.grobid.tsv
+
+Next steps:
+- import the matched files (while verifying match)
+- some web interface to make sandcrawler easier?
+    input: sha1 or url
+    view: grobid status and metadata, ML results, fatcat metadata (via API lookup)
+    links/actions: view PDF, re-run GROBID, add to a release (via API)
+
+## BAD/BROKEN
+
+All these following didn't work because old versions of kafkacat only read
+partial results. Ended up using docker to run more recent ubuntu, sigh.
+
+    kafkacat -C -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.grobid-output-pg -e | pv -l > grobid-output.prod.json
+
+    cat grobid-output.prod.json | rg '"status": "success"' > grobid-output.prod.success.json
+
+    kafkacat -C -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.grobid-output-pg -e | pv -l | rg '"status": "success"' > grobid-output.prod.success.json
+
+    kafkacat -C -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.grobid-output-pg -e | pv -l | rg 'OA-JOURNAL-CRAWL-2019-08' > OA-JOURNAL-CRAWL-2019-08.grobid.json
+
+    head -n200 /grande/oa-crawl-grobid/grobid-output.prod.success.json | ./grobid_tool.py transform --metadata-only - | jq "[.fatcat_release, .biblio.title]" -c | less
+
+
+    cat OA-JOURNAL-CRAWL-2019-08.grobid.json | parallel --pipe -j8 jq .status -r | sort | uniq -c
+         1879 error
+        26698 success
+
+
+For full grobid-output was looking like:
+
+     318561 error
+     199607 success
+
