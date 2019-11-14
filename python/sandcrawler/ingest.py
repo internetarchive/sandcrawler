@@ -73,8 +73,8 @@ class IngestFileWorker(SandcrawlerWorker):
                 return self.spn_client.save_url_now_v1(url)
     
         resp = requests.get(WAYBACK_ENDPOINT + cdx['datetime'] + "id_/" + cdx['url'])
-        if resp.status_code != 200:
-            raise WaybackError(resp.text)
+        if resp.status_code != cdx['http_status']:
+            raise WaybackError("Got unexpected wayback status (expected {} from CDX, got {})".format(cdx['http_status'], resp.status_code))
         body = resp.content
         return (cdx, body)
 
