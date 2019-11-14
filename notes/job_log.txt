@@ -101,3 +101,44 @@ joined-rows 0   14115453    14115453
     job_1559844455575_118299
     http://ia802401.us.archive.org:6988/proxy/application_1559844455575_118299
 
+## Re-GROBID batch (2019-11-12)
+
+Want to re-process "old" GROBID output with newer (0.5.5+fatcat) GROBID version
+(vanilla training) plus biblio-glutton identification. Hoping to make a couple
+million new fatcat matches; will probably do a later round of ML matching over
+this batch as well.
+
+    # in /grande/regrobid
+
+    # as postgres
+    psql sandcrawler < dump_regrobid_pdf.sql > dump_regrobid_pdf.txt
+
+    # as bnewbold
+    cat dump_regrobid_pdf.txt | sort -S 4G | uniq -w 40 | cut -f2 | pv -l > dump_regrobid_pdf.2019-11-12.json
+    # 41.5M lines, uniq by SHA1
+    # NOTE: not the full 56m+ from GROBID table... some in archive.org, others
+    # not application/pdf type. Will need to follow-up on those later
+
+    # intend to have 3 worker machines, but splitting 6 ways in case we need to
+    # re-balance load or get extra machines or something
+    split -n l/6 -a1 -d --additional-suffix=.json dump_regrobid_pdf.2019-11-12.json regrobid_cdx.split_
+
+    # distribute to tmp001, tmp002, tmp003:
+    tmp001: 0,1
+    tmp002: 2,3
+    tmp003: 4,5
+
+    # test local grobid config:
+    head /srv/sandcrawler/tasks/regrobid_cdx.split_0.json | pv -l | ./grobid_tool.py --grobid-host http://localhost:8070 -j0 extract-json - > example_out.json
+    # expect at least a couple fatcat matches
+    cat example_out.json | jq .tei_xml -r | rg fatcat
+
+    # test GROBID+kafka config:
+    cat /srv/sandcrawler/tasks/regrobid_cdx.split_*.json | pv -l | head | parallel -j40 --linebuffer --round-robin --pipe ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
+    
+    # full run, in a screen session
+    cat /srv/sandcrawler/tasks/regrobid_cdx.split_*.json | pv -l | parallel -j40 --linebuffer --round-robin --pipe ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
+
+NOTE: really should get parallel kafka worker going soon. if there is a reboot
+or something in the middle of this process, will need to re-run from the start.
+
