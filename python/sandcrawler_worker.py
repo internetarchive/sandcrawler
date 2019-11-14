@@ -21,15 +21,20 @@ def run_grobid_extract(args):
     consume_topic = "sandcrawler-{}.ungrobided-pg".format(args.env)
     produce_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
     sink = KafkaSink(kafka_hosts=args.kafka_hosts, produce_topic=produce_topic)
-    worker = GrobidWorker(host_url=args.grobid_host, sink=sink)
-    pusher = KafkaJsonPusher(sink=worker, group="grobid-extract")
+    grobid_client = GrobidClient(host_url=args.grobid_host)
+    wayback_client = WaybackClient(host_url=args.grobid_host)
+    worker = GrobidWorker(grobid_client=grobid_client, wayback_client=wayback_client, sink=sink)
+    pusher = KafkaJsonPusher(worker=worker, kafka_hosts=args.kafka_hosts,
+        consume_topic=consume_topic, group="grobid-extract")
     pusher.run()
 
 def run_grobid_persist(args):
     consume_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
-    sink = GrobidPersist(consume_topic=consume_topic)
-    pusher = KafkaJsonPusher(sink)
-    pusher.run()
+    raise NotImplementedError
+    #worker = GrobidPersistWorker()
+    #pusher = KafkaJsonPusher(worker=worker, kafka_hosts=args.kafka_hosts,
+    #    consume_topic=consume_topic, group="grobid-persist")
+    #pusher.run()
 
 def run_ingest_file(args):
     consume_topic = "sandcrawler-{}.ingest-file-requests".format(args.env)

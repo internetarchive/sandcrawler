@@ -181,7 +181,7 @@ class IngestFileRequestHandler(BaseHTTPRequestHandler):
         length = int(self.headers.get('content-length'))
         request = json.loads(self.rfile.read(length).decode('utf-8'))
         print("Got request: {}".format(request))
-        ingester = FileIngestWorker()
+        ingester = IngestFileWorker()
         result = ingester.process(request)
         self.send_response(200)
         self.end_headers()
