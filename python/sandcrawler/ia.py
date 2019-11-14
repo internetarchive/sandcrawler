@@ -126,6 +126,9 @@ class WaybackClient:
 class SavePageNowError(Exception):
     pass
 
+class SavePageNowRemoteError(Exception):
+    pass
+
 class SavePageNowClient:
 
     def __init__(self, cdx_client=None,
@@ -156,13 +159,18 @@ class SavePageNowClient:
         error on non-success.
         """
         resp = self.http_session.get(self.v1endpoint + url)
-        if resp.status_code != 200:
+        if resp.status_code != 200 and not resp.headers.get('X-Archive-Orig-Location'):
+            # looks like an error which was *not* a remote server error. Some
+            # problem with wayback, might need to short-circuit
             raise SavePageNowError("HTTP status: {}, url: {}".format(resp.status_code, url))
+        if resp.headers.get('X-Archive-Wayback-Runtime-Error'):
+            # looks like a weird remote error; would not expect a CDX reply so bailing here
+            raise SavePageNowRemoteError(resp.headers['X-Archive-Wayback-Runtime-Error'])
         terminal_url = '/'.join(resp.url.split('/')[5:])
         body = resp.content
         cdx = self.cdx_client.lookup_latest(terminal_url)
         if not cdx:
-            raise SavePageNowError("SPN was successful, but CDX lookup then failed")
+            raise SavePageNowError("SPN was successful, but CDX lookup then failed. URL: {}".format(terminal_url))
         return (cdx, body)
 
     def save_url_now_v2(self, url):
