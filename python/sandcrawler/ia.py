@@ -21,16 +21,23 @@ class CdxApiClient:
 
     def __init__(self, host_url="https://web.archive.org/cdx/search/cdx"):
         self.host_url = host_url
+        self.http_session = requests_retry_session(retries=3, backoff_factor=3)
+        self.http_session.headers.update({
+            'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
+        })
+        self.wayback_endpoint = "https://web.archive.org/web/"
 
-    def lookup_latest(self, url, recent_only=True, follow_redirects=False):
+    def lookup_latest(self, url, recent_only=True, follow_redirects=False, redirect_depth=0):
         """
         Looks up most recent HTTP 200 record for the given URL.
 
         Returns a CDX dict, or None if not found.
 
-        XXX: should do authorized lookup using cookie to get all fields
+        NOTE: could do authorized lookup using cookie to get all fields?
         """
-        WAYBACK_ENDPOINT = "https://web.archive.org/web/"
+
+        if redirect_depth >= 15:
+            raise CdxApiError("redirect loop (by iteration count)")
 
         since = datetime.date.today() - datetime.timedelta(weeks=4)
         params = {
@@ -43,7 +50,7 @@ class CdxApiClient:
             params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day),
         if not follow_redirects:
             params['filter'] = 'statuscode:200'
-        resp = requests.get(self.host_url, params=params)
+        resp = self.http_session.get(self.host_url, params=params)
         if resp.status_code != 200:
             raise CdxApiError(resp.text)
         rj = resp.json()
@@ -61,11 +68,11 @@ class CdxApiClient:
             sha1hex=b32_hex(cdx[5]),
         )
         if follow_redirects and cdx['http_status'] in (301, 302):
-            resp = requests.get(WAYBACK_ENDPOINT + cdx['datetime'] + "id_/" + cdx['url'])
-            assert resp.status_code == 200
+            resp = requests.get(self.wayback_endpoint + cdx['datetime'] + "id_/" + cdx['url'])
             next_url = '/'.join(resp.url.split('/')[5:])
-            assert next_url != url
-            return self.lookup_latest(next_url)
+            if next_url == url:
+                raise CdxApiError("redirect loop (by url)")
+            return self.lookup_latest(next_url, redirect_depth=redirect_depth+1)
         return cdx
 
 
