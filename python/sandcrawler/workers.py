@@ -401,13 +401,13 @@ def make_kafka_consumer(hosts, consume_topic, group):
         'bootstrap.servers': hosts,
         'group.id': group,
         'on_commit': fail_fast,
-        # messages don't have offset marked as stored until pushed to
-        # elastic, but we do auto-commit stored offsets to broker
+        # messages don't have offset marked as stored until processed,
+        # but we do auto-commit stored offsets to broker
         'enable.auto.offset.store': False,
         'enable.auto.commit': True,
         # user code timeout; if no poll after this long, assume user code
         # hung and rebalance (default: 5min)
-        'max.poll.interval.ms': 120000,
+        'max.poll.interval.ms': 300000,
         'default.topic.config': {
             'auto.offset.reset': 'latest',
         },

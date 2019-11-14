@@ -43,7 +43,7 @@ def run_ingest_file(args):
     grobid_client = GrobidClient(host_url=args.grobid_host)
     worker = IngestFileWorker(grobid_client=grobid_client, sink=sink)
     pusher = KafkaJsonPusher(worker=worker, kafka_hosts=args.kafka_hosts,
-        consume_topic=consume_topic, group="ingest-file")
+        consume_topic=consume_topic, group="ingest-file", batch_size=1)
     pusher.run()
 
 def main():
