@@ -152,7 +152,7 @@ class SavePageNowClient:
         self.ia_secret_key = os.environ.get('IA_SECRET_KEY')
         self.v1endpoint = v1endpoint
         self.v2endpoint = v2endpoint
-        self.v1_session = requests_retry_session(retries=5, backoff_factor=3)
+        self.v1_session = requests_retry_session(retries=5, backoff_factor=3, status_forcelist=())
         self.v1_session.headers.update({
             'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
         })
@@ -169,7 +169,7 @@ class SavePageNowClient:
         error on non-success.
         """
         try:
-            resp = self.v1_session.get(self.v1endpoint + url, status_forcelist=())
+            resp = self.v1_session.get(self.v1endpoint + url)
         except requests.exceptions.RetryError as re:
             # could have been any number of issues...
             raise SavePageNowError(str(re))
