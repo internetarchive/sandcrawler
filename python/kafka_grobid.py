@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+DEPRECATED: this worker uses old kafka topics and an old schema. Use
+`sandcrawler_worker.py` instead.
+
 Kafka worker that does GROBID extraction from one queue and into another.
 
 Based on the ungrobided Hadoop job code. Does not talk to HBase at all, just
