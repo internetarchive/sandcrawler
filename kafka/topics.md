@@ -25,6 +25,18 @@ retention (on both a size and time basis).
         => fewer partitions with batch mode, but still a bunch (24?)
         => key is sha1hex of PDF. enable time compaction (6 months?)
 
+    sandcrawler-ENV.ingest-file-requests
+        => ingest requests from multiple sources
+        => schema is JSON; see ingest proposal for fields. small objects.
+        => fewer partitions with batch mode, but still a bunch (24)
+        => can't think of a good key, so none. enable time compaction (3-6 months?)
+
+    sandcrawler-ENV.ingest-file-results
+        => ingest requests from multiple sources
+        => schema is JSON; see ingest proposal for fields. small objects.
+        => 6 partitions
+        => can't think of a good key, so none; no compaction
+
     fatcat-ENV.api-crossref
     fatcat-ENV.api-datacite
         => all new and updated DOIs (regardless of type)
@@ -98,6 +110,9 @@ exists`; this seems safe, and the settings won't be over-ridden.
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 24 --topic sandcrawler-qa.ungrobided-pg
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic sandcrawler-qa.grobid-output-pg --config compression.type=gzip --config cleanup.policy=compact
+
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 24 --topic sandcrawler-qa.ingest-file-requests --config retention.ms=7889400000 --config cleanup.policy=delete
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions  6 --topic sandcrawler-qa.ingest-file-results
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.changelog
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.release-updates-v03
