@@ -5,7 +5,7 @@ import base64
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError
+from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, SavePageNowRemoteError
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.misc import gen_file_metadata
 from sandcrawler.html import extract_fulltext_url
@@ -67,7 +67,6 @@ class IngestFileWorker(SandcrawlerWorker):
                     # extraction didn't work as expected; fetch whatever SPN2 got
                     cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
                 if not cdx:
-                    raise SavePageNowError("")
                     sys.stderr.write("{}\n".format(cdx_list))
                     raise Exception("Failed to crawl PDF URL")
             else:
@@ -97,10 +96,14 @@ class IngestFileWorker(SandcrawlerWorker):
         In all cases, print JSON status, and maybe push to sandcrawler-db
         """
 
-        response = dict(request=request)
+        response = dict(request=request, hit=False)
         url = request['base_url']
         while url:
-            (cdx_dict, body) = self.get_cdx_and_body(url)
+            try:
+                (cdx_dict, body) = self.get_cdx_and_body(url)
+            except SavePageNowRemoteError:
+                response['status'] = 'spn-remote-error'
+                return response
             sys.stderr.write("CDX hit: {}\n".format(cdx_dict))
 
             response['cdx'] = cdx_dict
@@ -108,6 +111,9 @@ class IngestFileWorker(SandcrawlerWorker):
             response['terminal'] = dict(url=cdx_dict['url'], http_status=cdx_dict['http_status'])
             if not body:
                 response['status'] = 'null-body'
+                return response
+            if cdx_dict['http_status'] != 200:
+                response['status'] = 'terminal-bad-status'
                 return response
             file_meta = gen_file_metadata(body)
             mimetype = cdx_dict['mimetype']
@@ -135,11 +141,12 @@ class IngestFileWorker(SandcrawlerWorker):
                     response['status'] = 'no-pdf-link'
                 return response
             elif 'pdf' in mimetype:
-                response['file_meta'] = file_meta
                 break
             else:
                 response['status'] = 'other-mimetype'
                 return response
+
+        response['file_meta'] = file_meta
 
         # if we got here, we have a PDF
         sha1hex = response['file_meta']['sha1hex']
