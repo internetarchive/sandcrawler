@@ -20,9 +20,10 @@ def run_single_ingest(args):
     return result
 
 def run_requests(args):
+    ingester = FileIngester()
     for l in args.json_file:
         request = json.loads(l.strip())
-        result = ingest_file(request)
+        result = ingester.ingest_file(request)
         print(json.dumps(result))
 
 def run_api(args):

@@ -6,6 +6,7 @@ import urllib.parse
 from bs4 import BeautifulSoup
 
 RESEARCHSQUARE_REGEX = re.compile(r'"url":"(https://assets.researchsquare.com/files/.{1,50}/v\d+/Manuscript.pdf)"')
+IEEEXPLORE_REGEX = re.compile(r'"pdfPath":"(/.*?\.pdf)"')
 
 def extract_fulltext_url(html_url, html_body):
     """
@@ -69,5 +70,23 @@ def extract_fulltext_url(html_url, html_body):
             if 'sciencedirect.com' in url:
                 url = urllib.parse.unquote(url)
                 return dict(next_url=url)
+
+    # ieeexplore.ieee.org
+    # https://ieeexplore.ieee.org/document/8730316
+    if '://ieeexplore.ieee.org/document/' in html_url:
+        # JSON in body with a field like:
+        # "pdfPath":"/iel7/6287639/8600701/08730316.pdf",
+        m = IEEEXPLORE_REGEX.search(html_body.decode('utf-8'))
+        if m:
+            url = m.group(1)
+            assert len(url) < 1024
+            return dict(release_stage="published", pdf_url=host_prefix+url)
+    # https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8730313
+    if '://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber' in html_url:
+        # HTML iframe like:
+        # <iframe src="http://web.archive.org/web/20191026011528if_/https://ieeexplore.ieee.org/ielx7/6287639/8600701/08730313.pdf?tp=&amp;arnumber=8730313&amp;isnumber=8600701&amp;ref=" frameborder="0"></iframe>
+        iframe = soup.find("iframe")
+        if iframe and '.pdf' in iframe['src']:
+            return dict(pdf_url=iframe['src'])
 
     return dict()

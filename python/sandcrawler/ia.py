@@ -5,6 +5,7 @@
 
 import os, sys, time
 import requests
+import datetime
 
 import wayback.exception
 from http.client import IncompleteRead
@@ -21,7 +22,7 @@ class CdxApiClient:
     def __init__(self, host_url="https://web.archive.org/cdx/search/cdx"):
         self.host_url = host_url
 
-    def lookup_latest(self, url, follow_redirects=False):
+    def lookup_latest(self, url, recent_only=True, follow_redirects=False):
         """
         Looks up most recent HTTP 200 record for the given URL.
 
@@ -29,21 +30,22 @@ class CdxApiClient:
 
         XXX: should do authorized lookup using cookie to get all fields
         """
+        WAYBACK_ENDPOINT = "https://web.archive.org/web/"
 
+        since = datetime.date.today() - datetime.timedelta(weeks=4)
         params = {
             'url': url,
             'matchType': 'exact',
             'limit': -1,
             'output': 'json',
         }
+        if recent_only:
+            params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day),
         if not follow_redirects:
             params['filter'] = 'statuscode:200'
         resp = requests.get(self.host_url, params=params)
-        if follow_redirects:
-            raise NotImplementedError
-        else:
-            if resp.status_code != 200:
-                raise CdxApiError(resp.text)
+        if resp.status_code != 200:
+            raise CdxApiError(resp.text)
         rj = resp.json()
         if len(rj) <= 1:
             return None
@@ -58,6 +60,12 @@ class CdxApiClient:
             sha1b32=cdx[5],
             sha1hex=b32_hex(cdx[5]),
         )
+        if follow_redirects and cdx['http_status'] in (301, 302):
+            resp = requests.get(WAYBACK_ENDPOINT + cdx['datetime'] + "id_/" + cdx['url'])
+            assert resp.status_code == 200
+            next_url = '/'.join(resp.url.split('/')[5:])
+            assert next_url != url
+            return self.lookup_latest(next_url)
         return cdx
 
 
@@ -183,11 +191,14 @@ class SavePageNowClient:
             status = resp.json()['status']
             if status == 'success':
                 resp = resp.json()
+                if resp.get('message', '').startswith('The same snapshot had been made'):
+                    raise SavePageNowError("SPN2 re-snapshot withing short time window")
                 break
             elif status == 'pending':
                 time.sleep(1.0)
             else:
                 raise SavePageNowError("SPN2 status:{} url:{}".format(status, url))
 
+        #print(resp)
         return resp['resources']
 

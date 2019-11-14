@@ -5,7 +5,7 @@ import base64
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient
+from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.misc import gen_file_metadata
 from sandcrawler.html import extract_fulltext_url
@@ -39,10 +39,12 @@ class FileIngester:
     
         WAYBACK_ENDPOINT = "https://web.archive.org/web/"
     
-        cdx = self.cdx_client.lookup_latest(url)
+        cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
         if not cdx:
+            # TODO: refactor this to make adding new domains/patterns easier
             # sciencedirect.com (Elsevier) requires browser crawling (SPNv2)
-            if ('sciencedirect.com' in url and '.pdf' in url):
+            if ('sciencedirect.com' in url and '.pdf' in url) or ('osapublishing.org' in url) or ('pubs.acs.org/doi/' in url) or ('ieeexplore.ieee.org' in url and ('.pdf' in url or '/stamp/stamp.jsp' in url)):
+                #print(url)
                 cdx_list = self.spn_client.save_url_now_v2(url)
                 for cdx_url in cdx_list:
                     if 'pdf.sciencedirectassets.com' in cdx_url and '.pdf' in cdx_url:
@@ -51,8 +53,19 @@ class FileIngester:
                     if 'osapublishing.org' in cdx_url and 'abstract.cfm' in cdx_url:
                         cdx = self.cdx_client.lookup_latest(cdx_url)
                         break
+                    if 'pubs.acs.org' in cdx_url and '/doi/pdf/' in cdx_url:
+                        cdx = self.cdx_client.lookup_latest(cdx_url)
+                        break
+                    if 'ieeexplore.ieee.org' in cdx_url and '.pdf' in cdx_url and 'arnumber=' in cdx_url:
+                        cdx = self.cdx_client.lookup_latest(cdx_url)
+                        break
                 if not cdx:
-                    raise Exception("Failed to crawl sciencedirect.com PDF URL")
+                    # extraction didn't work as expected; fetch whatever SPN2 got
+                    cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
+                if not cdx:
+                    raise SavePageNowError("")
+                    sys.stderr.write("{}\n".format(cdx_list))
+                    raise Exception("Failed to crawl PDF URL")
             else:
                 return self.spn_client.save_url_now_v1(url)
     
@@ -87,18 +100,31 @@ class FileIngester:
             sys.stderr.write("CDX hit: {}\n".format(cdx_dict))
 
             response['cdx'] = cdx_dict
-            response['terminal'] = dict()
+            # TODO: populate terminal
+            response['terminal'] = dict(url=cdx_dict['url'], http_status=cdx_dict['http_status'])
+            if not body:
+                response['status'] = 'null-body'
+                return response
             file_meta = gen_file_metadata(body)
             mimetype = cdx_dict['mimetype']
             if mimetype in ('warc/revisit', 'binary/octet-stream', 'application/octet-stream'):
                 mimetype = file_meta['mimetype']
+                response['file_meta'] = file_meta
             if 'html' in mimetype:
                 page_metadata = extract_fulltext_url(response['cdx']['url'], body)
                 if page_metadata and page_metadata.get('pdf_url'):
-                    url = page_metadata.get('pdf_url')
+                    next_url = page_metadata.get('pdf_url')
+                    if next_url == url:
+                        response['status'] = 'link-loop'
+                        return response
+                    url = next_url
                     continue
                 elif page_metadata and page_metadata.get('next_url'):
-                    url = page_metadata.get('next_url')
+                    next_url = page_metadata.get('next_url')
+                    if next_url == url:
+                        response['status'] = 'link-loop'
+                        return response
+                    url = next_url
                     continue
                 else:
                     response['terminal']['html'] = page_metadata
@@ -116,7 +142,7 @@ class FileIngester:
 
         # do GROBID
         response['grobid'] = self.grobid_client.process_fulltext(body)
-        sys.stderr.write("GROBID status: {}\n".format(response['grobid']['status']))
+        #sys.stderr.write("GROBID status: {}\n".format(response['grobid']['status']))
 
         # TODO: optionally publish to Kafka here, but continue on failure (but
         # send a sentry exception?)
@@ -129,7 +155,7 @@ class FileIngester:
             response['grobid'].pop('tei_xml')
 
         # Ok, now what?
-        sys.stderr.write("GOT TO END\n")
+        #sys.stderr.write("GOT TO END\n")
         response['status'] = "success"
         response['hit'] = True
         return response
@@ -144,7 +170,8 @@ class IngestFileRequestHandler(BaseHTTPRequestHandler):
         length = int(self.headers.get('content-length'))
         request = json.loads(self.rfile.read(length).decode('utf-8'))
         print("Got request: {}".format(request))
-        result = ingest_file(request)
+        ingester = FileIngester()
+        result = ingester.ingest_file(request)
         self.send_response(200)
         self.end_headers()
         self.wfile.write(json.dumps(result))
