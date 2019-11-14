@@ -406,8 +406,8 @@ def make_kafka_consumer(hosts, consume_topic, group):
         'enable.auto.offset.store': False,
         'enable.auto.commit': True,
         # user code timeout; if no poll after this long, assume user code
-        # hung and rebalance (default: 5min)
-        'max.poll.interval.ms': 300000,
+        # hung and rebalance (default: 6min)
+        'max.poll.interval.ms': 360000,
         'default.topic.config': {
             'auto.offset.reset': 'latest',
         },
