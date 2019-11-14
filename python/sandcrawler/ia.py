@@ -173,6 +173,8 @@ class SavePageNowClient:
         except requests.exceptions.RetryError as re:
             # could have been any number of issues...
             raise SavePageNowError(str(re))
+        except requests.exceptions.TooManyRedirects as tmr:
+            raise SavePageNowRemoteError(str(tmr))
 
         if resp.status_code != 200 and resp.headers.get('X-Archive-Wayback-Runtime-Error'):
             # looks like a weird remote error; would not expect a CDX reply so bailing here
