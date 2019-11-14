@@ -116,6 +116,10 @@ class IngestFileWorker(SandcrawlerWorker):
                 response['status'] = 'cdx-error'
                 response['error_message'] = str(e)
                 return response
+            except WaybackError as e:
+                response['status'] = 'wayback-error'
+                response['error_message'] = str(e)
+                return response
             sys.stderr.write("CDX hit: {}\n".format(cdx_dict))
 
             response['cdx'] = cdx_dict
