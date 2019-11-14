@@ -25,7 +25,9 @@ def extract_fulltext_url(html_url, html_body):
         meta = soup.find('meta', attrs={"name":"bepress_citation_pdf_url"})
     if meta:
         url = meta['content'].strip()
-        if url.startswith('http'):
+        if url.startswith('/'):
+            return dict(pdf_url=host_prefix+url, technique='citation_pdf_url')
+        elif url.startswith('http'):
             return dict(pdf_url=url, technique='citation_pdf_url')
         else:
             sys.stderr.write("malformed citation_pdf_url? {}\n".format(url))
