@@ -192,7 +192,7 @@ class SavePageNowClient:
 
     def save_url_now_v2(self, url):
         """
-        Returns a list of cdx objects, or raises an error on non-success.
+        Returns a list of URLs, or raises an error on non-success.
         """
         if not (self.ia_access_key and self.ia_secret_key):
             raise Exception("SPNv2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
@@ -210,20 +210,24 @@ class SavePageNowClient:
         assert resp_json
 
         # poll until complete
+        final_json = None
         for i in range(90):
             resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, resp_json['job_id']))
             resp.raise_for_status()
             status = resp.json()['status']
             if status == 'success':
-                resp = resp.json()
-                if resp.get('message', '').startswith('The same snapshot had been made'):
-                    raise SavePageNowError("SPN2 re-snapshot withing short time window")
+                final_json = resp.json()
+                if final_json.get('message', '').startswith('The same snapshot had been made'):
+                    raise SavePageNowError("SPN2 re-snapshot within short time window")
                 break
             elif status == 'pending':
                 time.sleep(1.0)
             else:
                 raise SavePageNowError("SPN2 status:{} url:{}".format(status, url))
 
-        #print(resp)
-        return resp['resources']
+        if not final_json:
+            raise SavePageNowError("SPN2 timed out (polling count exceeded)")
+
+        #print(final_json)
+        return final_json['resources']
 
