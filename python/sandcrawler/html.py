@@ -91,4 +91,6 @@ def extract_fulltext_url(html_url, html_body):
         if iframe and '.pdf' in iframe['src']:
             return dict(pdf_url=iframe['src'])
 
+    # TODO: hrmars.com. anchor with .pdf href, and anchor text is "PDF"
+
     return dict()
