@@ -152,8 +152,8 @@ class SavePageNowClient:
         self.ia_secret_key = os.environ.get('IA_SECRET_KEY')
         self.v1endpoint = v1endpoint
         self.v2endpoint = v2endpoint
-        self.http_session = requests_retry_session(retries=5, backoff_factor=3)
-        self.http_session.headers.update({
+        self.v1_session = requests_retry_session(retries=5, backoff_factor=3)
+        self.v1_session.headers.update({
             'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
         })
         self.v2_session = requests_retry_session(retries=5, backoff_factor=3)
@@ -168,14 +168,21 @@ class SavePageNowClient:
         Returns a tuple (cdx, blob) on success of single fetch, or raises an
         error on non-success.
         """
-        resp = self.http_session.get(self.v1endpoint + url)
-        if resp.status_code != 200 and not resp.headers.get('X-Archive-Orig-Location'):
-            # looks like an error which was *not* a remote server error. Some
-            # problem with wayback, might need to short-circuit
-            raise SavePageNowError("HTTP status: {}, url: {}".format(resp.status_code, url))
-        if resp.headers.get('X-Archive-Wayback-Runtime-Error'):
+        try:
+            resp = self.v1_session.get(self.v1endpoint + url, status_forcelist=())
+        except requests.exceptions.RetryError as re:
+            # could have been any number of issues...
+            raise SavePageNowError(str(re))
+
+        if resp.status_code != 200 and resp.headers.get('X-Archive-Wayback-Runtime-Error'):
             # looks like a weird remote error; would not expect a CDX reply so bailing here
             raise SavePageNowRemoteError(resp.headers['X-Archive-Wayback-Runtime-Error'])
+        if resp.status_code != 200 and not resp.headers.get('X-Archive-Orig-Location'):
+            # looks like an error which was *not* just a remote server HTTP
+            # status code, or one of the handled wayback runtime errors. Some
+            # of these are remote server errors that wayback doesn't detect?
+            raise SavePageNowError("HTTP status: {}, url: {}".format(resp.status_code, url))
+
         terminal_url = '/'.join(resp.url.split('/')[5:])
         body = resp.content
         cdx = self.cdx_client.lookup_latest(terminal_url)
