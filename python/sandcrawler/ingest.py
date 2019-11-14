@@ -74,8 +74,11 @@ class IngestFileWorker(SandcrawlerWorker):
                     raise SavePageNowError("Failed to find terminal capture from SPNv2")
             else:
                 return self.spn_client.save_url_now_v1(url)
-    
-        resp = requests.get(WAYBACK_ENDPOINT + cdx['datetime'] + "id_/" + cdx['url'])
+
+        try:
+            resp = requests.get(WAYBACK_ENDPOINT + cdx['datetime'] + "id_/" + cdx['url'])
+        except requests.exceptions.TooManyRedirects as e:
+            raise WaybackError("Redirect loop fetching from wayback (dt: {}, url: {})".format(cdx['datetime'], cdx['url']))
         if resp.status_code != cdx['http_status']:
             raise WaybackError("Got unexpected wayback status (expected {} from CDX, got {})".format(cdx['http_status'], resp.status_code))
         body = resp.content
