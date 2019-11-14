@@ -9,11 +9,15 @@ from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, Wayba
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.misc import gen_file_metadata
 from sandcrawler.html import extract_fulltext_url
+from sandcrawler.workers import SandcrawlerWorker
 
-class FileIngester:
 
-    def __init__(self, **kwargs):
+class IngestFileWorker(SandcrawlerWorker):
+
+    def __init__(self, sink=None, **kwargs):
+        super().__init__()
         
+        self.sink = sink
         self.spn_client = kwargs.get('spn_client',
             SavePageNowClient())
         self.wayback_client = kwargs.get('wayback_client',
@@ -75,7 +79,7 @@ class FileIngester:
         body = resp.content
         return (cdx, body)
 
-    def ingest_file(self, request):
+    def process(self, request):
         """
         1. check sandcrawler-db for base_url
             -> if found, populate terminal+wayback fields
@@ -170,8 +174,8 @@ class IngestFileRequestHandler(BaseHTTPRequestHandler):
         length = int(self.headers.get('content-length'))
         request = json.loads(self.rfile.read(length).decode('utf-8'))
         print("Got request: {}".format(request))
-        ingester = FileIngester()
-        result = ingester.ingest_file(request)
+        ingester = FileIngestWorker()
+        result = ingester.process(request)
         self.send_response(200)
         self.end_headers()
         self.wfile.write(json.dumps(result))

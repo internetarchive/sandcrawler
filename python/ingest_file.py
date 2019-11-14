@@ -5,7 +5,7 @@ import json
 import argparse
 
 from http.server import HTTPServer
-from sandcrawler.ingest import IngestFileRequestHandler, FileIngester
+from sandcrawler.ingest import IngestFileRequestHandler, IngestFileWorker
 
 
 def run_single_ingest(args):
@@ -14,16 +14,17 @@ def run_single_ingest(args):
         ext_ids=dict(doi=args.doi),
         release_id=args.release_id,
     )
-    ingester = FileIngester()
-    result = ingester.ingest_file(request)
+    ingester = IngestFileWorker()
+    result = ingester.process(request)
     print(json.dumps(result))
     return result
 
 def run_requests(args):
-    ingester = FileIngester()
+    # TODO: switch to using JsonLinePusher
+    ingester = IngestFileWorker()
     for l in args.json_file:
         request = json.loads(l.strip())
-        result = ingester.ingest_file(request)
+        result = ingester.process(request)
         print(json.dumps(result))
 
 def run_api(args):
