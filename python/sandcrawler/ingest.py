@@ -5,7 +5,7 @@ import base64
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, SavePageNowRemoteError
+from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, SavePageNowRemoteError, CdxApiError
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.misc import gen_file_metadata
 from sandcrawler.html import extract_fulltext_url
@@ -101,8 +101,17 @@ class IngestFileWorker(SandcrawlerWorker):
         while url:
             try:
                 (cdx_dict, body) = self.get_cdx_and_body(url)
-            except SavePageNowRemoteError:
+            except SavePageNowRemoteError as e:
                 response['status'] = 'spn-remote-error'
+                response['error_message'] = str(e)
+                return response
+            except SavePageNowError as e:
+                response['status'] = 'spn-error'
+                response['error_message'] = str(e)
+                return response
+            except CdxApiError as e:
+                response['status'] = 'cdx-error'
+                response['error_message'] = str(e)
                 return response
             sys.stderr.write("CDX hit: {}\n".format(cdx_dict))
 
