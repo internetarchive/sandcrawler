@@ -68,7 +68,7 @@ class IngestFileWorker(SandcrawlerWorker):
                     cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
                 if not cdx:
                     sys.stderr.write("{}\n".format(cdx_list))
-                    raise Exception("Failed to crawl PDF URL")
+                    raise SavePageNowError("Failed to find terminal capture from SPNv2")
             else:
                 return self.spn_client.save_url_now_v1(url)
     
