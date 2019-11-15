@@ -108,6 +108,8 @@ class KafkaSink(SandcrawlerWorker):
         config = self.producer_config({
             'bootstrap.servers': kafka_hosts,
             'message.max.bytes': 20000000, # ~20 MBytes; broker is ~50 MBytes
+            'api.version.request': True,
+            'api.version.fallback.ms': 0,
         })
         self.producer = Producer(config)
 

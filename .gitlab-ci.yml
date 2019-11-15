@@ -25,7 +25,10 @@ test_python_hadoop:
     - pipenv install --dev --deploy
     - pipenv run pytest --cov
 
+# needs fixing; some upstream com.hadoop.gplcompression#hadoop-lzo;0.4.16: java.lang.NullPointerException
+# change happened
 test_scalding:
+  when: manual
   script:
     - ./please -h
     - cd scalding
@@ -33,9 +36,10 @@ test_scalding:
     - sbt -mem 1024 assembly
 
 # Needs fixing
-#test_pig:
-#  script:
-#    - ./fetch_hadoop.sh
-#    - cd pig
-#    - pipenv install --dev --deploy
-#    - JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::") pipenv run pytest
+test_pig:
+  when: manual
+  script:
+    - ./fetch_hadoop.sh
+    - cd pig
+    - pipenv install --dev --deploy
+    - JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::") pipenv run pytest
