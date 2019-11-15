@@ -142,3 +142,34 @@ this batch as well.
 NOTE: really should get parallel kafka worker going soon. if there is a reboot
 or something in the middle of this process, will need to re-run from the start.
 
+Was getting a bunch of weird kafka INVALID_MSG errors on produce. Would be nice to be able to retry, so doing:
+
+    cat /srv/sandcrawler/tasks/regrobid_cdx.split_*.json | pv -l | parallel --joblog regrobid_job.log --retries 5 -j40 --linebuffer --pipe ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
+
+Never mind, going to split into chunks which can be retried.
+
+    cd /srv/sandcrawler/tasks
+    sudo chown sandcrawler:staff .
+    cat regrobid_cdx.split_* | split -l 20000 -a4 -d --additional-suffix=.json - chunk_
+    ls /srv/sandcrawler/tasks/chunk_*.json | parallel -j4 ./extract_chunk.sh {}
+
+extract_chunk.sh:
+
+
+    #!/bin/bash
+
+    set -x -e -u -o pipefail
+
+    if [ -f $1.SUCCESS ]; then
+        echo "Skipping: $1..."
+        exit
+    fi
+
+    echo "Extracting $1..."
+
+    date
+    cat $1 | parallel -j10 --linebuffer --round-robin --pipe ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
+
+    touch $1.SUCCESS
+
+seems to be working better! tested and if there is a problem with one chunk the others continue
