@@ -44,6 +44,12 @@ class GrobidClient(object):
         if grobid_response.status_code == 200:
             info['status'] = 'success'
             info['tei_xml'] = grobid_response.text
+            if len(info['tei_xml']) > 19500000:
+                # XML is larger than Kafka message size, and much larger than
+                # an article in general; bail out
+                info['status'] = 'error'
+                info['error_msg'] = "response XML too large: {} bytes".format(len(len(info['tei_xml'])))
+                info.pop('tei_xml')
         else:
             # response.text is .content decoded as utf-8
             info['status'] = 'error'
