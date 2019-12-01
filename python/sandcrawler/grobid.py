@@ -1,6 +1,5 @@
 
 import requests
-from collections import Counter
 
 from grobid2json import teixml2json
 from .workers import SandcrawlerWorker
