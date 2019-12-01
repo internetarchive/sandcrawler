@@ -127,7 +127,8 @@ class GrobidBlobWorker(SandcrawlerWorker):
         self.consolidate_mode = 2
 
     def process(self, blob):
-        assert blob
+        if not blob:
+            return None
         result = self.grobid_client.process_fulltext(blob, consolidate_mode=self.consolidate_mode)
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']
