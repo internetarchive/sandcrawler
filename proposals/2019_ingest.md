@@ -28,6 +28,50 @@ transform the task into a list of ingest requests, then submit those requests
 to an automated system to have them archived and inserted into fatcat with as
 little manual effort as possible.
 
+## Use Cases and Workflows
+
+### Unpaywall Example
+
+As a motivating example, consider how unpaywall crawls are done today:
+
+- download and archive JSON dump from unpaywall. transform and filter into a
+  TSV with DOI, URL, release-stage columns.
+- filter out previously crawled URLs from this seed file, based on last dump,
+  with the intent of not repeating crawls unnecessarily
+- run heritrix3 crawl, usually by sharding seedlist over multiple machines.
+  after crawl completes:
+    - backfill CDX PDF subset into hbase (for future de-dupe)
+    - generate CRL files etc and upload to archive items
+- run arabesque over complete crawl logs. this takes time, is somewhat manual,
+  and has scaling issues past a few million seeds
+- depending on source/context, run fatcat import with arabesque results
+- periodically run GROBID (and other transforms) over all new harvested files
+
+Issues with this are:
+
+- seedlist generation and arabesque step are toilsome (manual), and arabesque
+  likely has metadata issues or otherwise "leaks" content
+- brozzler pipeline is entirely separate
+- results in re-crawls of content already in wayback, in particular links
+  between large corpuses
+
+New plan:
+
+- download dump, filter, transform into ingest requests (mostly the same as
+  before)
+- load into ingest-request SQL table. only new rows (unique by source, type,
+  and URL) are loaded. run a SQL query for new rows from the source with URLs
+  that have not been ingested
+- (optional) pre-crawl bulk/direct URLs using heritrix3, as before, to reduce
+  later load on SPN
+- run ingest script over the above SQL output. ingest first hits CDX/wayback,
+  and falls back to SPNv2 (brozzler) for "hard" requests, or based on URL.
+  ingest worker handles file metadata, GROBID, any other processing. results go
+  to kafka, then SQL table
+- either do a bulk fatcat import (via join query), or just have workers
+  continuously import into fatcat from kafka ingest feed (with various quality
+  checks)
+
 ## Request/Response Schema
 
 For now, plan is to have a single request type, and multiple similar but
@@ -35,13 +79,14 @@ separate result types, depending on the ingest type (file, fileset,
 webcapture). The initial use case is single file PDF ingest.
 
 NOTE: what about crawl requests where we don't know if we will get a PDF or
-HTML? Or both?
+HTML? Or both? Let's just recrawl.
 
 *IngestRequest*
-  - `ingest_type`: required, one of `file`, `fileset`, or `webcapture`
+  - `ingest_type`: required, one of `pdf`, `xml`, `html`, `dataset`
   - `base_url`: required, where to start crawl process
-  - `project`/`source`: recommended, slug string. to track where this ingest
-    request is coming from
+  - `source`: recommended, slug string. indicating the database or "authority" where URL/identifier match is coming from (eg, `unpaywall`, `semantic-scholar`, `save-paper-now`, `doi`)
+  - `source_id`: recommended, slug string. to track where this ingest request is coming from
+  - `actor`: recommended, slug string. tracks the code or user who submitted request
   - `fatcat`
     - `release_stage`: optional
     - `release_ident`: optional
@@ -52,7 +97,6 @@ HTML? Or both?
     - `doi`
     - `pmcid`
     - ...
-  - `expect_mimetypes`: 
   - `expect_hash`: optional, if we are expecting a specific file
     - `sha1`
     - ...
@@ -62,7 +106,7 @@ HTML? Or both?
   - terminal
     - url
     - status_code
-  - wayback
+  - wayback (XXX: ?)
     - datetime
     - archive_url
   - file_meta (same schema as sandcrawler-db table)
@@ -73,25 +117,115 @@ HTML? Or both?
     - mimetype
   - cdx (same schema as sandcrawler-db table)
   - grobid (same schema as sandcrawler-db table)
-    - version
+    - status
+    - grobid_version
     - status_code
     - xml_url
-    - release_id
+    - fatcat_release (via biblio-glutton match)
+    - metadata (JSON)
   - status (slug): 'success', 'error', etc
   - hit (boolean): whether we got something that looks like what was requested
 
-## Result Schema
+## New SQL Tables
 
-## New API Endpoints
+Sandcrawler should persist status about:
+
+- claimed locations (links) to fulltext copies of in-scope works, from indexes
+  like unpaywall, MAG, semantic scholar, CORE
+    - with enough context to help insert into fatcat if works are crawled and
+      found. eg, external identifier that is indexed in fatcat, and
+      release-stage
+- state of attempting to crawl all such links
+    - again, enough to insert into fatcat
+    - also info about when/how crawl happened, particularly for failures, so we
+      can do retries
+
+Proposing two tables:
+
+    -- source/source_id examples:
+    --  unpaywall / doi
+    --  mag / mag_id
+    --  core / core_id
+    --  s2 / semanticscholar_id
+    --  save-paper-now / fatcat_release
+    --  doi / doi (for any base_url which is just https://doi.org/10..., regardless of why enqueued)
+    --  pubmed / pmid (for any base_url like europmc.org, regardless of why enqueued)
+    --  arxiv / arxiv_id (for any base_url like arxiv.org, regardless of why enqueued)
+    CREATE TABLE IF NOT EXISTS ingest_request (
+        -- conceptually: source, source_id, ingest_type, url
+        -- but we use this order for PRIMARY KEY so we have a free index on type/URL
+        ingest_type             TEXT NOT NULL CHECK (octet_length(ingest_type) >= 1),
+        base_url                TEXT NOT NULL CHECK (octet_length(url) >= 1),
+        source                  TEXT NOT NULL CHECK (octet_length(source) >= 1),
+        source_id               TEXT NOT NULL CHECK (octet_length(source_id) >= 1),
+        actor                   TEXT NOT NULL CHECK (octet_length(actor) >= 1),
+
+        created                 TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+        release_stage           TEXT CHECK (octet_length(release_stage) >= 1),
+        request                 JSONB,
+        -- request isn't required, but can stash extra fields there for import, eg:
+        --   ext_ids (source/source_id sometimes enough)
+        --   fatcat_release (if ext_ids and source/source_id not specific enough; eg SPN)
+        --   edit_extra
+
+        PRIMARY KEY (ingest_type, base_url, source, source_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS ingest_file_result (
+        ingest_type             TEXT NOT NULL CHECK (octet_length(ingest_type) >= 1),
+        base_url                TEXT NOT NULL CHECK (octet_length(url) >= 1),
+
+        updated                 TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+        hit                     BOOLEAN NOT NULL,
+        status                  TEXT
+        terminal_url            TEXT, INDEX
+        terminal_dt             TEXT
+        terminal_status_code    INT
+        terminal_sha1hex        TEXT, INDEX
+
+        PRIMARY KEY (ingest_type, base_url)
+    );
 
 ## New Kafka Topics
 
 - `sandcrawler-ENV.ingest-file-requests`
 - `sandcrawler-ENV.ingest-file-results`
 
-## New Fatcat Features
+## Ingest Tool Design
+
+The basics of the ingest tool are to:
+
+- use native wayback python library to do fast/efficient lookups and redirect
+  lookups
+- starting from base-url, do a fetch to either target resource or landing page:
+  follow redirects, at terminus should have both CDX metadata and response body
+    - if no capture, or most recent is too old (based on request param), do
+      SPNv2 (brozzler) fetches before wayback lookups
+- if looking for PDF but got landing page (HTML), try to extract a PDF link
+  from HTML using various tricks, then do another fetch. limit this
+  recursion/spidering to just landing page (or at most one or two additional
+  hops)
+
+Note that if we pre-crawled with heritrix3 (with `citation_pdf_url` link
+following), then in the large majority of simple cases we
 
 ## Design Issues
+
+### Open Questions
+
+Do direct aggregator/repositories crawls need to go through this process? Eg
+arxiv.org or pubmed. I guess so, otherwise how do we get full file metadata
+(size, other hashes)?
+
+When recording hit status for a URL (ingest result), is that status dependent
+on the crawl context? Eg, for save-paper-now we might want to require GROBID.
+Semantics of `hit` should probably be consistent: if we got the filetype
+expected based on type, not whether we would actually import to fatcat.
+
+Where to include knowledge about, eg, single-page abstract PDFs being bogus? Do
+we just block crawling, set an ingest result status, or only filter at fatcat
+import time? Definitely need to filter at fatcat import time to make sure
+things don't slip through elsewhere.
 
 ### Yet Another PDF Harvester
 
