@@ -43,6 +43,17 @@ CREATE TABLE IF NOT EXISTS grobid (
     status_code         INT NOT NULL,
     status              TEXT CHECK (octet_length(status) >= 1),
     fatcat_release      TEXT CHECK (octet_length(fatcat_release) = 26),
+    -- extracted basic biblio metadata:
+    --  title
+    --  authors[]
+    --    full/display
+    --    given_name
+    --    surname
+    --    affiliation
+    --  year
+    --  journal_issn
+    --  journal_name
+    --  refs_count
     metadata            JSONB
 );
 -- CREATE INDEX grobid_fatcat_release_idx ON grobid(fatcat_release);
