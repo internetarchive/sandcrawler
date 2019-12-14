@@ -82,23 +82,33 @@ NOTE: what about crawl requests where we don't know if we will get a PDF or
 HTML? Or both? Let's just recrawl.
 
 *IngestRequest*
-  - `ingest_type`: required, one of `pdf`, `xml`, `html`, `dataset`
+  - `ingest_type`: required, one of `pdf`, `xml`, `html`, `dataset`. For
+    backwards compatibility, `file` should be interpreted as `pdf`. `pdf` and
+    `xml` return file ingest respose; `html` and `dataset` not implemented but
+    would be webcapture (wayback) and fileset (archive.org item or wayback?).
+    In the future: `epub`, `video`, `git`, etc.
   - `base_url`: required, where to start crawl process
-  - `source`: recommended, slug string. indicating the database or "authority" where URL/identifier match is coming from (eg, `unpaywall`, `semantic-scholar`, `save-paper-now`, `doi`)
-  - `source_id`: recommended, slug string. to track where this ingest request is coming from
-  - `actor`: recommended, slug string. tracks the code or user who submitted request
+  - `link_source`: recommended, slug string. indicating the database or "authority"
+    where URL/identifier match is coming from (eg, `doi`, `pubmed`, `unpaywall`
+    (doi), `s2` (semantic-scholar id), `spn` (fatcat release), `core` (CORE
+    id), `mag` (MAG id))
+  - `link_source_id`: recommended, identifier string. pairs with `link_source`.
+  - `ingest_request_source`: recommended, slug string. tracks the service or
+    user who submitted request. eg, `fatcat-changelog`, `editor_<ident>`,
+    `savepapernow-web`
+  - `release_stage`: optional. indicates the release stage of fulltext expected to be found at this URL
   - `fatcat`
-    - `release_stage`: optional
-    - `release_ident`: optional
-    - `work_ident`: optional
+    - `release_ident`: optional. if provided, indicates that ingest is expected
+      to be fulltext copy of this release (though may be a sibling release
+      under same work if `release_stage` doesn't match)
+    - `work_ident`: optional, unused. might eventually be used if, eg,
+      `release_stage` of ingested file doesn't match that of the `release_ident`
     - `edit_extra`: additional metadata to be included in any eventual fatcat
-      commits. supplements project/source
-  - `ext_ids`
+      commits.
+  - `ext_ids`: matching fatcat schema. used for later lookups. sometimes
+    `link_source` and id are sufficient.
     - `doi`
     - `pmcid`
-    - ...
-  - `expect_hash`: optional, if we are expecting a specific file
-    - `sha1`
     - ...
 
 *FileIngestResult*
@@ -156,9 +166,8 @@ Proposing two tables:
         -- but we use this order for PRIMARY KEY so we have a free index on type/URL
         ingest_type             TEXT NOT NULL CHECK (octet_length(ingest_type) >= 1),
         base_url                TEXT NOT NULL CHECK (octet_length(url) >= 1),
-        source                  TEXT NOT NULL CHECK (octet_length(source) >= 1),
-        source_id               TEXT NOT NULL CHECK (octet_length(source_id) >= 1),
-        actor                   TEXT NOT NULL CHECK (octet_length(actor) >= 1),
+        link_source             TEXT NOT NULL CHECK (octet_length(link_source) >= 1),
+        link_source_id          TEXT NOT NULL CHECK (octet_length(link_source_id) >= 1),
 
         created                 TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
         release_stage           TEXT CHECK (octet_length(release_stage) >= 1),
@@ -167,8 +176,9 @@ Proposing two tables:
         --   ext_ids (source/source_id sometimes enough)
         --   fatcat_release (if ext_ids and source/source_id not specific enough; eg SPN)
         --   edit_extra
+        -- ingest_request_source   TEXT NOT NULL CHECK (octet_length(ingest_request_source) >= 1),
 
-        PRIMARY KEY (ingest_type, base_url, source, source_id)
+        PRIMARY KEY (ingest_type, base_url, link_source, link_source_id)
     );
 
     CREATE TABLE IF NOT EXISTS ingest_file_result (

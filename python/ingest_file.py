@@ -12,7 +12,7 @@ def run_single_ingest(args):
     request = dict(
         base_url=args.url,
         ext_ids=dict(doi=args.doi),
-        release_id=args.release_id,
+        fatcat=dict(release_ident=args.release_id),
     )
     ingester = IngestFileWorker()
     result = ingester.process(request)
