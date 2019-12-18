@@ -177,7 +177,8 @@ def main():   # pragma no cover
         content = open(filename, 'r')
         print(json.dumps(
             teixml2json(content,
-               encumbered=(not args.no_encumbered))))
+               encumbered=(not args.no_encumbered)),
+            sort_keys=True))
 
 if __name__=='__main__':   # pragma no cover
     main()

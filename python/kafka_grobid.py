@@ -282,7 +282,7 @@ class KafkaGrobidWorker:
                         grobid_output.get('key'),
                         status))
                     sys.stdout.flush()
-                    producer.produce(json.dumps(grobid_output).encode('utf-8'))
+                    producer.produce(json.dumps(grobid_output, sort_keys=True).encode('utf-8'))
                     sequential_failures = 0
                 else:
                     sys.stderr.write("failed to extract: {}\n".format(status))

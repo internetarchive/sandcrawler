@@ -16,7 +16,7 @@ def run_single_ingest(args):
     )
     ingester = IngestFileWorker()
     result = ingester.process(request)
-    print(json.dumps(result))
+    print(json.dumps(result, sort_keys=True))
     return result
 
 def run_requests(args):
@@ -25,7 +25,7 @@ def run_requests(args):
     for l in args.json_file:
         request = json.loads(l.strip())
         result = ingester.process(request)
-        print(json.dumps(result))
+        print(json.dumps(result, sort_keys=True))
 
 def run_api(args):
     port = 8083
@@ -67,7 +67,7 @@ def main():
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
-        sys.stderr.write("tell me what to do!\n")
+        print("tell me what to do!", file=sys.stderr)
         sys.exit(-1)
 
     args.func(args)

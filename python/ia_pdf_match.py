@@ -102,7 +102,7 @@ def run():
         obj = json.loads(line)
         match = parse(obj)
         if match:
-            print(json.dumps(match))
+            print(json.dumps(match, sort_keys=True))
 
 if __name__ == '__main__':
     run()
