@@ -30,7 +30,7 @@ def extract_fulltext_url(html_url, html_body):
         elif url.startswith('http'):
             return dict(pdf_url=url, technique='citation_pdf_url')
         else:
-            sys.stderr.write("malformed citation_pdf_url? {}\n".format(url))
+            print("malformed citation_pdf_url? {}".format(url), file=sys.stderr)
 
     # ACS (and probably others) like:
     #   https://pubs.acs.org/doi/10.1021/acs.estlett.9b00379

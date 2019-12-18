@@ -285,10 +285,10 @@ class KafkaGrobidWorker:
                     producer.produce(json.dumps(grobid_output, sort_keys=True).encode('utf-8'))
                     sequential_failures = 0
                 else:
-                    sys.stderr.write("failed to extract: {}\n".format(status))
+                    print("failed to extract: {}".format(status), file=sys.stderr)
                     sequential_failures += 1
                     if sequential_failures > 20:
-                        sys.stderr.write("too many failures in a row, bailing out\n")
+                        print("too many failures in a row, bailing out", file=sys.stderr)
                         sys.exit(-1)
 
 

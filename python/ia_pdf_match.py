@@ -27,7 +27,7 @@ import json
 
 def parse(obj):
     if obj['metadata']['identifier'].endswith('-test') or obj['metadata'].get('test'):
-        sys.stderr.write('skip: test item\n')
+        print('skip: test item', file=sys.stderr)
         return None
 
     extid_type = None
@@ -36,14 +36,14 @@ def parse(obj):
         extid_type = 'arxiv'
         extid = obj['metadata'].get('source')
         if not extid:
-            sys.stderr.write('skip: no source\n')
+            print('skip: no source', file=sys.stderr)
             return None
         assert extid.startswith('http://arxiv.org/abs/')
         extid = extid.replace('http://arxiv.org/abs/', '')
         #print(extid)
         assert '/' in extid or '.' in extid
         if not 'v' in extid or not extid[-1].isdigit():
-            sys.stderr.write('skip: non-versioned arxiv_id\n')
+            print('skip: non-versioned arxiv_id', file=sys.stderr)
             return None
     elif obj['metadata']['identifier'].startswith('paper-doi-10_'):
         extid_type = 'doi'
@@ -67,9 +67,9 @@ def parse(obj):
             pdf_file = f
             break
     if not pdf_file:
-        sys.stderr.write('skip: no PDF found: {}\n'.format(obj['metadata']['identifier']))
+        print('skip: no PDF found: {}'.format(obj['metadata']['identifier']), file=sys.stderr)
         #for f in obj['files']:
-        #    sys.stderr.write(f['format'] + "\n")
+        #    print(f['format'], file=sys.stderr)
         return None
 
     assert pdf_file['name'].endswith('.pdf')

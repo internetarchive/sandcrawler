@@ -70,7 +70,7 @@ class IngestFileWorker(SandcrawlerWorker):
                     # extraction didn't work as expected; fetch whatever SPN2 got
                     cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
                 if not cdx:
-                    sys.stderr.write("{}\n".format(cdx_list))
+                    print("{}".format(cdx_list), file=sys.stderr)
                     raise SavePageNowError("Failed to find terminal capture from SPNv2")
             else:
                 return self.spn_client.save_url_now_v1(url)
@@ -123,7 +123,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 response['status'] = 'wayback-error'
                 response['error_message'] = str(e)
                 return response
-            sys.stderr.write("CDX hit: {}\n".format(cdx_dict))
+            print("CDX hit: {}".format(cdx_dict), file=sys.stderr)
 
             response['cdx'] = cdx_dict
             # TODO: populate terminal
@@ -172,7 +172,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         # do GROBID
         response['grobid'] = self.grobid_client.process_fulltext(body)
-        #sys.stderr.write("GROBID status: {}\n".format(response['grobid']['status']))
+        #print("GROBID status: {}".format(response['grobid']['status']), file=sys.stderr)
 
         # TODO: optionally publish to Kafka here, but continue on failure (but
         # send a sentry exception?)
@@ -185,7 +185,7 @@ class IngestFileWorker(SandcrawlerWorker):
             response['grobid'].pop('tei_xml')
 
         # Ok, now what?
-        #sys.stderr.write("GOT TO END\n")
+        #print("GOT TO END", file=sys.stderr)
         response['status'] = "success"
         response['hit'] = True
         return response
