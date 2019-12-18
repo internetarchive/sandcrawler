@@ -295,7 +295,8 @@ class KafkaGrobidWorker:
 @sentry_client.capture_exceptions
 def main():
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--kafka-hosts',
                         default="localhost:9092",
                         help="list of Kafka brokers (host/port) to use")

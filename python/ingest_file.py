@@ -34,13 +34,15 @@ def run_api(args):
     server.serve_forever()
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--api-host-url',
         default="http://localhost:9411/v0",
         help="fatcat API host/port to use")
     subparsers = parser.add_subparsers()
 
-    sub_single= subparsers.add_parser('single')
+    sub_single= subparsers.add_parser('single',
+        help="ingests a single file URL")
     sub_single.set_defaults(func=run_single_ingest)
     sub_single.add_argument('--release-id',
         help="(optional) existing release ident to match to")
@@ -49,13 +51,15 @@ def main():
     sub_single.add_argument('url',
         help="URL of paper to fetch")
 
-    sub_requests = subparsers.add_parser('requests')
+    sub_requests = subparsers.add_parser('requests',
+        help="takes a series of ingest requests (JSON, per line) and runs each")
     sub_requests.set_defaults(func=run_requests)
     sub_requests.add_argument('json_file',
         help="JSON file (request per line) to import from (or stdin)",
         default=sys.stdin, type=argparse.FileType('r'))
 
-    sub_api = subparsers.add_parser('api')
+    sub_api = subparsers.add_parser('api',
+        help="starts a simple HTTP server that processes ingest requests")
     sub_api.set_defaults(func=run_api)
     sub_api.add_argument('--port',
         help="HTTP port to listen on",

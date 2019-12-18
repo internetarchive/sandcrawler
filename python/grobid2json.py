@@ -163,6 +163,7 @@ def teixml2json(content, encumbered=True):
 
 def main():   # pragma no cover
     parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="GROBID TEI XML to JSON",
         usage="%(prog)s [options] <teifile>...")
     parser.add_argument("--no-encumbered",

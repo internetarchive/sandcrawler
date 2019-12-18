@@ -47,7 +47,8 @@ def run_ingest_file(args):
     pusher.run()
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--kafka-hosts',
         default="localhost:9092",
         help="list of Kafka brokers (host/port) to use")
@@ -59,13 +60,16 @@ def main():
         help="GROBID API host/port")
     subparsers = parser.add_subparsers()
 
-    sub_grobid_extract = subparsers.add_parser('grobid-extract')
+    sub_grobid_extract = subparsers.add_parser('grobid-extract',
+        help="daemon that consumes CDX JSON objects from Kafka, extracts, pushes to Kafka")
     sub_grobid_extract.set_defaults(func=run_grobid_extract)
 
-    sub_grobid_persist = subparsers.add_parser('grobid-persist')
+    sub_grobid_persist = subparsers.add_parser('grobid-persist',
+        help="daemon that consumes GROBID output from Kafka and pushes to minio and postgres")
     sub_grobid_persist.set_defaults(func=run_grobid_persist)
 
-    sub_ingest_file = subparsers.add_parser('ingest-file')
+    sub_ingest_file = subparsers.add_parser('ingest-file',
+        help="daemon that consumes requests from Kafka, ingests, pushes results to Kafka")
     sub_ingest_file.set_defaults(func=run_ingest_file)
 
     args = parser.parse_args()

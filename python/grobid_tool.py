@@ -50,7 +50,8 @@ def run_extract_zipfile(args):
     pusher.run()
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--kafka-mode',
         action='store_true',
         help="send output to Kafka (not stdout)")
@@ -68,19 +69,22 @@ def main():
         help="GROBID API host/port")
     subparsers = parser.add_subparsers()
 
-    sub_extract_json = subparsers.add_parser('extract-json')
+    sub_extract_json = subparsers.add_parser('extract-json',
+        help="for each JSON line with CDX info, fetches PDF and does GROBID extraction")
     sub_extract_json.set_defaults(func=run_extract_json)
     sub_extract_json.add_argument('json_file',
         help="JSON file to import from (or '-' for stdin)",
         type=argparse.FileType('r'))
 
-    sub_extract_cdx = subparsers.add_parser('extract-cdx')
+    sub_extract_cdx = subparsers.add_parser('extract-cdx',
+        help="for each CDX line, fetches PDF and does GROBID extraction")
     sub_extract_cdx.set_defaults(func=run_extract_cdx)
     sub_extract_cdx.add_argument('cdx_file',
         help="CDX file to import from (or '-' for stdin)",
         type=argparse.FileType('r'))
 
-    sub_extract_zipfile = subparsers.add_parser('extract-zipfile')
+    sub_extract_zipfile = subparsers.add_parser('extract-zipfile',
+        help="opens zipfile, iterates over PDF files inside and does GROBID extract for each")
     sub_extract_zipfile.set_defaults(func=run_extract_zipfile)
     sub_extract_zipfile.add_argument('zip_file',
         help="zipfile with PDFs to extract",
