@@ -17,6 +17,9 @@ import unittest
 import subprocess
 
 
+def count_lines(s):
+    return len([l for l in s.strip().split('\n') if len(l) > 0])
+
 class PigTestHelper(unittest.TestCase):
 
     @classmethod
@@ -50,7 +53,7 @@ class PigTestHelper(unittest.TestCase):
         return retval
 
     def run_pig(self, script_path, in_file, **kwargs):
-        """Convenience helper around run_pig().
+        """Convenience helper around run_pig_raw().
         
         INPUT parameter is set to in_file.
         OUTPUT parameter is set to a random file.

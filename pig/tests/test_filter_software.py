@@ -1,10 +1,8 @@
 
 import os
 import unittest
-from pighelper import PigTestHelper
+from pighelper import PigTestHelper, count_lines
 
-def count_lines(s):
-    return len([l for l in s.strip().split('\n') if len(l) > 0])
 
 class TestFilterCDXSoftware(PigTestHelper):
 
