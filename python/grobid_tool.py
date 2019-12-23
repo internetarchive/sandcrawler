@@ -10,9 +10,11 @@ Example of large parallel run, locally:
 """
 
 import sys
+import json
 import argparse
 import datetime
 
+from grobid2json import teixml2json
 from sandcrawler import *
 
 
@@ -48,6 +50,22 @@ def run_extract_zipfile(args):
     worker = GrobidBlobWorker(grobid_client, sink=args.sink)
     pusher = ZipfilePusher(worker, args.zip_file)
     pusher.run()
+
+def run_transform(args):
+    grobid_client = GrobidClient()
+    for line in args.json_file:
+        if not line.strip():
+            continue
+        line = json.loads(line)
+        if args.metadata_only:
+            out = grobid_client.metadata(line)
+        else:
+            out = teixml2json(line['tei_xml'])
+        if out:
+            if 'source' in line:
+                out['source'] = line['source']
+            print(json.dumps(out))
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -89,6 +107,15 @@ def main():
     sub_extract_zipfile.add_argument('zip_file',
         help="zipfile with PDFs to extract",
         type=str)
+
+    sub_transform = subparsers.add_parser('transform')
+    sub_transform.set_defaults(func=run_transform)
+    sub_transform.add_argument('--metadata-only',
+        action='store_true',
+        help="Only pass through bibliographic metadata, not fulltext")
+    sub_transform.add_argument('json_file',
+        help="convert TEI-XML to JSON. Input is JSON lines with tei_xml field",
+        type=argparse.FileType('r'))
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
