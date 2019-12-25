@@ -5,6 +5,21 @@ No primary storage of anything in this table. Everything should be rapidly
 re-creatable from dumps, kafka topics (compressed), CDX, petabox metadata, etc.
 This is a secondary view on all of that.
 
+## Create Database and User
+
+Create system user with your username like:
+
+    sudo su postgres
+    createuser -s bnewbold
+
+Create database using `diesel` tool (see fatcat rust docs for install notes):
+
+    # DANGER: will delete/recreate entire database
+    diesel database reset
+
+In the future would probably be better to create a real role/password and
+supply these via `DATABASE_URL` env variable.
+
 ## Schema
 
     schema/database name is 'sandcrawler'
@@ -123,4 +138,36 @@ Questions we might want to answer
 
     http get :3030/cdx?url=eq.https://coleccionables.mercadolibre.com.ar/arduino-pdf_Installments_NoInterest_BestSellers_YES
     http get :3030/file_meta?sha1hex=eq.120582c855a7cc3c70a8527c560d7f27e6027278
+
+## Parse URLs
+
+One approach is to do regexes, something like:
+
+    SELECT substring(column_name FROM '[^/]+://([^/]+)/') AS domain_name FROM table_name;
+
+Eg:
+
+    SELECT DISTINCT(domain), COUNT(domain)
+        FROM (select substring(base_url FROM '[^/]+://([^/]*)') as domain FROM ingest_file_result) t1
+        WHERE t1.domain != ''
+        GROUP BY domain
+        ORDER BY COUNT DESC 
+        LIMIT 10;
+
+Or:
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain != ''
+            AND t1.status != 'success'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC
+        LIMIT 10;
+
+Can also do some quick lookups for a specific domain and protocol like:
+
+    SELECT *
+        FROM ingest_file_result
+        WHERE terminal_url LIKE 'https://insights.ovid.com/%'
+        LIMIT 10;
 
