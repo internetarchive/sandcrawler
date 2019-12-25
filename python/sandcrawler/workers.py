@@ -219,7 +219,11 @@ class JsonLinePusher(RecordPusher):
             if not line:
                 continue
             self.counts['total'] += 1
-            record = json.loads(line)
+            try:
+                record = json.loads(line)
+            except json.decoder.JSONDecodeError:
+                self.counts['error-json-decode'] += 1
+                continue
             if self.batch_size:
                 batch.append(record)
                 if len(batch) >= self.batch_size:
