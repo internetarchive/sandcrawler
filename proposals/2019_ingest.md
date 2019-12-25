@@ -157,9 +157,8 @@ Proposing two tables:
     --  mag / mag_id
     --  core / core_id
     --  s2 / semanticscholar_id
-    --  save-paper-now / fatcat_release
     --  doi / doi (for any base_url which is just https://doi.org/10..., regardless of why enqueued)
-    --  pubmed / pmid (for any base_url like europmc.org, regardless of why enqueued)
+    --  pmc / pmcid (for any base_url like europmc.org, regardless of why enqueued)
     --  arxiv / arxiv_id (for any base_url like arxiv.org, regardless of why enqueued)
     CREATE TABLE IF NOT EXISTS ingest_request (
         -- conceptually: source, source_id, ingest_type, url
@@ -174,7 +173,7 @@ Proposing two tables:
         request                 JSONB,
         -- request isn't required, but can stash extra fields there for import, eg:
         --   ext_ids (source/source_id sometimes enough)
-        --   fatcat_release (if ext_ids and source/source_id not specific enough; eg SPN)
+        --   release_ident (if ext_ids and source/source_id not specific enough; eg SPN)
         --   edit_extra
         -- ingest_request_source   TEXT NOT NULL CHECK (octet_length(ingest_request_source) >= 1),
 
