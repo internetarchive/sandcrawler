@@ -50,6 +50,20 @@ def run_grobid(args):
     )
     pusher.run()
 
+def run_grobid_disk(args):
+    """
+    Writes XML to individual files on disk, and also prints non-XML metadata to
+    stdout as JSON, which can be redirected to a separate file.
+    """
+    worker = PersistGrobidDiskWorker(
+        output_dir=args.output_dir,
+    )
+    pusher = JsonLinePusher(
+        worker,
+        args.json_file,
+    )
+    pusher.run()
+
 def run_ingest_file_result(args):
     worker = PersistIngestFileResultWorker(
         db_url=args.db_url,
@@ -97,6 +111,19 @@ def main():
     sub_grobid.add_argument('json_file',
         help="grobid file to import from (or '-' for stdin)",
         type=argparse.FileType('r'))
+    sub_grobid.add_argument('--s3-only',
+        action='store_true',
+        help="only upload TEI-XML to S3 (don't write to database)")
+
+    sub_grobid_disk = subparsers.add_parser('grobid-disk',
+        help="dump GRBOID output to (local) files on disk")
+    sub_grobid_disk.set_defaults(func=run_grobid_disk)
+    sub_grobid_disk.add_argument('json_file',
+        help="grobid file to import from (or '-' for stdin)",
+        type=argparse.FileType('r'))
+    sub_grobid_disk.add_argument('output_dir',
+        help="base directory to output into",
+        type=str)
 
     sub_ingest_file_result = subparsers.add_parser('ingest-file-result',
         help="backfill a ingest_file_result JSON dump into postgresql")

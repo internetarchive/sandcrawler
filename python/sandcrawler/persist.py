@@ -245,3 +245,36 @@ class PersistGrobidWorker(SandcrawlerWorker):
         self.db.commit()
         return []
 
+
+class PersistGrobidDiskWorker(SandcrawlerWorker):
+    """
+    Writes blobs out to disk.
+
+    This could be refactored into a "Sink" type with an even thinner wrapper.
+    """
+
+    def __init__(self, output_dir):
+        super().__init__()
+        self.output_dir = output_dir
+
+    def _blob_path(self, sha1hex, extension=".tei.xml"):
+        obj_path = "{}/{}/{}{}".format(
+            sha1hex[0:2],
+            sha1hex[2:4],
+            sha1hex,
+            extension,
+        )
+        return obj_path
+
+    def process(self, record):
+
+        if record['status_code'] != 200 or not record.get('tei_xml'):
+            return False
+        assert(len(record['key'])) == 40
+        p = "{}/{}".format(self.output_dir, self._blob_path(record['key']))
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        with open(p, 'w') as f:
+            f.write(record.pop('tei_xml'))
+        self.counts['written'] += 1
+        return record
+
