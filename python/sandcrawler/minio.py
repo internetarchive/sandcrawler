@@ -1,11 +1,13 @@
 
+import io
 import os
+
 import minio
 
 
 class SandcrawlerMinioClient(object):
 
-    def __init__(self, host, access_key, secret_key, default_bucket=None):
+    def __init__(self, host_url, access_key, secret_key, default_bucket=None):
         """
         host is minio connection string (host:port)
         access and secret key are as expected
@@ -18,14 +20,30 @@ class SandcrawlerMinioClient(object):
             secret_key=os.environ['MINIO_SECRET_KEY'],
         """
         self.mc = minio.Minio(
-            host,
+            host_url,
             access_key=access_key,
             secret_key=secret_key,
             secure=False,
         )
         self.default_bucket = default_bucket
 
-    def upload_blob(self, folder, blob, sha1hex=None, extension="", prefix="", bucket=None):
+    def _blob_path(self, folder, sha1hex, extension, prefix):
+        if not extension:
+            extension = ""
+        if not prefix:
+            prefix = ""
+        assert len(sha1hex) == 40
+        obj_path = "{}{}/{}/{}/{}{}".format(
+            prefix,
+            folder,
+            sha1hex[0:2],
+            sha1hex[2:4],
+            sha1hex,
+            extension,
+        )
+        return obj_path
+
+    def put_blob(self, folder, blob, sha1hex=None, extension="", prefix="", bucket=None):
         """
         blob should be bytes
         sha1hex is assumed to be sha1 of the blob itself; if not supplied it will be calculated
@@ -40,20 +58,31 @@ class SandcrawlerMinioClient(object):
             h = hashlib.sha1()
             h.update(blob)
             sha1hex = h.hexdigest()
-        obj_path = "{}{}/{}/{}/{}{}".format(
-            prefix,
-            folder,
-            sha1hex[0:2],
-            sha1hex[2:4],
-            sha1hex,
-            extension,
-        )
+        obj_path = self._blob_path(folder, sha1hex, extension, prefix)
         if not bucket:
             bucket = self.default_bucket
+        assert bucket
         self.mc.put_object(
-            self.default_bucket,
+            bucket,
             obj_path,
-            blob,
+            io.BytesIO(blob),
             len(blob),
         )
         return (bucket, obj_path)
+
+    def get_blob(self, folder, sha1hex, extension="", prefix="", bucket=None):
+        """
+        sha1hex is sha1 of the blob itself
+
+        Fetched blob from the given bucket/folder, using the sandcrawler SHA1 path convention
+        """
+        obj_path = self._blob_path(folder, sha1hex, extension, prefix)
+        if not bucket:
+            bucket = self.default_bucket
+        assert bucket
+        blob = self.mc.get_object(
+            bucket,
+            obj_path,
+        )
+        # TODO: optionally verify SHA-1?
+        return blob
