@@ -173,3 +173,13 @@ extract_chunk.sh:
     touch $1.SUCCESS
 
 seems to be working better! tested and if there is a problem with one chunk the others continue
+
+## Pig Joins (around 2019-12-24)
+
+Partial (as a start):
+
+    pig -param INPUT_CDX="/user/bnewbold/pdfs/gwb-pdf-20191005172329" -param INPUT_DIGEST="/user/bnewbold/scihash/shadow.20191222.sha1b32.sorted" -param OUTPUT="/user/bnewbold/scihash/gwb-pdf-20191005172329.shadow.20191222.join.cdx" join-cdx-sha1.pig
+
+Full GWB:
+
+    pig -param INPUT_CDX="/user/bnewbold/pdfs/gwb-pdf-20191005172329" -param INPUT_DIGEST="/user/bnewbold/scihash/shadow.20191222.sha1b32.sorted" -param OUTPUT="/user/bnewbold/scihash/gwb-pdf-20191005172329.shadow.20191222.join.cdx" join-cdx-sha1.pig
