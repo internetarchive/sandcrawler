@@ -62,10 +62,12 @@ class GrobidClient(object):
         meta = dict()
         biblio = dict()
         for k in ('title', 'authors', 'journal', 'date', 'doi', ):
-            biblio[k] = tei_json.get(k)
+            if tei_json.get(k):
+                biblio[k] = tei_json[k]
         meta['biblio'] = biblio
         for k in ('grobid_version', 'grobid_timestamp', 'fatcat_release', 'language_code'):
-            meta[k] = tei_json.get(k)
+            if tei_json.get(k):
+                meta[k] = tei_json[k]
         return meta
 
 class GrobidWorker(SandcrawlerWorker):

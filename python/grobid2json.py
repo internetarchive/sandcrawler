@@ -40,7 +40,11 @@ def all_authors(elem):
         given_name = pn.findtext('./{%s}forename' % ns) or None
         surname = pn.findtext('./{%s}surname' % ns) or None
         full_name = ' '.join(pn.itertext())
-        obj = dict(name=full_name, given_name=given_name, surname=surname)
+        obj = dict(name=full_name)
+        if given_name:
+            obj['given_name'] = given_name
+        if surname:
+            obj['surname'] = surname
         ae = author.find('./{%s}affiliation' % ns)
         if ae:
             affiliation = dict()
@@ -73,6 +77,12 @@ def journal_info(elem):
     journal['eissn'] = elem.findtext('.//{%s}idno[@type="eISSN"]' % ns)
     journal['volume'] = elem.findtext('.//{%s}biblScope[@unit="volume"]' % ns)
     journal['issue'] = elem.findtext('.//{%s}biblScope[@unit="issue"]' % ns)
+    keys = list(journal.keys())
+
+    # remove empty/null keys
+    for k in keys:
+        if not journal[k]:
+            journal.pop(k)
     return journal
 
 
@@ -159,6 +169,11 @@ def teixml2json(content, encumbered=True):
         el = tei.find('.//{%s}back/{%s}div[@type="annex"]' % (ns, ns))
         info['annex'] = (el or None) and " ".join(el.itertext()).strip()
 
+    # remove empty/null keys
+    keys = list(info.keys())
+    for k in keys:
+        if not info[k]:
+            info.pop(k)
     return info
 
 def main():   # pragma no cover
