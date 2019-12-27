@@ -46,6 +46,7 @@ class SandcrawlerPostgresClient:
         return self.conn.commit()
 
     def _inserts_and_updates(self, resp, on_conflict):
+        resp = [int(r[0]) for r in resp]
         inserts = len([r for r in resp if r == 0])
         if on_conflict == "update":
             updates = len([r for r in resp if r != 0])
@@ -66,16 +67,16 @@ class SandcrawlerPostgresClient:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))
         sql += " RETURNING xmax;"
 
-        batch = [d for d in batch if d.get('warc_offset')]
+        batch = [d for d in batch if d.get('warc_path')]
         if not batch:
-            return 0
+            return (0, 0)
         batch = [(d['url'],
                   d['datetime'],
                   d['sha1hex'],
                   d['mimetype'],
                   d['warc_path'],
-                  d['warc_csize'],
-                  d['warc_offset'])
+                  int(d['warc_csize']),
+                  int(d['warc_offset']))
                  for d in batch]
         resp = psycopg2.extras.execute_values(cur, sql, batch, page_size=250, fetch=True)
         return self._inserts_and_updates(resp, on_conflict)
