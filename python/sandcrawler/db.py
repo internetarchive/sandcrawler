@@ -59,7 +59,7 @@ class SandcrawlerPostgresClient:
             cdx (url, datetime, sha1hex, mimetype, warc_path, warc_csize, warc_offset)
             VALUES %s
             ON CONFLICT ON CONSTRAINT cdx_pkey DO
-        """.format(on_conflict)
+        """
         if on_conflict.lower() == "nothing":
             sql += " NOTHING"
         else:
