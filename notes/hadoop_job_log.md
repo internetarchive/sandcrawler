@@ -180,6 +180,31 @@ Partial (as a start):
 
     pig -param INPUT_CDX="/user/bnewbold/pdfs/gwb-pdf-20191005172329" -param INPUT_DIGEST="/user/bnewbold/scihash/shadow.20191222.sha1b32.sorted" -param OUTPUT="/user/bnewbold/scihash/gwb-pdf-20191005172329.shadow.20191222.join.cdx" join-cdx-sha1.pig
 
+    HadoopVersion   PigVersion      UserId  StartedAt       FinishedAt      Features
+2.6.0-cdh5.11.2 0.12.0-cdh5.0.1 bnewbold        2019-12-27 00:39:38     2019-12-27 15:32:44     HASH_JOIN,ORDER_BY,DISTINCT,FILTER
+
+    Success!
+
+    Job Stats (time in seconds):
+    JobId   Maps    Reduces MaxMapTime      MinMapTIme      AvgMapTime      MedianMapTime   MaxReduceTime   MinReduceTime   AvgReduceTime   MedianReducetime      Alias   Feature Outputs
+    job_1574819148370_46540 4880    0       143     10      27      21      n/a     n/a     n/a     n/a     cdx     MAP_ONLY
+    job_1574819148370_46541 19      0       59      9       25      18      n/a     n/a     n/a     n/a     digests MAP_ONLY
+    job_1574819148370_46773 24      1       17      7       10      9       6       6       6       6       digests SAMPLER
+    job_1574819148370_46774 7306    1       55      4       7       7       25      25      25      25      cdx     SAMPLER
+    job_1574819148370_46778 7306    40      127     8       18      15      4970    1936    2768    2377    cdx     ORDER_BY
+    job_1574819148370_46779 24      20      80      24      60      66      90      26      38      37      digests ORDER_BY
+    job_1574819148370_46822 22      3       101     27      53      48      1501    166     735     539             DISTINCT
+    job_1574819148370_46828 7146    959     122     7       16      14      91      21      35      32      full_join,result        HASH_JOIN    /user/bnewbold/scihash/gwb-pdf-20191005172329.shadow.20191222.join.cdx,
+
+    Input(s):
+    Successfully read 1968654006 records (654323590996 bytes) from: "/user/bnewbold/pdfs/gwb-pdf-20191005172329"
+    Successfully read 74254196 records (2451575849 bytes) from: "/user/bnewbold/scihash/shadow.20191222.sha1b32.sorted"
+
+    Output(s):
+    Successfully stored 0 records in: "/user/bnewbold/scihash/gwb-pdf-20191005172329.shadow.20191222.join.cdx"
+
+Oops! Didn't upper-case the sha1b32 output.
+
 Full GWB:
 
     pig -param INPUT_CDX="/user/bnewbold/pdfs/gwb-pdf-20191005172329" -param INPUT_DIGEST="/user/bnewbold/scihash/shadow.20191222.sha1b32.sorted" -param OUTPUT="/user/bnewbold/scihash/gwb-pdf-20191005172329.shadow.20191222.join.cdx" join-cdx-sha1.pig
