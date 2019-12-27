@@ -19,15 +19,9 @@
     {"name": "J Doe", "given_name": "J", "surname": "Doe"}
   ],
   "journal": {
-    "name": "Dummy Example File. Journal of Fake News. pp. 1-2. ISSN 1234-5678",
-    "eissn": null,
-    "issn": null,
-    "issue": null,
-    "publisher": null,
-    "volume": null
+    "name": "Dummy Example File. Journal of Fake News. pp. 1-2. ISSN 1234-5678"
   },
   "date": "2000",
-  "doi": null,
   "citations": [
     { "authors": [{"name": "A Seaperson", "given_name": "A", "surname": "Seaperson"}],
       "date": "2001",
@@ -52,9 +46,6 @@
   ],
   "abstract": "Everything you ever wanted to know about nothing",
   "body": "Introduction \nEverything starts somewhere, as somebody [1]  once said. \n\n In Depth \n Meat \nYou know, for kids. \n Potatos \nQED.",
-  "acknowledgement": null,
-  "annex": null,
-  "fatcat_release": null,
   "grobid_timestamp": "2018-04-02T00:31+0000",
   "grobid_version": "0.5.1-SNAPSHOT",
   "language_code": "en"
