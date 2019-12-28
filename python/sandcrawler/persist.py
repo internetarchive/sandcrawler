@@ -231,7 +231,7 @@ class PersistGrobidWorker(SandcrawlerWorker):
             if r['status_code'] != 200 or not r.get('tei_xml'):
                 self.counts['s3-skip-status'] += 1
                 if r.get('error_msg'):
-                    r['metadata']['error_msg'] = r['error_msg'][:500]
+                    r['metadata'] = {'error_msg': r['error_msg'][:500]}
                 continue
 
             assert len(r['key']) == 40
