@@ -256,7 +256,6 @@ class PersistGrobidWorker(SandcrawlerWorker):
             r['metadata'] = metadata
 
         if not self.s3_only:
-            grobid_batch = [r['grobid'] for r in batch if r.get('grobid')]
             resp = self.db.insert_grobid(self.cur, batch, on_conflict="update")
             self.counts['insert-grobid'] += resp[0]
             self.counts['update-grobid'] += resp[1]
