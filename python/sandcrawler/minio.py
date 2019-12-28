@@ -63,11 +63,15 @@ class SandcrawlerMinioClient(object):
         if not bucket:
             bucket = self.default_bucket
         assert bucket
+        content_type = "application/octet-stream"
+        if extension.endswith('.xml'):
+            content_type = "application/xml"
         self.mc.put_object(
             bucket,
             obj_path,
             io.BytesIO(blob),
             len(blob),
+            content_type=content_type,
         )
         return (bucket, obj_path)
 
