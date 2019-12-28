@@ -16,7 +16,7 @@
 
 set mapreduce.job.queuename default
 
-digests = LOAD '$INPUT_DIGEST' USING PigStorage() AS sha1b32:chararray;
+digests = LOAD '$INPUT_DIGEST' AS sha1b32:chararray;
 digests = ORDER digests by sha1b32 ASC PARALLEL 20;
 digests = DISTINCT digests;
 
@@ -29,7 +29,7 @@ cdx = FOREACH cdx GENERATE (chararray)cols.$0 as cdx_surt, (chararray)cols.$1 as
 cdx = FILTER cdx BY not cdx_surt matches '-';
 cdx = FILTER cdx BY httpstatus matches '200';
 cdx = FILTER cdx BY not mimetype matches 'warc/revisit';
-cdx = ORDER cdx by sha1b32 ASC PARALLEL 40;
+cdx = ORDER cdx BY sha1b32 ASC PARALLEL 40;
 
 -- TODO: DISTINCT by (sha1b32, cdx_surt) for efficiency
 
