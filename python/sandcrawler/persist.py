@@ -195,7 +195,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
 
         file_meta_batch = [r['file_meta'] for r in batch if r.get('hit') and r.get('file_meta')]
         if file_meta_batch:
-            resp = self.db.insert_file_meta(self.cur, file_meta_batch)
+            resp = self.db.insert_file_meta(self.cur, file_meta_batch, on_conflict="update")
             self.counts['insert-file_meta'] += resp[0]
             self.counts['update-file_meta'] += resp[1]
 
@@ -227,11 +227,23 @@ class PersistGrobidWorker(SandcrawlerWorker):
     def push_batch(self, batch):
         self.counts['total'] += len(batch)
 
-        # enhance with teixml2json metadata, if available
         for r in batch:
             if r['status_code'] != 200 or not r.get('tei_xml'):
-                self.counts['s3-skip'] += 1
+                self.counts['s3-skip-status'] += 1
+                if r.get('error_msg'):
+                    r['metadata']['error_msg'] = r['error_msg'][:500]
                 continue
+
+            assert len(r['key']) == 40
+            resp = self.s3.put_blob(
+                folder="grobid",
+                blob=r['tei_xml'],
+                sha1hex=r['key'],
+                extension=".tei.xml",
+            )
+            self.counts['s3-put'] += 1
+
+            # enhance with teixml2json metadata, if available
             metadata = self.grobid.metadata(r)
             if not metadata:
                 continue
@@ -243,15 +255,6 @@ class PersistGrobidWorker(SandcrawlerWorker):
                 r['updated'] = metadata['grobid_timestamp']
             r['metadata'] = metadata
 
-            assert len(r['key']) == 40
-            resp = self.s3.put_blob(
-                folder="grobid",
-                blob=r['tei_xml'],
-                sha1hex=r['key'],
-                extension=".tei.xml",
-            )
-            self.counts['s3-put'] += 1
-
         if not self.s3_only:
             grobid_batch = [r['grobid'] for r in batch if r.get('grobid')]
             resp = self.db.insert_grobid(self.cur, batch, on_conflict="update")
@@ -259,7 +262,7 @@ class PersistGrobidWorker(SandcrawlerWorker):
             self.counts['update-grobid'] += resp[1]
 
             file_meta_batch = [r['file_meta'] for r in batch if r.get('file_meta')]
-            resp = self.db.insert_file_meta(self.cur, file_meta_batch)
+            resp = self.db.insert_file_meta(self.cur, file_meta_batch, on_conflict="update")
             self.counts['insert-file-meta'] += resp[0]
             self.counts['update-file-meta'] += resp[1]
 
