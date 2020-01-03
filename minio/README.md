@@ -4,6 +4,14 @@ documents, addressed by the sha1 of the PDF file the XML was extracted from.
 
 Note that on the backend minio is just storing objects as files on disk.
 
+## Deploying minio Server
+
+It seems to be important to use a version of minio from at least December 2019
+era for on-disk compression to actually work.
+
+Currently install minio (and mc, the minio client) in prod by simply
+downloading the binaries and calling from systemd.
+
 ## Buckets and Directories
 
 Hosts and buckets:
@@ -61,3 +69,6 @@ Make a prefix within a bucket world-readable like:
 
     mc policy set download cluster/unpaywall/grobid
 
+## Config
+
+    mc admin config set aitio compression extensions=.txt,.log,.csv,.json,.tsv,.pdf,.xml mime_types=text/csv,text/plain,application/json,application/xml,application/octet-stream,application/tei+xml
