@@ -53,3 +53,8 @@ Time: 189067.335 ms (03:09.067)
     ) r
     LIMIT 5;
 
+More stats (2019-12-27):
+
+    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT(*) DESC LIMIT 20;
+
+    SELECT SUM(size_bytes) FROM file_meta;
