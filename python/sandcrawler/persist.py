@@ -156,22 +156,8 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         if not batch:
             return []
 
-        # need to ensure that we aren't trying to update same row multiple
-        # times in same batch (!)
         results = [self.file_result_to_row(raw) for raw in batch]
-        results.reverse()
-        clean_results = []
-        result_keys = []
-        for r in results:
-            if not r:
-                continue
-            key = (r['ingest_type'], r['base_url'])
-            if key in result_keys:
-                self.counts['skip-duplicate-result'] += 1
-                continue
-            result_keys.append(key)
-            clean_results.append(r)
-        results = clean_results
+        results = [r for r in results if r]
 
         requests = [self.request_to_row(raw['request']) for raw in batch if raw.get('request')]
         requests = [r for r in requests if r]
