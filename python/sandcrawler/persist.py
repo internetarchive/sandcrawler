@@ -20,6 +20,7 @@ grobid
 """
 
 import os
+import xml.etree.ElementTree
 
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgresClient
@@ -230,7 +231,12 @@ class PersistGrobidWorker(SandcrawlerWorker):
             self.counts['s3-put'] += 1
 
             # enhance with teixml2json metadata, if available
-            metadata = self.grobid.metadata(r)
+            try:
+                metadata = self.grobid.metadata(r)
+            except xml.etree.ElementTree.ParseError as xml_e:
+                r['status'] = 'bad-grobid-xml'
+                r['metadata'] = {'error_msg': str(xml_e)[:1024]}
+                continue
             if not metadata:
                 continue
             for k in ('fatcat_release', 'grobid_version'):
