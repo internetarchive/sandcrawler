@@ -6,6 +6,7 @@
 import os, sys, time
 import requests
 import datetime
+from collections import namedtuple
 
 import wayback.exception
 from http.client import IncompleteRead
@@ -125,31 +126,114 @@ class WaybackClient:
             raise WaybackError("failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
         return raw_content
 
-    def fetch_url_datetime(self, url, datetime):
+    def fetch_warc_by_url_dt(self, url, datetime):
+        """
+        Helper wrapper that first hits CDX API to get a full CDX row, then
+        fetches content from wayback
+        """
         cdx_row = self.cdx_client.lookup(url, datetime)
         return self.fetch_warc_content(
             cdx_row['warc_path'],
             cdx_row['warc_offset'],
             cdx_row['warc_csize'])
 
+    def fetch_resource(self, start_url, mimetype=None):
+        """
+        Looks in wayback for a resource starting at the URL, following any
+        redirects. Returns a ResourceResult object.
+
+        In a for loop:
+
+            lookup best CDX
+            redirect?
+                fetch wayback
+                continue
+            good?
+                fetch wayback
+                return success
+            bad?
+                return failure
+
+        got to end?
+            return failure; too many redirects
+        """
+        next_url = start_url
+        urls_seen = [start_url]
+        for i in range(25):
+            cdx_row = self.cdx_client.lookup_best(next_url, mimetype=mimetype)
+            if not cdx_row:
+                return None
+            if cdx.status_code == 200:
+                body = self.fetch_warc_content(cdx.warc_path, cdx.warc_offset, cdx_row.warc_csize)
+                return ResourceResult(
+                    start_url=start_url,
+                    hit=True,
+                    status="success",
+                    terminal_url=cdx_row.url,
+                    terminal_dt=cdx_row.datetime,
+                    terminal_status_code=cdx_row.status_code,
+                    body=body,
+                    cdx=cdx_row,
+                )
+            elif cdx_row.status_code >= 300 and cdx_row.status_code < 400:
+                body = self.fetch_warc_content(cdx_row.warc_path, cdx_row.warc_offset, cdx_row.warc_csize)
+                next_url = body.get_redirect_url()
+                if next_url in urls_seen:
+                    return ResourceResult(
+                        start_url=start_url,
+                        hit=False,
+                        status="redirect-loop",
+                        terminal_url=cdx_row.url,
+                        terminal_dt=cdx_row.datetime,
+                        terminal_status_code=cdx_row.status_code,
+                        body=None,
+                        cdx=cdx_row,
+                    )
+                urls_seen.append(next_url)
+                continue
+            else:
+                return ResourceResult(
+                    start_url=start_url,
+                    hit=False,
+                    status="remote-status",
+                    terminal_url=cdx_row.url,
+                    terminal_dt=cdx_row.datetime,
+                    terminal_status_code=cdx_row.status_code,
+                    body=None,
+                    cdx=cdx_row,
+                )
+        return ResourceResult(
+            start_url=start_url,
+            hit=False,
+            status="redirects-exceeded",
+            terminal_url=cdx_row.url,
+            terminal_dt=cdx_row.datetime,
+            terminal_status_code=cdx_row.status_code,
+            body=None,
+            cdx=cdx_row,
+        )
+
 
 class SavePageNowError(Exception):
     pass
 
-class SavePageNowRemoteError(Exception):
-    pass
+SavePageNowResult = namedtuple('SavePageNowResult', [
+    'success',
+    'status',
+    'job_id',
+    'request_url',
+    'terminal_url',
+    'terminal_dt',
+    'resources',
+])
 
 class SavePageNowClient:
 
-    def __init__(self, cdx_client=None,
-            v1endpoint="https://web.archive.org/save/",
-            v2endpoint="https://web.archive.org/save"):
-        if cdx_client:
-            self.cdx_client = cdx_client
-        else:
-            self.cdx_client = CdxApiClient()
-        self.ia_access_key = os.environ.get('IA_ACCESS_KEY')
-        self.ia_secret_key = os.environ.get('IA_SECRET_KEY')
+    def __init__(self, v2endpoint="https://web.archive.org/save", **kwargs):
+        self.ia_access_key = kwargs.get('ia_access_key',
+            os.environ.get('IA_ACCESS_KEY'))
+        self.ia_secret_key = kwargs.get('ia_secret_key',
+            os.environ.get('IA_SECRET_KEY'))
         self.v2endpoint = v2endpoint
         self.v2_session = requests_retry_session(retries=5, backoff_factor=3)
         self.v2_session.headers.update({
@@ -157,45 +241,87 @@ class SavePageNowClient:
             'Accept': 'application/json',
             'Authorization': 'LOW {}:{}'.format(self.ia_access_key, self.ia_secret_key),
         })
+        self.poll_count = 30
+        self.poll_seconds = 3.0
 
-    def save_url_now_v2(self, url):
+    def save_url_now_v2(self, request_url):
         """
-        Returns a list of URLs, or raises an error on non-success.
+        Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
+        at all, or raises an exception if there was an error with SPN itself.
+
+        If SPN2 was unable to fetch the remote content, `success` will be
+        false and status will be indicated.
+
+        SavePageNowResult fields:
+        - success: boolean if SPN
+        - status: "success" or an error message/type
+        - job_id: returned by API
+        - request_url: url we asked to fetch
+        - terminal_url: final primary resource (after any redirects)
+        - terminal_timestamp: wayback timestamp of final capture
+        - resources: list of all URLs captured
+
+        TODO: parse SPN error codes and handle better. Eg, non-200 remote
+        statuses, invalid hosts/URLs, timeouts, backoff, etc.
         """
         if not (self.ia_access_key and self.ia_secret_key):
-            raise Exception("SPNv2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
+            raise Exception("SPN2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
         resp = self.v2_session.post(
             self.v2endpoint,
             data={
-                'url': url,
+                'url': request_url,
                 'capture_all': 1,
                 'if_not_archived_within': '1d',
             },
         )
         if resp.status_code != 200:
-            raise SavePageNowError("HTTP status: {}, url: {}".format(resp.status_code, url))
+            raise SavePageNowError("SPN2 status_code: {}, url: {}".format(resp.status_code, request_url))
         resp_json = resp.json()
-        assert resp_json
+
+        if not resp_json or 'job_id' not in resp_json:
+            raise SavePageNowError(
+                "Didn't get expected 'job_id' field in SPN2 response: {}".format(resp_json))
+
+        job_id = resp_json['job_id']
 
         # poll until complete
         final_json = None
-        for i in range(90):
+        for i in range(self.poll_count):
             resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, resp_json['job_id']))
-            resp.raise_for_status()
+            try:
+                resp.raise_for_status()
+            except:
+                raise SavePageNowError(resp.content)
             status = resp.json()['status']
-            if status == 'success':
+            if status == 'pending':
+                time.sleep(self.poll_seconds)
+            elif status in ('success', 'error'):
                 final_json = resp.json()
-                if final_json.get('message', '').startswith('The same snapshot had been made'):
-                    raise SavePageNowError("SPN2 re-snapshot within short time window")
                 break
-            elif status == 'pending':
-                time.sleep(1.0)
             else:
-                raise SavePageNowError("SPN2 status:{} url:{}".format(status, url))
+                raise SavePageNowError("Unknown SPN2 status:{} url:{}".format(status, request_url))
 
         if not final_json:
             raise SavePageNowError("SPN2 timed out (polling count exceeded)")
 
-        #print(final_json)
-        return final_json['resources']
+        if final_json['status'] == "success":
+            return SavePageNowResult(
+                True,
+                "success",
+                job_id,
+                request_url,
+                final_json['original_url'],
+                final_json['timestamp'],
+                final_json['resources'],
+            )
+        else:
+            return SavePageNowResult(
+                False,
+                final_json.get('status_ext') or final_json['status'],
+                job_id,
+                request_url,
+                None,
+                None,
+                None,
+            )
 
