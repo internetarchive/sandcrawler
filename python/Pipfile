@@ -15,6 +15,7 @@ pytest-pythonpath = "*"
 pytest-pylint = "*"
 responses = ">=0.10"
 pytest-cov = "*"
+pytest-mock = "*"
 pylint = "*"
 
 [packages]
