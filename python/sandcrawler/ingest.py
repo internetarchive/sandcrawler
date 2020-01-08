@@ -6,7 +6,7 @@ import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, SavePageNowRemoteError, CdxApiError
-from sandcrawler.grobid import GrobidClient
+krom sandcrawler.grobid import GrobidClient
 from sandcrawler.misc import gen_file_metadata
 from sandcrawler.html import extract_fulltext_url
 from sandcrawler.workers import SandcrawlerWorker
@@ -45,35 +45,29 @@ class IngestFileWorker(SandcrawlerWorker):
     
         cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
         if not cdx:
-            # TODO: refactor this to make adding new domains/patterns easier
-            # sciencedirect.com (Elsevier) requires browser crawling (SPNv2)
-            if ('sciencedirect.com' in url and '.pdf' in url) or ('osapublishing.org' in url) or ('pubs.acs.org/doi/' in url) or ('ieeexplore.ieee.org' in url and ('.pdf' in url or '/stamp/stamp.jsp' in url)) or ('hrmars.com' in url):
-                #print(url)
-                cdx_list = self.spn_client.save_url_now_v2(url)
-                for cdx_url in cdx_list:
-                    if 'pdf.sciencedirectassets.com' in cdx_url and '.pdf' in cdx_url:
-                        cdx = self.cdx_client.lookup_latest(cdx_url)
-                        break
-                    if 'osapublishing.org' in cdx_url and 'abstract.cfm' in cdx_url:
-                        cdx = self.cdx_client.lookup_latest(cdx_url)
-                        break
-                    if 'pubs.acs.org' in cdx_url and '/doi/pdf/' in cdx_url:
-                        cdx = self.cdx_client.lookup_latest(cdx_url)
-                        break
-                    if 'ieeexplore.ieee.org' in cdx_url and '.pdf' in cdx_url and 'arnumber=' in cdx_url:
-                        cdx = self.cdx_client.lookup_latest(cdx_url)
-                        break
-                    if 'hrmars.com' in cdx_url and 'journals/papers' in cdx_url:
-                        cdx = self.cdx_client.lookup_latest(cdx_url)
-                        break
-                if not cdx:
-                    # extraction didn't work as expected; fetch whatever SPN2 got
-                    cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
-                if not cdx:
-                    print("{}".format(cdx_list), file=sys.stderr)
-                    raise SavePageNowError("Failed to find terminal capture from SPNv2")
-            else:
-                return self.spn_client.save_url_now_v1(url)
+            cdx_list = self.spn_client.save_url_now_v2(url)
+            for cdx_url in cdx_list:
+                if 'pdf.sciencedirectassets.com' in cdx_url and '.pdf' in cdx_url:
+                    cdx = self.cdx_client.lookup_latest(cdx_url)
+                    break
+                if 'osapublishing.org' in cdx_url and 'abstract.cfm' in cdx_url:
+                    cdx = self.cdx_client.lookup_latest(cdx_url)
+                    break
+                if 'pubs.acs.org' in cdx_url and '/doi/pdf/' in cdx_url:
+                    cdx = self.cdx_client.lookup_latest(cdx_url)
+                    break
+                if 'ieeexplore.ieee.org' in cdx_url and '.pdf' in cdx_url and 'arnumber=' in cdx_url:
+                    cdx = self.cdx_client.lookup_latest(cdx_url)
+                    break
+                if 'hrmars.com' in cdx_url and 'journals/papers' in cdx_url:
+                    cdx = self.cdx_client.lookup_latest(cdx_url)
+                    break
+            if not cdx:
+                # extraction didn't work as expected; fetch whatever SPN2 got
+                cdx = self.cdx_client.lookup_latest(url, follow_redirects=True)
+            if not cdx:
+                print("{}".format(cdx_list), file=sys.stderr)
+                raise SavePageNowError("Failed to find terminal capture from SPNv2")
 
         try:
             resp = requests.get(WAYBACK_ENDPOINT + cdx['datetime'] + "id_/" + cdx['url'])

@@ -23,7 +23,7 @@ class CdxApiClient:
         self.host_url = host_url
         self.http_session = requests_retry_session(retries=3, backoff_factor=3)
         self.http_session.headers.update({
-            'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
+            'User-Agent': 'Mozilla/5.0 sandcrawler.CdxApiClient',
         })
         self.wayback_endpoint = "https://web.archive.org/web/"
 
@@ -150,47 +150,13 @@ class SavePageNowClient:
             self.cdx_client = CdxApiClient()
         self.ia_access_key = os.environ.get('IA_ACCESS_KEY')
         self.ia_secret_key = os.environ.get('IA_SECRET_KEY')
-        self.v1endpoint = v1endpoint
         self.v2endpoint = v2endpoint
-        self.v1_session = requests_retry_session(retries=5, backoff_factor=3, status_forcelist=())
-        self.v1_session.headers.update({
-            'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
-        })
         self.v2_session = requests_retry_session(retries=5, backoff_factor=3)
         self.v2_session.headers.update({
             'User-Agent': 'Mozilla/5.0 sandcrawler.SavePageNowClient',
             'Accept': 'application/json',
             'Authorization': 'LOW {}:{}'.format(self.ia_access_key, self.ia_secret_key),
         })
-
-    def save_url_now_v1(self, url):
-        """
-        Returns a tuple (cdx, blob) on success of single fetch, or raises an
-        error on non-success.
-        """
-        try:
-            resp = self.v1_session.get(self.v1endpoint + url)
-        except requests.exceptions.RetryError as re:
-            # could have been any number of issues...
-            raise SavePageNowError(str(re))
-        except requests.exceptions.TooManyRedirects as tmr:
-            raise SavePageNowRemoteError(str(tmr))
-
-        if resp.status_code != 200 and resp.headers.get('X-Archive-Wayback-Runtime-Error'):
-            # looks like a weird remote error; would not expect a CDX reply so bailing here
-            raise SavePageNowRemoteError(resp.headers['X-Archive-Wayback-Runtime-Error'])
-        if resp.status_code != 200 and not resp.headers.get('X-Archive-Orig-Location'):
-            # looks like an error which was *not* just a remote server HTTP
-            # status code, or one of the handled wayback runtime errors. Some
-            # of these are remote server errors that wayback doesn't detect?
-            raise SavePageNowError("HTTP status: {}, url: {}".format(resp.status_code, url))
-
-        terminal_url = '/'.join(resp.url.split('/')[5:])
-        body = resp.content
-        cdx = self.cdx_client.lookup_latest(terminal_url)
-        if not cdx:
-            raise SavePageNowError("SPN was successful, but CDX lookup then failed. URL: {}".format(terminal_url))
-        return (cdx, body)
 
     def save_url_now_v2(self, url):
         """
