@@ -15,69 +15,159 @@ from gwb.loader import CDXLoaderFactory
 
 from .misc import b32_hex, requests_retry_session
 
+
+ResourceResult = namedtuple("ResourceResult", [
+    "start_url",
+    "hit",
+    "status",
+    "terminal_url",
+    "terminal_dt",
+    "terminal_status_code",
+    "body",
+    "cdx",
+])
+
+CdxRow = namedtuple('CdxRow', [
+    'surt',
+    'datetime',
+    'url',
+    'mimetype',
+    'status_code',
+    'sha1b32',
+    'sha1hex',
+    'warc_csize',
+    'warc_offset',
+    'warc_path',
+])
+
+CdxPartial = namedtuple('CdxPartial', [
+    'surt',
+    'datetime',
+    'url',
+    'mimetype',
+    'status_code',
+    'sha1b32',
+    'sha1hex',
+])
+
 class CdxApiError(Exception):
     pass
 
 class CdxApiClient:
 
-    def __init__(self, host_url="https://web.archive.org/cdx/search/cdx"):
+    def __init__(self, host_url="https://web.archive.org/cdx/search/cdx", **kwargs):
         self.host_url = host_url
         self.http_session = requests_retry_session(retries=3, backoff_factor=3)
         self.http_session.headers.update({
             'User-Agent': 'Mozilla/5.0 sandcrawler.CdxApiClient',
         })
+        self.cdx_auth_token = kwargs.get('cdx_auth_token',
+            os.environ.get('CDX_AUTH_TOKEN'))
+        if self.cdx_auth_token:
+            self.http_session.headers.update({
+                'Cookie': 'cdx_auth_token={}'.format(cdx_auth_token),
+            })
         self.wayback_endpoint = "https://web.archive.org/web/"
 
-    def lookup_latest(self, url, recent_only=True, follow_redirects=False, redirect_depth=0):
+    def _query_api(self, params):
         """
-        Looks up most recent HTTP 200 record for the given URL.
-
-        Returns a CDX dict, or None if not found.
-
-        NOTE: could do authorized lookup using cookie to get all fields?
+        Hits CDX API with a query, parses result into a list of CdxRow
         """
-
-        if redirect_depth >= 15:
-            raise CdxApiError("redirect loop (by iteration count)")
-
-        since = datetime.date.today() - datetime.timedelta(weeks=4)
-        params = {
-            'url': url,
-            'matchType': 'exact',
-            'limit': -1,
-            'output': 'json',
-        }
-        if recent_only:
-            params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day),
-        if not follow_redirects:
-            params['filter'] = 'statuscode:200'
         resp = self.http_session.get(self.host_url, params=params)
         if resp.status_code != 200:
             raise CdxApiError(resp.text)
         rj = resp.json()
         if len(rj) <= 1:
             return None
-        cdx = rj[1]
-        assert len(cdx) == 7    # JSON is short
-        cdx = dict(
-            surt=cdx[0],
-            datetime=cdx[1],
-            url=cdx[2],
-            mimetype=cdx[3],
-            http_status=int(cdx[4]),
-            sha1b32=cdx[5],
-            sha1hex=b32_hex(cdx[5]),
-        )
-        if follow_redirects and cdx['http_status'] in (301, 302):
-            try:
-                resp = requests.get(self.wayback_endpoint + cdx['datetime'] + "id_/" + cdx['url'])
-            except requests.exceptions.TooManyRedirects:
-                raise CdxApiError("redirect loop (wayback fetch)")
-            next_url = '/'.join(resp.url.split('/')[5:])
-            if next_url == url:
-                raise CdxApiError("redirect loop (by url)")
-            return self.lookup_latest(next_url, redirect_depth=redirect_depth+1)
-        return cdx
+        rows = []
+        for raw in rj[1:]:
+            assert len(raw) == 11    # JSON is short
+            row = CdxRow(
+                surt=raw[0],
+                datetime=raw[1],
+                url=raw[2],
+                mimetype=raw[3],
+                status_code=int(raw[4]),
+                sha1b32=raw[5],
+                sha1hex=b32_hex(raw[5]),
+                warc_csize=raw[8],
+                warc_offset=raw[9],
+                warc_path=raw[10],
+            )
+            assert (row.mimetype == "-") or ("-" not in row)
+            rows.append(row)
+        return rows
+
+    def fetch(self, url, datetime):
+        """
+        Fetches a single CDX row by url/datetime. Raises a KeyError if not
+        found, because we expect to be looking up a specific full record.
+        """
+        if len(datetime) != 14:
+            raise ValueError("CDX fetch requires full 14 digit timestamp. Got: {}".format(datetime))
+        params = {
+            'url': url,
+            'from': datetime,
+            'to': datetime,
+            'matchType': 'exact',
+            'limit': -1,
+            'output': 'json',
+        }
+        resp = self._query_api(params)
+        if not resp:
+            raise KeyError("CDX url/datetime not found: {} {}".format(url, datetime))
+        row = resp[0]
+        if not (row.url == url and row.datetime == datetime):
+            raise KeyError("CDX url/datetime not found: {} {} (closest: {})".format(url, datetime, row))
+        return row
+
+    def lookup_best(self, url, max_age_days=None, best_mimetype=None):
+        """
+        Fetches multiple CDX rows for the given URL, tries to find the most recent.
+
+        If no matching row is found, return None. Note this is different from fetch.
+        """
+        params = {
+            'url': url,
+            'matchType': 'exact',
+            'limit': -25,
+            'output': 'json',
+            'collapse': 'timestamp:6',
+        }
+        if max_age_days:
+            since = datetime.date.today() - datetime.timedelta(days=max_age_days)
+            params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day),
+        rows = self._query_api(params)
+        if not rows:
+            return None
+
+        def cdx_sort_key(r):
+            """
+            Preference order by status code looks like:
+
+                200
+                    mimetype match
+                        most-recent
+                    no match
+                        most-recent
+                3xx
+                    most-recent
+                4xx
+                    most-recent
+                5xx
+                    most-recent
+
+            This function will create a tuple that can be used to sort in *reverse* order.
+            """
+            return (
+                r.status_code == 200,
+                0 - r.status_code,
+                r.mimetype == best_mimetype,
+                r.datetime,
+            )
+
+        rows = sorted(rows, key=cdx_sort_key)
+        return rows[-1]
 
 
 class WaybackError(Exception):
