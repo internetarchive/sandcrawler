@@ -206,7 +206,8 @@ class WaybackClient:
         else:
             self.cdx_client = CdxApiClient()
         # /serve/ instead of /download/ doesn't record view count
-        self.petabox_base_url = kwargs.get('petabox_base_url', 'https://archive.org/serve/')
+        # this *does* want to be http://, not https://
+        self.petabox_base_url = kwargs.get('petabox_base_url', 'http://archive.org/serve/')
         # gwb library will fall back to reading from /opt/.petabox/webdata.secret
         self.petabox_webdata_secret = kwargs.get('petabox_webdata_secret', os.environ.get('PETABOX_WEBDATA_SECRET'))
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix', 'https://archive.org/serve/')
