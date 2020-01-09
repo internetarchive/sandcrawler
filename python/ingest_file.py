@@ -10,6 +10,7 @@ from sandcrawler.ingest import IngestFileRequestHandler, IngestFileWorker
 
 def run_single_ingest(args):
     request = dict(
+        ingest_type=args.type,
         base_url=args.url,
         ext_ids=dict(doi=args.doi),
         fatcat=dict(release_ident=args.release_id),
@@ -36,9 +37,6 @@ def run_api(args):
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--api-host-url',
-        default="http://localhost:9411/v0",
-        help="fatcat API host/port to use")
     subparsers = parser.add_subparsers()
 
     sub_single= subparsers.add_parser('single',
@@ -48,6 +46,9 @@ def main():
         help="(optional) existing release ident to match to")
     sub_single.add_argument('--doi',
         help="(optional) existing release DOI to match to")
+    sub_single.add_argument('--type',
+        default="pdf",
+        help="type of ingest (pdf, html, etc)")
     sub_single.add_argument('url',
         help="URL of paper to fetch")
 
