@@ -212,6 +212,7 @@ class WaybackClient:
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix', 'https://archive.org/serve/')
         self.rstore = None
         self.max_redirects = 25
+        self.wayback_endpoint = "https://web.archive.org/web/"
 
     def fetch_petabox(self, c_size, offset, warc_path):
         """
@@ -292,9 +293,20 @@ class WaybackClient:
         Intended for use with SPN2 requests, where request body has not ended
         up in petabox yet.
 
-        TODO: is this actually necessary?
+        TODO: is this really necessary?
         """
-        raise NotImplementedError
+        try:
+            resp = requests.get(self.wayback_endpoint + datetime + "id_/" + url)
+        except requests.exceptions.TooManyRedirects:
+            raise WaybackError("redirect loop (wayback replay fetch)")
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            raise WaybackError(str(e))
+        # TODO: some verification here?
+        #print(resp.url, file=sys.stderr)
+        #print(resp.content)
+        return resp.content
 
     def lookup_resource(self, start_url, best_mimetype=None):
         """
@@ -473,6 +485,16 @@ class SavePageNowClient:
         if not final_json:
             raise SavePageNowError("SPN2 timed out (polling count exceeded)")
 
+        if final_json.get('original_job_id'):
+            resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, final_json['original_job_id']))
+            try:
+                resp.raise_for_status()
+            except:
+                raise SavePageNowError(resp.content)
+            final_json = resp.json()
+
+        #print(final_json, file=sys.stderr)
+
         if final_json['status'] == "success":
             return SavePageNowResult(
                 True,
@@ -515,10 +537,23 @@ class SavePageNowClient:
                 cdx=None,
             )
 
-        # fetch CDX and body
-        cdx_row = wayback_client.cdx_client.fetch(spn_result.terminal_url, spn_result.terminal_dt)
+        # sleep one second to let CDX API update (XXX)
+        time.sleep(1.0)
+
+        # fetch CDX, then body
+        cdx_row = wayback_client.cdx_client.fetch(
+            spn_result.terminal_url,
+            spn_result.terminal_dt,
+            filter_status_code=200,
+        )
+        print(spn_result, file=sys.stderr)
+        print(cdx_row, file=sys.stderr)
         assert cdx_row.status_code == 200
-        body = wayback_client.fetch_petabox_body(cdx_row.warc_csize, cdx_row.warc_offset, cdx_row.warc_path)
+        body = wayback_client.fetch_replay_body(cdx_row.url, cdx_row.datetime)
+        file_meta = gen_file_metadata(body)
+        if cdx_row.sha1hex != file_meta['sha1hex']:
+            print(file_meta, file=sys.stderr)
+            raise WaybackError("replay fetch resulted in non-matching SHA1 (vs. CDX API)")
 
         # not a full CDX yet
         cdx_partial = cdx_partial_from_row(cdx_row)
