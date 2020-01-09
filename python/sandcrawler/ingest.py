@@ -6,7 +6,7 @@ import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from collections import namedtuple
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, CdxApiError, PetaboxError
+from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.misc import gen_file_metadata
 from sandcrawler.html import extract_fulltext_url
@@ -54,7 +54,9 @@ class IngestFileWorker(SandcrawlerWorker):
         if not self.grobid_client:
             self.grobid_client = GrobidClient()
 
-        self.attempt_existing = False
+        self.try_existing_ingest = False
+        self.try_wayback = True
+        self.try_spn2 = True
 
     def check_existing_ingest(self, base_url):
         """
@@ -66,7 +68,7 @@ class IngestFileWorker(SandcrawlerWorker):
         Looks at existing ingest results and makes a decision based on, eg,
         status and timestamp.
         """
-        if not self.attempt_existing:
+        if not self.try_existing_ingest:
             return None
         raise NotImplementedError
 
@@ -78,10 +80,16 @@ class IngestFileWorker(SandcrawlerWorker):
         Looks in wayback for a resource starting at the URL, following any
         redirects. If a hit isn't found, try crawling with SPN.
         """
-        resource = self.wayback_client.lookup_resource(url, best_mimetype)
-        if not resource or not resource.hit:
+        via = "none"
+        resource = None
+        if self.try_wayback:
+            via = "wayback"
+            resource = self.wayback_client.lookup_resource(url, best_mimetype)
+        if self.try_spn2 and (not resource or not resource.hit):
+            via = "spn2"
             resource = self.spn_client.crawl_resource(url, self.wayback_client)
-        print("[FETCH] {}  url:{}".format(
+        print("[FETCH {}\t] {}\turl:{}".format(
+                via,
                 resource.status,
                 url),
             file=sys.stderr)
@@ -146,11 +154,6 @@ class IngestFileWorker(SandcrawlerWorker):
         try:
             # first hop
             resource = self.find_resource(base_url, best_mimetype)
-            print("[{}] fetch status: {} url: {}".format(
-                    resource.status,
-                    ingest_type,
-                    base_url),
-                file=sys.stderr)
             if not resource.hit:
                 result['status'] = resource.status
                 return result
@@ -218,6 +221,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         result['status'] = "success"
         result['hit'] = True
+        result['cdx'] = cdx_to_dict(resource.cdx)
         return result
 
 

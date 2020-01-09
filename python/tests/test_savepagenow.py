@@ -182,10 +182,16 @@ def test_crawl_resource(spn_client, wayback_client):
         'http://dummy-cdx/cdx',
         status=200,
         body=json.dumps(CDX_SPN_HIT))
+    responses.add(responses.GET,
+        'https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"),
+        status=200,
+        headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
+        body=WARC_BODY)
 
+    print('https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"))
     resp = spn_client.crawl_resource(TARGET, wayback_client)
 
-    assert len(responses.calls) == 4
+    assert len(responses.calls) == 5
 
     assert resp.hit == True
     assert resp.status == "success"
