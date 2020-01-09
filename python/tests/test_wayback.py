@@ -54,8 +54,8 @@ def test_cdx_fetch(cdx_client):
     assert resp.datetime == CDX_DT
     assert resp.url == CDX_TARGET
     assert resp.sha1b32 == "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR"
-    assert resp.warc_csize == "8445"
-    assert resp.warc_offset == "108062304"
+    assert resp.warc_csize == 8445
+    assert resp.warc_offset == 108062304
     assert resp.warc_path == "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
 
 @responses.activate
@@ -96,7 +96,17 @@ def test_cdx_lookup_best(cdx_client):
     assert resp.warc_path == CDX_SINGLE_HIT[1][-1]
 
 WARC_TARGET = "http://fatcat.wiki/"
-WARC_BODY = b"<html>some stuff</html>"
+WARC_BODY = b"""
+<html>
+  <head>
+      <meta name="citation_pdf_url" content="http://www.example.com/content/271/20/11761.full.pdf">
+  </head>
+  <body>
+    <h1>my big article here</h1>
+    blah
+  </body>
+</html>
+"""
 
 @pytest.fixture
 def wayback_client(cdx_client, mocker):
@@ -116,7 +126,30 @@ def wayback_client(cdx_client, mocker):
 
     return client
 
-def test_wayback_fetch(wayback_client, mocker):
+@pytest.fixture
+def wayback_client_pdf(cdx_client, mocker):
+
+    with open('tests/files/dummy.pdf', 'rb') as f:
+        pdf_bytes = f.read()
+
+    client = WaybackClient(
+        cdx_client=cdx_client,
+        petabox_webdata_secret="dummy-petabox-secret",
+    )
+    # mock out the wayback store with mock stuff
+    client.rstore = mocker.Mock()
+    resource = mocker.Mock()
+    client.rstore.load_resource = mocker.MagicMock(return_value=resource)
+    resource.get_status = mocker.MagicMock(return_value=[200])
+    resource.get_location = mocker.MagicMock(return_value=[WARC_TARGET])
+    body = mocker.Mock()
+    resource.open_raw_content = mocker.MagicMock(return_value=body)
+    body.read = mocker.MagicMock(return_value=pdf_bytes)
+
+    return client
+
+@responses.activate
+def test_wayback_fetch(wayback_client):
     resp = wayback_client.fetch_petabox(123, 456789, "here/there.warc.gz")
     assert resp.body == WARC_BODY
     assert resp.location == WARC_TARGET
@@ -124,3 +157,14 @@ def test_wayback_fetch(wayback_client, mocker):
     resp = wayback_client.fetch_petabox_body(123, 456789, "here/there.warc.gz")
     assert resp == WARC_BODY
 
+@responses.activate
+def test_lookup_resource_success(wayback_client):
+
+    responses.add(responses.GET,
+        'http://dummy-cdx/cdx',
+        status=200,
+        body=json.dumps(CDX_MULTI_HIT))
+
+    resp = wayback_client.lookup_resource(CDX_TARGET)
+
+    assert resp.hit == True

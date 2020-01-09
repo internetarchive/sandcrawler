@@ -13,7 +13,7 @@ from http.client import IncompleteRead
 from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
 
-from .misc import b32_hex, requests_retry_session
+from .misc import b32_hex, requests_retry_session, gen_file_metadata
 
 
 ResourceResult = namedtuple("ResourceResult", [
@@ -106,15 +106,15 @@ class CdxApiClient:
                 status_code=int(raw[4]),
                 sha1b32=raw[5],
                 sha1hex=b32_hex(raw[5]),
-                warc_csize=raw[8],
-                warc_offset=raw[9],
+                warc_csize=int(raw[8]),
+                warc_offset=int(raw[9]),
                 warc_path=raw[10],
             )
             assert (row.mimetype == "-") or ("-" not in row)
             rows.append(row)
         return rows
 
-    def fetch(self, url, datetime):
+    def fetch(self, url, datetime, filter_status_code=None):
         """
         Fetches a single CDX row by url/datetime. Raises a KeyError if not
         found, because we expect to be looking up a specific full record.
@@ -127,9 +127,10 @@ class CdxApiClient:
             'to': datetime,
             'matchType': 'exact',
             'limit': -1,
-            'fastLatest': True,
             'output': 'json',
         }
+        if filter_status_code:
+            params['filter'] = "statuscode:{}".format(filter_status_code)
         resp = self._query_api(params)
         if not resp:
             raise KeyError("CDX url/datetime not found: {} {}".format(url, datetime))
@@ -148,9 +149,9 @@ class CdxApiClient:
             'url': url,
             'matchType': 'exact',
             'limit': -25,
-            'fastLatest': True,
             'output': 'json',
             'collapse': 'timestamp:6',
+            'filter': '!mimetype:warc/revisit',
         }
         if max_age_days:
             since = datetime.date.today() - datetime.timedelta(days=max_age_days)
@@ -165,9 +166,11 @@ class CdxApiClient:
 
                 200
                     mimetype match
-                        most-recent
+                        not-liveweb
+                            most-recent
                     no match
-                        most-recent
+                        not-liveweb
+                            most-recent
                 3xx
                     most-recent
                 4xx
@@ -178,10 +181,11 @@ class CdxApiClient:
             This function will create a tuple that can be used to sort in *reverse* order.
             """
             return (
-                r.status_code == 200,
-                0 - r.status_code,
-                r.mimetype == best_mimetype,
-                r.datetime,
+                int(r.status_code == 200),
+                int(0 - r.status_code),
+                int(r.mimetype == best_mimetype),
+                int('/' in r.warc_path),
+                int(r.datetime),
             )
 
         rows = sorted(rows, key=cdx_sort_key)
@@ -251,7 +255,7 @@ class WaybackClient:
         # whole cluster is down though.
 
         status_code = gwb_record.get_status()[0]
-        location = gwb_record.get_location()[0]
+        location = (gwb_record.get_location() or [None])[0]
 
         body = None
         if status_code == 200:
@@ -280,7 +284,7 @@ class WaybackClient:
 
         return resource.body
 
-    def fetch_replay(self, url, datetime):
+    def fetch_replay_body(self, url, datetime):
         """
         Fetches an HTTP 200 record from wayback via the replay interface
         (web.archive.org) instead of petabox.
@@ -327,8 +331,8 @@ class WaybackClient:
                     body=None,
                     cdx=None,
                 )
-            if cdx.status_code == 200:
-                body = self.fetch_petabox_body(cdx.warc_csize, cdx.warc_offset, cdx_row.warc_path)
+            if cdx_row.status_code == 200:
+                body = self.fetch_petabox_body(cdx_row.warc_csize, cdx_row.warc_offset, cdx_row.warc_path)
                 return ResourceResult(
                     start_url=start_url,
                     hit=True,
@@ -360,7 +364,7 @@ class WaybackClient:
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,
-                    status="terminal-not-success",
+                    status="terminal-bad-status",
                     terminal_url=cdx_row.url,
                     terminal_dt=cdx_row.datetime,
                     terminal_status_code=cdx_row.status_code,
@@ -506,7 +510,7 @@ class SavePageNowClient:
                 status=spn_result.status,
                 terminal_url=spn_result.terminal_url,
                 terminal_dt=spn_result.terminal_dt,
-                terminal_status_code=spn_result.terminal_status_code,
+                terminal_status_code=None,
                 body=None,
                 cdx=None,
             )
@@ -523,7 +527,7 @@ class SavePageNowClient:
             hit=True,
             status="success",
             terminal_url=cdx_row.url,
-            terminal_dt=cdx_row.status_code,
+            terminal_dt=cdx_row.datetime,
             terminal_status_code=cdx_row.status_code,
             body=body,
             cdx=cdx_partial,
