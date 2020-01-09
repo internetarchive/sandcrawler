@@ -257,7 +257,7 @@ class WaybackClient:
         # whole cluster is down though.
 
         status_code = gwb_record.get_status()[0]
-        location = (gwb_record.get_location() or [None])[0]
+        location = gwb_record.get_location() or None
 
         body = None
         if status_code == 200:
