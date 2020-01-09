@@ -4,7 +4,7 @@ import struct
 import responses
 
 from sandcrawler import GrobidClient, GrobidWorker, CdxLinePusher, BlackholeSink, WaybackClient
-from test_wayback import *
+from test_wayback import wayback_client, cdx_client
 
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
@@ -36,7 +36,6 @@ def test_grobid_503(grobid_client):
     assert resp['status'] == "error"
 
 @responses.activate
-@pytest.mark.skip(reason="XXX: need to fix unicode/bytes something something")
 def test_grobid_success(grobid_client):
 
     responses.add(responses.POST,
@@ -50,10 +49,9 @@ def test_grobid_success(grobid_client):
 
     assert resp['status_code'] == 200
     assert resp['status'] == "success"
-    print(type(resp['tei_xml']))
-    print(type(REAL_TEI_XML))
-    assert resp['tei_xml'] == REAL_TEI_XML.decode('utf-8')
-    #assert resp['tei_xml'].split('\n')[:3] == REAL_TEI_XML.split('\n')[:3]
+    #print(type(resp['tei_xml']))
+    #print(type(REAL_TEI_XML))
+    assert resp['tei_xml'] == REAL_TEI_XML.decode('ISO-8859-1')
 
 @responses.activate
 def test_grobid_worker_cdx(grobid_client, wayback_client):
