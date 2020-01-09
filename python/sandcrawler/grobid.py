@@ -85,8 +85,8 @@ class GrobidWorker(SandcrawlerWorker):
             if not self.wayback_client:
                 raise Exception("wayback client not configured for this GrobidWorker")
             try:
-                blob = self.wayback_client.fetch_warc_content(record['warc_path'],
-                    record['warc_offset'], record['warc_csize'])
+                blob = self.wayback_client.fetch_petabox_body(record['warc_csize'],
+                    record['warc_offset'], record['warc_path'])
             except WaybackError as we:
                 return dict(status="error-wayback", error_msg=str(we), source=record)
         elif record.get('url') and record.get('datetime'):
@@ -94,7 +94,7 @@ class GrobidWorker(SandcrawlerWorker):
             if not self.wayback_client:
                 raise Exception("wayback client not configured for this GrobidWorker")
             try:
-                blob = self.wayback_client.fetch_url_datetime(record['url'], record['datetime'])
+                blob = self.wayback_client.fetch_warc_by_url_dt(record['url'], record['datetime'])
             except WaybackError as we:
                 return dict(status="error-wayback", error_msg=str(we), source=record)
         elif record.get('item') and record.get('path'):

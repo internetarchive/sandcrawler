@@ -96,7 +96,7 @@ def test_cdx_lookup_best(cdx_client):
     assert resp.warc_path == CDX_SINGLE_HIT[1][-1]
 
 WARC_TARGET = "http://fatcat.wiki/"
-WARC_BODY = "<html>some stuff</html>"
+WARC_BODY = b"<html>some stuff</html>"
 
 @pytest.fixture
 def wayback_client(cdx_client, mocker):

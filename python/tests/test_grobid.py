@@ -4,6 +4,7 @@ import struct
 import responses
 
 from sandcrawler import GrobidClient, GrobidWorker, CdxLinePusher, BlackholeSink, WaybackClient
+from test_wayback import *
 
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
@@ -11,17 +12,22 @@ FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
 with open('tests/files/23b29ea36382680716be08fc71aa81bd226e8a85.xml', 'rb') as f:
     REAL_TEI_XML = f.read()
 
-@responses.activate
-def test_grobid_503():
+@pytest.fixture
+def grobid_client():
+    client = GrobidClient(
+        host_url="http://localhost:8070",
+    )
+    return client
 
-    client = GrobidClient(host_url="http://localhost:8070")
+@responses.activate
+def test_grobid_503(grobid_client):
 
     status = b'{"status": "done broke due to 503"}'
     responses.add(responses.POST,
         'http://localhost:8070/api/processFulltextDocument', status=503,
         body=status)
 
-    resp = client.process_fulltext(FAKE_PDF_BYTES)
+    resp = grobid_client.process_fulltext(FAKE_PDF_BYTES)
 
     # grobid gets POST 1x times
     assert len(responses.calls) == 1
@@ -31,15 +37,13 @@ def test_grobid_503():
 
 @responses.activate
 @pytest.mark.skip(reason="XXX: need to fix unicode/bytes something something")
-def test_grobid_success():
-
-    client = GrobidClient(host_url="http://localhost:8070")
+def test_grobid_success(grobid_client):
 
     responses.add(responses.POST,
         'http://localhost:8070/api/processFulltextDocument', status=200,
         body=REAL_TEI_XML, content_type='text/xml')
 
-    resp = client.process_fulltext(FAKE_PDF_BYTES)
+    resp = grobid_client.process_fulltext(FAKE_PDF_BYTES)
 
     # grobid gets POST 1x times
     assert len(responses.calls) == 1
@@ -52,11 +56,9 @@ def test_grobid_success():
     #assert resp['tei_xml'].split('\n')[:3] == REAL_TEI_XML.split('\n')[:3]
 
 @responses.activate
-def test_grobid_worker_cdx():
+def test_grobid_worker_cdx(grobid_client, wayback_client):
 
     sink = BlackholeSink()
-    grobid_client = GrobidClient(host_url="http://localhost:8070")
-    wayback_client = WaybackClient()
     worker = GrobidWorker(grobid_client, wayback_client, sink=sink)
 
     responses.add(responses.POST,
