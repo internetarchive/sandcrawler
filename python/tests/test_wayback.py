@@ -35,14 +35,7 @@ CDX_MULTI_HIT = [
 def cdx_client():
     client = CdxApiClient(
         host_url="http://dummy-cdx/cdx",
-    )
-    return client
-
-@pytest.fixture
-def wayback_client(cdx_client):
-    client = WaybackClient(
-        cdx_client=cdx_client,
-        petabox_webdata_secret="dummy-petabox-secret",
+        cdx_auth_token="dummy-token",
     )
     return client
 
@@ -102,9 +95,32 @@ def test_cdx_lookup_best(cdx_client):
     assert resp.sha1b32 == CDX_BEST_SHA1B32
     assert resp.warc_path == CDX_SINGLE_HIT[1][-1]
 
+WARC_TARGET = "http://fatcat.wiki/"
+WARC_BODY = "<html>some stuff</html>"
+
+@pytest.fixture
+def wayback_client(cdx_client, mocker):
+    client = WaybackClient(
+        cdx_client=cdx_client,
+        petabox_webdata_secret="dummy-petabox-secret",
+    )
+    # mock out the wayback store with mock stuff
+    client.rstore = mocker.Mock()
+    resource = mocker.Mock()
+    client.rstore.load_resource = mocker.MagicMock(return_value=resource)
+    resource.get_status = mocker.MagicMock(return_value=[200])
+    resource.get_location = mocker.MagicMock(return_value=[WARC_TARGET])
+    body = mocker.Mock()
+    resource.open_raw_content = mocker.MagicMock(return_value=body)
+    body.read = mocker.MagicMock(return_value=WARC_BODY)
+
+    return client
+
 def test_wayback_fetch(wayback_client, mocker):
-    # mock something
-    #mocker.patch('fatcat_tools.harvest.harvest_common.HarvestState.initialize_from_kafka')
-    #blah = mocker.Mock()
-    return
+    resp = wayback_client.fetch_petabox(123, 456789, "here/there.warc.gz")
+    assert resp.body == WARC_BODY
+    assert resp.location == WARC_TARGET
+
+    resp = wayback_client.fetch_petabox_body(123, 456789, "here/there.warc.gz")
+    assert resp == WARC_BODY
 

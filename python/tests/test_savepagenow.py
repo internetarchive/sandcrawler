@@ -3,7 +3,8 @@ import json
 import pytest
 import responses
 
-from sandcrawler import SavePageNowClient, SavePageNowError
+from sandcrawler import SavePageNowClient, SavePageNowError, CdxPartial
+from test_wayback import *
 
 
 TARGET = "http://dummy-target.dummy"
@@ -72,6 +73,10 @@ ERROR_BODY = {
     "message": "Couldn't resolve host for http://example5123.com.",
     "resources": []
 }
+CDX_SPN_HIT = [
+ ["urlkey","timestamp","original","mimetype","statuscode","digest","redirect","robotflags","length","offset","filename"],
+ ["wiki,fatcat)/", "20180326070330", TARGET + "/redirect", "application/pdf", "200", CDX_BEST_SHA1B32, "-", "-", "8445", "108062304", "liveweb-20200108215212-wwwb-spn04.us.archive.org-kols1pud.warc.gz"],
+]
 
 @pytest.fixture
 def spn_client():
@@ -157,4 +162,37 @@ def test_savepagenow_500(spn_client):
         resp = spn_client.save_url_now_v2(TARGET)
 
     assert len(responses.calls) == 2
+
+@responses.activate
+def test_crawl_resource(spn_client, wayback_client):
+
+    responses.add(responses.POST,
+        'http://dummy-spnv2/save',
+        status=200,
+        body=json.dumps({"url": TARGET, "job_id": JOB_ID}))
+    responses.add(responses.GET,
+        'http://dummy-spnv2/save/status/' + JOB_ID,
+        status=200,
+        body=json.dumps(PENDING_BODY))
+    responses.add(responses.GET,
+        'http://dummy-spnv2/save/status/' + JOB_ID,
+        status=200,
+        body=json.dumps(SUCCESS_BODY))
+    responses.add(responses.GET,
+        'http://dummy-cdx/cdx',
+        status=200,
+        body=json.dumps(CDX_SPN_HIT))
+
+    resp = spn_client.crawl_resource(TARGET, wayback_client)
+
+    assert len(responses.calls) == 4
+
+    assert resp.hit == True
+    assert resp.status == "success"
+    assert resp.body == WARC_BODY
+    assert resp.cdx.sha1b32 == CDX_BEST_SHA1B32
+
+    assert type(resp.cdx) == CdxPartial
+    with pytest.raises(AttributeError):
+        print(resp.cdx.warc_path)
 
