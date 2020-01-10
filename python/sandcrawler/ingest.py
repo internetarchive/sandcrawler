@@ -151,47 +151,70 @@ class IngestFileWorker(SandcrawlerWorker):
 
         result = dict(request=request, hit=False)
 
-        try:
-            # first hop
-            resource = self.find_resource(base_url, best_mimetype)
+        next_url = base_url
+        hops = [base_url]
+        self.max_hops = 4
+
+
+        while len(hops) <= self.max_hops:
+
+            result['hops'] = hops
+            try:
+                resource = self.find_resource(next_url, best_mimetype)
+            except SavePageNowError as e:
+                result['status'] = 'spn-error'
+                result['error_message'] = str(e)
+                return result
+            except PetaboxError as e:
+                result['status'] = 'petabox-error'
+                result['error_message'] = str(e)
+                return result
+            except CdxApiError as e:
+                result['status'] = 'cdx-error'
+                result['error_message'] = str(e)
+                return result
+            except WaybackError as e:
+                result['status'] = 'wayback-error'
+                result['error_message'] = str(e)
+                return result
+
             if not resource.hit:
                 result['status'] = resource.status
                 return result
             file_meta = gen_file_metadata(resource.body)
 
             if "html" in file_meta['mimetype']:
-                # got landing page, try another hop
+                # got landing page or similar
                 fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
                 
                 result['html'] = fulltext_url
                 if not fulltext_url or not 'pdf_url' in fulltext_url:
                     result['status'] = 'no-pdf-link'
+                    if resource.terminal_dt:
+                        result['terminal'] = {
+                            "terminal_url": resource.terminal_url,
+                            "terminal_dt": resource.terminal_dt,
+                            "terminal_status_code": resource.terminal_status_code,
+                        }
                     return result
                 print("\tlanding page URL extracted ({}): {}".format(
                         fulltext_url.get('technique'),
                         fulltext_url['pdf_url'],
                     ),
                     file=sys.stderr)
-                resource = self.find_resource(fulltext_url['pdf_url'], best_mimetype)
-                if not resource.hit:
-                    result['status'] = resource.status
+                next_url = fulltext_url['pdf_url']
+                if next_url in hops:
+                    result['status'] = 'link-loop'
+                    result['error_message'] = "repeated: {}".format(next_url)
                     return result
-                file_meta = gen_file_metadata(resource.body)
-        except SavePageNowError as e:
-            result['status'] = 'spn-error'
-            result['error_message'] = str(e)
-            return result
-        except PetaboxError as e:
-            result['status'] = 'petabox-error'
-            result['error_message'] = str(e)
-            return result
-        except CdxApiError as e:
-            result['status'] = 'cdx-error'
-            result['error_message'] = str(e)
-            return result
-        except WaybackError as e:
-            result['status'] = 'wayback-error'
-            result['error_message'] = str(e)
+                hops.append(next_url)
+                continue
+            
+            # default is to NOT keep hopping
+            break
+
+        if len(hops) >= self.max_hops:
+            result['status'] = "max-hops-exceeded"
             return result
 
         if resource.terminal_dt:
@@ -201,11 +224,12 @@ class IngestFileWorker(SandcrawlerWorker):
                 "terminal_status_code": resource.terminal_status_code,
             }
 
-        # must be a hit if we got this far
+        # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
         assert resource.hit == True
         assert resource.terminal_status_code == 200
 
         result['file_meta'] = file_meta
+        result['cdx'] = cdx_to_dict(resource.cdx)
 
         # other failure cases
         if not resource.body or file_meta['size_bytes'] == 0:
@@ -221,7 +245,6 @@ class IngestFileWorker(SandcrawlerWorker):
 
         result['status'] = "success"
         result['hit'] = True
-        result['cdx'] = cdx_to_dict(resource.cdx)
         return result
 
 

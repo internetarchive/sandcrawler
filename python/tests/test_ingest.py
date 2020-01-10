@@ -109,12 +109,19 @@ def test_ingest_landing(ingest_worker):
         headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
         body=WARC_BODY)
 
+    # this is for second time around; don't want to fetch same landing page
+    # HTML again and result in a loop
+    responses.add(responses.GET,
+        'https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"),
+        status=200,
+        headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
+        body="<html></html>")
+
     resp = ingest_worker.process(request)
 
     print(resp)
     assert resp['hit'] == False
-    assert resp['status'] == "wrong-mimetype"
+    assert resp['status'] == "no-pdf-link"
     assert resp['request'] == request
     assert 'grobid' not in resp
-    assert resp['terminal']
 
