@@ -51,7 +51,7 @@ def extract_fulltext_url(html_url, html_body):
         if anchor:
             url = anchor['href'].strip()
             assert '.pdf' in url
-            return dict(pdf_url=url)
+            return dict(pdf_url=url, technique='publisher')
 
     # research square (researchsquare.com)
     if 'researchsquare.com/article/' in html_url:
@@ -61,17 +61,16 @@ def extract_fulltext_url(html_url, html_body):
         if m:
             url = m.group(1)
             assert len(url) < 1024
-            return dict(release_stage="manuscript", pdf_url=url)
+            return dict(release_stage="manuscript", pdf_url=url, technique='publisher')
 
-    # ehp.niehs.nih.gov
-    # <a href="/doi/pdf/10.1289/EHP3950">
+    # elseiver linking hub
     if '://linkinghub.elsevier.com/retrieve/pii/' in html_url:
         redirect = soup.find("input", attrs={"name": "redirectURL"})
         if redirect:
             url = redirect['value'].strip()
             if 'sciencedirect.com' in url:
                 url = urllib.parse.unquote(url)
-                return dict(next_url=url)
+                return dict(next_url=url, technique="publisher")
 
     # ieeexplore.ieee.org
     # https://ieeexplore.ieee.org/document/8730316
@@ -82,14 +81,14 @@ def extract_fulltext_url(html_url, html_body):
         if m:
             url = m.group(1)
             assert len(url) < 1024
-            return dict(release_stage="published", pdf_url=host_prefix+url)
+            return dict(release_stage="published", pdf_url=host_prefix+url, technique="publisher")
     # https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8730313
     if '://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber' in html_url:
         # HTML iframe like:
         # <iframe src="http://web.archive.org/web/20191026011528if_/https://ieeexplore.ieee.org/ielx7/6287639/8600701/08730313.pdf?tp=&amp;arnumber=8730313&amp;isnumber=8600701&amp;ref=" frameborder="0"></iframe>
         iframe = soup.find("iframe")
         if iframe and '.pdf' in iframe['src']:
-            return dict(pdf_url=iframe['src'])
+            return dict(pdf_url=iframe['src'], technique="iframe")
 
     # TODO: hrmars.com. anchor with .pdf href, and anchor text is "PDF"
 
