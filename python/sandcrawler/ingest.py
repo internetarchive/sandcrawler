@@ -136,6 +136,10 @@ class IngestFileWorker(SandcrawlerWorker):
 
     def process(self, request):
 
+        # backwards compatibility
+        if request.get('ingest_type') in ('file', None):
+            reqeust['ingest_type'] = 'pdf'
+
         # for now, only pdf ingest is implemented
         assert request.get('ingest_type') == "pdf"
         ingest_type = request.get('ingest_type')
@@ -184,18 +188,20 @@ class IngestFileWorker(SandcrawlerWorker):
             file_meta = gen_file_metadata(resource.body)
 
             if "html" in file_meta['mimetype']:
+
                 # got landing page or similar
+                if resource.terminal_dt:
+                    result['terminal'] = {
+                        "terminal_url": resource.terminal_url,
+                        "terminal_dt": resource.terminal_dt,
+                        "terminal_status_code": resource.terminal_status_code,
+                    }
+
                 fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
                 
                 result['html'] = fulltext_url
                 if not fulltext_url:
                     result['status'] = 'no-pdf-link'
-                    if resource.terminal_dt:
-                        result['terminal'] = {
-                            "terminal_url": resource.terminal_url,
-                            "terminal_dt": resource.terminal_dt,
-                            "terminal_status_code": resource.terminal_status_code,
-                        }
                     return result
                 next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url')
                 assert next_url
