@@ -188,7 +188,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
                 
                 result['html'] = fulltext_url
-                if not fulltext_url or not 'pdf_url' in fulltext_url:
+                if not fulltext_url:
                     result['status'] = 'no-pdf-link'
                     if resource.terminal_dt:
                         result['terminal'] = {
@@ -197,12 +197,13 @@ class IngestFileWorker(SandcrawlerWorker):
                             "terminal_status_code": resource.terminal_status_code,
                         }
                     return result
-                print("\tlanding page URL extracted ({}): {}".format(
+                next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url')
+                assert next_url
+                print("\tnext hop extracted ({}): {}".format(
                         fulltext_url.get('technique'),
-                        fulltext_url['pdf_url'],
+                        next_url,
                     ),
                     file=sys.stderr)
-                next_url = fulltext_url['pdf_url']
                 if next_url in hops:
                     result['status'] = 'link-loop'
                     result['error_message'] = "repeated: {}".format(next_url)
