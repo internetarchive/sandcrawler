@@ -348,7 +348,8 @@ class WaybackClient:
 
         # defensively check that this is actually correct replay based on headers
         assert "X-Archive-Src" in resp.headers
-        assert datetime in resp.url
+        if not datetime in resp.url:
+            raise WaybackError("didn't get exact reply (redirect?) datetime:{} got:{}".format(datetime, resp.url))
 
         if cdx_sha1hex:
             # verify that body matches CDX hash
