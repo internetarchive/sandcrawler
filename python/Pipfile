@@ -9,7 +9,6 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 
 [dev-packages]
-ipython = "*"
 pytest = ">=4"
 pytest-pythonpath = "*"
 pytest-pylint = "*"
@@ -17,6 +16,9 @@ responses = ">=0.10"
 pytest-cov = "*"
 pytest-mock = "*"
 pylint = "*"
+
+# newer ipython conflicts with python3.5
+ipython = "<7.0.0"
 
 [packages]
 requests = ">=2"
