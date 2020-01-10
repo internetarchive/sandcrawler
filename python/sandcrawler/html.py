@@ -7,6 +7,15 @@ from bs4 import BeautifulSoup
 
 RESEARCHSQUARE_REGEX = re.compile(r'"url":"(https://assets.researchsquare.com/files/.{1,50}/v\d+/Manuscript.pdf)"')
 IEEEXPLORE_REGEX = re.compile(r'"pdfPath":"(/.*?\.pdf)"')
+OVID_JOURNAL_URL_REGEX = re.compile(r'journalURL = "(http.*)";')
+
+def test_regex():
+    lines = """
+    blah
+    var journalURL = "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689";
+    asdf"""
+    m = OVID_JOURNAL_URL_REGEX.search(lines)
+    assert m.group(1) == "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689"
 
 def extract_fulltext_url(html_url, html_body):
     """
@@ -23,7 +32,8 @@ def extract_fulltext_url(html_url, html_body):
     meta = soup.find('meta', attrs={"name":"citation_pdf_url"})
     if not meta:
         meta = soup.find('meta', attrs={"name":"bepress_citation_pdf_url"})
-    if meta:
+    # wiley has a weird almost-blank page we don't want to loop on
+    if meta and not "://onlinelibrary.wiley.com/doi/pdf/" in html_url:
         url = meta['content'].strip()
         if url.startswith('/'):
             return dict(pdf_url=host_prefix+url, technique='citation_pdf_url')
@@ -31,6 +41,16 @@ def extract_fulltext_url(html_url, html_body):
             return dict(pdf_url=url, technique='citation_pdf_url')
         else:
             print("malformed citation_pdf_url? {}".format(url), file=sys.stderr)
+
+    # sage, and also utpjournals (see below)
+    # https://journals.sagepub.com/doi/10.1177/2309499019888836
+    # <a href="http://journals.sagepub.com/doi/pdf/10.1177/2309499019888836" class="show-pdf" target="_self">
+    # <a href="http://utpjournals.press/doi/pdf/10.3138/cjh.ach.54.1-2.05" class="show-pdf" target="_blank">
+    href = soup.find('a', attrs={"class":"show-pdf"})
+    if href:
+        url = href['href'].strip()
+        if url.startswith('http'):
+            return dict(pdf_url=url, technique='href_show-pdf')
 
     # ACS (and probably others) like:
     #   https://pubs.acs.org/doi/10.1021/acs.estlett.9b00379
@@ -42,6 +62,16 @@ def extract_fulltext_url(html_url, html_body):
             return dict(pdf_url=url, technique='href_title')
         elif url.startswith('/'):
             return dict(pdf_url=host_prefix+url, technique='href_title')
+
+    # http://www.jasstudies.com/DergiTamDetay.aspx?ID=3401
+    # <embed src="/files/jass_makaleler/1359848334_33-Okt.%20Yasemin%20KARADEM%C4%B0R.pdf" type="application/pdf" />
+    embed = soup.find('embed', attrs={"type": "application/pdf"})
+    if embed:
+        url = embed['src'].strip()
+        if url.startswith('/'):
+            url = host_prefix+url
+        if url.startswith('http'):
+            return dict(pdf_url=url, technique='embed_type')
 
     ### Publisher/Platform Specific ###
 
@@ -64,13 +94,17 @@ def extract_fulltext_url(html_url, html_body):
             return dict(release_stage="manuscript", pdf_url=url, technique='publisher')
 
     # elseiver linking hub
+    # https://linkinghub.elsevier.com/retrieve/pii/S1569199319308975
     if '://linkinghub.elsevier.com/retrieve/pii/' in html_url:
+        # <input type="hidden" name="redirectURL" value="http%3A%2F%2Fcysticfibrosisjournal.com%2Fretrieve%2Fpii%2FS1569199319308975" id="redirectURL"/>
         redirect = soup.find("input", attrs={"name": "redirectURL"})
         if redirect:
             url = redirect['value'].strip()
-            if 'sciencedirect.com' in url:
+            if 'http' in url:
                 url = urllib.parse.unquote(url)
-                return dict(next_url=url, technique="publisher")
+                # drop any the query parameter
+                url = url.split('?via')[0]
+                return dict(next_url=url, technique="elsevier-linkinghub")
 
     # ieeexplore.ieee.org
     # https://ieeexplore.ieee.org/document/8730316
@@ -90,6 +124,64 @@ def extract_fulltext_url(html_url, html_body):
         if iframe and '.pdf' in iframe['src']:
             return dict(pdf_url=iframe['src'], technique="iframe")
 
-    # TODO: hrmars.com. anchor with .pdf href, and anchor text is "PDF"
+    # utpjournals.press
+    # https://utpjournals.press/doi/10.3138/cjh.ach.54.1-2.05
+    if '://utpjournals.press/doi/10.' in html_url:
+        # <a href="http://utpjournals.press/doi/pdf/10.3138/cjh.ach.54.1-2.05" class="show-pdf" target="_blank">
+        href = soup.find('a', attrs={"class":"show-pdf"})
+        if href:
+            url = href['href'].strip()
+            if url.startswith('http'):
+                return dict(pdf_url=url, technique='publisher-href')
+
+    # https://www.jcancer.org/v10p4038.htm
+    # simple journal-specific href
+    if '://www.jcancer.org/' in html_url and html_url.endswith(".htm"):
+        # <a href='v10p4038.pdf' class='textbutton'>PDF</a>
+        href = soup.find('a', attrs={"class":"textbutton"})
+        if href:
+            url = href['href'].strip()
+            if url.endswith(".pdf") and not "http" in url:
+                return dict(pdf_url=host_prefix+"/"+url, technique='journal-href')
+
+    # https://insights.ovid.com/crossref?an=00042307-202001000-00013
+    # Ovid is some kind of landing page bounce portal tracking run-around.
+    # Can extract actual journal URL from javascript blob in the HTML
+    if '://insights.ovid.com/crossref' in html_url:
+        # var journalURL = "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689";
+        m = OVID_JOURNAL_URL_REGEX.search(html_body.decode('utf-8'))
+        if m:
+            url = m.group(1)
+            assert len(url) < 1024
+            return dict(next_url=url, technique='ovid')
+
+    # osf.io
+    # https://osf.io/8phvx/
+    # https://osf.io/preprints/socarxiv/8phvx/
+    # wow, they ship total javascript crud! going to just guess download URL
+    # based on URL for now. Maybe content type header would help?
+    if '://osf.io/' in html_url and not '/download' in html_url:
+        if not html_url.endswith("/"):
+            next_url = html_url+"/download"
+        else:
+            next_url = html_url+"download"
+        return dict(next_url=next_url, technique='osf-by-url')
+
+    # wiley
+    # https://onlinelibrary.wiley.com/doi/pdf/10.1111/1467-923X.12787
+    if "://onlinelibrary.wiley.com/doi/pdf/" in html_url:
+        if "/doi/pdfdirect/" in html_body:
+            next_url = html_url.replace('/doi/pdf/', '/doi/pdfdirect/')
+            return dict(next_url=next_url, technique='wiley-pdfdirect')
+
+    # taylor and frances
+    # https://www.tandfonline.com/doi/full/10.1080/19491247.2019.1682234
+    # <a href="/doi/pdf/10.1080/19491247.2019.1682234?needAccess=true" class="show-pdf" target="_blank">
+    if "://www.tandfonline.com/doi/full/10." in html_url:
+        href = soup.find('a', attrs={"class":"show-pdf"})
+        if href:
+            url = href['href'].strip()
+            if "/pdf/" in url:
+                return dict(pdf_url=host_prefix+url, technique='publisher')
 
     return dict()
