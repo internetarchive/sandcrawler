@@ -413,10 +413,13 @@ class WaybackClient:
             raise WaybackError("didn't get exact reply (redirect?) datetime:{} got:{}".format(datetime, resp.url))
 
         redirect_url = resp.headers.get("Location")
+        # eg, https://web.archive.org/web/20200111003923id_/https://dx.doi.org/10.17504/protocols.io.y2gfybw
+        #print(redirect_url, file=sys.stderr)
         if redirect_url and redirect_url.startswith("https://web.archive.org/web/"):
             redirect_url = "/".join(redirect_url.split("/")[5:])
+        #print(redirect_url, file=sys.stderr)
         if redirect_url and redirect_url.startswith("http"):
-            return resp.url
+            return redirect_url
         else:
             return None
 
