@@ -145,7 +145,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         # backwards compatibility
         if request.get('ingest_type') in ('file', None):
-            reqeust['ingest_type'] = 'pdf'
+            request['ingest_type'] = 'pdf'
 
         # for now, only pdf ingest is implemented
         if not 'ingest_type' in request:
