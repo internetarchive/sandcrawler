@@ -151,14 +151,14 @@ class CdxApiClient:
         resp = self._query_api(params)
         if not resp:
             if retry_sleep:
-                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep))
+                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep), file=sys.stderr)
                 time.sleep(retry_sleep)
                 return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=None)
             raise KeyError("CDX url/datetime not found: {} {}".format(url, datetime))
         row = resp[0]
         if not (row.url == url and row.datetime == datetime):
             if retry_sleep:
-                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep))
+                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep), file=sys.stderr)
                 time.sleep(retry_sleep)
                 return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=None)
             raise KeyError("Didn't get exact CDX url/datetime match. url:{} dt:{} got:{}".format(url, datetime, row))
@@ -731,7 +731,7 @@ class SavePageNowClient:
                     retry_sleep=10.0,
                 )
             except KeyError as ke:
-                print(str(ke), file=sys.stderr)
+                print("CDX KeyError: {}".format(ke), file=sys.stderr)
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,

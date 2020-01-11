@@ -214,7 +214,7 @@ class IngestFileWorker(SandcrawlerWorker):
                     return result
                 next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url')
                 assert next_url
-                print("[EXTRACT\t] {}\t{}".format(
+                print("[PARSE\t] {}\t{}".format(
                         fulltext_url.get('technique'),
                         next_url,
                     ),
