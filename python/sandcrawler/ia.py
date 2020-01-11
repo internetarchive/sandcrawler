@@ -379,6 +379,47 @@ class WaybackClient:
                 )
         return resp.content
 
+    def fetch_replay_redirect(self, url, datetime):
+        """
+        Fetches an HTTP 3xx redirect Location from wayback via the replay interface
+        (web.archive.org) instead of petabox.
+
+        Intended for use with SPN2 requests, where request body has not ended
+        up in petabox yet.
+
+        Returns None if response is found, but couldn't find redirect.
+        """
+
+        # defensively check datetime format
+        assert len(datetime) == 14
+        assert datetime.isdigit()
+
+        try:
+            resp = requests.get(
+                self.wayback_endpoint + datetime + "id_/" + url,
+                allow_redirects=False,
+            )
+        except requests.exceptions.TooManyRedirects:
+            raise WaybackError("redirect loop (wayback replay fetch)")
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            raise WaybackError(str(e))
+        #print(resp.url, file=sys.stderr)
+
+        # defensively check that this is actually correct replay based on headers
+        assert "X-Archive-Src" in resp.headers
+        if not datetime in resp.url:
+            raise WaybackError("didn't get exact reply (redirect?) datetime:{} got:{}".format(datetime, resp.url))
+
+        redirect_url = resp.headers.get("Location")
+        if redirect_url and redirect_url.startswith("https://web.archive.org/web/"):
+            redirect_url = "/".join(redirect_url.split("/")[5:])
+        if redirect_url and redirect_url.startswith("http"):
+            return resp.url
+        else:
+            return None
+
     def lookup_resource(self, start_url, best_mimetype=None):
         """
         Looks in wayback for a resource starting at the URL, following any
@@ -443,15 +484,34 @@ class WaybackClient:
                     cdx=cdx_row,
                 )
             elif 300 <= cdx_row.status_code < 400:
-                resource = self.fetch_petabox(
-                    csize=cdx_row.warc_csize,
-                    offset=cdx_row.warc_offset,
-                    warc_path=cdx_row.warc_path,
-                )
-                assert 300 <= resource.status_code < 400
-                assert resource.location
-                #print(resource, file=sys.stderr)
-                next_url = resource.location
+                if '/' in cdx_row.warc_path:
+                    resource = self.fetch_petabox(
+                        csize=cdx_row.warc_csize,
+                        offset=cdx_row.warc_offset,
+                        warc_path=cdx_row.warc_path,
+                    )
+                    assert 300 <= resource.status_code < 400
+                    assert resource.location
+                    #print(resource, file=sys.stderr)
+                    next_url = resource.location
+                else:
+                    next_url = self.fetch_replay_redirect(
+                        url=cdx_row.url,
+                        datetime=cdx_row.datetime,
+                    )
+                    cdx_row = cdx_partial_from_row(cdx_row)
+                    if not next_url:
+                        print("bad redirect record: {}".format(cdx_row), file=sys.stderr)
+                        return ResourceResult(
+                            start_url=start_url,
+                            hit=False,
+                            status="bad-redirect",
+                            terminal_url=cdx_row.url,
+                            terminal_dt=cdx_row.datetime,
+                            terminal_status_code=cdx_row.status_code,
+                            body=None,
+                            cdx=cdx_row,
+                        )
                 if next_url in urls_seen:
                     return ResourceResult(
                         start_url=start_url,
