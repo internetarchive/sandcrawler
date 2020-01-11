@@ -142,7 +142,7 @@ class CdxApiClient:
             'from': datetime,
             'to': datetime,
             'matchType': 'exact',
-            'limit': -1,
+            'limit': 1,
             'output': 'json',
         }
         if filter_status_code:
