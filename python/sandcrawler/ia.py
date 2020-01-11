@@ -702,6 +702,21 @@ class SavePageNowClient:
                 body=None,
                 cdx=None,
             )
+        #print(spn_result, file=sys.stderr)
+
+        cdx_row = None
+        # hack to work around elsevier weirdness
+        if "://pdf.sciencedirectassets.com/" in spn_result.request_url:
+            elsevier_pdf_cdx = wayback_client.cdx_client.lookup_best(
+                spn_result.request_url,
+                best_mimetype="application/pdf",
+            )
+            if elsevier_pdf_cdx and elsevier_pdf_cdx.mimetype == "application/pdf":
+                print("Trying pdf.sciencedirectassets.com hack!", file=sys.stderr)
+                cdx_row = elsevier_pdf_cdx
+            else:
+                print("Failed pdf.sciencedirectassets.com hack!", file=sys.stderr)
+                #print(elsevier_pdf_cdx, file=sys.stderr)
 
         # fetch exact CDX row
         cdx_row = wayback_client.cdx_client.fetch(
