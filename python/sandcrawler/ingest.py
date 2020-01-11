@@ -85,13 +85,20 @@ class IngestFileWorker(SandcrawlerWorker):
         if self.try_wayback:
             via = "wayback"
             resource = self.wayback_client.lookup_resource(url, best_mimetype)
-        if self.try_spn2 and (not resource or not resource.hit):
+
+        # check for "soft 404" conditions, where we should retry with live SPNv2
+        # TODO: could refactor these into the resource fetch things themselves?
+        soft404 = False
+        if resource and resource.hit and resource.terminal_url.endswith('/cookieAbsent'):
+            soft404 = True
+
+        if self.try_spn2 and (not resource or not resource.hit or soft404):
             via = "spn2"
             resource = self.spn_client.crawl_resource(url, self.wayback_client)
-        print("[FETCH {}\t] {}\turl:{}".format(
+        print("[FETCH {}\t] {}\t{}".format(
                 via,
                 resource.status,
-                url),
+                resource.terminal_url or url),
             file=sys.stderr)
         return resource
 
@@ -141,9 +148,13 @@ class IngestFileWorker(SandcrawlerWorker):
             reqeust['ingest_type'] = 'pdf'
 
         # for now, only pdf ingest is implemented
+        if not 'ingest_type' in request:
+            request['ingest_type'] = "pdf"
         assert request.get('ingest_type') == "pdf"
         ingest_type = request.get('ingest_type')
         base_url = request['base_url']
+
+        print("[INGEST {}\t] {}".format(ingest_type, base_url), file=sys.stderr)
 
         best_mimetype = None
         if ingest_type == "pdf":
@@ -157,7 +168,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         next_url = base_url
         hops = [base_url]
-        self.max_hops = 4
+        self.max_hops = 6
 
 
         while len(hops) <= self.max_hops:
@@ -166,7 +177,7 @@ class IngestFileWorker(SandcrawlerWorker):
             try:
                 resource = self.find_resource(next_url, best_mimetype)
             except SavePageNowError as e:
-                result['status'] = 'spn-error'
+                result['status'] = 'spn2-error'
                 result['error_message'] = str(e)
                 return result
             except PetaboxError as e:
@@ -187,16 +198,14 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
             file_meta = gen_file_metadata(resource.body)
 
-            if "html" in file_meta['mimetype']:
-
-                # got landing page or similar
+            if "html" in file_meta['mimetype'] or "xml" in file_meta['mimetype']:
+                # Got landing page or similar. Some XHTML detected as "application/xml"
                 if resource.terminal_dt:
                     result['terminal'] = {
                         "terminal_url": resource.terminal_url,
                         "terminal_dt": resource.terminal_dt,
                         "terminal_status_code": resource.terminal_status_code,
                     }
-
                 fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
                 
                 result['html'] = fulltext_url
@@ -205,7 +214,7 @@ class IngestFileWorker(SandcrawlerWorker):
                     return result
                 next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url')
                 assert next_url
-                print("\tnext hop extracted ({}): {}".format(
+                print("[EXTRACT\t] {}\t{}".format(
                         fulltext_url.get('technique'),
                         next_url,
                     ),
@@ -252,6 +261,11 @@ class IngestFileWorker(SandcrawlerWorker):
 
         result['status'] = "success"
         result['hit'] = True
+        print("[SUCCESS\t] sha1:{} grobid:{}".format(
+                result.get('file_meta', {}).get('sha1hex'),
+                result.get('grobid', {}).get('status_code'),
+            ),
+            file=sys.stderr)
         return result
 
 

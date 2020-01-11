@@ -266,9 +266,8 @@ class WaybackClient:
         """
         if not self.petabox_webdata_secret:
             raise Exception("WaybackClient needs petabox secret to do direct WARC fetches")
-        # TODO:
-        #if not "/" in warc_path:
-        #    raise ValueError("what looks like a liveweb/SPN temporary warc path: {}".format(warc_path))
+        if not "/" in warc_path:
+            raise ValueError("what looks like a liveweb/SPN temporary warc path: {}".format(warc_path))
         warc_uri = self.warc_uri_prefix + warc_path
         if not self.rstore:
             self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
@@ -278,6 +277,7 @@ class WaybackClient:
             #print("offset: {} csize: {} uri: {}".format(offset, csize, warc_uri), file=sys.stderr)
             gwb_record = self.rstore.load_resource(warc_uri, offset, csize)
         except wayback.exception.ResourceUnavailable:
+            print("Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
             raise PetaboxError("failed to load file contents from wayback/petabox (ResourceUnavailable)")
         except ValueError as ve:
             raise PetaboxError("failed to load file contents from wayback/petabox (ValueError: {})".format(ve))
@@ -347,8 +347,10 @@ class WaybackClient:
         assert datetime.isdigit()
 
         try:
-            # TODO: don't follow redirects?
-            resp = requests.get(self.wayback_endpoint + datetime + "id_/" + url)
+            resp = requests.get(
+                self.wayback_endpoint + datetime + "id_/" + url,
+                allow_redirects=False,
+            )
         except requests.exceptions.TooManyRedirects:
             raise WaybackError("redirect loop (wayback replay fetch)")
         try:
@@ -543,6 +545,7 @@ class SavePageNowClient:
             data={
                 'url': request_url,
                 'capture_all': 1,
+                'capture_screenshot': 0,
                 'if_not_archived_within': '1d',
             },
         )
@@ -619,6 +622,16 @@ class SavePageNowClient:
         spn_result = self.save_url_now_v2(start_url)
 
         if not spn_result.success:
+            status = spn_result.status
+            if status in ("error:invalid-url", "error:not-found",
+                    "error:invalid-host-resolution", "error:gateway-timeout"):
+                status = status.replace("error:", "")
+            elif status == "error:no-access":
+                status = "forbidden"
+            elif status == "error:user-session-limit":
+                raise Exception("SPNv2 user-session-limit, need to backoff")
+            elif status.startswith("error:"):
+                status = "spn2-" + status
             return ResourceResult(
                 start_url=start_url,
                 hit=False,
