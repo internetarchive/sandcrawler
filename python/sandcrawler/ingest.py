@@ -253,8 +253,10 @@ class IngestFileWorker(SandcrawlerWorker):
             return result
 
         if not (resource.hit and file_meta['mimetype'] == "application/pdf"):
-            result['status'] = "wrong-mimetype"  # formerly: "other-mimetype"
-            return result
+            # protocols.io PDFs are "application/octet-stream"
+            if not (file_meta['mimetype'] == "application/octet-stream" and "://protocols.io/" in resource.terminal_url):
+                result['status'] = "wrong-mimetype"  # formerly: "other-mimetype"
+                return result
 
         info = self.process_hit(resource, file_meta)
         result.update(info)
