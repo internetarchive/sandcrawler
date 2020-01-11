@@ -215,7 +215,7 @@ def extract_fulltext_url(html_url, html_body):
     # https://americanarchivist.org/doi/abs/10.17723/aarc.62.2.j475270470145630
     if "://americanarchivist.org/doi/abs/" in html_url:
         # <a href="/doi/pdf/10.17723/aarc.62.2.j475270470145630" target="_blank">
-        hrefs = soup.find_all('a', attrs={"_target":"blank"})
+        hrefs = soup.find_all('a', attrs={"target":"_blank"})
         for href in hrefs:
             url = href['href'].strip()
             if "/doi/pdf/" in url:
@@ -223,5 +223,11 @@ def extract_fulltext_url(html_url, html_body):
                     return dict(pdf_url=url, technique='publisher-href')
                 elif url.startswith('/'):
                     return dict(pdf_url=host_prefix+url, technique='publisher-href')
+
+    # protocols.io
+    # https://www.protocols.io/view/flow-cytometry-protocol-mgdc3s6
+    if "://www.protocols.io/view/" in html_url and not html_url.endswith(".pdf"):
+        url = html_url + ".pdf"
+        return dict(pdf_url=url, technique='protocolsio-url')
 
     return dict()
