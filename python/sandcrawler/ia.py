@@ -718,12 +718,29 @@ class SavePageNowClient:
                 print("Failed pdf.sciencedirectassets.com hack!", file=sys.stderr)
                 #print(elsevier_pdf_cdx, file=sys.stderr)
 
-        # fetch exact CDX row
-        cdx_row = wayback_client.cdx_client.fetch(
-            url=spn_result.terminal_url,
-            datetime=spn_result.terminal_dt,
-            filter_status_code=200,
-        )
+        if not cdx_row:
+            # lookup exact
+            try:
+                cdx_row = wayback_client.cdx_client.fetch(
+                    url=spn_result.terminal_url,
+                    datetime=spn_result.terminal_dt,
+                    filter_status_code=200,
+                    retry_sleep=10.0,
+                )
+            except KeyError as ke:
+                print(str(ke), file=sys.stderr)
+                return ResourceResult(
+                    start_url=start_url,
+                    hit=False,
+                    status="spn2-cdx-lookup-failure",
+                    terminal_url=spn_result.terminal_url,
+                    terminal_dt=spn_result.terminal_dt,
+                    terminal_status_code=None,
+                    body=None,
+                    cdx=None,
+                )
+
+        #print(cdx_row, file=sys.stderr)
 
         if '/' in cdx_row.warc_path:
             # Usually can't do this kind of direct fetch because CDX result is recent/live
