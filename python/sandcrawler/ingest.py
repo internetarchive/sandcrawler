@@ -178,19 +178,19 @@ class IngestFileWorker(SandcrawlerWorker):
                 resource = self.find_resource(next_url, best_mimetype)
             except SavePageNowError as e:
                 result['status'] = 'spn2-error'
-                result['error_message'] = str(e)
+                result['error_message'] = str(e)[:1600]
                 return result
             except PetaboxError as e:
                 result['status'] = 'petabox-error'
-                result['error_message'] = str(e)
+                result['error_message'] = str(e)[:1600]
                 return result
             except CdxApiError as e:
                 result['status'] = 'cdx-error'
-                result['error_message'] = str(e)
+                result['error_message'] = str(e)[:1600]
                 return result
             except WaybackError as e:
                 result['status'] = 'wayback-error'
-                result['error_message'] = str(e)
+                result['error_message'] = str(e)[:1600]
                 return result
 
             if not resource.hit:
