@@ -168,7 +168,9 @@ class CdxApiClient:
             'matchType': 'exact',
             'limit': -25,
             'output': 'json',
-            'collapse': 'timestamp:6',
+            # Collapsing seems efficient, but is complex; would need to include
+            # other filters and status code in filter
+            #'collapse': 'timestamp:6',
             'filter': '!mimetype:warc/revisit',
         }
         if max_age_days:
