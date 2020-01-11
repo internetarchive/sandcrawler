@@ -107,6 +107,7 @@ class CdxApiClient:
         resp = self.http_session.get(self.host_url, params=params)
         if resp.status_code != 200:
             raise CdxApiError(resp.text)
+        #print(resp.url, file=sys.stderr)
         rj = resp.json()
         if len(rj) <= 1:
             return None

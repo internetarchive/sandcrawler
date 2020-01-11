@@ -52,6 +52,14 @@ def test_cdx_lookup_best(cdx_client):
     # won't know datetime, hash, etc
     assert resp.url in (url, url.replace("https://", "http://"))
     assert resp.mimetype == "application/pdf"
+    assert resp.status_code == 200
+
+    url = "https://americanarchivist.org/doi/abs/10.17723/aarc.62.2.gu33570g87v71007"
+    resp = cdx_client.lookup_best(url, best_mimetype="application/pdf")
+
+    assert resp.url in (url, url.replace("https://", "http://"))
+    assert resp.mimetype == "text/html"
+    assert resp.status_code == 200
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_wayback_fetch(wayback_client):
@@ -70,4 +78,37 @@ def test_lookup_resource_success(wayback_client):
     assert resp.status == "success"
     assert resp.terminal_url in (url, url.replace("https://", "http://"))
     assert resp.cdx.url in (url, url.replace("https://", "http://"))
+
+@pytest.mark.skip(reason="hits prod services, requires auth")
+def test_cdx_fetch_spn2(cdx_client):
+
+    # https://linkinghub.elsevier.com/retrieve/pii/S2590109519300424 20200110210133
+
+    # com,elsevier,linkinghub)/retrieve/pii/s2590109519300424 20191201203206 https://linkinghub.elsevier.com/retrieve/pii/S2590109519300424 text/html 200 FPXVUJR7RXVGO6RIY5HYB6JVT7OD53SG - - 5026 364192270 liveweb-20191201204645/live-20191201195942-wwwb-app52.us.archive.org.warc.gz
+    # com,elsevier,linkinghub)/retrieve/pii/s2590109519300424 20200110210044 https://linkinghub.elsevier.com/retrieve/pii/S2590109519300424 text/html 200 OIQ3TKPBQLYYXQDIG7D2ZOK7IJEUEAQ7 - - 5130 710652442 liveweb-20200110204521-wwwb-spn20.us.archive.org-8001.warc.gz
+    # com,elsevier,linkinghub)/retrieve/pii/s2590109519300424 20200110210133 https://linkinghub.elsevier.com/retrieve/pii/S2590109519300424 text/html 200 G2MSFAYELECMFGKTYEHUN66WWNW4HXKQ - - 5126 544508422 liveweb-20200110205247-wwwb-spn01.us.archive.org-8000.warc.gz
+
+    url = "https://linkinghub.elsevier.com/retrieve/pii/S2590109519300424"
+    datetime = "20200110210133"
+    resp = cdx_client.fetch(url, datetime, filter_status_code=200)
+
+    assert resp.url == url
+    assert resp.datetime == datetime
+    assert resp.sha1b32 == "G2MSFAYELECMFGKTYEHUN66WWNW4HXKQ"
+    assert resp.status_code == 200
+
+    # https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 20200110222410
+
+    #com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 200 VYW7JXFK6EC2KC537N5B7PHYZC4B6MZL - - 9006 815069841 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
+#com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1096 815066572 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
+#com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222422 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1094 307563475 liveweb-20200110214449-wwwb-spn18.us.archive.org-8003.warc.gz
+
+    url = "https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209"
+    datetime = "20200110222410"
+    resp = cdx_client.fetch(url, datetime, filter_status_code=200)
+
+    assert resp.url == url
+    assert resp.datetime == datetime
+    assert resp.sha1b32 == "VYW7JXFK6EC2KC537N5B7PHYZC4B6MZL"
+    assert resp.status_code == 200
 
