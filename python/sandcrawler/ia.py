@@ -131,7 +131,7 @@ class CdxApiClient:
             rows.append(row)
         return rows
 
-    def fetch(self, url, datetime, filter_status_code=None):
+    def fetch(self, url, datetime, filter_status_code=None, retry_sleep=None):
         """
         Fetches a single CDX row by url/datetime. Raises a KeyError if not
         found, because we expect to be looking up a specific full record.
@@ -150,9 +150,17 @@ class CdxApiClient:
             params['filter'] = "statuscode:{}".format(filter_status_code)
         resp = self._query_api(params)
         if not resp:
+            if retry_sleep:
+                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep))
+                time.sleep(retry_sleep)
+                return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=None)
             raise KeyError("CDX url/datetime not found: {} {}".format(url, datetime))
         row = resp[0]
         if not (row.url == url and row.datetime == datetime):
+            if retry_sleep:
+                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep))
+                time.sleep(retry_sleep)
+                return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=None)
             raise KeyError("Didn't get exact CDX url/datetime match. url:{} dt:{} got:{}".format(url, datetime, row))
         if filter_status_code:
             assert row.status_code == filter_status_code
