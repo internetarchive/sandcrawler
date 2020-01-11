@@ -38,3 +38,8 @@ The `./please` python3 wrapper script is a helper for running jobs (python or
 scalding) on the IA Hadoop cluster. You'll need to run the setup/dependency
 tasks first; see README files in subdirectories.
 
+## Running Python Code
+
+You need python3.5 (or python3.6+ and `pyenv`) and `pipenv` to set up the
+environment. You may also need the debian packages `libpq-dev` and `
+python-dev` to install some dependencies.
