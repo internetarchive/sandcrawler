@@ -10,7 +10,7 @@ Simply uncomment lines to run.
 import json
 import pytest
 
-from sandcrawler import CdxApiClient, CdxApiError, WaybackClient, WaybackError, PetaboxError
+from sandcrawler import CdxApiClient, CdxApiError, WaybackClient, WaybackError, PetaboxError, SavePageNowClient, SavePageNowError, CdxPartial, gen_file_metadata
 
 
 @pytest.fixture
@@ -21,6 +21,11 @@ def cdx_client():
 @pytest.fixture
 def wayback_client():
     client = WaybackClient()
+    return client
+
+@pytest.fixture
+def spn_client():
+    client = SavePageNowClient()
     return client
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
@@ -112,3 +117,33 @@ def test_cdx_fetch_spn2(cdx_client):
     assert resp.sha1b32 == "VYW7JXFK6EC2KC537N5B7PHYZC4B6MZL"
     assert resp.status_code == 200
 
+@pytest.mark.skip(reason="hits prod services, requires auth")
+def test_lookup_ftp(wayback_client):
+    # ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/80/23/10.1177_1559827617708562.PMC6236633.pdf
+    # ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/ad/ab/mmr-17-05-6969.PMC5928650.pdf
+
+    url = "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/ad/ab/mmr-17-05-6969.PMC5928650.pdf"
+    resp = wayback_client.lookup_resource(url)
+
+    assert resp.hit == True
+    assert resp.status == "success"
+    assert resp.terminal_url == url
+    assert resp.cdx.url == url
+
+    file_meta = gen_file_metadata(resp.body)
+    assert file_meta['sha1hex'] == resp.cdx.sha1hex
+
+@pytest.mark.skip(reason="hits prod services, requires auth")
+def test_crawl_ftp(spn_client, wayback_client):
+
+    url = "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/ad/ab/mmr-17-05-6969.PMC5928650.pdf"
+    resp = spn_client.crawl_resource(url, wayback_client)
+
+    # FTP isn't supported yet!
+    #assert resp.hit == True
+    #assert resp.status == "success"
+    #assert resp.terminal_url == url
+    #assert resp.cdx.url == url
+
+    assert resp.hit == False
+    assert resp.status == "spn2-no-ftp"
