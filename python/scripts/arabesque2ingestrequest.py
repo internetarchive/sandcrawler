@@ -27,7 +27,7 @@ def run(args):
 
         request = {
             'base_url': row['final_url'],
-            'ingest_type': 'pdf',
+            'ingest_type': args.ingest_type,
             'link_source': args.link_source,
             'link_source_id': row['identifier'],
             'ingest_request_source': args.ingest_request_source,
@@ -50,6 +50,9 @@ def main():
     parser.add_argument('--extid-type',
         required=True,
         help="extid to encode identifier as")
+    parser.add_argument('--ingest-type',
+        default="pdf",
+        help="ingest type (pdf, html, xml, etc)")
     parser.add_argument('--ingest-request-source',
         default="arabesque",
         help="to include in request")
