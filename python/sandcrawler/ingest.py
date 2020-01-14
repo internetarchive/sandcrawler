@@ -242,7 +242,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
         assert resource.hit == True
-        assert resource.terminal_status_code == 200
+        assert resource.terminal_status_code in (200, 226)
 
         result['file_meta'] = file_meta
         result['cdx'] = cdx_to_dict(resource.cdx)

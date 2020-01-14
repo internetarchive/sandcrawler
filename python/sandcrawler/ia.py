@@ -115,12 +115,21 @@ class CdxApiClient:
         for raw in rj[1:]:
             assert len(raw) == 11    # JSON is short
             #print(raw, file=sys.stderr)
+
+            # transform "-" ftp status code to a 226
+            status_code = None
+            if raw[4] == "-":
+                if raw[2].startswith("ftp://"):
+                    status_code = 226
+            else:
+                status_code = int(raw[4])
+
             row = CdxRow(
                 surt=raw[0],
                 datetime=raw[1],
                 url=raw[2],
                 mimetype=raw[3],
-                status_code=int(raw[4]),
+                status_code=status_code,
                 sha1b32=raw[5],
                 sha1hex=b32_hex(raw[5]),
                 warc_csize=int(raw[8]),
@@ -171,6 +180,23 @@ class CdxApiClient:
         Fetches multiple CDX rows for the given URL, tries to find the most recent.
 
         If no matching row is found, return None. Note this is different from fetch.
+
+        Preference order by status code looks like:
+
+            200 or 226
+                mimetype match
+                    not-liveweb
+                        most-recent
+                no match
+                    not-liveweb
+                        most-recent
+            3xx
+                most-recent
+            4xx
+                most-recent
+            5xx
+                most-recent
+
         """
         params = {
             'url': url,
@@ -180,7 +206,9 @@ class CdxApiClient:
             # Collapsing seems efficient, but is complex; would need to include
             # other filters and status code in filter
             #'collapse': 'timestamp:6',
-            'filter': '!mimetype:warc/revisit',
+
+            # Revisits now allowed and resolved!
+            #'filter': '!mimetype:warc/revisit',
         }
         if max_age_days:
             since = datetime.date.today() - datetime.timedelta(days=max_age_days)
@@ -189,35 +217,22 @@ class CdxApiClient:
         if not rows:
             return None
 
-        def cdx_sort_key(r):
+        def _cdx_sort_key(r):
             """
-            Preference order by status code looks like:
-
-                200
-                    mimetype match
-                        not-liveweb
-                            most-recent
-                    no match
-                        not-liveweb
-                            most-recent
-                3xx
-                    most-recent
-                4xx
-                    most-recent
-                5xx
-                    most-recent
-
-            This function will create a tuple that can be used to sort in *reverse* order.
+            This is a function, not a lambda, because it captures
+            best_mimetype. Will create a tuple that can be used to sort in
+            *reverse* order.
             """
             return (
-                int(r.status_code == 200),
+                int(r.status_code in (200, 226)),
                 int(0 - r.status_code),
                 int(r.mimetype == best_mimetype),
+                int(r.mimetype != "warc/revisit"),
                 int('/' in r.warc_path),
                 int(r.datetime),
             )
 
-        rows = sorted(rows, key=cdx_sort_key)
+        rows = sorted(rows, key=_cdx_sort_key)
         return rows[-1]
 
 
@@ -247,7 +262,7 @@ class WaybackClient:
         self.max_redirects = 25
         self.wayback_endpoint = "https://web.archive.org/web/"
 
-    def fetch_petabox(self, csize, offset, warc_path):
+    def fetch_petabox(self, csize, offset, warc_path, resolve_revisit=True):
         """
         Fetches wayback resource directly from petabox using WARC path/offset/csize.
 
@@ -261,6 +276,10 @@ class WaybackClient:
         - status_code: int
         - location: eg, for redirects
         - body: raw bytes
+
+        resolve_revist does what it sounds like: tries following a revisit
+        record by looking up CDX API and then another fetch. Refuses to recurse
+        more than one hop (eg, won't follow a chain of revisits).
 
         Requires (and uses) a secret token.
         """
@@ -292,20 +311,40 @@ class WaybackClient:
         status_code = gwb_record.get_status()[0]
         location = gwb_record.get_location() or None
 
+        if status_code is None and gwb_record.target_uri.startswith(b"ftp://"):
+            # TODO: some additional verification here?
+            status_code = 226
+
         body = None
-        if status_code == 200:
-            try:
-                body = gwb_record.open_raw_content().read()
-            except IncompleteRead as ire:
-                raise WaybackError(
-                    "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
+        if status_code in (200, 226):
+            if gwb_record.is_revisit():
+                if not resolve_revisit:
+                    raise WaybackError( "found revisit record, but won't resolve (loop?)")
+                revisit_uri, revisit_dt = gwb_record.refers_to
+                # convert revisit_dt
+                assert len(revisit_dt) == len("2018-07-24T11:56:49")
+                revisit_uri = revisit_uri.decode('utf-8')
+                revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '')
+                revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
+                body = self.fetch_petabox_body(
+                    csize=revisit_cdx.warc_csize,
+                    offset=revisit_cdx.warc_offset,
+                    warc_path=revisit_cdx.warc_path,
+                    resolve_revisit=False,
+                )
+            else:
+                try:
+                    body = gwb_record.open_raw_content().read()
+                except IncompleteRead as ire:
+                    raise WaybackError(
+                        "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
         return WarcResource(
             status_code=status_code,
             location=location,
             body=body,
         )
 
-    def fetch_petabox_body(self, csize, offset, warc_path):
+    def fetch_petabox_body(self, csize, offset, warc_path, resolve_revisit=True):
         """
         Fetches HTTP 200 WARC resource directly from petabox using WARC path/offset/csize.
 
@@ -317,11 +356,12 @@ class WaybackClient:
             csize=csize,
             offset=offset,
             warc_path=warc_path,
+            resolve_revisit=resolve_revisit,
         )
 
-        if resource.status_code != 200:
+        if resource.status_code not in (200, 226):
             raise KeyError("archived HTTP response (WARC) was not 200: {}".format(
-                gwb_record.get_status()[0]),
+                resource.status_code)
             )
 
         return resource.body
@@ -463,7 +503,7 @@ class WaybackClient:
                     body=None,
                     cdx=None,
                 )
-            if cdx_row.status_code == 200:
+            if cdx_row.status_code in (200, 226):
                 if '/' in cdx_row.warc_path:
                     body = self.fetch_petabox_body(
                         csize=cdx_row.warc_csize,
@@ -724,10 +764,13 @@ class SavePageNowClient:
         if not cdx_row:
             # lookup exact
             try:
+                filter_status_code = 200
+                if spn_result.terminal_url.startswith("ftp://"):
+                    filter_status_code = 226
                 cdx_row = wayback_client.cdx_client.fetch(
                     url=spn_result.terminal_url,
                     datetime=spn_result.terminal_dt,
-                    filter_status_code=200,
+                    filter_status_code=filter_status_code,
                     retry_sleep=10.0,
                 )
             except KeyError as ke:
