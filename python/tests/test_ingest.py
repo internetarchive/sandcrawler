@@ -24,12 +24,16 @@ def ingest_worker(wayback_client, spn_client):
 @pytest.fixture
 def ingest_worker_pdf(wayback_client_pdf, spn_client):
     grobid_client = GrobidClient(
-        host_url="http://localhost:8070",
+        host_url="http://dummy-grobid",
+    )
+    pgrest_client = SandcrawlerPostgrestClient(
+        api_url="http://dummy-postgrest",
     )
     worker = IngestFileWorker(
         wayback_client=wayback_client_pdf,
         spn_client=spn_client,
         grobid_client=grobid_client,
+        pgrest_client=pgrest_client,
     )
     return worker
 
@@ -65,6 +69,10 @@ def test_ingest_success(ingest_worker_pdf):
         status=200,
         headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
         body=pdf_bytes)
+    responses.add(responses.GET,
+        'http://dummy-postgrest/grobid?sha1hex=eq.{}'.format("90ffd2359008d82298821d16b21778c5c39aec36"),
+        status=200,
+        body=json.dumps([]))
     responses.add(responses.POST,
         'http://dummy-grobid/api/processFulltextDocument', status=200,
         body=REAL_TEI_XML, content_type='text/xml')
