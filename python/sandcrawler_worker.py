@@ -67,9 +67,14 @@ def run_persist_grobid(args):
 def run_ingest_file(args):
     consume_topic = "sandcrawler-{}.ingest-file-requests".format(args.env)
     produce_topic = "sandcrawler-{}.ingest-file-results".format(args.env)
+    grobid_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
     sink = KafkaSink(
         kafka_hosts=args.kafka_hosts,
         produce_topic=produce_topic,
+    )
+    grobid_sink = KafkaSink(
+        kafka_hosts=args.kafka_hosts,
+        produce_topic=grobid_topic,
     )
     grobid_client = GrobidClient(
         host_url=args.grobid_host,
@@ -77,6 +82,7 @@ def run_ingest_file(args):
     worker = IngestFileWorker(
         grobid_client=grobid_client,
         sink=sink,
+        grobid_sink=grobid_sink,
     )
     pusher = KafkaJsonPusher(
         worker=worker,
