@@ -70,7 +70,7 @@ class IngestFileWorker(SandcrawlerWorker):
         """
         if not self.try_existing_ingest:
             return None
-        raise NotImplementedError
+        raise NotImplementedError("can't pre-check ingests yet")
 
         # this "return True" is just here to make pylint happy
         return True
@@ -82,6 +82,13 @@ class IngestFileWorker(SandcrawlerWorker):
         """
         via = "none"
         resource = None
+
+        if url.startswith("http://web.archive.org/web/") or url.startswith("https://web.archive.org/web/"):
+            raise NotImplementedError("handling direct wayback links not supported yet")
+
+        if url.startswith("http://archive.org/") or url.startswith("https://archive.org/"):
+            raise NotImplementedError("fetching from archive.org not implemented yet")
+
         if self.try_wayback:
             via = "wayback"
             resource = self.wayback_client.lookup_resource(url, best_mimetype)
@@ -190,6 +197,10 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
             except WaybackError as e:
                 result['status'] = 'wayback-error'
+                result['error_message'] = str(e)[:1600]
+                return result
+            except NotImplementedError as e:
+                result['status'] = 'not-implemented'
                 result['error_message'] = str(e)[:1600]
                 return result
 
