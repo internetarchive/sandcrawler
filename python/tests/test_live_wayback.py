@@ -121,13 +121,29 @@ def test_cdx_fetch_spn2(cdx_client):
 def test_lookup_ftp(wayback_client):
     # ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/80/23/10.1177_1559827617708562.PMC6236633.pdf
     # ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/ad/ab/mmr-17-05-6969.PMC5928650.pdf
+    # ftp://ftp.cs.utexas.edu/pub/qsim/papers/Xu-crv-08.pdf
 
+    # revisit!
     url = "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/ad/ab/mmr-17-05-6969.PMC5928650.pdf"
     resp = wayback_client.lookup_resource(url)
 
     assert resp.hit == True
     assert resp.status == "success"
     assert resp.terminal_url == url
+    assert resp.terminal_status_code == 226
+    assert resp.cdx.url == url
+
+    file_meta = gen_file_metadata(resp.body)
+    assert file_meta['sha1hex'] == resp.cdx.sha1hex
+
+    # not revisit?
+    url = "ftp://ftp.cs.utexas.edu/pub/qsim/papers/Xu-crv-08.pdf"
+    resp = wayback_client.lookup_resource(url)
+
+    assert resp.hit == True
+    assert resp.status == "success"
+    assert resp.terminal_url == url
+    assert resp.terminal_status_code == 226
     assert resp.cdx.url == url
 
     file_meta = gen_file_metadata(resp.body)

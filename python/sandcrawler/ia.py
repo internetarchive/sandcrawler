@@ -643,6 +643,16 @@ class SavePageNowClient:
         """
         if not (self.ia_access_key and self.ia_secret_key):
             raise Exception("SPN2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
+        if request_url.startswith("ftp://"):
+            return SavePageNowResult(
+                False,
+                "spn2-no-ftp",
+                None,
+                request_url,
+                None,
+                None,
+                None,
+            )
         resp = self.v2_session.post(
             self.v2endpoint,
             data={
