@@ -5,4 +5,5 @@ from .workers import KafkaSink, KafkaGrobidSink, JsonLinePusher, CdxLinePusher, 
 from .ia import WaybackClient, WaybackError, CdxApiClient, CdxApiError, SavePageNowClient, SavePageNowError, PetaboxError, ResourceResult, WarcResource, CdxPartial, CdxRow
 from .ingest import IngestFileWorker
 from .persist import PersistCdxWorker, PersistIngestFileResultWorker, PersistGrobidWorker, PersistGrobidDiskWorker
+from .db import SandcrawlerPostgrestClient, SandcrawlerPostgresClient
 

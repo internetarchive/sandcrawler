@@ -9,7 +9,7 @@ import requests
 class SandcrawlerPostgrestClient:
 
     def __init__(self, api_url="http://aitio.us.archive.org:3030", **kwargs):
-        self.api_uri = api_url
+        self.api_url = api_url
 
     def get_cdx(self, url):
         resp = requests.get(self.api_url + "/cdx", params=dict(url='eq.'+url))
@@ -27,6 +27,15 @@ class SandcrawlerPostgrestClient:
 
     def get_file_meta(self, sha1):
         resp = requests.get(self.api_url + "/file_meta", params=dict(sha1hex='eq.'+sha1))
+        resp.raise_for_status()
+        resp = resp.json()
+        if resp:
+            return resp[0]
+        else:
+            return None
+
+    def get_ingest_file_result(self, url):
+        resp = requests.get(self.api_url + "/ingest_file_result", params=dict(base_url='eq.'+url))
         resp.raise_for_status()
         resp = resp.json()
         if resp:
