@@ -65,7 +65,10 @@ def run_persist_grobid(args):
     pusher.run()
 
 def run_ingest_file(args):
-    consume_topic = "sandcrawler-{}.ingest-file-requests".format(args.env)
+    if args.bulk:
+        consume_topic = "sandcrawler-{}.ingest-file-requests-bulk".format(args.env)
+    else:
+        consume_topic = "sandcrawler-{}.ingest-file-requests".format(args.env)
     produce_topic = "sandcrawler-{}.ingest-file-results".format(args.env)
     grobid_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
     sink = KafkaSink(
@@ -150,6 +153,9 @@ def main():
 
     sub_ingest_file = subparsers.add_parser('ingest-file',
         help="daemon that consumes requests from Kafka, ingests, pushes results to Kafka")
+    sub_ingest_file.add_argument('--bulk',
+        action='store_true',
+        help="consume from bulk kafka topic (eg, for ingest backfill)")
     sub_ingest_file.set_defaults(func=run_ingest_file)
 
     sub_persist_ingest_file = subparsers.add_parser('persist-ingest-file',
