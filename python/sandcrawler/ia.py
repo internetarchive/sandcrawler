@@ -31,6 +31,7 @@ WarcResource = namedtuple("WarcResource", [
     "status_code",
     "location",
     "body",
+    "revisit_cdx",
 ])
 
 CdxRow = namedtuple('CdxRow', [
@@ -225,7 +226,7 @@ class CdxApiClient:
             """
             return (
                 int(r.status_code in (200, 226)),
-                int(0 - r.status_code),
+                int(0 - (r.status_code or 999)),
                 int(r.mimetype == best_mimetype),
                 int(r.mimetype != "warc/revisit"),
                 int('/' in r.warc_path),
@@ -316,6 +317,7 @@ class WaybackClient:
             status_code = 226
 
         body = None
+        revisit_cdx = None
         if status_code in (200, 226):
             if gwb_record.is_revisit():
                 if not resolve_revisit:
@@ -342,6 +344,7 @@ class WaybackClient:
             status_code=status_code,
             location=location,
             body=body,
+            revisit_cdx=revisit_cdx,
         )
 
     def fetch_petabox_body(self, csize, offset, warc_path, resolve_revisit=True):
@@ -526,12 +529,13 @@ class WaybackClient:
                     body=body,
                     cdx=cdx_row,
                 )
-            elif 300 <= cdx_row.status_code < 400:
+            elif 300 <= (cdx_row.status_code or 0) < 400:
                 if '/' in cdx_row.warc_path:
                     resource = self.fetch_petabox(
                         csize=cdx_row.warc_csize,
                         offset=cdx_row.warc_offset,
                         warc_path=cdx_row.warc_path,
+                        resolve_revisit=False,
                     )
                     assert 300 <= resource.status_code < 400
                     assert resource.location
@@ -798,6 +802,7 @@ class SavePageNowClient:
 
         #print(cdx_row, file=sys.stderr)
 
+        cdx_ret = cdx_row
         if '/' in cdx_row.warc_path:
             # Usually can't do this kind of direct fetch because CDX result is recent/live
             resource = wayback_client.fetch_petabox(
@@ -806,6 +811,9 @@ class SavePageNowClient:
                 warc_path=cdx_row.warc_path,
             )
             body = resource.body
+            if resource.revisit_cdx:
+                assert resource.revisit_cdx.sha1hex == cdx_row.sha1hex
+                cdx_ret = resource.revisit_cdx
         else:
             # note: currently not trying to verify cdx_row.sha1hex
             body = wayback_client.fetch_replay_body(
@@ -813,7 +821,7 @@ class SavePageNowClient:
                 datetime=cdx_row.datetime,
             )
             # warc_path etc will change, so strip them out
-            cdx_row = cdx_partial_from_row(cdx_row)
+            cdx_ret = cdx_partial_from_row(cdx_row)
 
         return ResourceResult(
             start_url=start_url,
@@ -823,6 +831,6 @@ class SavePageNowClient:
             terminal_dt=cdx_row.datetime,
             terminal_status_code=cdx_row.status_code,
             body=body,
-            cdx=cdx_row,
+            cdx=cdx_ret,
         )
 
