@@ -27,7 +27,7 @@ def run_cdx(args):
     pusher = CdxLinePusher(
         worker,
         args.cdx_file,
-        filter_http_statuses=[200],
+        filter_http_statuses=[200, 226],
         filter_mimetypes=filter_mimetypes,
         #allow_octet_stream
         batch_size=200,

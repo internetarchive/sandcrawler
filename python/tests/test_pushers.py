@@ -19,7 +19,7 @@ def test_cdx_line_pusher():
     # HTTP 200 and application/pdf
     with open('tests/files/example.cdx', 'r') as cdx_file:
         pusher = CdxLinePusher(sink, cdx_file,
-            filter_mimetypes=['application/pdf'], filter_http_statuses=[200])
+            filter_mimetypes=['application/pdf'], filter_http_statuses=[200, 226])
         counts = pusher.run()
     assert counts['total'] == 20
     assert counts['skip-parse'] == 1

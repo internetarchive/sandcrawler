@@ -64,8 +64,12 @@ def test_grobid_worker_cdx(grobid_client, wayback_client):
         body=REAL_TEI_XML, content_type='text/xml')
 
     with open('tests/files/example.cdx', 'r') as cdx_file:
-        pusher = CdxLinePusher(worker, cdx_file,
-            filter_http_statuses=[200], filter_mimetypes=['application/pdf'])
+        pusher = CdxLinePusher(
+            worker,
+            cdx_file,
+            filter_http_statuses=[200, 226],
+            filter_mimetypes=['application/pdf'],
+        )
         pusher_counts = pusher.run()
         assert pusher_counts['total']
         assert pusher_counts['pushed'] == 7

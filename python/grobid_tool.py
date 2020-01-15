@@ -36,13 +36,21 @@ def run_extract_cdx(args):
     if args.jobs > 1:
         worker = GrobidWorker(grobid_client, wayback_client, sink=None)
         multi_worker = MultiprocessWrapper(worker, args.sink)
-        pusher = CdxLinePusher(multi_worker, args.cdx_file,
-            filter_http_statuses=[200], filter_mimetypes=['application/pdf'],
-            batch_size=args.jobs)
+        pusher = CdxLinePusher(
+            multi_worker,
+            args.cdx_file,
+            filter_http_statuses=[200, 226],
+            filter_mimetypes=['application/pdf'],
+            batch_size=args.jobs,
+        )
     else:
         worker = GrobidWorker(grobid_client, wayback_client, sink=args.sink)
-        pusher = CdxLinePusher(worker, args.cdx_file,
-            filter_http_statuses=[200], filter_mimetypes=['application/pdf'])
+        pusher = CdxLinePusher(
+            worker,
+            args.cdx_file,
+            filter_http_statuses=[200, 226],
+            filter_mimetypes=['application/pdf'],
+        )
     pusher.run()
 
 def run_extract_zipfile(args):
