@@ -12,7 +12,7 @@ from test_grobid import REAL_TEI_XML
 @pytest.fixture
 def ingest_worker(wayback_client, spn_client):
     grobid_client = GrobidClient(
-        host_url="http://localhost:8070",
+        host_url="http://dummy-grobid",
     )
     worker = IngestFileWorker(
         wayback_client=wayback_client,
@@ -66,7 +66,7 @@ def test_ingest_success(ingest_worker_pdf):
         headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
         body=pdf_bytes)
     responses.add(responses.POST,
-        'http://localhost:8070/api/processFulltextDocument', status=200,
+        'http://dummy-grobid/api/processFulltextDocument', status=200,
         body=REAL_TEI_XML, content_type='text/xml')
 
     resp = ingest_worker_pdf.process(request)
