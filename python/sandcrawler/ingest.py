@@ -76,10 +76,12 @@ class IngestFileWorker(SandcrawlerWorker):
         """
         if not self.try_existing_ingest:
             return None
-        raise NotImplementedError("can't pre-check ingests yet")
-
-        # this "return True" is just here to make pylint happy
-        return True
+        existing = self.pgrest_client.get_ingest_file_result(base_url)
+        # TODO: filter on more flags?
+        if existing and existing['hit'] == True:
+            return existing
+        else:
+            return None
 
     def find_resource(self, url, best_mimetype=None):
         """
@@ -120,13 +122,25 @@ class IngestFileWorker(SandcrawlerWorker):
         If we have an existing ingest file result, do any database fetches or
         additional processing necessary to return a result.
         """
+        raise NotImplementedError("process_existing() not tested or safe yet")
+        assert result_row['hit']
+        existing_file_meta = self.pgrest_client.get_grobid(result_row['terminal_sha1hex'])
+        existing_grobid = self.pgrest_client.get_grobid(result_row['terminal_sha1hex'])
+        if not (existing_file_meta and existing_grobid):
+            raise NotImplementedError("partially-exsiting records not implemented yet")
+        # TODO: CDX
         result = {
-            'hit': result_row.hit,
-            'status': result_row.status,
+            'hit': result_row['hit'],
+            'status': "existing",
             'request': request,
+            'grobid': existing_grobid,
+            'file_meta': existing_file_meta,
+            'terminal': {
+                'terminal_url': result_row['terminal_url'],
+                'terminal_dt': result_row['terminal_dt'],
+                'terminal_status_code': result_row['terminal_status_code'],
+            },
         }
-        # TODO: fetch file_meta
-        # TODO: fetch grobid
         return result
 
     def process_hit(self, resource, file_meta):
