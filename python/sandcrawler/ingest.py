@@ -239,6 +239,7 @@ class IngestFileWorker(SandcrawlerWorker):
             if not resource.hit:
                 result['status'] = resource.status
                 return result
+
             file_meta = gen_file_metadata(resource.body)
 
             if "html" in file_meta['mimetype'] or "xml" in file_meta['mimetype']:
@@ -289,6 +290,8 @@ class IngestFileWorker(SandcrawlerWorker):
 
         result['file_meta'] = file_meta
         result['cdx'] = cdx_to_dict(resource.cdx)
+        if resource.revisit_cdx:
+            result['revisit_cdx'] = cdx_to_dict(resource.revisit_cdx)
 
         # other failure cases
         if not resource.body or file_meta['size_bytes'] == 0:

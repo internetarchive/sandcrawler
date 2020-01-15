@@ -25,6 +25,7 @@ ResourceResult = namedtuple("ResourceResult", [
     "terminal_status_code",
     "body",
     "cdx",
+    "revisit_cdx",
 ])
 
 WarcResource = namedtuple("WarcResource", [
@@ -505,14 +506,18 @@ class WaybackClient:
                     terminal_status_code=None,
                     body=None,
                     cdx=None,
+                    revisit_cdx=None,
                 )
             if cdx_row.status_code in (200, 226):
+                revisit_cdx = None
                 if '/' in cdx_row.warc_path:
-                    body = self.fetch_petabox_body(
+                    resource = self.fetch_petabox(
                         csize=cdx_row.warc_csize,
                         offset=cdx_row.warc_offset,
                         warc_path=cdx_row.warc_path,
                     )
+                    body = resource.body
+                    revisit_cdx = resource.revisit_cdx
                 else:
                     body = self.fetch_replay_body(
                         url=cdx_row.url,
@@ -528,6 +533,7 @@ class WaybackClient:
                     terminal_status_code=cdx_row.status_code,
                     body=body,
                     cdx=cdx_row,
+                    revisit_cdx=revisit_cdx,
                 )
             elif 300 <= (cdx_row.status_code or 0) < 400:
                 if '/' in cdx_row.warc_path:
@@ -558,6 +564,7 @@ class WaybackClient:
                             terminal_status_code=cdx_row.status_code,
                             body=None,
                             cdx=cdx_row,
+                            revisit_cdx=None,
                         )
                 if next_url in urls_seen:
                     return ResourceResult(
@@ -569,6 +576,7 @@ class WaybackClient:
                         terminal_status_code=cdx_row.status_code,
                         body=None,
                         cdx=cdx_row,
+                        revisit_cdx=None,
                     )
                 urls_seen.append(next_url)
                 continue
@@ -582,6 +590,7 @@ class WaybackClient:
                     terminal_status_code=cdx_row.status_code,
                     body=None,
                     cdx=cdx_row,
+                    revisit_cdx=None,
                 )
         return ResourceResult(
             start_url=start_url,
@@ -592,6 +601,7 @@ class WaybackClient:
             terminal_status_code=cdx_row.status_code,
             body=None,
             cdx=cdx_row,
+            revisit_cdx=None,
         )
 
 
@@ -758,6 +768,7 @@ class SavePageNowClient:
                 terminal_status_code=None,
                 body=None,
                 cdx=None,
+                revisit_cdx=None,
             )
         #print(spn_result, file=sys.stderr)
 
@@ -798,11 +809,12 @@ class SavePageNowClient:
                     terminal_status_code=None,
                     body=None,
                     cdx=None,
+                    revisit_cdx=None,
                 )
 
         #print(cdx_row, file=sys.stderr)
 
-        cdx_ret = cdx_row
+        revisit_cdx = None
         if '/' in cdx_row.warc_path:
             # Usually can't do this kind of direct fetch because CDX result is recent/live
             resource = wayback_client.fetch_petabox(
@@ -813,7 +825,7 @@ class SavePageNowClient:
             body = resource.body
             if resource.revisit_cdx:
                 assert resource.revisit_cdx.sha1hex == cdx_row.sha1hex
-                cdx_ret = resource.revisit_cdx
+                revisit_cdx = resource.revisit_cdx
         else:
             # note: currently not trying to verify cdx_row.sha1hex
             body = wayback_client.fetch_replay_body(
@@ -821,7 +833,7 @@ class SavePageNowClient:
                 datetime=cdx_row.datetime,
             )
             # warc_path etc will change, so strip them out
-            cdx_ret = cdx_partial_from_row(cdx_row)
+            cdx_row = cdx_partial_from_row(cdx_row)
 
         return ResourceResult(
             start_url=start_url,
@@ -831,6 +843,7 @@ class SavePageNowClient:
             terminal_dt=cdx_row.datetime,
             terminal_status_code=cdx_row.status_code,
             body=body,
-            cdx=cdx_ret,
+            cdx=cdx_row,
+            revisit_cdx=revisit_cdx,
         )
 
