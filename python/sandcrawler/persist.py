@@ -133,6 +133,9 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         if ingest_type not in ('pdf', 'xml'):
             self.counts['skip-ingest-type'] += 1
             return None
+        if raw['status'] in ("existing", ):
+            self.counts['skip-existing'] += 1
+            return None
         result = {
             'ingest_type': ingest_type,
             'base_url': raw['request']['base_url'],
