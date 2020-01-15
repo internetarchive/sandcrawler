@@ -89,7 +89,7 @@ HTML? Or both? Let's just recrawl.
     In the future: `epub`, `video`, `git`, etc.
   - `base_url`: required, where to start crawl process
   - `link_source`: recommended, slug string. indicating the database or "authority"
-    where URL/identifier match is coming from (eg, `doi`, `pubmed`, `unpaywall`
+    where URL/identifier match is coming from (eg, `doi`, `pmc`, `unpaywall`
     (doi), `s2` (semantic-scholar id), `spn` (fatcat release), `core` (CORE
     id), `mag` (MAG id))
   - `link_source_id`: recommended, identifier string. pairs with `link_source`.
@@ -223,8 +223,8 @@ following), then in the large majority of simple cases we
 ### Open Questions
 
 Do direct aggregator/repositories crawls need to go through this process? Eg
-arxiv.org or pubmed. I guess so, otherwise how do we get full file metadata
-(size, other hashes)?
+arxiv.org or pubmed central. I guess so, otherwise how do we get full file
+metadata (size, other hashes)?
 
 When recording hit status for a URL (ingest result), is that status dependent
 on the crawl context? Eg, for save-paper-now we might want to require GROBID.
