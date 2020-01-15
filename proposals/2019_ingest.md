@@ -112,29 +112,40 @@ HTML? Or both? Let's just recrawl.
     - ...
 
 *FileIngestResult*
-  - request (object): the full IngestRequest, copied
-  - terminal
-    - url
-    - status_code
-  - wayback (XXX: ?)
-    - datetime
-    - archive_url
-  - file_meta (same schema as sandcrawler-db table)
-    - size_bytes
-    - md5
-    - sha1
-    - sha256
-    - mimetype
-  - cdx (same schema as sandcrawler-db table)
-  - grobid (same schema as sandcrawler-db table)
-    - status
-    - grobid_version
-    - status_code
-    - xml_url
-    - fatcat_release (via biblio-glutton match)
-    - metadata (JSON)
-  - status (slug): 'success', 'error', etc
-  - hit (boolean): whether we got something that looks like what was requested
+  - `request` (object): the full IngestRequest, copied
+  - `status` (slug): 'success', 'error', etc
+  - `hit` (boolean): whether we got something that looks like what was requested
+  - `terminal` (object): last crawled resource (if any)
+    - `terminal_url` (string; formerly `url`)
+    - `terminal_dt` (string): wayback capture datetime (string)
+    - `terminal_status_code`
+    - `terminal_sha1hex`: should match true `file_meta` SHA1 (not necessarily CDX SHA1)
+      (in case of transport encoding difference)
+  - `file_meta` (object): info about the terminal file
+    - same schema as sandcrawler-db table
+    - `size_bytes`
+    - `md5hex`
+    - `sha1hex`
+    - `sha256hex`
+    - `mimetype`: if not know, `application/octet-stream`
+  - `cdx`: CDX record matching terminal resource. *MAY* be a revisit or partial
+    record (eg, if via SPNv2)
+    - same schema as sandcrawler-db table 
+  - `revisit_cdx` (optional): if `cdx` is a revisit record, this will be the
+    best "original" location for retrieval of the body (matching `flie_meta`)
+    - same schema as sandcrawler-db table 
+  - `grobid`
+    - same schema as sandcrawler-db table
+    - `status` (string)
+    - `status_code` (int)
+    - `grobid_version` (string, from metadata)
+    - `fatcat_release` (string, from metadata)
+    - `metadata` (JSON) (with `grobid_version` and `fatcat_release` removed)
+    - NOT `tei_xml` (strip from reply)
+    - NOT `file_meta` (strip from reply)
+
+In general, it is the `terminal_dt` and `terminal_url` that should be used to
+construct wayback links (eg, for insertion to fatcat), not from the `cdx`.
 
 ## New SQL Tables
 

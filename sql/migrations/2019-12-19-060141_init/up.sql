@@ -1,10 +1,24 @@
 
+-- rows *may* be revisit records; indicated by mimetype == "warc/revisit"
+-- records are implied to be 200 status (or 226 for ftp); either direct hits or
+-- revisits
+-- there is nothing to prevent duplicate hits. eg, same sha1, same url, many
+-- datetimes. import scripts should take efforts to reduce this sort of
+-- duplication though. one row per *domain*/sha1hex pair is a good guideline.
+-- all ingest result url/dt pairs should be included though.
+-- any mimetype is allowed, but presumption should be that actual body is full
+-- manifestation of a work. AKA, no landing pages, no webcapture HTML (each
+-- only a part of work). URLs that are parts of a fileset are allowed.
 CREATE TABLE IF NOT EXISTS cdx (
     url                 TEXT NOT NULL CHECK (octet_length(url) >= 1),
     datetime            TEXT NOT NULL CHECK (octet_length(datetime) = 14),
+    -- sha1hex/cdx_sha1hex difference is intended to help with difference between
+    -- CDX hash (which is transport encoded body) vs. actual body. Probably need to
+    -- include both for all records?
     sha1hex             TEXT NOT NULL CHECK (octet_length(sha1hex) = 40),
     cdx_sha1hex         TEXT CHECK (octet_length(cdx_sha1hex) = 40),
     mimetype            TEXT CHECK (octet_length(mimetype) >= 1),
+    -- TODO: enforce that only paths with '/' (item+file) should be included?
     warc_path           TEXT CHECK (octet_length(warc_path) >= 1),
     warc_csize          BIGINT,
     warc_offset         BIGINT,
@@ -12,8 +26,10 @@ CREATE TABLE IF NOT EXISTS cdx (
     PRIMARY KEY(url, datetime)
 );
 CREATE INDEX IF NOT EXISTS cdx_sha1hex_idx ON cdx(sha1hex);
+-- TODO: remove this index? not currently used
 CREATE INDEX IF NOT EXISTS cdx_row_created_idx ON cdx(row_created);
 
+-- TODO: require all fields. if mimetype unknown, should be octet-stream
 CREATE TABLE IF NOT EXISTS file_meta (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     sha256hex           TEXT CHECK (octet_length(sha256hex) = 64),

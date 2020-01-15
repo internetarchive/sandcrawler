@@ -83,10 +83,22 @@ def test_ingest_success(ingest_worker_pdf):
     assert resp['hit'] == True
     assert resp['status'] == "success"
     assert resp['request'] == request
-    assert resp['file_meta']['size_bytes']
-    assert resp['grobid']
+    assert resp['terminal']['terminal_sha1hex'] == resp['file_meta']['sha1hex']
+    assert type(resp['terminal']['terminal_dt']) == str
+    assert resp['terminal']['terminal_url'] == TARGET + "/redirect"
+    assert resp['terminal']['terminal_status_code']
+    assert type(resp['file_meta']['size_bytes']) == int
+    assert resp['file_meta']['mimetype'] == "application/pdf"
+    assert resp['cdx']['url'] == TARGET + "/redirect"
+    assert 'warc_path' not in resp['cdx']
+    assert 'revisit_cdx' not in resp
+    assert resp['grobid']['status'] == "success"
+    assert resp['grobid']['status_code'] == 200
+    assert resp['grobid']['grobid_version']
+    assert 'fatcat_release' in resp['grobid']
+    assert 'grobid_version' not in resp['grobid']['metadata']
+    assert 'fatcat_release' not in resp['grobid']['metadata']
     assert not 'tei_xml' in resp['grobid']
-    assert resp['terminal']
 
 @responses.activate
 def test_ingest_landing(ingest_worker):
@@ -131,5 +143,9 @@ def test_ingest_landing(ingest_worker):
     assert resp['hit'] == False
     assert resp['status'] == "no-pdf-link"
     assert resp['request'] == request
+    assert 'terminal' in resp
+    assert 'file_meta' not in resp
+    assert 'cdx' not in resp
+    assert 'revisit_cdx' not in resp
     assert 'grobid' not in resp
 

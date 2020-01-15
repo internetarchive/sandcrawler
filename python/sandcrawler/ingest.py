@@ -126,19 +126,21 @@ class IngestFileWorker(SandcrawlerWorker):
         assert result_row['hit']
         existing_file_meta = self.pgrest_client.get_grobid(result_row['terminal_sha1hex'])
         existing_grobid = self.pgrest_client.get_grobid(result_row['terminal_sha1hex'])
-        if not (existing_file_meta and existing_grobid):
+        existing_cdx = self.pgrest_client.get_cdx(result_row['terminal_url'], result_row['terminal_dt'])
+        if not (existing_file_meta and existing_grobid and existing_cdx):
             raise NotImplementedError("partially-exsiting records not implemented yet")
-        # TODO: CDX
         result = {
             'hit': result_row['hit'],
             'status': "existing",
             'request': request,
             'grobid': existing_grobid,
             'file_meta': existing_file_meta,
+            'cdx': existing_cdx,
             'terminal': {
                 'terminal_url': result_row['terminal_url'],
                 'terminal_dt': result_row['terminal_dt'],
                 'terminal_status_code': result_row['terminal_status_code'],
+                'terminal_sha1hex': result_row['terminal_sha1hex'],
             },
         }
         return result
@@ -174,7 +176,9 @@ class IngestFileWorker(SandcrawlerWorker):
         if result['status'] == "success":
             metadata = self.grobid_client.metadata(result)
             if metadata:
-                result.update(metadata)
+                result['metadata'] = self.grobid_client.metadata(result)
+                result['fatcat_release'] = result['metadata'].pop('fatcat_release', None)
+                result['grobid_version'] = result['metadata'].pop('grobid_version', None)
         result.pop('tei_xml', None)
         result.pop('file_meta', None)
         result.pop('key', None)
@@ -282,6 +286,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 "terminal_url": resource.terminal_url,
                 "terminal_dt": resource.terminal_dt,
                 "terminal_status_code": resource.terminal_status_code,
+                "terminal_sha1hex": file_meta['sha1hex'],
             }
 
         # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
@@ -300,7 +305,9 @@ class IngestFileWorker(SandcrawlerWorker):
 
         if not (resource.hit and file_meta['mimetype'] == "application/pdf"):
             # protocols.io PDFs are "application/octet-stream"
-            if not (file_meta['mimetype'] == "application/octet-stream" and "://protocols.io/" in resource.terminal_url):
+            if (file_meta['mimetype'] == "application/octet-stream" and "://protocols.io/" in resource.terminal_url):
+                pass
+            else:
                 result['status'] = "wrong-mimetype"  # formerly: "other-mimetype"
                 return result
 
