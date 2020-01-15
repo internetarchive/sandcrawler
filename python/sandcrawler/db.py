@@ -156,7 +156,7 @@ class SandcrawlerPostgresClient:
                   d.get('grobid_version') or None,
                   d['status_code'],
                   d['status'],
-                  d.get('fatcat_release') or None,
+                  d.get('fatcat_release') or d.get('metadata', {}).get('fatcat_release') or None,
                   d.get('updated') or datetime.datetime.now(),
                   d.get('metadata') or None ,
                  )
