@@ -1,0 +1,190 @@
+
+## SQL Table Sizes
+
+              table_name           | table_size | indexes_size | total_size 
+    -------------------------------+------------+--------------+------------
+     "public"."cdx"                | 42 GB      | 36 GB        | 78 GB
+     "public"."grobid"             | 38 GB      | 7076 MB      | 45 GB
+     "public"."file_meta"          | 23 GB      | 11 GB        | 34 GB
+     "public"."shadow"             | 8303 MB    | 9216 MB      | 17 GB
+     "public"."fatcat_file"        | 5206 MB    | 2094 MB      | 7300 MB
+     "public"."ingest_file_result" | 566 MB     | 749 MB       | 1314 MB
+     "public"."petabox"            | 403 MB     | 594 MB       | 997 MB
+     "public"."ingest_request"     | 363 MB     | 625 MB       | 988 MB
+
+## File Metadata
+
+Counts and total file size:
+
+    SELECT COUNT(*) as total_count, SUM(size_bytes) as total_size FROM file_meta;
+
+
+     total_count |   total_size
+    -------------+-----------------
+       118823340 | 140917467253923
+    (1 row)
+
+    # 118,823,340 => 118 million
+    # 140,917,467,253,923 => ~141 TByte
+
+Top mimetypes:
+
+    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 10;
+
+               mimetype            |   count   
+    -------------------------------+-----------
+     application/pdf               | 117185567
+                                   |   1509149
+     application/octet-stream      |     87783
+     text/html                     |      9901
+     application/postscript        |      3781
+     application/vnd.ms-powerpoint |      1421
+     text/plain                    |      1151
+     application/xml               |       427
+     application/gzip              |       414
+     application/msword            |       314
+    (10 rows)
+
+## CDX
+
+Total and unique-by-sha1 counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM cdx;
+
+     unique_sha1 |   total   
+    -------------+-----------
+        96141851 | 110030179
+    (1 row)
+
+    # 96,141,851
+    # 110,030,179
+
+Top mimetypes (not unique by sha1):
+
+            mimetype        |  count
+    ------------------------+----------
+     application/pdf        | 84582642
+     text/html              | 24841846
+     text/xml               |   524682
+     application/postscript |    81009
+    (4 rows)
+
+## GROBID
+
+Counts:
+
+    SELECT COUNT(DISTINCT fatcat_release) AS unique_releases, COUNT(*) AS total  FROM grobid;
+
+     unique_releases |  total
+    -----------------+----------
+            13675190 | 59919772
+
+    # 13,675,190
+    # 59,919,772
+
+Status?
+
+    SELECT status_code, COUNT(*) FROM grobid GROUP BY status_code ORDER BY COUNT DESC LIMIT 10;
+
+     status_code |  count
+    -------------+----------
+             200 | 57382904
+             500 |  2536862
+             503 |        6
+    (3 rows)
+
+What version used?
+
+    SELECT grobid_version, COUNT(*) FROM grobid WHERE status_code = 200 GROUP BY grobid_version ORDER BY COUNT DESC LIMIT 10;
+
+     grobid_version |  count
+    ----------------+----------
+     0.5.5-fatcat   | 41699385
+                    | 15683279
+    (2 rows)
+
+## Petabox
+
+Counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM petabox;
+
+     unique_sha1 |  total
+    -------------+---------
+         2868825 | 2887834
+    (1 row)
+
+    # 2,868,825
+    # 2,887,834
+
+## Ingests
+
+Requests by source:
+
+    SELECT ingest_type, link_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source ORDER BY COUNT DESC LIMIT 25;
+     ingest_type | link_source |  count  
+    -------------+-------------+---------
+     pdf         | doi         | 2816171
+     pdf         | arxiv       |  154448
+     pdf         | spn         |      55
+     pdf         | pubmed      |       2
+    (4 rows)
+
+Uncrawled requests by source:
+
+    # TODO: verify this?
+    SELECT ingest_request.ingest_type, ingest_request.link_source, COUNT(*)
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+    WHERE ingest_file_result.base_url IS NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY COUNT DESC LIMIT 25;
+
+    
+     ingest_type | link_source | count
+    -------------+-------------+-------
+    (0 rows)
+
+Results by source:
+
+    SELECT
+        ingest_request.ingest_type,
+        ingest_request.link_source,
+        COUNT(*) as attempts,
+        COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) hits, 
+        ROUND(1.0 * COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) / COUNT(*), 3) as fraction
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+        AND ingest_file_result.ingest_type IS NOT NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY attempts DESC LIMIT 25;
+
+
+     ingest_type | link_source | attempts |  hits  | fraction
+    -------------+-------------+----------+--------+----------
+     pdf         | doi         |  2816171 | 289199 |    0.103
+     pdf         | arxiv       |   154448 |  41105 |    0.266
+     pdf         | spn         |       55 |     46 |    0.836
+     pdf         | pubmed      |        2 |      0 |    0.000
+    (4 rows)
+
+Ingest result by status:
+
+    SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type |       status        |  count
+    -------------+---------------------+---------
+     pdf         | no-pdf-link         | 2213720
+     pdf         | success             |  330492
+     pdf         | spn-remote-error    |  182157
+     pdf         | spn-error           |  141222
+     pdf         | cdx-error           |   83131
+     pdf         | link-loop           |   11350
+     pdf         | other-mimetype      |    6089
+     pdf         | null-body           |    1980
+     pdf         | terminal-bad-status |     583
+     pdf         | wayback-error       |     381
+    (10 rows)
+
