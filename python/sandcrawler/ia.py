@@ -397,6 +397,8 @@ class WaybackClient:
             )
         except requests.exceptions.TooManyRedirects:
             raise WaybackError("redirect loop (wayback replay fetch)")
+        except UnicodeDecodeError:
+            raise WaybackError("UnicodeDecodeError in replay request (can mean nasty redirect URL): {}".format(url))
         try:
             resp.raise_for_status()
         except Exception as e:
