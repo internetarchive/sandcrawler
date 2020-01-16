@@ -33,7 +33,7 @@ retention (on both a size and time basis).
 
     sandcrawler-ENV.ingest-file-requests-bulk
         => ingest requests from bulk crawl sources; background processing
-        => same as ingest-file-requests, but fewer partiions (12)
+        => same as ingest-file-requests
 
     sandcrawler-ENV.ingest-file-results
         => ingest requests from multiple sources
