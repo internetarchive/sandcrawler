@@ -635,7 +635,9 @@ class SavePageNowClient:
             'Accept': 'application/json',
             'Authorization': 'LOW {}:{}'.format(self.ia_access_key, self.ia_secret_key),
         })
-        self.poll_count = 30
+
+        # 4 minutes total; very long, kafka likely to time out
+        self.poll_count = 80
         self.poll_seconds = 3.0
 
     def save_url_now_v2(self, request_url):
