@@ -406,7 +406,8 @@ class WaybackClient:
         #print(resp.url, file=sys.stderr)
 
         # defensively check that this is actually correct replay based on headers
-        assert "X-Archive-Src" in resp.headers
+        if not "X-Archive-Src" in resp.headers:
+            raise WaybackError("replay fetch didn't return X-Archive-Src in headers")
         if not datetime in resp.url:
             raise WaybackError("didn't get exact reply (redirect?) datetime:{} got:{}".format(datetime, resp.url))
 
