@@ -151,12 +151,19 @@ class SandcrawlerPostgresClient:
         sql += " RETURNING xmax;"
         for r in batch:
             if r.get('metadata'):
+                # sometimes these are only in metadata; shouldn't pass through
+                # though (to save database space)
+                dupe_fields = ('fatcat_release', 'grobid_version')
+                for k in dupe_fields:
+                    if not k in r:
+                        r[k] = r['metadata'].get(k)
+                    r['metadata'].pop(k, None)
                 r['metadata'] = json.dumps(r['metadata'], sort_keys=True)
         batch = [(d['key'],
                   d.get('grobid_version') or None,
                   d['status_code'],
                   d['status'],
-                  d.get('fatcat_release') or d.get('metadata', {}).get('fatcat_release') or None,
+                  d.get('fatcat_release') or None,
                   d.get('updated') or datetime.datetime.now(),
                   d.get('metadata') or None ,
                  )
