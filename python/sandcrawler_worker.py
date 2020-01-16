@@ -15,7 +15,11 @@ import raven
 from sandcrawler import *
 
 # Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
-sentry_client = raven.Client()
+try:
+    git_sha = raven.fetch_git_sha('..')
+except Exception as e:
+    git_sha = None
+sentry_client = raven.Client(release=git_sha)
 
 
 def run_grobid_extract(args):

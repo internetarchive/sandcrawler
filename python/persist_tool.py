@@ -11,7 +11,6 @@ import os
 import sys
 import argparse
 import datetime
-import raven
 
 from sandcrawler import *
 from sandcrawler.persist import *
