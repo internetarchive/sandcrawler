@@ -59,10 +59,34 @@ class IngestFileWorker(SandcrawlerWorker):
             self.pgrest_client = SandcrawlerPostgrestClient()
         self.grobid_sink = kwargs.get('grobid_sink')
 
-        self.try_existing_ingest = False
-        self.try_existing_grobid = True
-        self.try_wayback = True
-        self.try_spn2 = True
+        self.try_existing_ingest = kwargs.get('try_existing_ingest', False)
+        self.try_existing_grobid = kwargs.get('try_existing_grobid', True)
+        self.try_wayback = kwargs.get('try_wayback', True)
+        self.try_spn2 = kwargs.get('try_spn2', True)
+
+        self.base_url_blocklist = [
+            # temporary, until we do specific crawls
+            "://doi.org/10.5281/zenodo",
+            "://doi.org/10.6084/",
+            "://doi.org/10.11583/",
+            "://doi.org/10.1184/",
+            "://zenodo.org/",
+            "://figshare.com/",
+
+            # temporary, until we implement specific fetch and 'petabox' output
+            "://archive.org/",
+            "://web.archive.org/web/",
+            "://openlibrary.org/",
+            "://fatcat.wiki/",
+
+            # Domain squats
+            "://bartandjones.com",
+            "://ijretm.com",
+            "://ijrcemas.com",
+            "://jist.net.in",
+            "://croisements-revue.org",
+
+        ]
 
     def check_existing_ingest(self, base_url):
         """
@@ -196,6 +220,10 @@ class IngestFileWorker(SandcrawlerWorker):
         assert request.get('ingest_type') == "pdf"
         ingest_type = request.get('ingest_type')
         base_url = request['base_url']
+
+        for block in self.base_url_blocklist:
+            if block in base_url:
+                return dict(request=request, hit=False, status="skip-url-blocklist")
 
         print("[INGEST {}\t] {}".format(ingest_type, base_url), file=sys.stderr)
 
