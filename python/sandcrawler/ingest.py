@@ -223,6 +223,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         for block in self.base_url_blocklist:
             if block in base_url:
+                print("[SKIP {}\t] {}".format(ingest_type, base_url), file=sys.stderr)
                 return dict(request=request, hit=False, status="skip-url-blocklist")
 
         print("[INGEST {}\t] {}".format(ingest_type, base_url), file=sys.stderr)
