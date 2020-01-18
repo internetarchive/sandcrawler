@@ -27,15 +27,22 @@ class GrobidClient(object):
         if consolidate_mode == None:
             consolidate_mode = self.consolidate_mode
 
-        grobid_response = requests.post(
-            self.host_url + "/api/processFulltextDocument",
-            files={
-                'input': blob,
-                'consolidateHeader': self.consolidate_mode,
-                'consolidateCitations': 0, # too expensive for now
-                'includeRawCitations': 1,
+        try:
+            grobid_response = requests.post(
+                self.host_url + "/api/processFulltextDocument",
+                files={
+                    'input': blob,
+                    'consolidateHeader': self.consolidate_mode,
+                    'consolidateCitations': 0, # too expensive for now
+                    'includeRawCitations': 1,
+                },
+                timeout=180.0,
+            )
+        except requests.Timeout:
+            return {
+                'status': 'error-timeout',
+                'status': 'GROBID request (HTTP POST) timeout',
             }
-        )
 
         info = dict(
             status_code=grobid_response.status_code,
