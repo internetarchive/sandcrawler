@@ -223,7 +223,7 @@ class PersistGrobidWorker(SandcrawlerWorker):
         self.counts['total'] += len(batch)
 
         for r in batch:
-            if r['status_code'] != 200 or not r.get('tei_xml'):
+            if r.get('status_code') != 200 or not r.get('tei_xml'):
                 self.counts['s3-skip-status'] += 1
                 if r.get('error_msg'):
                     r['metadata'] = {'error_msg': r['error_msg'][:500]}
@@ -291,7 +291,7 @@ class PersistGrobidDiskWorker(SandcrawlerWorker):
 
     def process(self, record):
 
-        if record['status_code'] != 200 or not record.get('tei_xml'):
+        if record.get('status_code') != 200 or not record.get('tei_xml'):
             return False
         assert(len(record['key'])) == 40
         p = "{}/{}".format(self.output_dir, self._blob_path(record['key']))
