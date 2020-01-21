@@ -222,8 +222,14 @@ class PersistGrobidWorker(SandcrawlerWorker):
     def push_batch(self, batch):
         self.counts['total'] += len(batch)
 
+        # filter out bad "missing status_code" timeout rows
+        missing = [r for r in batch if not r.get('status_code')]
+        if missing:
+            self.counts['skip-missing-status'] += len(missing)
+            batch = [r for r in batch if r.get('status_code')]
+
         for r in batch:
-            if r.get('status_code') != 200 or not r.get('tei_xml'):
+            if r['status_code'] != 200 or not r.get('tei_xml'):
                 self.counts['s3-skip-status'] += 1
                 if r.get('error_msg'):
                     r['metadata'] = {'error_msg': r['error_msg'][:500]}
@@ -265,7 +271,8 @@ class PersistGrobidWorker(SandcrawlerWorker):
             self.counts['insert-file-meta'] += resp[0]
             self.counts['update-file-meta'] += resp[1]
 
-        self.db.commit()
+            self.db.commit()
+
         return []
 
 
