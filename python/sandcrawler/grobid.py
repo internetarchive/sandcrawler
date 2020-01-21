@@ -41,7 +41,8 @@ class GrobidClient(object):
         except requests.Timeout:
             return {
                 'status': 'error-timeout',
-                'status': 'GROBID request (HTTP POST) timeout',
+                'status_code': -4,  # heritrix3 "HTTP timeout" code
+                'error_msg': 'GROBID request (HTTP POST) timeout',
             }
 
         info = dict(
