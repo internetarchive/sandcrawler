@@ -273,6 +273,9 @@ class IngestFileWorker(SandcrawlerWorker):
                 result['status'] = resource.status
                 return result
 
+            if not resource.body:
+                result['status'] = 'null-body'
+                return result
             file_meta = gen_file_metadata(resource.body)
 
             if "html" in file_meta['mimetype'] or "xml" in file_meta['mimetype']:
