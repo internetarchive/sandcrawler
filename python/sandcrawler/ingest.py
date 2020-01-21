@@ -65,14 +65,6 @@ class IngestFileWorker(SandcrawlerWorker):
         self.try_spn2 = kwargs.get('try_spn2', True)
 
         self.base_url_blocklist = [
-            # temporary, until we do specific crawls
-            "://doi.org/10.5281/zenodo",
-            "://doi.org/10.6084/",
-            "://doi.org/10.11583/",
-            "://doi.org/10.1184/",
-            "://zenodo.org/",
-            "://figshare.com/",
-
             # temporary, until we implement specific fetch and 'petabox' output
             "://archive.org/",
             "://web.archive.org/web/",
