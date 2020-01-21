@@ -432,7 +432,8 @@ class WaybackClient:
         (web.archive.org) instead of petabox.
 
         Intended for use with SPN2 requests, where request body has not ended
-        up in petabox yet.
+        up in petabox yet. For example, re-ingesting a base_url which was
+        recently crawler by SPNv2, where we are doing ingest via wayback path.
 
         Returns None if response is found, but couldn't find redirect.
         """
@@ -457,7 +458,8 @@ class WaybackClient:
         #print(resp.url, file=sys.stderr)
 
         # defensively check that this is actually correct replay based on headers
-        assert "X-Archive-Src" in resp.headers
+        if not "X-Archive-Redirect-Reason" in resp.headers:
+            raise WaybackError("redirect replay fetch didn't return X-Archive-Redirect-Reason in headers")
         if not datetime in resp.url:
             raise WaybackError("didn't get exact reply (redirect?) datetime:{} got:{}".format(datetime, resp.url))
 
