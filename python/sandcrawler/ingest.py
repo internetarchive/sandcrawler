@@ -78,6 +78,9 @@ class IngestFileWorker(SandcrawlerWorker):
             "://jist.net.in",
             "://croisements-revue.org",
 
+            # all stubs/previews, not full papers
+            "://page-one.live.cf.public.springer.com",
+
         ]
 
     def check_existing_ingest(self, base_url):
