@@ -271,8 +271,8 @@ class WaybackClient:
         If there is a problem with petabox, raises a PetaboxError.
         If resource doesn't exist, would raise a KeyError (TODO).
 
-        The full record is returned as crawled; it may be a redirect, 404
-        response, etc.
+        The body is only returned if the record is success (HTTP 200 or
+        equivalent). Otherwise only the status and header info is returned.
 
         WarcResource object (namedtuple) contains fields:
         - status_code: int
@@ -325,7 +325,7 @@ class WaybackClient:
                     raise WaybackError( "found revisit record, but won't resolve (loop?)")
                 revisit_uri, revisit_dt = gwb_record.refers_to
                 # convert revisit_dt
-                assert len(revisit_dt) == len("2018-07-24T11:56:49")
+                assert len(revisit_dt) == 19  # len("2018-07-24T11:56:49")
                 revisit_uri = revisit_uri.decode('utf-8')
                 revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '')
                 revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
@@ -341,6 +341,9 @@ class WaybackClient:
                 except IncompleteRead as ire:
                     raise WaybackError(
                         "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
+        else if status_code is None:
+            raise WaybackError(
+                "got a None status_code in (W)ARC record".format(ire))
         return WarcResource(
             status_code=status_code,
             location=location,
