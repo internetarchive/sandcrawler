@@ -343,7 +343,7 @@ class WaybackClient:
                         "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
         elif status_code is None:
             raise WaybackError(
-                "got a None status_code in (W)ARC record".format(ire))
+                "got a None status_code in (W)ARC record")
         return WarcResource(
             status_code=status_code,
             location=location,
