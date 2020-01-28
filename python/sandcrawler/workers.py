@@ -397,7 +397,7 @@ def make_kafka_consumer(hosts, consume_topic, group):
                 print("Kafka consumer commit error: {}".format(p.error), file=sys.stderr)
                 print("Bailing out...", file=sys.stderr)
                 # TODO: should it be sys.exit(-1)?
-                raise KafkaException(err)
+                raise KafkaException(p.error)
         #print("Kafka consumer commit successful")
         pass
 
