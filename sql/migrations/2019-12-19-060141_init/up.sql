@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS grobid (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     grobid_version      TEXT CHECK (octet_length(grobid_version) >= 1),
+    -- TODO: status_code is validly null if there was a wayback or petabox error. We want to record these cases so we don't loop re-processing forever
     status_code         INT NOT NULL,
     status              TEXT CHECK (octet_length(status) >= 1),
     fatcat_release      TEXT CHECK (octet_length(fatcat_release) = 26),

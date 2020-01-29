@@ -222,12 +222,6 @@ class PersistGrobidWorker(SandcrawlerWorker):
     def push_batch(self, batch):
         self.counts['total'] += len(batch)
 
-        # filter out bad "missing status_code" timeout rows
-        missing = [r for r in batch if not r.get('status_code')]
-        if missing:
-            self.counts['skip-missing-status'] += len(missing)
-            batch = [r for r in batch if r.get('status_code')]
-
         for r in batch:
             if r['status_code'] != 200 or not r.get('tei_xml'):
                 self.counts['s3-skip-status'] += 1

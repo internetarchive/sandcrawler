@@ -161,7 +161,8 @@ class SandcrawlerPostgresClient:
                 r['metadata'] = json.dumps(r['metadata'], sort_keys=True)
         batch = [(d['key'],
                   d.get('grobid_version') or None,
-                  d['status_code'],
+                  # status_code is validly not set if there was, eg, error-wayback in grobid-worker
+                  d.get('status_code') or 0,
                   d['status'],
                   d.get('fatcat_release') or None,
                   d.get('updated') or datetime.datetime.now(),
