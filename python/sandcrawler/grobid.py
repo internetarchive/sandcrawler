@@ -88,6 +88,7 @@ class GrobidWorker(SandcrawlerWorker):
         self.consolidate_mode = 2
 
     def process(self, record):
+        default_key = record['sha1hex']
         if record.get('warc_path') and record.get('warc_offset'):
             # it's a full CDX dict. fetch using WaybackClient
             if not self.wayback_client:
@@ -99,7 +100,12 @@ class GrobidWorker(SandcrawlerWorker):
                     warc_path=record['warc_path'],
                 )
             except WaybackError as we:
-                return dict(status="error-wayback", error_msg=str(we), source=record)
+                return dict(
+                    status="error-wayback",
+                    error_msg=str(we),
+                    source=record,
+                    key=default_key,
+                )
         elif record.get('url') and record.get('datetime'):
             # it's a partial CDX dict or something? fetch using WaybackClient
             if not self.wayback_client:
@@ -110,7 +116,12 @@ class GrobidWorker(SandcrawlerWorker):
                     datetime=record['datetime'],
                 )
             except WaybackError as we:
-                return dict(status="error-wayback", error_msg=str(we), source=record)
+                return dict(
+                    status="error-wayback",
+                    error_msg=str(we),
+                    source=record,
+                    key=default_key,
+                )
         elif record.get('item') and record.get('path'):
             # it's petabox link; fetch via HTTP
             resp = requests.get("https://archive.org/serve/{}/{}".format(
@@ -118,12 +129,22 @@ class GrobidWorker(SandcrawlerWorker):
             try:
                 resp.raise_for_status()
             except Exception as e:
-                return dict(status="error-petabox", error_msg=str(e), source=record)
+                return dict(
+                    status="error-petabox",
+                    error_msg=str(e),
+                    source=record,
+                    key=default_key,
+                )
             blob = resp.body
         else:
             raise ValueError("not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")
         if not blob:
-            return dict(status="error", error_msg="empty blob", source=record)
+            return dict(
+                status="error",
+                error_msg="empty blob",
+                source=record,
+                key=default_key,
+            )
         result = self.grobid_client.process_fulltext(blob, consolidate_mode=self.consolidate_mode)
         result['file_meta'] = gen_file_metadata(blob)
         result['source'] = record
