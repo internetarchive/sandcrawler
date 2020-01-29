@@ -171,3 +171,10 @@ Can also do some quick lookups for a specific domain and protocol like:
         WHERE terminal_url LIKE 'https://insights.ovid.com/%'
         LIMIT 10;
 
+## Full Database Dumps
+
+Run a dump in compressed, postgres custom format:
+
+    export DATESLUG="`date +%Y-%m-%d.%H%M%S`"
+    time sudo -u postgres pg_dump --verbose --format=custom sandcrawler > /sandcrawler-db/snapshots/sandcrawler_full_dbdump_${DATESLUG}.pgdump
+
