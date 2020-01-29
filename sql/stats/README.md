@@ -49,7 +49,7 @@ Counts:
 
 Status?
 
-    SELECT status_code, COUNT(*) FROM file_meta GROUP BY status_code ORDER BY COUNT DESC LIMIT 10;
+    SELECT status_code, COUNT(*) FROM grobid GROUP BY status_code ORDER BY COUNT DESC LIMIT 10;
 
 What version used?
 
