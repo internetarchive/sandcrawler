@@ -4,7 +4,7 @@ import requests
 from grobid2json import teixml2json
 from .workers import SandcrawlerWorker
 from .misc import gen_file_metadata
-from .ia import WaybackClient, WaybackError
+from .ia import WaybackClient, WaybackError, PetaboxError
 
 class GrobidClient(object):
 
@@ -99,7 +99,7 @@ class GrobidWorker(SandcrawlerWorker):
                     offset=record['warc_offset'],
                     warc_path=record['warc_path'],
                 )
-            except WaybackError as we:
+            except (WaybackError, PetaboxError) as we:
                 return dict(
                     status="error-wayback",
                     error_msg=str(we),
