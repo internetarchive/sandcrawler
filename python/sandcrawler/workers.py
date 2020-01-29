@@ -107,7 +107,7 @@ class KafkaSink(SandcrawlerWorker):
 
         config = self.producer_config({
             'bootstrap.servers': kafka_hosts,
-            'message.max.bytes': 20000000, # ~20 MBytes; broker is ~50 MBytes
+            'message.max.bytes': 30000000, # ~30 MBytes; broker is ~50 MBytes
             'api.version.request': True,
             'api.version.fallback.ms': 0,
         })
@@ -127,6 +127,7 @@ class KafkaSink(SandcrawlerWorker):
         config.update({
             'delivery.report.only.error': True,
             'default.topic.config': {
+                'message.timeout.ms': 30000,
                 'request.required.acks': -1, # all brokers must confirm
             }
         })
@@ -171,10 +172,11 @@ class KafkaGrobidSink(KafkaSink):
         config.update({
             'compression.codec': 'gzip',
             'retry.backoff.ms': 250,
-            'linger.ms': 5000,
+            'linger.ms': 1000,
             'batch.num.messages': 50,
             'delivery.report.only.error': True,
             'default.topic.config': {
+                'message.timeout.ms': 30000,
                 'request.required.acks': -1, # all brokers must confirm
             }
         })
