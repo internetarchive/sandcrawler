@@ -45,6 +45,7 @@ def run_grobid_extract(args):
         kafka_hosts=args.kafka_hosts,
         consume_topic=consume_topic,
         group="grobid-extract",
+        batch_size=1,
     )
     pusher.run()
 
