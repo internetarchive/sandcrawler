@@ -149,7 +149,7 @@ class KafkaSink(SandcrawlerWorker):
             on_delivery=self._fail_fast)
         self.counts['produced'] += 1
 
-        # TODO: check for errors etc. is this necessary?
+        # check for errors etc
         self.producer.poll(0)
 
     def push_batch(self, msgs):
