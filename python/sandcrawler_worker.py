@@ -71,8 +71,10 @@ def run_persist_grobid(args):
 
 def run_ingest_file(args):
     if args.bulk:
+        consume_group = "sandcrawler-{}-ingest-file-bulk".format(args.env)
         consume_topic = "sandcrawler-{}.ingest-file-requests-bulk".format(args.env)
     else:
+        consume_group = "sandcrawler-{}-ingest-file".format(args.env)
         consume_topic = "sandcrawler-{}.ingest-file-requests".format(args.env)
     produce_topic = "sandcrawler-{}.ingest-file-results".format(args.env)
     grobid_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
@@ -96,7 +98,7 @@ def run_ingest_file(args):
         worker=worker,
         kafka_hosts=args.kafka_hosts,
         consume_topic=consume_topic,
-        group="ingest-file",
+        group=consume_group,
         batch_size=1,
     )
     pusher.run()
