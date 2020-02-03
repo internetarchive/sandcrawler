@@ -8,6 +8,11 @@ import requests
 import datetime
 from collections import namedtuple
 
+import http.client
+
+# not sure this will really work. Should go before wayback imports.
+http.client._MAXHEADERS = 1000
+
 import wayback.exception
 from http.client import IncompleteRead
 from wayback.resourcestore import ResourceStore
@@ -310,7 +315,10 @@ class WaybackClient:
         # many petabox errors. Do want jobs to fail loud and clear when the
         # whole cluster is down though.
 
-        status_code = gwb_record.get_status()[0]
+        try:
+            status_code = gwb_record.get_status()[0]
+        except http.client.HTTPException:
+            raise WaybackError("too many HTTP headers (in wayback fetch)")
         location = gwb_record.get_location() or None
 
         if status_code is None and gwb_record.target_uri.startswith(b"ftp://"):
