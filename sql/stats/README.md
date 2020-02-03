@@ -31,6 +31,10 @@ Top mimetypes:
 
     SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 10;
 
+Missing full metadata:
+
+    SELECT COUNT(*) FROM file_meta WHERE sha256hex IS NULL;
+
 ## CDX
 
 Total and unique-by-sha1 counts:
@@ -96,4 +100,15 @@ Results by source:
 Ingest result by status:
 
     SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 25;
+
+## Fatcat Files
+
+Count of PDF files that GROBID processed and matched to a release (via
+glutton), but no PDF in `fatcat_file`:
+
+    SELECT COUNT(*) as total_count, COUNT(DISTINCT grobid.fatcat_release) as release_count
+    FROM grobid
+    LEFT JOIN fatcat_file ON grobid.sha1hex = fatcat_file.sha1hex
+    WHERE fatcat_file.sha1hex IS NULL
+      AND grobid.fatcat_release IS NOT NULL;
 
