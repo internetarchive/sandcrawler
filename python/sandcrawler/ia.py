@@ -20,6 +20,8 @@ from gwb.loader import CDXLoaderFactory
 
 from .misc import b32_hex, requests_retry_session, gen_file_metadata
 
+class SandcrawlerBackoffError(Exception):
+    pass
 
 ResourceResult = namedtuple("ResourceResult", [
     "start_url",
@@ -626,6 +628,9 @@ class WaybackClient:
 class SavePageNowError(Exception):
     pass
 
+class SavePageNowBackoffError(Exception):
+    pass
+
 SavePageNowResult = namedtuple('SavePageNowResult', [
     'success',
     'status',
@@ -696,11 +701,15 @@ class SavePageNowClient:
                 'if_not_archived_within': '1d',
             },
         )
-        if resp.status_code != 200:
+        if resp.status_code == 429:
+            raise SavePaperNowBackoffError("status_code: {}, url: {}".format(resp.status_code, request_url))
+        elif resp.status_code != 200:
             raise SavePageNowError("SPN2 status_code: {}, url: {}".format(resp.status_code, request_url))
         resp_json = resp.json()
 
-        if not resp_json or 'job_id' not in resp_json:
+        if resp_json and 'message' in resp_json and 'You have already reached the limit of active sessions' in resp_json['message']:
+            raise SavePaperNowBackoffError(resp_json['message'])
+        elif not resp_json or 'job_id' not in resp_json:
             raise SavePageNowError(
                 "Didn't get expected 'job_id' field in SPN2 response: {}".format(resp_json))
 
