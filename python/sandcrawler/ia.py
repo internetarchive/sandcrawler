@@ -21,6 +21,12 @@ from gwb.loader import CDXLoaderFactory
 from .misc import b32_hex, requests_retry_session, gen_file_metadata
 
 class SandcrawlerBackoffError(Exception):
+    """
+    A set of Exceptions which are raised through multiple abstraction layers to
+    indicate backpressure. For example, SPNv2 back-pressure sometimes needs to
+    be passed up through any timeout/retry code and become an actual long pause
+    or crash.
+    """
     pass
 
 ResourceResult = namedtuple("ResourceResult", [
@@ -628,7 +634,7 @@ class WaybackClient:
 class SavePageNowError(Exception):
     pass
 
-class SavePageNowBackoffError(Exception):
+class SavePageNowBackoffError(SandcrawlerBackoffError):
     pass
 
 SavePageNowResult = namedtuple('SavePageNowResult', [
@@ -702,13 +708,13 @@ class SavePageNowClient:
             },
         )
         if resp.status_code == 429:
-            raise SavePaperNowBackoffError("status_code: {}, url: {}".format(resp.status_code, request_url))
+            raise SavePageNowBackoffError("status_code: {}, url: {}".format(resp.status_code, request_url))
         elif resp.status_code != 200:
             raise SavePageNowError("SPN2 status_code: {}, url: {}".format(resp.status_code, request_url))
         resp_json = resp.json()
 
         if resp_json and 'message' in resp_json and 'You have already reached the limit of active sessions' in resp_json['message']:
-            raise SavePaperNowBackoffError(resp_json['message'])
+            raise SavePageNowBackoffError(resp_json['message'])
         elif not resp_json or 'job_id' not in resp_json:
             raise SavePageNowError(
                 "Didn't get expected 'job_id' field in SPN2 response: {}".format(resp_json))
@@ -785,13 +791,13 @@ class SavePageNowClient:
             elif status == "error:no-access":
                 status = "forbidden"
             elif status == "error:user-session-limit":
-                raise Exception("SPNv2 user-session-limit, need to backoff")
+                raise SavePageNowBackoffError("SPNv2 user-session-limit")
             elif status.startswith("error:"):
                 status = "spn2-" + status
             return ResourceResult(
                 start_url=start_url,
                 hit=False,
-                status=spn_result.status,
+                status=status,
                 terminal_url=spn_result.terminal_url,
                 terminal_dt=spn_result.terminal_dt,
                 terminal_status_code=None,
