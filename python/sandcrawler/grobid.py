@@ -135,7 +135,7 @@ class GrobidWorker(SandcrawlerWorker):
                     source=record,
                     key=default_key,
                 )
-            blob = resp.body
+            blob = resp.content
         else:
             raise ValueError("not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")
         if not blob:
