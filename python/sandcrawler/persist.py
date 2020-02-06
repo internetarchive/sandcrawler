@@ -102,6 +102,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             'base_url': raw['base_url'],
             'link_source': raw['link_source'],
             'link_source_id': raw['link_source_id'],
+            'ingest_request_source': raw.get('ingest_request_source'),
             'request': {},
         }
         # extra/optional fields
