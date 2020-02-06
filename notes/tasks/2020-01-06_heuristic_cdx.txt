@@ -1,0 +1,37 @@
+
+Wanted to include a large number of additional CDX lines based on regex
+pattern. These are primarily .edu domains with things that look like user
+accounts *and* .pdf file extensions in the path.
+
+## Commands
+
+aitio:/fast/gwb_pdfs
+
+  pdfs/gwb-pdf-20191005172329-url-heuristics-edu
+  pdfs/gwb-pdf-20191005172329-url-heuristics
+
+
+to filter as url/sha1 uniq:
+
+    cat raw.cdx | sort -u -t' ' -k3,6 -S 4G > uniq.cdx
+
+    cat gwb-pdf-20191005172329-url-heuristics-edu/part-r-000* | sort -u -t' ' -k3,6 -S 4G > gwb-pdf-20191005172329-url-heuristics-edu.uniq_url_sha1.cdx
+    cat gwb-pdf-20191005172329-url-heuristics/part-r-000* | sort -u -t' ' -k3,6 -S 4G > gwb-pdf-20191005172329-url-heuristics.uniq_url_sha1.cdx
+
+    7241795  gwb-pdf-20191005172329-url-heuristics-edu.uniq_url_sha1.cdx
+    41137888 gwb-pdf-20191005172329-url-heuristics.uniq_url_sha1.cdx
+
+    cut -d' ' -f6 gwb-pdf-20191005172329-url-heuristics-edu.uniq_url_sha1.cdx | sort -u -S 4G | wc -l
+    7241795
+
+    cut -d' ' -f6 gwb-pdf-20191005172329-url-heuristics.uniq_url_sha1.cdx | sort -u -S 4G | wc -l
+    41137888
+
+    ./persist_tool.py cdx /fast/gwb_pdf/gwb-pdf-20191005172329-url-heuristics-edu.uniq_url_sha1.cdx
+    Worker: Counter({'total': 7239153, 'insert-cdx': 6845283, 'update-cdx': 0})
+    CDX lines pushed: Counter({'total': 7241795, 'pushed': 7239153, 'skip-parse': 2603, 'skip-mimetype': 39})
+
+    ./persist_tool.py cdx /fast/gwb_pdf/gwb-pdf-20191005172329-url-heuristics.uniq_url_sha1.cdx
+    Worker: Counter({'total': 41030360, 'insert-cdx': 22430064, 'update-cdx': 0})
+    CDX lines pushed: Counter({'total': 41137888, 'pushed': 41030360, 'skip-mimetype': 87341, 'skip-parse': 20187})
+
