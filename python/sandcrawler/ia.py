@@ -662,8 +662,8 @@ class SavePageNowClient:
             'Authorization': 'LOW {}:{}'.format(self.ia_access_key, self.ia_secret_key),
         })
 
-        # 4 minutes total; very long, kafka likely to time out
-        self.poll_count = 80
+        # 3 minutes total
+        self.poll_count = 60
         self.poll_seconds = 3.0
 
     def save_url_now_v2(self, request_url):
