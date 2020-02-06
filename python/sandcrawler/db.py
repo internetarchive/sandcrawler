@@ -189,7 +189,8 @@ class SandcrawlerPostgresClient:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))
         sql += " RETURNING xmax;"
         for r in batch:
-            extra = dict()
+            # in case these fields were already packed into 'request'
+            extra = r.get('request', {})
             for k in ('ext_ids', 'fatcat_release', 'edit_extra'):
                 if r.get(k):
                     extra[k] = r[k]
