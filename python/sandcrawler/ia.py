@@ -341,9 +341,11 @@ class WaybackClient:
                     raise WaybackError( "found revisit record, but won't resolve (loop?)")
                 revisit_uri, revisit_dt = gwb_record.refers_to
                 # convert revisit_dt
-                assert len(revisit_dt) == 19  # len("2018-07-24T11:56:49")
+                # len("2018-07-24T11:56:49"), or with "Z"
+                assert len(revisit_dt) in (19, 20)
                 revisit_uri = revisit_uri.decode('utf-8')
-                revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '')
+                revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
+                assert len(revisit_dt) == 14
                 revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
                 body = self.fetch_petabox_body(
                     csize=revisit_cdx.warc_csize,
