@@ -1,0 +1,42 @@
+
+How many file_meta still missing core metadata?
+
+    SELECT COUNT(*) FROM file_meta WHERE sha256hex IS NULL;
+    => 1,130,915
+
+Great! Not many.
+
+And are in petabox?
+
+    SELECT COUNT(*)
+    FROM file_meta
+    LEFT JOIN petabox ON file_meta.sha1hex = petabox.sha1hex
+    WHERE file_meta.sha256hex IS NULL
+      AND file_meta.sha1hex IS NOT NULL;
+    => 1,149,194
+
+Almost all; maybe just some CDX fetch failures or something in there. So,
+should run these on, eg, grobid2-vm.
+
+    COPY (
+      SELECT row_to_json(petabox.*)
+      FROM file_meta
+      LEFT JOIN petabox ON file_meta.sha1hex = petabox.sha1hex
+      WHERE file_meta.sha256hex IS NULL
+        AND file_meta.sha1hex IS NOT NULL
+    ) TO '/grande/snapshots/dump_grobid_petabox_todo.json';
+
+Count of PDF files that GROBID processed and matched to a release (via
+glutton), but no PDF in `fatcat_file` (note: `fatcat_file` is out of date by a
+couple million files):
+
+    SELECT COUNT(*) as total_count, COUNT(DISTINCT grobid.fatcat_release) as release_count
+    FROM grobid
+    LEFT JOIN fatcat_file ON grobid.sha1hex = fatcat_file.sha1hex
+    WHERE fatcat_file.sha1hex IS NULL
+      AND grobid.fatcat_release IS NOT NULL;
+
+     total_count |  count  
+    -------------+---------
+         5072452 | 4130405
+
