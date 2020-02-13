@@ -29,9 +29,9 @@ class PdfTrioClient(object):
 
         try:
             pdftrio_response = requests.post(
-                self.host_url + "/classify/pdf/all",
+                self.host_url + "/classify/research-pub/all",
                 files={
-                    'pdf': blob,
+                    'pdf_content': blob,
                 },
                 timeout=30.0,
             )
