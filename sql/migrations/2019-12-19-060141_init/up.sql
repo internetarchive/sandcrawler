@@ -74,6 +74,19 @@ CREATE TABLE IF NOT EXISTS grobid (
 );
 -- CREATE INDEX grobid_fatcat_release_idx ON grobid(fatcat_release);
 
+CREATE TABLE IF NOT EXISTS pdftrio (
+    sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
+    updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    status_code         INT NOT NULL,
+    status              TEXT CHECK (octet_length(status) >= 1) NOT NULL,
+    pdftrio_version     TEXT CHECK (octet_length(pdftrio_version) >= 1),
+    models_date         DATE,
+    ensemble_score      REAL,
+    bert_score          REAL,
+    linear_score        REAL,
+    image_score         REAL
+);
+
 CREATE TABLE IF NOT EXISTS ingest_request (
     link_source             TEXT NOT NULL CHECK (octet_length(link_source) >= 1),
     link_source_id          TEXT NOT NULL CHECK (octet_length(link_source_id) >= 1),
