@@ -325,8 +325,16 @@ class PersistPdfTrioWorker(SandcrawlerWorker):
 
     def push_batch(self, batch):
         self.counts['total'] += len(batch)
-        resp = self.db.insert_pdftrio(self.cur, batch)
+
+        pdftrio_batch = [r['pdf_trio'] for r in batch]
+        resp = self.db.insert_pdftrio(self.cur, pdftrio_batch)
         self.counts['insert-pdftrio'] += resp[0]
         self.counts['update-pdftrio'] += resp[1]
+
+        file_meta_batch = [r['file_meta'] for r in batch if r['pdf_trio']['status'] == "success" and r.get('file_meta')]
+        resp = self.db.insert_file_meta(self.cur, file_meta_batch)
+        self.counts['insert-file-meta'] += resp[0]
+        self.counts['update-file-meta'] += resp[1]
+
         self.db.commit()
         return []
