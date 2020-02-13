@@ -63,6 +63,17 @@ def run_grobid_disk(args):
     )
     pusher.run()
 
+def run_pdftrio(args):
+    worker = PersistPdfTrioWorker(
+        db_url=args.db_url,
+    )
+    pusher = JsonLinePusher(
+        worker,
+        args.json_file,
+        batch_size=100,
+    )
+    pusher.run()
+
 def run_ingest_file_result(args):
     worker = PersistIngestFileResultWorker(
         db_url=args.db_url,
@@ -123,6 +134,13 @@ def main():
     sub_grobid_disk.add_argument('output_dir',
         help="base directory to output into",
         type=str)
+
+    sub_pdftrio = subparsers.add_parser('pdftrio',
+        help="backfill a pdftrio JSON ('pg') dump into postgresql and s3 (minio)")
+    sub_pdftrio.set_defaults(func=run_pdftrio)
+    sub_pdftrio.add_argument('json_file',
+        help="pdftrio file to import from (or '-' for stdin)",
+        type=argparse.FileType('r'))
 
     sub_ingest_file_result = subparsers.add_parser('ingest-file-result',
         help="backfill a ingest_file_result JSON dump into postgresql")

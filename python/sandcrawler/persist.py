@@ -309,3 +309,24 @@ class PersistGrobidDiskWorker(SandcrawlerWorker):
         self.counts['written'] += 1
         return record
 
+
+class PersistPdfTrioWorker(SandcrawlerWorker):
+
+    def __init__(self, db_url, **kwargs):
+        super().__init__()
+        self.db = SandcrawlerPostgresClient(db_url)
+        self.cur = self.db.conn.cursor()
+
+    def process(self, record):
+        """
+        Only do batches (as transactions)
+        """
+        raise NotImplementedError
+
+    def push_batch(self, batch):
+        self.counts['total'] += len(batch)
+        resp = self.db.insert_pdftrio(self.cur, batch)
+        self.counts['insert-pdftrio'] += resp[0]
+        self.counts['update-pdftrio'] += resp[1]
+        self.db.commit()
+        return []

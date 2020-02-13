@@ -69,6 +69,21 @@ def run_persist_grobid(args):
     )
     pusher.run()
 
+def run_persist_pdftrio(args):
+    consume_topic = "sandcrawler-{}.pdftrio-output".format(args.env)
+    worker = PersistPdfTrioWorker(
+        db_url=args.db_url,
+    )
+    pusher = KafkaJsonPusher(
+        worker=worker,
+        kafka_hosts=args.kafka_hosts,
+        consume_topic=consume_topic,
+        group="persist-pdftrio",
+        push_batches=True,
+        batch_size=100,
+    )
+    pusher.run()
+
 def run_ingest_file(args):
     if args.bulk:
         consume_group = "sandcrawler-{}-ingest-file-bulk".format(args.env)
@@ -157,6 +172,10 @@ def main():
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
     sub_persist_grobid.set_defaults(func=run_persist_grobid)
+
+    sub_persist_pdftrio = subparsers.add_parser('persist-pdftrio',
+        help="daemon that consumes pdftrio output from Kafka and pushes to postgres")
+    sub_persist_pdftrio.set_defaults(func=run_persist_pdftrio)
 
     sub_ingest_file = subparsers.add_parser('ingest-file',
         help="daemon that consumes requests from Kafka, ingests, pushes results to Kafka")

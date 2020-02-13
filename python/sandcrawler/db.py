@@ -25,6 +25,15 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
+    def get_pdftrio(self, sha1):
+        resp = requests.get(self.api_url + "/pdftrio", params=dict(sha1hex='eq.'+sha1))
+        resp.raise_for_status()
+        resp = resp.json()
+        if resp:
+            return resp[0]
+        else:
+            return None
+
     def get_file_meta(self, sha1):
         resp = requests.get(self.api_url + "/file_meta", params=dict(sha1hex='eq.'+sha1))
         resp.raise_for_status()
@@ -168,6 +177,54 @@ class SandcrawlerPostgresClient:
                   d.get('metadata') or None ,
                  )
                  for d in batch]
+        # filter out duplicate rows by key (sha1hex)
+        batch_dict = dict()
+        for b in batch:
+            batch_dict[b[0]] = b
+        batch = list(batch_dict.values())
+        resp = psycopg2.extras.execute_values(cur, sql, batch, page_size=250, fetch=True)
+        return self._inserts_and_updates(resp, on_conflict)
+
+    def insert_pdftrio(self, cur, batch, on_conflict="nothing"):
+        sql = """
+            INSERT INTO
+            pdftrio (sha1hex, updated, status_code, status, pdftrio_version,
+                     models_date, ensemble_score, bert_score, linear_score,
+                     image_score)
+            VALUES %s
+            ON CONFLICT (sha1hex) DO
+        """
+        if on_conflict.lower() == "nothing":
+            sql += " NOTHING"
+        elif on_conflict.lower() == "update":
+            sql += """ UPDATE SET
+                updated=EXCLUDED.updated,
+                status_code=EXCLUDED.status_code,
+                status=EXCLUDED.status,
+                pdftrio_version=EXCLUDED.pdftrio_version,
+                models_date=EXCLUDED.models_date,
+                ensemble_score=EXCLUDED.ensemble_score,
+                bert_score=EXCLUDED.bert_score,
+                linear_score=EXCLUDED.linear_score,
+                image_score=EXCLUDED.image_score
+            """
+        else:
+            raise NotImplementedError("on_conflict: {}".format(on_conflict))
+        sql += " RETURNING xmax;"
+        batch = [
+            (
+                d['key'],
+                d.get('updated') or datetime.datetime.now(),
+                d['status_code'],
+                d['status'],
+                d.get('versions', {}).get('pdftrio_version') or None,
+                d.get('versions', {}).get('models_date') or None,
+                d.get('ensemble_score') or None,
+                d.get('bert_score') or None,
+                d.get('linear_score') or None,
+                d.get('image_score') or None,
+            )
+            for d in batch]
         # filter out duplicate rows by key (sha1hex)
         batch_dict = dict()
         for b in batch:
