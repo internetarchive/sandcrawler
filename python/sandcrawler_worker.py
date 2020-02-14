@@ -108,6 +108,8 @@ def run_ingest_file(args):
         grobid_client=grobid_client,
         sink=sink,
         grobid_sink=grobid_sink,
+        # don't SPNv2 for --bulk backfill
+        try_spn2=not args.bulk,
     )
     pusher = KafkaJsonPusher(
         worker=worker,
