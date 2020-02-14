@@ -139,12 +139,12 @@ class PdfTrioWorker(SandcrawlerWorker):
                 key=default_key,
             )
         result = dict()
-        result['key'] = result['file_meta']['sha1hex']
         result['file_meta'] = gen_file_metadata(blob)
+        result['key'] = result['file_meta']['sha1hex']
         result['pdf_trio'] = self.pdftrio_client.classify_pdf(blob)
         result['source'] = record
         result['timing'] = dict(
-            pdftrio_sec=result['pdf_trio'].pop('_total_sec'),
+            pdftrio_sec=result['pdf_trio'].pop('_total_sec', None),
             total_sec=time.time() - start_process,
         )
         if wayback_sec:
@@ -165,10 +165,16 @@ class PdfTrioBlobWorker(SandcrawlerWorker):
         self.sink = sink
 
     def process(self, blob):
+        start_process = time.time()
         if not blob:
             return None
-        result = self.pdftrio_client.classify_pdf(blob)
+        result = dict()
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']
+        result['pdf_trio'] = self.pdftrio_client.classify_pdf(blob)
+        result['timing'] = dict(
+            pdftrio_sec=result['pdf_trio'].pop('_total_sec', None),
+            total_sec=time.time() - start_process,
+        )
         return result
 
