@@ -248,7 +248,7 @@ class SandcrawlerPostgresClient:
         for r in batch:
             # in case these fields were already packed into 'request'
             extra = r.get('request', {})
-            for k in ('ext_ids', 'fatcat_release', 'edit_extra'):
+            for k in ('ext_ids', 'fatcat_release', 'edit_extra', 'rel'):
                 if r.get(k):
                     extra[k] = r[k]
             if extra:

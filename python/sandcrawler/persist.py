@@ -110,7 +110,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             request['release_stage'] = raw['release_stage']
         if raw.get('fatcat', {}).get('release_ident'):
             request['request']['release_ident'] = raw['fatcat']['release_ident']
-        for k in ('ext_ids', 'edit_extra'):
+        for k in ('ext_ids', 'edit_extra', 'rel'):
             if raw.get(k):
                 request['request'][k] = raw[k]
         # if this dict is empty, trim it to save DB space

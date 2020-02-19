@@ -97,6 +97,8 @@ HTML? Or both? Let's just recrawl.
     user who submitted request. eg, `fatcat-changelog`, `editor_<ident>`,
     `savepapernow-web`
   - `release_stage`: optional. indicates the release stage of fulltext expected to be found at this URL
+  - `rel`: optional. indicates the link type
+  - `oa_status`: optional. unpaywall schema
   - `fatcat`
     - `release_ident`: optional. if provided, indicates that ingest is expected
       to be fulltext copy of this release (though may be a sibling release
@@ -186,6 +188,8 @@ Proposing two tables:
         --   ext_ids (source/source_id sometimes enough)
         --   release_ident (if ext_ids and source/source_id not specific enough; eg SPN)
         --   edit_extra
+        --   rel
+        --   oa_status
         -- ingest_request_source   TEXT NOT NULL CHECK (octet_length(ingest_request_source) >= 1),
 
         PRIMARY KEY (ingest_type, base_url, link_source, link_source_id)
