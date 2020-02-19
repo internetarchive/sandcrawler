@@ -180,7 +180,7 @@ class PdfTrioBlobWorker(SandcrawlerWorker):
         result = dict()
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']
-        result['pdf_trio'] = self.pdftrio_client.classify_pdf(blob, mode=mode)
+        result['pdf_trio'] = self.pdftrio_client.classify_pdf(blob, mode=self.mode)
         result['timing'] = dict(
             pdftrio_sec=result['pdf_trio'].pop('_total_sec', None),
             total_sec=time.time() - start_process,
