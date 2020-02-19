@@ -90,10 +90,12 @@ class PdfTrioWorker(SandcrawlerWorker):
                 wayback_sec = time.time() - start
             except (WaybackError, PetaboxError) as we:
                 return dict(
-                    status="error-wayback",
-                    error_msg=str(we),
-                    source=record,
                     key=default_key,
+                    source=record,
+                    pdf_trio=dict(
+                        status="error-wayback",
+                        error_msg=str(we),
+                    ),
                 )
         elif record.get('url') and record.get('datetime'):
             # it's a partial CDX dict or something? fetch using WaybackClient
@@ -108,10 +110,12 @@ class PdfTrioWorker(SandcrawlerWorker):
                 wayback_sec = time.time() - start
             except WaybackError as we:
                 return dict(
-                    status="error-wayback",
-                    error_msg=str(we),
-                    source=record,
                     key=default_key,
+                    source=record,
+                    pdf_trio=dict(
+                        status="error-wayback",
+                        error_msg=str(we),
+                    ),
                 )
         elif record.get('item') and record.get('path'):
             # it's petabox link; fetch via HTTP
@@ -123,20 +127,24 @@ class PdfTrioWorker(SandcrawlerWorker):
                 resp.raise_for_status()
             except Exception as e:
                 return dict(
-                    status="error-petabox",
-                    error_msg=str(e),
-                    source=record,
                     key=default_key,
+                    source=record,
+                    pdf_trio=dict(
+                        status="error-petabox",
+                        error_msg=str(e),
+                    ),
                 )
             blob = resp.content
         else:
             raise ValueError("not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")
         if not blob:
             return dict(
-                status="error",
-                error_msg="empty blob",
-                source=record,
                 key=default_key,
+                source=record,
+                pdf_trio=dict(
+                    status="error",
+                    error_msg="empty blob",
+                ),
             )
         result = dict()
         result['file_meta'] = gen_file_metadata(blob)
