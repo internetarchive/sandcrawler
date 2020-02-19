@@ -319,6 +319,11 @@ class WaybackClient:
             raise PetaboxError("failed to load file contents from wayback/petabox (EOFError: {})".format(eofe))
         except TypeError as te:
             raise PetaboxError("failed to load file contents from wayback/petabox (TypeError: {}; likely a bug in wayback python code)".format(te))
+        except Exception as e:
+            if "while decompressing data: invalid block type" in str(e):
+                raise PetaboxError("decompression error fetching WARC record; usually due to bad alexa ARC files")
+            else:
+                raise e
         # Note: could consider a generic "except Exception" here, as we get so
         # many petabox errors. Do want jobs to fail loud and clear when the
         # whole cluster is down though.
