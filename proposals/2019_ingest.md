@@ -99,14 +99,13 @@ HTML? Or both? Let's just recrawl.
   - `release_stage`: optional. indicates the release stage of fulltext expected to be found at this URL
   - `rel`: optional. indicates the link type
   - `oa_status`: optional. unpaywall schema
+  - `edit_extra`: additional metadata to be included in any eventual fatcat commits.
   - `fatcat`
     - `release_ident`: optional. if provided, indicates that ingest is expected
       to be fulltext copy of this release (though may be a sibling release
       under same work if `release_stage` doesn't match)
     - `work_ident`: optional, unused. might eventually be used if, eg,
       `release_stage` of ingested file doesn't match that of the `release_ident`
-    - `edit_extra`: additional metadata to be included in any eventual fatcat
-      commits.
   - `ext_ids`: matching fatcat schema. used for later lookups. sometimes
     `link_source` and id are sufficient.
     - `doi`
