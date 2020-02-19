@@ -139,6 +139,10 @@ class CdxApiClient:
             else:
                 status_code = int(raw[4])
 
+            # CDX rows with no WARC records?
+            if raw[8] == '-' or raw[9] == '-' or raw[10] == '-':
+                continue
+
             row = CdxRow(
                 surt=raw[0],
                 datetime=raw[1],
