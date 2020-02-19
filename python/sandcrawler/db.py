@@ -219,10 +219,10 @@ class SandcrawlerPostgresClient:
                 d['status'],
                 d.get('versions', {}).get('pdftrio_version') or None,
                 d.get('versions', {}).get('models_date') or None,
-                d.get('ensemble_score') or None,
-                d.get('bert_score') or None,
-                d.get('linear_score') or None,
-                d.get('image_score') or None,
+                d.get('ensemble_score'),
+                d.get('bert_score'),
+                d.get('linear_score'),
+                d.get('image_score'),
             )
             for d in batch]
         # filter out duplicate rows by key (sha1hex)

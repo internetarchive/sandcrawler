@@ -326,8 +326,12 @@ class PersistPdfTrioWorker(SandcrawlerWorker):
     def push_batch(self, batch):
         self.counts['total'] += len(batch)
 
+        batch = [r for r in batch if 'pdf_trio' in r and r['pdf_trio'].get('status_code')]
+        for r in batch:
+            # copy key (sha1hex) into sub-object
+            r['pdf_trio']['key'] = r['key']
         pdftrio_batch = [r['pdf_trio'] for r in batch]
-        resp = self.db.insert_pdftrio(self.cur, pdftrio_batch)
+        resp = self.db.insert_pdftrio(self.cur, pdftrio_batch, on_conflict="update")
         self.counts['insert-pdftrio'] += resp[0]
         self.counts['update-pdftrio'] += resp[1]
 
