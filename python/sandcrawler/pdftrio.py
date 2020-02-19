@@ -13,7 +13,7 @@ class PdfTrioClient(object):
         self.host_url = host_url
         self.http_session = requests_retry_session(retries=3, backoff_factor=3)
 
-    def classify_pdf(self, blob):
+    def classify_pdf(self, blob, mode="auto"):
         """
         Returns a dict with at least:
 
@@ -30,7 +30,7 @@ class PdfTrioClient(object):
 
         try:
             pdftrio_response = requests.post(
-                self.host_url + "/classify/research-pub/all",
+                self.host_url + "/classify/research-pub/" + mode,
                 files={
                     'pdf_content': blob,
                 },
@@ -167,10 +167,11 @@ class PdfTrioBlobWorker(SandcrawlerWorker):
     instead of fetching blobs from some remote store.
     """
 
-    def __init__(self, pdftrio_client, sink=None, **kwargs):
+    def __init__(self, pdftrio_client, sink=None, mode="auto", **kwargs):
         super().__init__()
         self.pdftrio_client = pdftrio_client
         self.sink = sink
+        self.mode = mode
 
     def process(self, blob):
         start_process = time.time()
@@ -179,7 +180,7 @@ class PdfTrioBlobWorker(SandcrawlerWorker):
         result = dict()
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']
-        result['pdf_trio'] = self.pdftrio_client.classify_pdf(blob)
+        result['pdf_trio'] = self.pdftrio_client.classify_pdf(blob, mode=mode)
         result['timing'] = dict(
             pdftrio_sec=result['pdf_trio'].pop('_total_sec', None),
             total_sec=time.time() - start_process,

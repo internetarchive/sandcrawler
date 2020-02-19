@@ -6,7 +6,7 @@ text extraction.
 
 Example of large parallel run, locally:
 
-    cat /srv/sandcrawler/tasks/something.cdx | pv -l | parallel -j30 --pipe ./pdftrio_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --pdftrio-host http://localhost:3939 -j0 classify-pdf-json -
+cat /srv/sandcrawler/tasks/something.cdx | pv -l | parallel -j30 --pipe ./pdftrio_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --pdftrio-host http://localhost:3939 -j0 classify-pdf-json -
 """
 
 import sys
@@ -21,11 +21,11 @@ def run_classify_pdf_json(args):
     pdftrio_client = PdfTrioClient(host_url=args.pdftrio_host)
     wayback_client = WaybackClient()
     if args.jobs > 1:
-        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=None)
+        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=None, mode=args.pdftrio_mode)
         multi_worker = MultiprocessWrapper(worker, args.sink)
         pusher = JsonLinePusher(multi_worker, args.json_file, batch_size=args.jobs)
     else:
-        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=args.sink)
+        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=args.sink, mode=args.pdftrio_mode)
         pusher = JsonLinePusher(worker, args.json_file)
     pusher.run()
 
@@ -33,7 +33,7 @@ def run_classify_pdf_cdx(args):
     pdftrio_client = PdfTrioClient(host_url=args.pdftrio_host)
     wayback_client = WaybackClient()
     if args.jobs > 1:
-        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=None)
+        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=None, mode=args.pdftrio_mode)
         multi_worker = MultiprocessWrapper(worker, args.sink)
         pusher = CdxLinePusher(
             multi_worker,
@@ -43,7 +43,7 @@ def run_classify_pdf_cdx(args):
             batch_size=args.jobs,
         )
     else:
-        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=args.sink)
+        worker = PdfTrioWorker(pdftrio_client, wayback_client, sink=args.sink, mode=args.pdftrio_mode)
         pusher = CdxLinePusher(
             worker,
             args.cdx_file,
@@ -54,7 +54,7 @@ def run_classify_pdf_cdx(args):
 
 def run_classify_pdf_zipfile(args):
     pdftrio_client = PdfTrioClient(host_url=args.pdftrio_host)
-    worker = PdfTrioBlobWorker(pdftrio_client, sink=args.sink)
+    worker = PdfTrioBlobWorker(pdftrio_client, sink=args.sink, mode=args.pdftrio_mode)
     pusher = ZipfilePusher(worker, args.zip_file)
     pusher.run()
 
@@ -77,6 +77,9 @@ def main():
     parser.add_argument('--pdftrio-host',
         default="http://pdftrio.qa.fatcat.wiki",
         help="pdftrio API host/port")
+    parser.add_argument('--pdftrio-mode',
+        default="auto",
+        help="which classification mode to use")
     subparsers = parser.add_subparsers()
 
     sub_classify_pdf_json = subparsers.add_parser('classify-pdf-json',
