@@ -577,8 +577,19 @@ class WaybackClient:
                         resolve_revisit=False,
                     )
                     assert 300 <= resource.status_code < 400
-                    assert resource.location
-                    #print(resource, file=sys.stderr)
+                    if not resource.location:
+                        print("bad redirect record: {}".format(cdx_row), file=sys.stderr)
+                        return ResourceResult(
+                            start_url=start_url,
+                            hit=False,
+                            status="bad-redirect",
+                            terminal_url=cdx_row.url,
+                            terminal_dt=cdx_row.datetime,
+                            terminal_status_code=cdx_row.status_code,
+                            body=None,
+                            cdx=cdx_row,
+                            revisit_cdx=None,
+                        )
                     next_url = resource.location
                 else:
                     next_url = self.fetch_replay_redirect(
