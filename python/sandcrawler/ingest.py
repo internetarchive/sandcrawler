@@ -275,6 +275,14 @@ class IngestFileWorker(SandcrawlerWorker):
 
             if not resource.hit:
                 result['status'] = resource.status
+                if resource.terminal_dt and resource.terminal_status_code:
+                    result['terminal'] = {
+                        "terminal_url": resource.terminal_url,
+                        "terminal_dt": resource.terminal_dt,
+                        "terminal_status_code": resource.terminal_status_code,
+                    }
+                    if resource.terminal_url not in result['hops']:
+                        result['hops'].append(resource.terminal_url)
                 return result
 
             if not resource.body:
