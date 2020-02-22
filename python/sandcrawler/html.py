@@ -33,10 +33,16 @@ def extract_fulltext_url(html_url, html_body):
     """
     Takes an HTML document (and URL), assumed to be a landing page, and tries
     to find a fulltext PDF url.
+
+    On error, or if fails to extract a URL, returns an empty dict.
     """
 
     host_prefix = '/'.join(html_url.split('/')[:3])
-    soup = BeautifulSoup(html_body, 'html.parser')
+    try:
+        soup = BeautifulSoup(html_body, 'html.parser')
+    except TypeError as te:
+        print("{} (url={})".format(te, html_url, file=sys.stderr))
+        return dict()
 
     ### General Tricks ###
 
