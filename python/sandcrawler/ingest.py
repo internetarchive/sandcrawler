@@ -81,6 +81,15 @@ class IngestFileWorker(SandcrawlerWorker):
             # all stubs/previews, not full papers
             "://page-one.live.cf.public.springer.com",
 
+            # large datasets-only (no PDF expected)
+            "plutof.ut.ee/",
+            "www.gbif.org/",
+            "doi.pangaea.de/",
+            "www.plate-archive.org/",
+
+            # Historical non-paper content:
+            "dhz.uni-passau.de/",   # newspapers
+            "digital.ucd.ie/",      # ireland national historical
         ]
 
     def check_existing_ingest(self, base_url):
