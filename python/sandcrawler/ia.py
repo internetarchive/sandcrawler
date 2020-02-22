@@ -123,6 +123,8 @@ class CdxApiClient:
         if resp.status_code != 200:
             raise CdxApiError(resp.text)
         #print(resp.url, file=sys.stderr)
+        if not resp.text:
+            return None
         rj = resp.json()
         if len(rj) <= 1:
             return None
