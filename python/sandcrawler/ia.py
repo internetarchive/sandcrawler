@@ -560,12 +560,12 @@ class WaybackClient:
                         start_url=start_url,
                         hit=True,
                         status="success",
-                        terminal_url=resource.revisit_cdx.url,
-                        terminal_dt=resource.revisit_cdx.datetime,
-                        terminal_status_code=resource.revisit_cdx.status_code,
+                        terminal_url=cdx_row.url,
+                        terminal_dt=cdx_row.datetime,
+                        terminal_status_code=resource.revisit_cdx.status_code, # ?
                         body=resource.body,
                         cdx=cdx_row,
-                        revisit_cdx=revisit_cdx,
+                        revisit_cdx=resource.revisit_cdx,
                     )
 
             if cdx_row.status_code in (200, 226):
