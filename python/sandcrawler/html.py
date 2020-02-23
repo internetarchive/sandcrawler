@@ -1,6 +1,7 @@
 
 import re
 import sys
+import json
 import urllib.parse
 
 from bs4 import BeautifulSoup
@@ -257,5 +258,51 @@ def extract_fulltext_url(html_url, html_body):
                 url = line.strip().replace('data-pdf-url=', '').replace('"', '')
                 if url.startswith('http') and 'pdfs.journals.lww.com' in url:
                     return dict(pdf_url=url, technique='journals.lww.com-jsvar')
+
+    # www.ahajournals.org
+    # https://www.ahajournals.org/doi/10.1161/circ.110.19.2977
+    if "://www.ahajournals.org/doi/" in html_url and not '/doi/pdf/' in html_url:
+        # <a href="/doi/pdf/10.1161/circ.110.19.2977?download=true">PDF download</a>
+        if b'/doi/pdf/10.' in html_body:
+            url = html_url.replace('/doi/10.', '/doi/pdf/10.')
+            url = url + "?download=true"
+            return dict(pdf_url=url, technique='ahajournals-url')
+
+    # ehp.niehs.nih.gov
+    # https://ehp.niehs.nih.gov/doi/full/10.1289/EHP4709
+    if "://ehp.niehs.nih.gov/doi/full/" in html_url:
+        # <a href="/doi/pdf/10.1289/EHP4709" target="_blank">
+        if b'/doi/pdf/10.' in html_body:
+            url = html_url.replace('/doi/full/10.', '/doi/pdf/10.')
+            return dict(pdf_url=url, technique='ehp.niehs.nigh.gov-url')
+
+    # journals.tsu.ru (and maybe others)
+    # http://journals.tsu.ru/psychology/&journal_page=archive&id=1815&article_id=40405
+    # <a class='file pdf' href='http://journals.tsu.ru/engine/download.php?id=150921&area=files'>Скачать электронную версию публикации</a>
+    href = soup.find('a', attrs={"class":"file pdf"})
+    if href:
+        url = href['href'].strip()
+        if url.startswith('http'):
+            return dict(pdf_url=url, technique='href_file_pdf-pdf')
+
+    # cogentoa.com
+    # https://www.cogentoa.com/article/10.1080/23311975.2017.1412873
+    if "://www.cogentoa.com/article/" in html_url and not ".pdf" in html_url:
+        # blech, it's a SPA! All JS
+        # https://www.cogentoa.com/article/10.1080/23311975.2017.1412873.pdf
+        url = html_url + ".pdf"
+        return dict(pdf_url=url, technique='cogentoa-url')
+
+    # chemrxiv.org (likely to be other figshare domains also)
+    # https://chemrxiv.org/articles/Biradical_Formation_by_Deprotonation_in_Thiazole-Derivatives_The_Hidden_Nature_of_Dasatinib/10101419
+    if "://chemrxiv.org/articles/" in html_url or '.figshare.org/articles/' in html_url:
+        # <script id="app-data" type="text/json"> [...] </script>
+        json_tag = soup.find('script', id="app-data", attrs={"type": "text/json"})
+        if json_tag.string:
+            app_data = json.loads(json_tag.string)
+            # "exportPdfDownloadUrl": "https://s3-eu-west-1.amazonaws.com/itempdf74155353254prod/10101419/Biradical_Formation_by_Deprotonation_in_Thiazole-Derivatives__The_Hidden_Nature_of_Dasatinib_v1.pdf"
+            url = app_data.get('article', {}).get('exportPdfDownloadUrl')
+            if url and url.startswith('http'):
+                return dict(pdf_url=url, technique='figshare-json')
 
     return dict()
