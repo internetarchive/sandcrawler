@@ -136,7 +136,7 @@ class CdxApiClient:
             # transform "-" ftp status code to a 226
             status_code = None
             if raw[4] == "-":
-                if raw[2].startswith("ftp://"):
+                if raw[3] != "warc/revisit" and raw[2].startswith("ftp://"):
                     status_code = 226
             else:
                 status_code = int(raw[4])
@@ -340,36 +340,35 @@ class WaybackClient:
             raise WaybackError("too many HTTP headers (in wayback fetch)")
         location = gwb_record.get_location() or None
 
-        if status_code is None and gwb_record.target_uri.startswith(b"ftp://"):
+        if status_code is None and gwb_record.target_uri.startswith(b"ftp://") and not gwb_record.is_revisit():
             # TODO: some additional verification here?
             status_code = 226
 
         body = None
         revisit_cdx = None
-        if status_code in (200, 226):
-            if gwb_record.is_revisit():
-                if not resolve_revisit:
-                    raise WaybackError( "found revisit record, but won't resolve (loop?)")
-                revisit_uri, revisit_dt = gwb_record.refers_to
-                # convert revisit_dt
-                # len("2018-07-24T11:56:49"), or with "Z"
-                assert len(revisit_dt) in (19, 20)
-                revisit_uri = revisit_uri.decode('utf-8')
-                revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
-                assert len(revisit_dt) == 14
-                revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
-                body = self.fetch_petabox_body(
-                    csize=revisit_cdx.warc_csize,
-                    offset=revisit_cdx.warc_offset,
-                    warc_path=revisit_cdx.warc_path,
-                    resolve_revisit=False,
-                )
-            else:
-                try:
-                    body = gwb_record.open_raw_content().read()
-                except IncompleteRead as ire:
-                    raise WaybackError(
-                        "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
+        if gwb_record.is_revisit():
+            if not resolve_revisit:
+                raise WaybackError( "found revisit record, but won't resolve (loop?)")
+            revisit_uri, revisit_dt = gwb_record.refers_to
+            # convert revisit_dt
+            # len("2018-07-24T11:56:49"), or with "Z"
+            assert len(revisit_dt) in (19, 20)
+            revisit_uri = revisit_uri.decode('utf-8')
+            revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
+            assert len(revisit_dt) == 14
+            revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
+            body = self.fetch_petabox_body(
+                csize=revisit_cdx.warc_csize,
+                offset=revisit_cdx.warc_offset,
+                warc_path=revisit_cdx.warc_path,
+                resolve_revisit=False,
+            )
+        elif status_code in (200, 226):
+            try:
+                body = gwb_record.open_raw_content().read()
+            except IncompleteRead as ire:
+                raise WaybackError(
+                    "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
         elif status_code is None:
             raise WaybackError(
                 "got a None status_code in (W)ARC record")
@@ -548,6 +547,27 @@ class WaybackClient:
                     cdx=None,
                     revisit_cdx=None,
                 )
+
+            # first try straight-forward redirect situation
+            if cdx_row.mimetype == "warc/revisit" and '/' in cdx_row.warc_path:
+                resource = self.fetch_petabox(
+                    csize=cdx_row.warc_csize,
+                    offset=cdx_row.warc_offset,
+                    warc_path=cdx_row.warc_path,
+                )
+                if resource.revisit_cdx and resource.revisit_cdx.status_code in (200, 226):
+                    return ResourceResult(
+                        start_url=start_url,
+                        hit=True,
+                        status="success",
+                        terminal_url=resource.revisit_cdx.url,
+                        terminal_dt=resource.revisit_cdx.datetime,
+                        terminal_status_code=resource.revisit_cdx.status_code,
+                        body=resource.body,
+                        cdx=cdx_row,
+                        revisit_cdx=revisit_cdx,
+                    )
+
             if cdx_row.status_code in (200, 226):
                 revisit_cdx = None
                 if '/' in cdx_row.warc_path:
