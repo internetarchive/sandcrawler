@@ -239,4 +239,23 @@ def extract_fulltext_url(html_url, html_body):
         url = html_url + ".pdf"
         return dict(pdf_url=url, technique='protocolsio-url')
 
+    # degruyter.com
+    # https://www.degruyter.com/view/books/9783486594621/9783486594621-009/9783486594621-009.xml
+    if "://www.degruyter.com/view/" in html_url and html_url.endswith(".xml"):
+        url = html_url.replace('/view/', '/downloadpdf/').replace('.xml', '.pdf')
+        return dict(pdf_url=url, technique='degruyter-url')
+
+    # journals.lww.com (Wolters Kluwer)
+    # https://journals.lww.com/spinejournal/Abstract/publishahead/Making_the_Most_of_Systematic_Reviews_and.94318.aspx
+    # DISABLED: they seem to redirect our crawler back to a "Fulltext" page and
+    # we never get the content.
+    if "://journals.lww.com/" in html_url and False:
+        # data-pdf-url="https://pdfs.journals.lww.com/spinejournal/9000/00000/Making_the_Most_of_Systematic_Reviews_and.94318.pdf?token=method|ExpireAbsolute;source|Journals;ttl|1582413672903;payload|mY8D3u1TCCsNvP5E421JYK6N6XICDamxByyYpaNzk7FKjTaa1Yz22MivkHZqjGP4kdS2v0J76WGAnHACH69s21Csk0OpQi3YbjEMdSoz2UhVybFqQxA7lKwSUlA502zQZr96TQRwhVlocEp/sJ586aVbcBFlltKNKo+tbuMfL73hiPqJliudqs17cHeLcLbV/CqjlP3IO0jGHlHQtJWcICDdAyGJMnpi6RlbEJaRheGeh5z5uvqz3FLHgPKVXJzdiVgCTnUeUQFYzcJRFhNtc2gv+ECZGji7HUicj1/6h85Y07DBRl1x2MGqlHWXUawD;hash|6cqYBa15ZK407m4VhFfJLw=="
+        for line in html_body.split(b'\n'):
+            if b"data-pdf-url=" in line:
+                line = line.decode('utf-8')
+                url = line.strip().replace('data-pdf-url=', '').replace('"', '')
+                if url.startswith('http') and 'pdfs.journals.lww.com' in url:
+                    return dict(pdf_url=url, technique='journals.lww.com-jsvar')
+
     return dict()
