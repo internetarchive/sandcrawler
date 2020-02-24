@@ -270,10 +270,11 @@ def extract_fulltext_url(html_url, html_body):
 
     # ehp.niehs.nih.gov
     # https://ehp.niehs.nih.gov/doi/full/10.1289/EHP4709
-    if "://ehp.niehs.nih.gov/doi/full/" in html_url:
+    # https://ehp.niehs.nih.gov/doi/10.1289/ehp.113-a51
+    if "://ehp.niehs.nih.gov/doi/" in html_url:
         # <a href="/doi/pdf/10.1289/EHP4709" target="_blank">
         if b'/doi/pdf/10.' in html_body:
-            url = html_url.replace('/doi/full/10.', '/doi/pdf/10.')
+            url = html_url.replace('/doi/full/10.', '/doi/pdf/10.').replace('/doi/10.', '/doi/pdf/10.')
             return dict(pdf_url=url, technique='ehp.niehs.nigh.gov-url')
 
     # journals.tsu.ru (and maybe others)
