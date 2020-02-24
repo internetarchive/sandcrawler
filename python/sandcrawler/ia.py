@@ -98,6 +98,30 @@ def cdx_to_dict(cdx):
         d['warc_path'] = cdx.warc_path
     return d
 
+def fuzzy_match_url(left, right):
+    """
+    Matches URLs agnostic of http/https (and maybe other normalizations in the
+    future)
+    """
+    if left == right:
+        return True
+    if '://' in left and '://' in right:
+        if left.split('://')[1:] == right.split('://')[1:]:
+            return True
+    return False
+
+def test_fuzzy_match_url():
+    assert fuzzy_match_url("http://thing.com", "http://thing.com") == True
+    assert fuzzy_match_url("http://thing.com", "https://thing.com") == True
+    assert fuzzy_match_url("http://thing.com", "ftp://thing.com") == True
+    assert fuzzy_match_url("http://thing.com", "http://thing.com/blue") == False
+
+    # should probably handle these?
+    assert fuzzy_match_url("http://thing.com", "http://thing.com/") == False
+    assert fuzzy_match_url("http://thing.com", "http://www.thing.com") == False
+    assert fuzzy_match_url("http://www.thing.com", "http://www2.thing.com") == False
+    assert fuzzy_match_url("http://www.thing.com", "https://www2.thing.com") == False
+
 class CdxApiError(Exception):
     pass
 
@@ -186,7 +210,8 @@ class CdxApiClient:
                 return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=None)
             raise KeyError("CDX url/datetime not found: {} {}".format(url, datetime))
         row = resp[0]
-        if not (row.url == url and row.datetime == datetime):
+        # allow fuzzy http/https match
+        if not (fuzzy_match_url(row.url, url) and row.datetime == datetime):
             if retry_sleep:
                 print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep), file=sys.stderr)
                 time.sleep(retry_sleep)
