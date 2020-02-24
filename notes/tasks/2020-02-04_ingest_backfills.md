@@ -135,10 +135,14 @@ end of weekend?
 As follow-ups:
 
     elife: https://fatcat.wiki/container/en4qj5ijrbf5djxx7p5zzpjyoq/coverage
+        => 2020-02-24: 7187 / 8101 = 88% preserved
     archivist: https://fatcat.wiki/container/zpobyv4vbranllc7oob56tgci4/coverage
         => 85 preserved
+        => 2020-02-24: 85 / 3005 preserved (TODO)
     jcancer: https://fatcat.wiki/container/nkkzpwht7jd3zdftc6gq4eoeey/coverage
         => 2020 preserved
         => 2520 preserved
+        => 2020-02-24: 2700 / 2766 preserved
     plos: https://fatcat.wiki/container/23nqq3odsjhmbi5tqavvcn7cfm/coverage
+        => 2020-02-24: 7580 / 7730 = 98% preserved
 
