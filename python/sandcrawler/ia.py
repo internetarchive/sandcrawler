@@ -387,6 +387,7 @@ class WaybackClient:
                 offset=revisit_cdx.warc_offset,
                 warc_path=revisit_cdx.warc_path,
                 resolve_revisit=False,
+                expected_status_code=revisit_cdx.status_code,
             )
         elif status_code in (200, 226):
             try:
@@ -404,7 +405,7 @@ class WaybackClient:
             revisit_cdx=revisit_cdx,
         )
 
-    def fetch_petabox_body(self, csize, offset, warc_path, resolve_revisit=True):
+    def fetch_petabox_body(self, csize, offset, warc_path, resolve_revisit=True, expected_status_code=None):
         """
         Fetches HTTP 200 WARC resource directly from petabox using WARC path/offset/csize.
 
@@ -419,7 +420,14 @@ class WaybackClient:
             resolve_revisit=resolve_revisit,
         )
 
-        if resource.status_code not in (200, 226):
+        if expected_status_code:
+            if expected_status_code != resource.status_code:
+                raise KeyError("archived HTTP response (WARC) was not {}: {}".format(
+                    expected_status_code,
+                    resource.status_code,
+                    )
+                )
+        elif resource.status_code not in (200, 226):
             raise KeyError("archived HTTP response (WARC) was not 200: {}".format(
                 resource.status_code)
             )
