@@ -224,6 +224,10 @@ def extract_fulltext_url(html_url, html_body):
     # american archivist (OA)
     # https://americanarchivist.org/doi/abs/10.17723/aarc.62.2.j475270470145630
     if "://americanarchivist.org/doi/" in html_url and not "/doi/pdf" in html_url:
+        # use a more aggressive direct guess to avoid rate-limiting...
+        if "/doi/10." in html_url:
+            url = html_url.replace("/doi/10.", "/doi/pdf/10.")
+            return dict(pdf_url=url, technique='archivist-url')
         # <a href="/doi/pdf/10.17723/aarc.62.2.j475270470145630" target="_blank">
         hrefs = soup.find_all('a', attrs={"target":"_blank"})
         for href in hrefs:
