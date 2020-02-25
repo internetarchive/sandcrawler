@@ -381,7 +381,10 @@ class WaybackClient:
             revisit_uri = revisit_uri.decode('utf-8')
             revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
             assert len(revisit_dt) == 14
-            revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
+            try:
+                revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
+            except KeyError as ke:
+                raise WaybackError("Revist resolution failed: {}".format(ke))
             body = self.fetch_petabox_body(
                 csize=revisit_cdx.warc_csize,
                 offset=revisit_cdx.warc_offset,
