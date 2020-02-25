@@ -1,0 +1,482 @@
+
+## SQL Table Sizes
+
+    SELECT
+        table_name,
+        pg_size_pretty(table_size) AS table_size,
+        pg_size_pretty(indexes_size) AS indexes_size,
+        pg_size_pretty(total_size) AS total_size
+      FROM (
+          SELECT
+              table_name,
+              pg_table_size(table_name) AS table_size,
+              pg_indexes_size(table_name) AS indexes_size,
+              pg_total_relation_size(table_name) AS total_size
+          FROM (
+              SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
+              FROM information_schema.tables
+              WHERE table_schema = 'public'
+          ) AS all_tables
+          ORDER BY total_size DESC
+      ) AS pretty_sizes;
+
+
+    Size:  271.83G
+
+              table_name           | table_size | indexes_size | total_size 
+    -------------------------------+------------+--------------+------------
+     "public"."cdx"                | 42 GB      | 36 GB        | 78 GB
+     "public"."grobid_shadow"      | 61 GB      | 6553 MB      | 68 GB
+     "public"."grobid"             | 47 GB      | 7213 MB      | 54 GB
+     "public"."file_meta"          | 26 GB      | 12 GB        | 38 GB
+     "public"."shadow"             | 8303 MB    | 9216 MB      | 17 GB
+     "public"."fatcat_file"        | 5206 MB    | 2094 MB      | 7300 MB
+     "public"."ingest_file_result" | 1831 MB    | 2454 MB      | 4285 MB
+     "public"."ingest_request"     | 2006 MB    | 2122 MB      | 4128 MB
+     "public"."petabox"            | 403 MB     | 594 MB       | 997 MB
+     "public"."pdftrio"            | 78 MB      | 64 MB        | 142 MB
+    (10 rows)
+
+
+## File Metadata
+
+(skipping, no update)
+
+
+## CDX
+
+Total and unique-by-sha1 counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM cdx;
+
+Processed or not:
+
+    # TODO:
+
+## GROBID
+
+Counts:
+
+    SELECT COUNT(DISTINCT fatcat_release) AS unique_releases, COUNT(*) AS total  FROM grobid;
+
+     unique_releases |  total
+    -----------------+----------
+          15,632,810 | 76,555,791
+    (1 row)
+
+Status?
+
+    SELECT status_code, COUNT(*) FROM grobid GROUP BY status_code ORDER BY COUNT DESC LIMIT 10;
+
+     status_code |  count   
+    -------------+----------
+             200 | 70656028
+             500 |  5896836
+              -4 |     2295
+             503 |      111
+    (4 rows)
+ 
+ What version used?
+ 
+    SELECT grobid_version, COUNT(*) FROM grobid WHERE status_code = 200 GROUP BY grobid_version ORDER BY COUNT DESC LIMIT 10;
+
+     grobid_version |  count
+    ----------------+----------
+     0.5.5-fatcat   | 56001631
+                    | 14654496
+    (2 rows)
+
+## Petabox
+
+Counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM petabox;
+
+     unique_sha1 |  total
+    -------------+---------
+       2,868,825 | 2,887,834
+    (1 row)
+
+## Ingests
+
+Requests by source:
+
+    SELECT ingest_type, link_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type | link_source |  count  
+    -------------+-------------+---------
+     pdf         | doi         | 6591633
+     pdf         | pmc         | 2030279
+     pdf         | arxiv       |  630743
+     pdf         | unpaywall   |    1400
+     pdf         | spn         |      82
+     pdf         | pubmed      |       2
+    (6 rows)
+
+    SELECT ingest_type, link_source, ingest_request_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source, ingest_request_source ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type | link_source |  ingest_request_source  |  count
+    -------------+-------------+-------------------------+---------
+     pdf         | doi         | fatcat-ingest-container | 3515873
+     pdf         | doi         |                         | 2943896
+     pdf         | pmc         | fatcat-ingest-container | 2028825
+     pdf         | arxiv       |                         |  629719
+     pdf         | doi         | fatcat-changelog        |  129932
+     pdf         | doi         | fatcat-ingest           |    1935
+     pdf         | pmc         |                         |    1454
+     pdf         | unpaywall   | unpaywall               |    1400
+     pdf         | arxiv       | fatcat-ingest           |     998
+     pdf         | spn         |                         |      64
+     pdf         | arxiv       | fatcat-ingest-container |      26
+     pdf         | spn         | savepapernow-web        |      18
+     pdf         | pubmed      |                         |       2
+     pdf         | doi         | savepapernow-web        |       1
+    (14 rows)
+
+    SELECT count(*) FROM ingest_request WHERE ingest_type = 'pdf' AND link_source = 'doi' AND ingest_request_source IS NULL;
+    UPDATE ingest_request SET ingest_request_source = 'fatcat-changelog' WHERE ingest_type = 'pdf' AND link_source = 'doi' AND ingest_request_source IS NULL;
+    => UPDATE 2943896
+
+    SELECT count(*) FROM ingest_request WHERE ingest_type = 'pdf' AND link_source = 'spn' AND ingest_request_source IS NULL;
+    UPDATE ingest_request SET ingest_request_source = 'savepapernow-web' WHERE ingest_type = 'pdf' AND link_source = 'spn' AND ingest_request_source IS NULL;
+    => UPDATE 64
+
+    SELECT count(*) FROM ingest_request WHERE ingest_type = 'pdf' AND link_source = 'arxiv' AND ingest_request_source IS NULL;
+    UPDATE ingest_request SET ingest_request_source = 'fatcat-ingest' WHERE ingest_type = 'pdf' AND link_source = 'arxiv' AND ingest_request_source IS NULL;
+    => UPDATE 629719
+
+    SELECT count(*) FROM ingest_request WHERE ingest_type = 'pdf' AND link_source = 'pmc' AND ingest_request_source IS NULL;
+    UPDATE ingest_request SET ingest_request_source = 'fatcat-ingest' WHERE ingest_type = 'pdf' AND link_source = 'pmc' AND ingest_request_source IS NULL;
+    => UPDATE 1454
+
+    SELECT count(*) FROM ingest_request WHERE link_source = 'pubmed';
+    DELETE FROM ingest_request WHERE link_source = 'pubmed';
+    => DELETE 2
+
+    SELECT ingest_type, link_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source ORDER BY COUNT DESC LIMIT 25;
+
+         ingest_type | link_source |  count  
+    -------------+-------------+---------
+     pdf         | doi         | 6591637
+     pdf         | pmc         | 2030279
+     pdf         | arxiv       |  630743
+     pdf         | unpaywall   |    1400
+     pdf         | spn         |      82
+    (5 rows)
+
+    SELECT ingest_type, link_source, ingest_request_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source, ingest_request_source ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type | link_source |  ingest_request_source  |  count  
+    -------------+-------------+-------------------------+---------
+     pdf         | doi         | fatcat-ingest-container | 3515873
+     pdf         | doi         | fatcat-changelog        | 3073828
+     pdf         | pmc         | fatcat-ingest-container | 2028825
+     pdf         | arxiv       | fatcat-ingest           |  630717
+     pdf         | doi         | fatcat-ingest           |    1935
+     pdf         | pmc         | fatcat-ingest           |    1454
+     pdf         | unpaywall   | unpaywall               |    1400
+     pdf         | spn         | savepapernow-web        |      82
+     pdf         | arxiv       | fatcat-ingest-container |      26
+     pdf         | doi         | savepapernow-web        |       1
+    (10 rows)
+
+Uncrawled requests by source:
+
+    # TODO: verify this?
+    SELECT ingest_request.ingest_type, ingest_request.link_source, COUNT(*)
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+    WHERE ingest_file_result.base_url IS NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY COUNT DESC LIMIT 25;
+
+    none?
+
+Results by source:
+
+    SELECT
+        ingest_request.ingest_type,
+        ingest_request.link_source,
+        COUNT(*) as attempts,
+        COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) hits, 
+        ROUND(1.0 * COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) / COUNT(*), 3) as fraction
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+        AND ingest_file_result.ingest_type IS NOT NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY attempts DESC LIMIT 25;
+
+
+     ingest_type | link_source | attempts |  hits   | fraction 
+    -------------+-------------+----------+---------+----------
+     pdf         | doi         |  6591637 | 1622702 |    0.246
+     pdf         | pmc         |  2030279 | 1241836 |    0.612
+     pdf         | arxiv       |   630743 |  500620 |    0.794
+     pdf         | unpaywall   |     1400 |     851 |    0.608
+     pdf         | spn         |       82 |      62 |    0.756
+    (5 rows)
+
+Ingest result by status:
+
+    SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 50;
+
+     ingest_type |               status                |  count  
+    -------------+-------------------------------------+---------
+     pdf         | success                             | 3366189
+     pdf         | no-pdf-link                         | 2902620
+     pdf         | no-capture                          | 1672025
+     pdf         | redirect-loop                       |  388844
+     pdf         | cdx-error                           |  272780
+     pdf         | terminal-bad-status                 |  171878
+     pdf         | spn-remote-error                    |  163843
+     pdf         | spn-error                           |  108070
+     pdf         | null-body                           |   66778
+     pdf         | link-loop                           |   43403
+     pdf         | skip-url-blocklist                  |   34705
+     pdf         | wrong-mimetype                      |   31343
+     pdf         | wayback-error                       |   13012
+     pdf         | spn2-cdx-lookup-failure             |    6100
+     pdf         | gateway-timeout                     |    5633
+     pdf         | other-mimetype                      |    5114
+     pdf         | spn2-error:proxy-error              |     538
+     pdf         | spn2-error:job-failed               |     470
+     pdf         | petabox-error                       |     415
+     pdf         | spn2-error:browser-running-error    |     136
+     pdf         | spn2-error                          |     127
+     pdf         | spn2-error:soft-time-limit-exceeded |      71
+     pdf         | bad-redirect                        |      39
+     pdf         | spn2-error:unknown                  |      30
+     pdf         | spn2-error:browsing-timeout         |      25
+     pdf         | pending                             |       3
+     pdf         | invalid-host-resolution             |       1
+    (27 rows)
+
+
+## Fatcat Files
+
+(skipping, no update)
+
+## Recent Success/Failure of Ingest by Domain
+
+NOTE: just finished a bunch of "backfill" ingest from OA-DOI crawl; only a
+small fraction of this is from changelog.
+
+    # "problem domains" and statuses
+    SELECT domain, status, COUNT((domain, status))     
+    FROM (SELECT status, updated, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+    WHERE t1.domain != ''
+        AND t1.status != 'success'
+        AND t1.updated >= NOW() - '1 day'::INTERVAL    
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 10;
+
+             domain          |     status     | count
+    -------------------------+----------------+-------
+     linkinghub.elsevier.com | no-capture     |  2579
+     www.mdpi.com            | wrong-mimetype |  1313
+     onlinelibrary.wiley.com | no-pdf-link    |   785
+     americanarchivist.org   | no-pdf-link    |   756
+     journals.sagepub.com    | redirect-loop  |   503
+     link.springer.com       | redirect-loop  |   432
+     iopscience.iop.org      | no-capture     |   392
+     www.tandfonline.com     | no-pdf-link    |   389
+     pubs.rsc.org            | no-capture     |   361
+     www.persee.fr           | no-capture     |   344
+    (10 rows)
+
+
+    # "what type of errors"
+    SELECT ingest_type, status, COUNT(*)
+    FROM ingest_file_result
+    WHERE updated >= NOW() - '1 day'::INTERVAL
+    GROUP BY ingest_type, status
+    ORDER BY COUNT DESC
+    LIMIT 25;    
+
+     ingest_type |               status                | count 
+    -------------+-------------------------------------+-------
+     pdf         | success                             | 40578
+     pdf         | cdx-error                           | 14982
+     pdf         | no-capture                          |  7747
+     pdf         | no-pdf-link                         |  7111
+     pdf         | redirect-loop                       |  3265
+     pdf         | wrong-mimetype                      |  1629
+     pdf         | spn2-cdx-lookup-failure             |   657
+     pdf         | link-loop                           |   538
+     pdf         | null-body                           |   517
+     pdf         | terminal-bad-status                 |   400
+     pdf         | wayback-error                       |    79
+     pdf         | spn2-error:job-failed               |    53
+     pdf         | gateway-timeout                     |    38
+     pdf         | spn2-error:soft-time-limit-exceeded |     7
+     pdf         | spn2-error                          |     6
+     pdf         | petabox-error                       |     5
+     pdf         | spn2-error:browsing-timeout         |     4
+     pdf         | spn2-error:unknown                  |     2
+     pdf         | bad-redirect                        |     1
+     pdf         | pending                             |     1
+    (20 rows)
+
+    # "throughput per day for last N days"
+    SELECT ingest_type,
+           date(updated),
+           COUNT(*) as total,
+           COUNT(CASE status WHEN 'success' THEN 1 ELSE null END) as success
+    FROM ingest_file_result
+    WHERE updated >= NOW() - '1 month'::INTERVAL
+    GROUP BY ingest_type, date(updated)
+    ORDER BY date(updated) DESC;
+
+     ingest_type |    date    |  total  | success 
+    -------------+------------+---------+---------
+     pdf         | 2020-02-25 |   32660 |   14322
+     pdf         | 2020-02-24 |   44967 |   26263
+     pdf         | 2020-02-23 |   58795 |   18874
+     pdf         | 2020-02-22 |  844249 |  272606
+     pdf         | 2020-02-21 | 1287378 |  433487
+     pdf         | 2020-02-20 | 1455943 |  492408
+     pdf         | 2020-02-19 |   21453 |    7529
+     pdf         | 2020-02-18 |    5863 |    2926
+     pdf         | 2020-02-17 |    3737 |     970
+     pdf         | 2020-02-16 |   13779 |    4862
+     pdf         | 2020-02-15 | 1021020 |  623020
+     pdf         | 2020-02-14 | 1036036 |  632830
+     pdf         | 2020-02-13 |   13503 |    5824
+     pdf         | 2020-02-12 |   20078 |   11422
+     pdf         | 2020-02-11 |   13499 |    6781
+     pdf         | 2020-02-10 |    2275 |     961
+     pdf         | 2020-02-09 |    3231 |    1494
+     pdf         | 2020-02-08 |    8967 |    4400
+     pdf         | 2020-02-07 |    7022 |    2430
+     pdf         | 2020-02-06 |    1291 |     516
+     pdf         | 2020-02-05 |    8586 |    6596
+     pdf         | 2020-02-04 |    3681 |    3593
+     pdf         | 2020-02-03 |     284 |     284
+     pdf         | 2020-02-02 |     480 |     480
+     pdf         | 2020-02-01 |     489 |     336
+     pdf         | 2020-01-31 |    1187 |    1130
+     pdf         | 2020-01-30 |    1613 |    1288
+     pdf         | 2020-01-29 |     947 |     279
+     pdf         | 2020-01-28 |     667 |     323
+    (29 rows)
+
+Top "no-capture" domains (will need to re-ingest using live tool):
+
+    SELECT domain, status, COUNT((domain, status))     
+    FROM (SELECT status, updated, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+    WHERE t1.domain != ''
+        AND t1.status = 'no-capture'
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 25;
+
+              domain          |   status   | count  
+    --------------------------+------------+--------
+     linkinghub.elsevier.com  | no-capture | 320065
+     iopscience.iop.org       | no-capture |  46858
+     pubs.rsc.org             | no-capture |  43331
+     www.persee.fr            | no-capture |  38971
+     www.doiserbia.nb.rs      | no-capture |  27112
+     academic.oup.com         | no-capture |  18877
+     www.osapublishing.org    | no-capture |  17113
+     osf.io                   | no-capture |  16978
+     scripts.iucr.org         | no-capture |  14844
+     www.degruyter.com        | no-capture |   8093
+     mab-online.nl            | no-capture |   6603
+     insights.ovid.com        | no-capture |   6457
+     ir.lib.uth.gr            | no-capture |   3625
+     www.sciencedirect.com    | no-capture |   3244
+     www.tandfonline.com      | no-capture |   3201
+     www.ccsenet.org          | no-capture |   2849
+     www.intechopen.com       | no-capture |   2813
+     primary-hospital-care.ch | no-capture |   2774
+     www.nature.com           | no-capture |   2484
+     www.indianjournals.com   | no-capture |   2432
+     journals.aps.org         | no-capture |   2197
+     journals.sagepub.com     | no-capture |   2064
+     www.episodes.org         | no-capture |   1805
+     periodicos.uninove.br    | no-capture |   1692
+     escholarship.org         | no-capture |   1666
+    (25 rows)
+
+Top "no-pdf-link" domains:
+
+    SELECT domain, status, COUNT((domain, status))     
+    FROM (SELECT status, updated, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+    WHERE t1.domain != ''
+        AND t1.status = 'no-pdf-link'
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 25;
+
+               domain            |   status    | count  
+    -----------------------------+-------------+--------
+     plutof.ut.ee                | no-pdf-link | 685315
+     www.gbif.org                | no-pdf-link | 670647
+     doi.pangaea.de              | no-pdf-link | 301984
+     www.plate-archive.org       | no-pdf-link | 209218
+     onlinelibrary.wiley.com     | no-pdf-link |  84890
+     figshare.com                | no-pdf-link |  72892
+     zenodo.org                  | no-pdf-link |  45768
+     www.tandfonline.com         | no-pdf-link |  43848
+     data.mendeley.com           | no-pdf-link |  42367
+     springernature.figshare.com | no-pdf-link |  35941
+     dhz.uni-passau.de           | no-pdf-link |  29187
+     www.frontiersin.org         | no-pdf-link |  17925
+     digital.ucd.ie              | no-pdf-link |  16769
+     mr.crossref.org             | no-pdf-link |  14999
+     journals.lww.com            | no-pdf-link |  12122
+     musewide.aip.de             | no-pdf-link |  10854
+     datadryad.org               | no-pdf-link |  10686
+     www.jstor.org               | no-pdf-link |   9159
+     koreascience.or.kr          | no-pdf-link |   9067
+     easy.dans.knaw.nl           | no-pdf-link |   8264
+     scielo.conicyt.cl           | no-pdf-link |   8069
+     www.degruyter.com           | no-pdf-link |   7989
+     www.kci.go.kr               | no-pdf-link |   6990
+     www.m-hikari.com            | no-pdf-link |   6941
+     cshprotocols.cshlp.org      | no-pdf-link |   6553
+    (25 rows)
+
+Top block-ish domains:
+
+    SELECT domain, status, COUNT((domain, status))     
+    FROM (SELECT status, updated, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+    WHERE t1.domain != ''
+        AND (t1.status = 'redirect-loop' OR t1.status = 'link-loop' OR t1.status = 'terminal-bad-status')
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 25;
+
+                 domain              |       status        | count 
+    ---------------------------------+---------------------+-------
+     journals.openedition.org        | redirect-loop       | 30395
+     ieeexplore.ieee.org             | redirect-loop       | 28926
+     www.degruyter.com               | redirect-loop       | 18891
+     www.cairn.info                  | link-loop           |  8919
+     www.frontiersin.org             | terminal-bad-status |  6786
+     projecteuclid.org               | link-loop           |  6098
+     www.mdpi.com                    | terminal-bad-status |  5189
+     medicalforum.ch                 | terminal-bad-status |  4596
+     jrnl.nau.edu.ua                 | link-loop           |  4238
+     www.revistas.unam.mx            | link-loop           |  3926
+     journals.aps.org                | redirect-loop       |  3696
+     www.ijcseonline.org             | redirect-loop       |  3567
+     www.researchsquare.com          | terminal-bad-status |  3453
+     www.persee.fr                   | terminal-bad-status |  3221
+     www.baltistica.lt               | link-loop           |  2098
+     osf.io                          | redirect-loop       |  2004
+     seer.ufrgs.br                   | terminal-bad-status |  2002
+     jtd.amegroups.com               | link-loop           |  1738
+     www.hindawi.com                 | terminal-bad-status |  1613
+     linkinghub.elsevier.com         | redirect-loop       |  1612
+     www.scienceopen.com             | terminal-bad-status |  1580
+     atm.amegroups.com               | link-loop           |  1571
+     scielo.conicyt.cl               | terminal-bad-status |  1491
+     repozytorium.ur.edu.pl          | redirect-loop       |  1279
+     agupubs.onlinelibrary.wiley.com | link-loop           |  1182
+    (25 rows)
+

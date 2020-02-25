@@ -41,6 +41,10 @@ Total and unique-by-sha1 counts:
 
     SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM cdx;
 
+mimetype counts:
+
+    SELECT mimetype, COUNT(*) FROM cdx GROUP BY mimetype ORDER BY COUNT(*) DESC;
+
 Processed or not:
 
     # TODO:
@@ -70,6 +74,8 @@ Counts:
 Requests by source:
 
     SELECT ingest_type, link_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source ORDER BY COUNT DESC LIMIT 25;
+
+    SELECT ingest_type, link_source, ingest_request_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source, ingest_request_source ORDER BY COUNT DESC LIMIT 25;
 
 Uncrawled requests by source:
 
