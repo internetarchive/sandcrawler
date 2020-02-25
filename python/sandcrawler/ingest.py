@@ -290,7 +290,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
             file_meta = gen_file_metadata(resource.body)
 
-            if "html" in file_meta['mimetype'] or "xml" in file_meta['mimetype']:
+            if "html" in file_meta['mimetype'] or "xhtml" in file_meta['mimetype'] or "application/xml" in file_meta['mimetype']:
                 # Got landing page or similar. Some XHTML detected as "application/xml"
                 if resource.terminal_dt:
                     result['terminal'] = {
