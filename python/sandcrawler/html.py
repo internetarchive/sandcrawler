@@ -303,7 +303,7 @@ def extract_fulltext_url(html_url, html_body):
     if "://chemrxiv.org/articles/" in html_url or '.figshare.org/articles/' in html_url:
         # <script id="app-data" type="text/json"> [...] </script>
         json_tag = soup.find('script', id="app-data", attrs={"type": "text/json"})
-        if json_tag.string:
+        if json_tag and json_tag.string:
             app_data = json.loads(json_tag.string)
             # "exportPdfDownloadUrl": "https://s3-eu-west-1.amazonaws.com/itempdf74155353254prod/10101419/Biradical_Formation_by_Deprotonation_in_Thiazole-Derivatives__The_Hidden_Nature_of_Dasatinib_v1.pdf"
             url = app_data.get('article', {}).get('exportPdfDownloadUrl')
