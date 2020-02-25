@@ -34,13 +34,21 @@ class PdfTrioClient(object):
                 files={
                     'pdf_content': blob,
                 },
-                timeout=30.0,
+                timeout=60.0,
             )
         except requests.Timeout:
             return {
                 'status': 'error-timeout',
                 'status_code': -4,  # heritrix3 "HTTP timeout" code
                 'error_msg': 'pdftrio request (HTTP POST) timeout',
+            }
+        except requests.exceptions.ConnectionError:
+            # crude back-off
+            time.sleep(2.0)
+            return {
+                'status': 'error-connect',
+                'status_code': -2,  # heritrix3 "HTTP connect" code
+                'error_msg': 'pdftrio request connection timout',
             }
 
         info = dict(
