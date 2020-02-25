@@ -377,7 +377,7 @@ class WaybackClient:
             revisit_uri, revisit_dt = gwb_record.refers_to
             if not (revisit_uri and revisit_dt):
                 raise WaybackError("revisit record missing URI and/or DT: warc:{} offset:{}".format(
-                    warc_path, warc_offset))
+                    warc_path, offset))
             # convert revisit_dt
             # len("2018-07-24T11:56:49"), or with "Z"
             assert len(revisit_dt) in (19, 20)
