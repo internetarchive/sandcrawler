@@ -373,8 +373,11 @@ class WaybackClient:
         revisit_cdx = None
         if gwb_record.is_revisit():
             if not resolve_revisit:
-                raise WaybackError( "found revisit record, but won't resolve (loop?)")
+                raise WaybackError("found revisit record, but won't resolve (loop?)")
             revisit_uri, revisit_dt = gwb_record.refers_to
+            if not (revisit_uri and revisit_dt):
+                raise WaybackError("revisit record missing URI and/or DT: warc:{} offset:{}".format(
+                    warc_path, warc_offset))
             # convert revisit_dt
             # len("2018-07-24T11:56:49"), or with "Z"
             assert len(revisit_dt) in (19, 20)
