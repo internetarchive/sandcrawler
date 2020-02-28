@@ -51,10 +51,11 @@ NORMAL_MIME = (
     'application/postscript',
     'text/html',
     'text/xml',
+    'application/octet-stream',
 )
 
 def normalize_mime(raw):
-    raw = raw.lower()
+    raw = raw.lower().strip()
     for norm in NORMAL_MIME:
         if raw.startswith(norm):
             return norm
@@ -64,6 +65,20 @@ def normalize_mime(raw):
         return 'text/xml'
     if raw.startswith('application/x-pdf'):
         return 'application/pdf'
+    if raw in (
+            '.pdf',
+            ):
+        return 'application/pdf'
+    if raw in (
+            'application/download',
+            'binary/octet-stream',
+            'unk',
+            'application/x-download',
+            'application/octetstream',
+            'application/force-download',
+            'application/unknown',
+            ):
+        return 'application/octet-stream'
     return None
 
 
@@ -76,6 +91,8 @@ def test_normalize_mime():
     assert normalize_mime("application/xml+stuff") == "text/xml"
     assert normalize_mime("application/x-pdf") == "application/pdf"
     assert normalize_mime("application/x-html") is None
+    assert normalize_mime("unk") == "application/octet-stream"
+    assert normalize_mime("binary/octet-stream") == "application/octet-stream"
 
 
 def parse_cdx_line(raw_cdx, normalize=True):
