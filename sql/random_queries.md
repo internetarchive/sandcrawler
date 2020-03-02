@@ -120,3 +120,60 @@ Can also do some quick lookups for a specific domain and protocol like:
         FROM ingest_file_result
         WHERE terminal_url LIKE 'https://insights.ovid.com/%'
         LIMIT 10;
+
+## Bulk Ingest
+
+Show bulk ingest status on links *added* in the past week:
+
+    SELECT ingest_file_result.ingest_type, ingest_file_result.status, COUNT(*)
+    FROM ingest_file_result
+    LEFT JOIN ingest_request
+        ON ingest_file_result.ingest_type = ingest_request.ingest_type
+        AND ingest_file_result.base_url = ingest_request.base_url
+    WHERE ingest_request.created >= NOW() - '30 day'::INTERVAL
+        AND ingest_request.link_source = 'unpaywall'
+    GROUP BY ingest_file_result.ingest_type, ingest_file_result.status
+    ORDER BY COUNT DESC
+    LIMIT 25;
+
+Top *successful* domains:
+
+    SELECT domain, status, COUNT((domain, status))
+    FROM (
+        SELECT
+            ingest_file_result.ingest_type,
+            ingest_file_result.status,
+            substring(ingest_file_result.terminal_url FROM '[^/]+://([^/]*)') AS domain
+        FROM ingest_file_result
+        LEFT JOIN ingest_request
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE ingest_request.created >= NOW() - '7 day'::INTERVAL
+            AND ingest_request.link_source = 'unpaywall'
+    ) t1
+    WHERE t1.domain != ''
+        AND t1.status = 'success'
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 20;
+
+Summarize non-success domains for the same:
+
+    SELECT domain, status, COUNT((domain, status))
+    FROM (
+        SELECT
+            ingest_file_result.ingest_type,
+            ingest_file_result.status,
+            substring(ingest_file_result.terminal_url FROM '[^/]+://([^/]*)') AS domain
+        FROM ingest_file_result
+        LEFT JOIN ingest_request
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE ingest_request.created >= NOW() - '7 day'::INTERVAL
+            AND ingest_request.link_source = 'unpaywall'
+    ) t1
+    WHERE t1.domain != ''
+        AND t1.status != 'success'
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 20;
