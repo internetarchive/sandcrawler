@@ -1,12 +1,13 @@
 
 import sys
 import json
+import gzip
 import base64
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from collections import namedtuple
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict
+from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.misc import gen_file_metadata
 from sandcrawler.html import extract_fulltext_url
@@ -291,6 +292,23 @@ class IngestFileWorker(SandcrawlerWorker):
                 result['status'] = 'null-body'
                 return result
             file_meta = gen_file_metadata(resource.body)
+
+            if file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
+                print("transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
+                inner_body = gzip.decompress(resource.body)
+                resource = ResourceResult(
+                    body=inner_body,
+                    # copy all other fields
+                    start_url=resource.start_url,
+                    hit=resource.hit,
+                    status=resource.status,
+                    terminal_url=resource.terminal_url,
+                    terminal_dt=resource.terminal_dt,
+                    terminal_status_code=resource.terminal_status_code,
+                    cdx=resource.cdx,
+                    revisit_cdx=resource.revisit_cdx,
+                )
+                file_meta = gen_file_metadata(resource.body)
 
             if "html" in file_meta['mimetype'] or "xhtml" in file_meta['mimetype'] or "application/xml" in file_meta['mimetype']:
                 # Got landing page or similar. Some XHTML detected as "application/xml"
