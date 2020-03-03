@@ -98,6 +98,7 @@ HTML? Or both? Let's just recrawl.
     `savepapernow-web`
   - `release_stage`: optional. indicates the release stage of fulltext expected to be found at this URL
   - `rel`: optional. indicates the link type
+  - `force_recrawl`: optional. if true, will always SPNv2 (won't check wayback)
   - `oa_status`: optional. unpaywall schema
   - `edit_extra`: additional metadata to be included in any eventual fatcat commits.
   - `fatcat`

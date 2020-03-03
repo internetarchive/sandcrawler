@@ -111,7 +111,7 @@ class IngestFileWorker(SandcrawlerWorker):
         else:
             return None
 
-    def find_resource(self, url, best_mimetype=None):
+    def find_resource(self, url, best_mimetype=None, force_recrawl=False):
         """
         Looks in wayback for a resource starting at the URL, following any
         redirects. If a hit isn't found, try crawling with SPN.
@@ -125,7 +125,7 @@ class IngestFileWorker(SandcrawlerWorker):
         if url.startswith("http://archive.org/") or url.startswith("https://archive.org/"):
             raise NotImplementedError("fetching from archive.org not implemented yet")
 
-        if self.try_wayback:
+        if self.try_wayback and not force_recrawl:
             via = "wayback"
             resource = self.wayback_client.lookup_resource(url, best_mimetype)
 
@@ -225,6 +225,8 @@ class IngestFileWorker(SandcrawlerWorker):
         ingest_type = request.get('ingest_type')
         base_url = request['base_url']
 
+        force_recrawl = bool(request.get('force_recrawl', False))
+
         for block in self.base_url_blocklist:
             if block in base_url:
                 print("[SKIP {}\t] {}".format(ingest_type, base_url), file=sys.stderr)
@@ -251,7 +253,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
             result['hops'] = hops
             try:
-                resource = self.find_resource(next_url, best_mimetype)
+                resource = self.find_resource(next_url, best_mimetype, force_recrawl=force_recrawl)
             except SavePageNowError as e:
                 result['status'] = 'spn2-error'
                 result['error_message'] = str(e)[:1600]
