@@ -293,9 +293,18 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
             file_meta = gen_file_metadata(resource.body)
 
+            # crude handling of content-encoding; wayback fetch library usually
+            # (and should always?) handle this
             if file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
                 print("transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
-                inner_body = gzip.decompress(resource.body)
+                try:
+                    inner_body = gzip.decompress(resource.body)
+                except EOFError:
+                    result['status'] = 'bad-gzip-encoding'
+                    return result
+                if not inner_body:
+                    result['status'] = 'null-body'
+                    return result
                 resource = ResourceResult(
                     body=inner_body,
                     # copy all other fields
