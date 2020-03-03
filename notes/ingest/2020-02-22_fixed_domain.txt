@@ -1,0 +1,246 @@
+
+www.degruyter.com
+
+    "/view/books/" didn't have citation_pdf_url, so added custom URL rule.
+
+    Not sure why redirect-loop happening, but isn't with current live ingest
+    tool?
+
+          domain       |         status          | count 
+    -------------------+-------------------------+-------
+     www.degruyter.com | redirect-loop           | 22023
+     www.degruyter.com | no-pdf-link             |  8773
+     www.degruyter.com | no-capture              |  8617
+     www.degruyter.com | success                 |   840
+     www.degruyter.com | link-loop               |    59
+     www.degruyter.com | terminal-bad-status     |    23
+     www.degruyter.com | wrong-mimetype          |    12
+     www.degruyter.com | spn-error               |     4
+     www.degruyter.com | spn2-cdx-lookup-failure |     4
+     www.degruyter.com | spn2-error:proxy-error  |     1
+     www.degruyter.com | spn-remote-error        |     1
+     www.degruyter.com | gateway-timeout         |     1
+     www.degruyter.com | petabox-error           |     1
+    (13 rows)
+
+www.frontiersin.org
+
+    no pdf link
+
+    seems to live ingest fine? files served from "*.blob.core.windows.net"
+    no fix, just re-ingest.
+
+           domain        |         status          | count 
+    ---------------------+-------------------------+-------
+     www.frontiersin.org | no-pdf-link             | 17503
+     www.frontiersin.org | terminal-bad-status     |  6696
+     www.frontiersin.org | wayback-error           |   203
+     www.frontiersin.org | no-capture              |    20
+     www.frontiersin.org | spn-error               |     6
+     www.frontiersin.org | gateway-timeout         |     3
+     www.frontiersin.org | wrong-mimetype          |     3
+     www.frontiersin.org | spn2-cdx-lookup-failure |     2
+     www.frontiersin.org | spn2-error:job-failed   |     2
+     www.frontiersin.org | spn-remote-error        |     1
+     www.frontiersin.org | cdx-error               |     1
+    (11 rows)
+
+www.mdpi.com
+
+    terminal-bad-status
+
+    Seems to ingest fine live? No fix, just re-ingest.
+
+        domain    |         status          | count 
+    --------------+-------------------------+-------
+     www.mdpi.com | terminal-bad-status     | 13866
+     www.mdpi.com | wrong-mimetype          |  2693
+     www.mdpi.com | wayback-error           |   513
+     www.mdpi.com | redirect-loop           |   505
+     www.mdpi.com | success                 |   436
+     www.mdpi.com | no-capture              |   214
+     www.mdpi.com | no-pdf-link             |    43
+     www.mdpi.com | spn2-cdx-lookup-failure |    34
+     www.mdpi.com | gateway-timeout         |     3
+     www.mdpi.com | petabox-error           |     2
+    (10 rows)
+
+www.ahajournals.org         | no-pdf-link         |   5727
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'www.ahajournals.org'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%www.ahajournals.org%'
+            AND status = 'no-pdf-link'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+           domain        |     status     | count 
+    ---------------------+----------------+-------
+     www.ahajournals.org | no-pdf-link    |  5738
+     www.ahajournals.org | wrong-mimetype |    84
+    (2 rows)
+
+
+     pdf         | https://doi.org/10.1161/circ.110.19.2977     | 2020-02-23 00:28:55.256296+00 | f   | no-pdf-link | https://www.ahajournals.org/action/cookieAbsent | 20200217122952 |                  200 | 
+     pdf         | https://doi.org/10.1161/str.49.suppl_1.tp403 | 2020-02-23 00:27:34.950059+00 | f   | no-pdf-link | https://www.ahajournals.org/action/cookieAbsent | 20200217122952 |                  200 | 
+     pdf         | https://doi.org/10.1161/str.49.suppl_1.tp168 | 2020-02-23 00:25:54.611271+00 | f   | no-pdf-link | https://www.ahajournals.org/action/cookieAbsent | 20200217122952 |                  200 | 
+     pdf         | https://doi.org/10.1161/jaha.119.012131      | 2020-02-23 00:24:44.244511+00 | f   | no-pdf-link | https://www.ahajournals.org/action/cookieAbsent | 20200217122952 |                  200 | 
+
+    Ah, the ol' annoying 'cookieAbsent'. Works with live SPNv2 via soft-404
+    detection, but that status wasn't coming through, and needed custom
+    pdf-link detection.
+
+    FIXED: added pdf-link detection
+
+ehp.niehs.nih.gov           | no-pdf-link         |   5772
+
+    simple custom URL format. but are they also blocking?
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'ehp.niehs.nih.gov'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+          domain       |     status     | count 
+    -------------------+----------------+-------
+     ehp.niehs.nih.gov | no-pdf-link    |  5791
+     ehp.niehs.nih.gov | wrong-mimetype |    11
+    (2 rows)
+
+    FIXED: mostly just slow, custom URL seems to work
+
+journals.tsu.ru             | no-pdf-link         |   4404
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'journals.tsu.ru'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%journals.tsu.ru%'
+            AND status = 'no-pdf-link'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+         domain      |     status     | count 
+    -----------------+----------------+-------
+     journals.tsu.ru | no-pdf-link    |  4409
+     journals.tsu.ru | success        |     1
+     journals.tsu.ru | wrong-mimetype |     1
+    (3 rows)
+
+
+    pdf         | https://doi.org/10.17223/18572685/57/3   | 2020-02-23 00:45:49.003593+00 | f   | no-pdf-link | http://journals.tsu.ru/rusin/&journal_page=archive&id=1907&article_id=42847      | 20200213132322 |                  200 | 
+    pdf         | https://doi.org/10.17223/17267080/71/4   | 2020-02-23 00:31:25.715416+00 | f   | no-pdf-link | http://journals.tsu.ru/psychology/&journal_page=archive&id=1815&article_id=40405 | 20200211151825 |                  200 | 
+    pdf         | https://doi.org/10.17223/15617793/399/33 | 2020-02-23 00:29:45.414865+00 | f   | no-pdf-link | http://journals.tsu.ru/vestnik/&journal_page=archive&id=1322&article_id=24619    | 20200208152715 |                  200 | 
+    pdf         | https://doi.org/10.17223/19988613/58/15  | 2020-02-23 00:25:24.402838+00 | f   | no-pdf-link | http://journals.tsu.ru//history/&journal_page=archive&id=1827&article_id=40501   | 20200212200320 |                  200 | 
+
+    FIXED: simple new custom PDF link pattern
+
+www.cogentoa.com            | no-pdf-link         |   4282
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'www.cogentoa.com'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%www.cogentoa.com%'
+            AND status = 'no-pdf-link'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+          domain      |   status    | count 
+    ------------------+-------------+-------
+     www.cogentoa.com | no-pdf-link |  4296
+    (1 row)
+
+     pdf         | https://doi.org/10.1080/23311932.2015.1022632 | 2020-02-23 01:06:14.040013+00 | f   | no-pdf-link | https://www.cogentoa.com/article/10.1080/23311932.2015.1022632 | 20200208054228 |                  200 |
+     pdf         | https://doi.org/10.1080/23322039.2020.1730079 | 2020-02-23 01:04:53.754117+00 | f   | no-pdf-link | https://www.cogentoa.com/article/10.1080/23322039.2020.1730079 | 20200223010431 |                  200 |
+     pdf         | https://doi.org/10.1080/2331186x.2018.1460901 | 2020-02-23 01:04:03.47563+00  | f   | no-pdf-link | https://www.cogentoa.com/article/10.1080/2331186X.2018.1460901 | 20200207200958 |                  200 |
+     pdf         | https://doi.org/10.1080/23311975.2017.1412873 | 2020-02-23 01:03:08.063545+00 | f   | no-pdf-link | https://www.cogentoa.com/article/10.1080/23311975.2017.1412873 | 20200209034602 |                  200 |
+     pdf         | https://doi.org/10.1080/23311916.2017.1293481 | 2020-02-23 01:02:42.868424+00 | f   | no-pdf-link | https://www.cogentoa.com/article/10.1080/23311916.2017.1293481 | 20200208101623 |                  200 |
+
+    FIXED: simple custom URL-based pattern
+
+chemrxiv.org                | no-pdf-link         |   4186
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'chemrxiv.org'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%chemrxiv.org%'
+            AND status = 'no-pdf-link'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+        domain    |         status          | count
+    --------------+-------------------------+-------
+     chemrxiv.org | no-pdf-link             |  4202
+     chemrxiv.org | wrong-mimetype          |    64
+     chemrxiv.org | wayback-error           |    14
+     chemrxiv.org | success                 |    12
+     chemrxiv.org | terminal-bad-status     |     4
+     chemrxiv.org | spn2-cdx-lookup-failure |     1
+
+    pdf         | https://doi.org/10.26434/chemrxiv.9912812.v1  | 2020-02-23 01:08:34.585084+00 | f   | no-pdf-link | https://chemrxiv.org/articles/Proximity_Effect_in_Crystalline_Framework_Materials_Stacking-Induced_Functionality_in_MOFs_and_COFs/9912812/1                                                                     | 20200215072929 |                  200 | 
+    pdf         | https://doi.org/10.26434/chemrxiv.7150097     | 2020-02-23 01:05:48.957624+00 | f   | no-pdf-link | https://chemrxiv.org/articles/Systematic_Engineering_of_a_Protein_Nanocage_for_High-Yield_Site-Specific_Modification/7150097                                                                                    | 20200213002430 |                  200 | 
+    pdf         | https://doi.org/10.26434/chemrxiv.7833500.v1  | 2020-02-23 00:55:41.013109+00 | f   | no-pdf-link | https://chemrxiv.org/articles/Formation_of_Neutral_Peptide_Aggregates_Studied_by_Mass_Selective_IR_Action_Spectroscopy/7833500/1                                                                                | 20200210131343 |                  200 | 
+    pdf         | https://doi.org/10.26434/chemrxiv.8146103     | 2020-02-23 00:52:00.193328+00 | f   | no-pdf-link | https://chemrxiv.org/articles/On-Demand_Guest_Release_from_MOF-5_Sealed_with_Nitrophenylacetic_Acid_Photocapping_Groups/8146103                                                                                 | 20200207215449 |                  200 | 
+    pdf         | https://doi.org/10.26434/chemrxiv.10101419    | 2020-02-23 00:46:14.086913+00 | f   | no-pdf-link | https://chemrxiv.org/articles/Biradical_Formation_by_Deprotonation_in_Thiazole-Derivatives_The_Hidden_Nature_of_Dasatinib/10101419                                                                              | 20200214044153 |                  200 | 
+
+    FIXED: complex JSON PDF url extraction; maybe for all figshare?
+
+TODO:
+x many datacite prefixes go to IRs, but have is_oa:false. we should probably crawl by default based on release_type
+    => fatcat branch bnewbold-more-ingest
+- re-ingest all degruyter (doi_prefix:10.1515)
+    1456169 doi:10.1515\/*
+    89942   doi:10.1515\/* is_oa:true
+    36350   doi:10.1515\/* in_ia:false is_oa:true
+    1290830 publisher:Gruyter
+    88944   publisher:Gruyter is_oa:true
+    40034   publisher:Gruyter is_oa:true in_ia:false
+- re-ingest all frontiersin
+    248165  publisher:frontiers
+    161996  publisher:frontiers is_oa:true
+    36093   publisher:frontiers is_oa:true in_ia:false
+    121001  publisher:frontiers in_ia:false
+- re-ingest all mdpi
+    43114   publisher:mdpi is_oa:true in_ia:false
+- re-ingest all ahajournals.org
+    132000  doi:10.1161\/*
+    6606    doi:10.1161\/* in_ia:false is_oa:true
+    81349   publisher:"American Heart Association"
+    5986    publisher:"American Heart Association" is_oa:true in_ia:false
+- re-ingest all ehp.niehs.nih.gov
+    25522   doi:10.1289\/*
+    15315   publisher:"Environmental Health Perspectives"
+     8779   publisher:"Environmental Health Perspectives" in_ia:false
+    12707   container_id:3w6amv3ecja7fa3ext35ndpiky in_ia:false is_oa:true
+- re-ingest all journals.tsu.ru
+    12232   publisher:"Tomsk State University"
+    11668   doi:10.17223\/*
+     4861   publisher:"Tomsk State University" in_ia:false is_oa:true
+- re-ingest all www.cogentoa.com
+    3421898 doi:10.1080\/*
+    4602    journal:cogent is_oa:true in_ia:false
+    5631    journal:cogent is_oa:true (let's recrawl all from publisher domain)
+- re-ingest chemrxiv
+    8281    doi:10.26434\/chemrxiv*
+    6918    doi:10.26434\/chemrxiv* in_ia:false
+
+Submit all the above with limits of 1000, then follow up later to check that
+there was success?
+

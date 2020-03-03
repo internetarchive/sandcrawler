@@ -1,0 +1,174 @@
+
+## protocols.io
+
+Tested that single ingest is working, and they fixed PDF format on their end
+recently.
+
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org --allow-non-oa container --name protocols.io
+    => Expecting 8448 release objects in search queries
+    => Counter({'estimate': 8448, 'kafka': 8448, 'ingest_request': 8448, 'elasticsearch_release': 8448})
+
+## backfill follow-ups
+
+- re-ingest all degruyter (doi_prefix:10.1515)
+    89942   doi:10.1515\/* is_oa:true
+    36350   doi:10.1515\/* in_ia:false is_oa:true
+    40034   publisher:Gruyter is_oa:true in_ia:false
+    => update:
+    135926  doi:10.1515\/* is_oa:true
+    50544   doi:10.1515\/* in_ia:false is_oa:true
+    54880   publisher:Gruyter is_oa:true in_ia:false
+- re-ingest all frontiersin
+    36093   publisher:frontiers is_oa:true in_ia:false
+    => update
+    22444   publisher:frontiers is_oa:true in_ia:false
+    22029   doi_prefix:10.3389 is_oa:true in_ia:false
+
+    select status, count(*) from ingest_file_result where base_url like 'https://doi.org/10.3389/%' group by status order by count(*) desc;
+
+                   status                | count 
+    -------------------------------------+-------
+     success                             | 34721
+     no-pdf-link                         | 18157
+     terminal-bad-status                 |  6799
+     cdx-error                           |  1805
+     wayback-error                       |   333
+     no-capture                          |   301
+    [...]
+
+    select * from ingest_file_result where base_url like 'https://doi.org/10.17723/aarc%' and status = 'no-pdf-link' order by updated desc limit 100;
+
+- re-ingest all mdpi
+    43114   publisher:mdpi is_oa:true in_ia:false
+    => update
+    8548    publisher:mdpi is_oa:true in_ia:false
+
+    select status, count(*) from ingest_file_result where base_url like 'https://doi.org/10.3390/%' group by status order by count(*) desc;
+                   status                | count  
+    -------------------------------------+--------
+     success                             | 108971
+     cdx-error                           |   6655
+     wrong-mimetype                      |   3359
+     terminal-bad-status                 |   1299
+     wayback-error                       |    151
+     spn2-cdx-lookup-failure             |     87
+
+     => added hack for gzip content-encoding coming through pdf fetch
+     => will re-ingest all after pushing fix
+
+- re-ingest all ahajournals.org
+    132000  doi:10.1161\/*
+    6606    doi:10.1161\/* in_ia:false is_oa:true
+    81349   publisher:"American Heart Association"
+    5986    publisher:"American Heart Association" is_oa:true in_ia:false
+    => update
+    1337    publisher:"American Heart Association" is_oa:true in_ia:false
+
+                   status                | count 
+    -------------------------------------+-------
+     success                             |  1480
+     cdx-error                           |  1176
+     spn2-cdx-lookup-failure             |   514
+     no-pdf-link                         |    85
+     wayback-error                       |    25
+     spn2-error:job-failed               |    18
+
+    => will re-run errors
+- re-ingest all ehp.niehs.nih.gov
+    25522   doi:10.1289\/*
+    15315   publisher:"Environmental Health Perspectives"
+     8779   publisher:"Environmental Health Perspectives" in_ia:false
+    12707   container_id:3w6amv3ecja7fa3ext35ndpiky in_ia:false is_oa:true
+    => update
+    7547    container_id:3w6amv3ecja7fa3ext35ndpiky in_ia:false is_oa:true
+- re-ingest all journals.tsu.ru
+    12232   publisher:"Tomsk State University"
+    11668   doi:10.17223\/*
+     4861   publisher:"Tomsk State University" in_ia:false is_oa:true
+    => update
+    2605    publisher:"Tomsk State University" in_ia:false is_oa:true
+    => just need to retry these? seem fine
+- re-ingest all www.cogentoa.com
+    3421898 doi:10.1080\/*
+    4602    journal:cogent is_oa:true in_ia:false
+    5631    journal:cogent is_oa:true (let's recrawl all from publisher domain)
+    => update
+    254     journal:cogent is_oa:true in_ia:false
+- re-ingest chemrxiv
+    8281    doi:10.26434\/chemrxiv*
+    6918    doi:10.26434\/chemrxiv* in_ia:false
+    => update
+    4890    doi:10.26434\/chemrxiv* in_ia:false
+    => re-ingest
+    => allow non-OA
+
+    # american archivist
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org --allow-non-oa container --container-id zpobyv4vbranllc7oob56tgci4
+    Counter({'estimate': 2920, 'elasticsearch_release': 2920, 'kafka': 2911, 'ingest_request': 2911})
+    => 2020-02-04: 85 / 3,005
+    => 2020-03-02: 2,182 / 3,005 preserved. some no-pdf-link, otherwise just a bunch of spn2-error
+    => looks like the no-pdf-url due to pinnacle-secure.allenpress.com soft-blocking loop
+
+
+## backfill re-ingests
+
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org --allow-non-oa --force-recrawl container --container-id zpobyv4vbranllc7oob56tgci4
+    => Counter({'elasticsearch_release': 823, 'estimate': 823, 'ingest_request': 814, 'kafka': 814})
+
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org container --publisher Gruyter
+    => Counter({'elasticsearch_release': 54880, 'estimate': 54880, 'kafka': 51497, 'ingest_request': 51497})
+
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org query 'publisher:"Tomsk State University"'
+    => Counter({'ingest_request': 2605, 'kafka': 2605, 'elasticsearch_release': 2605, 'estimate': 2605})
+
+    ./fatcat_ingest.py --limit 25 --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org query "doi:10.26434\/chemrxiv*"
+
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org container --publisher mdpi
+    => Counter({'estimate': 8548, 'elasticsearch_release': 8548, 'ingest_request': 6693, 'kafka': 6693})
+    => NOTE: about 2k not enqueued
+
+## re-ingest all broken
+
+    COPY (
+        SELECT row_to_json(ingest_request.*) FROM ingest_request
+        LEFT JOIN ingest_file_result ON ingest_file_result.base_url = ingest_request.base_url
+        WHERE ingest_request.ingest_type = 'pdf'
+            AND ingest_file_result.ingest_type = 'pdf'
+            AND ingest_file_result.updated < NOW() - '1 day'::INTERVAL
+            AND ingest_file_result.hit = false
+            AND ingest_file_result.status like 'spn2-%'
+    ) TO '/grande/snapshots/reingest_spn2_20200302.rows.json';
+    => COPY 14849
+
+    COPY (
+        SELECT row_to_json(ingest_request.*) FROM ingest_request
+        LEFT JOIN ingest_file_result ON ingest_file_result.base_url = ingest_request.base_url
+        WHERE ingest_request.ingest_type = 'pdf'
+            AND ingest_file_result.ingest_type = 'pdf'
+            AND ingest_file_result.hit = false
+            AND ingest_file_result.status like 'cdx-error'
+    ) TO '/grande/snapshots/reingest_cdxerr_20200302.rows.json';
+    => COPY 507610
+
+    This is a huge number! Re-ingest via bulk?
+
+Transform:
+
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_spn2_20200302.rows.json > reingest_spn2_20200302.json
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_cdxerr_20200302.rows.json > reingest_cdxerr_20200302.json
+
+Push to kafka:
+
+    cat reingest_spn2err_20200218.json | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests -p -1
+    # accidentially also piped the above through ingest-file-requests-bulk...
+    # which could actually be bad
+    cat reingest_cdxerr_20200302.json | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
+## biorxiv/medrxiv
+
+    8026    doi:10.1101\/20*
+    2159    doi:10.1101\/20* in_ia:false
+
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org --allow-non-oa query 'doi:10.1101\/20* in_ia:false'
+    => Counter({'estimate': 2159, 'ingest_request': 2159, 'elasticsearch_release': 2159, 'kafka': 2159})
+
