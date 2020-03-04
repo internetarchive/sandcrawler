@@ -299,8 +299,9 @@ class IngestFileWorker(SandcrawlerWorker):
                 print("transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
                 try:
                     inner_body = gzip.decompress(resource.body)
-                except EOFError:
+                except Exception as e:
                     result['status'] = 'bad-gzip-encoding'
+                    result['error_message'] = str(e)
                     return result
                 if not inner_body:
                     result['status'] = 'null-body'
