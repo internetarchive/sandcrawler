@@ -15,6 +15,8 @@ def run_single_ingest(args):
         ext_ids=dict(doi=args.doi),
         fatcat=dict(release_ident=args.release_id),
     )
+    if args.force_recrawl:
+        request['force_recrawl'] = True
     ingester = IngestFileWorker()
     result = ingester.process(request)
     print(json.dumps(result, sort_keys=True))
@@ -46,6 +48,9 @@ def main():
         help="(optional) existing release ident to match to")
     sub_single.add_argument('--doi',
         help="(optional) existing release DOI to match to")
+    sub_single.add_argument('--force-recrawl',
+        action='store_true',
+        help="ignore GWB history and use SPNv2 to re-crawl")
     sub_single.add_argument('--type',
         default="pdf",
         help="type of ingest (pdf, html, etc)")
