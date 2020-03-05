@@ -29,7 +29,10 @@ def run(args):
     for l in args.json_file:
         if not l.strip():
             continue
-        req = transform(json.loads(l))
+        try:
+            req = transform(json.loads(l))
+        except:
+            print(l, file=sys.stderr)
         print(json.dumps(req, sort_keys=True))
 
 def main():
