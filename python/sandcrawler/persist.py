@@ -198,6 +198,35 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         self.db.commit()
         return []
 
+class PersistIngestRequestWorker(PersistIngestFileResultWorker):
+
+    def __init__(self, db_url, **kwargs):
+        super().__init__()
+        self.db = SandcrawlerPostgresClient(db_url)
+        self.cur = self.db.conn.cursor()
+
+    def process(self, record):
+        """
+        Only do batches (as transactions)
+        """
+        raise NotImplementedError
+
+    def push_batch(self, batch):
+        self.counts['total'] += len(batch)
+
+        if not batch:
+            return []
+
+        requests = [self.request_to_row(raw) for raw in batch]
+        requests = [r for r in requests if r]
+
+        if requests:
+            resp = self.db.insert_ingest_request(self.cur, requests)
+            self.counts['insert-requests'] += resp[0]
+            self.counts['update-requests'] += resp[1]
+
+        self.db.commit()
+        return []
 
 class PersistGrobidWorker(SandcrawlerWorker):
 

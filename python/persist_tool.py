@@ -85,6 +85,17 @@ def run_ingest_file_result(args):
     )
     pusher.run()
 
+def run_ingest_request(args):
+    worker = PersistIngestRequestWorker(
+        db_url=args.db_url,
+    )
+    pusher = JsonLinePusher(
+        worker,
+        args.json_file,
+        batch_size=200,
+    )
+    pusher.run()
+
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -147,6 +158,13 @@ def main():
     sub_ingest_file_result.set_defaults(func=run_ingest_file_result)
     sub_ingest_file_result.add_argument('json_file',
         help="ingest_file_result file to import from (or '-' for stdin)",
+        type=argparse.FileType('r'))
+
+    sub_ingest_request = subparsers.add_parser('ingest-request',
+        help="backfill a ingest_request JSON dump into postgresql")
+    sub_ingest_request.set_defaults(func=run_ingest_file_result)
+    sub_ingest_request.add_argument('json_file',
+        help="ingest_request to import from (or '-' for stdin)",
         type=argparse.FileType('r'))
 
     args = parser.parse_args()
