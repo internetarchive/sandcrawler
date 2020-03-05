@@ -162,7 +162,7 @@ def main():
 
     sub_ingest_request = subparsers.add_parser('ingest-request',
         help="backfill a ingest_request JSON dump into postgresql")
-    sub_ingest_request.set_defaults(func=run_ingest_file_result)
+    sub_ingest_request.set_defaults(func=run_ingest_request)
     sub_ingest_request.add_argument('json_file',
         help="ingest_request to import from (or '-' for stdin)",
         type=argparse.FileType('r'))

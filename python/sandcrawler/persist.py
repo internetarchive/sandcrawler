@@ -201,9 +201,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
 class PersistIngestRequestWorker(PersistIngestFileResultWorker):
 
     def __init__(self, db_url, **kwargs):
-        super().__init__()
-        self.db = SandcrawlerPostgresClient(db_url)
-        self.cur = self.db.conn.cursor()
+        super().__init__(db_url=db_url)
 
     def process(self, record):
         """
