@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS file_meta (
     size_bytes          BIGINT,
     mimetype            TEXT CHECK (octet_length(mimetype) >= 1)
 );
+CREATE INDEX file_meta_md5hex_idx ON file_meta(md5hex);
 
 CREATE TABLE IF NOT EXISTS fatcat_file (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
