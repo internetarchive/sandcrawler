@@ -6,7 +6,14 @@ import datetime
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry # pylint: disable=import-error
+import urlcanon
 
+
+def clean_url(s):
+    parsed = urlcanon.parse_url(s)
+    if not parsed.port and parsed.colon_before_port:
+        parsed.colon_before_port = b''
+    return str(urlcanon.whatwg(parsed))
 
 def gen_file_metadata(blob):
     """

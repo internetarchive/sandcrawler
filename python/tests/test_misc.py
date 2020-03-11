@@ -1,7 +1,7 @@
 
 import pytest
 
-from sandcrawler import gen_file_metadata, b32_hex, parse_cdx_line
+from sandcrawler import gen_file_metadata, b32_hex, parse_cdx_line, clean_url
 
 def test_gen_file_metadata():
     
@@ -69,3 +69,9 @@ def test_invalid_cdx():
     print("bad datetime")
     raw = "edu,upenn,ldc)/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf 2070828233154 https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf application/pdf 200 WL3FEA62TEU4F52Y5DOVQ62VET4QJW7G - - 210251 931661233i SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828231135742-00000-00009-wbgrp-svc284/SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz" 
     assert parse_cdx_line(raw) == None
+
+def test_clean_url():
+    assert clean_url("http://BLAH.COM/file.pdf") == "http://blah.com/file.pdf"
+    assert clean_url("https://opensky.ucar.edu:/islandora/object/articles%3A10809/datastream/PDF/view") == \
+        "https://opensky.ucar.edu/islandora/object/articles%3A10809/datastream/PDF/view"
+

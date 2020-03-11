@@ -9,7 +9,7 @@ from collections import namedtuple
 
 from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult
 from sandcrawler.grobid import GrobidClient
-from sandcrawler.misc import gen_file_metadata
+from sandcrawler.misc import gen_file_metadata, clean_url
 from sandcrawler.html import extract_fulltext_url
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
@@ -224,7 +224,11 @@ class IngestFileWorker(SandcrawlerWorker):
             request['ingest_type'] = "pdf"
         assert request.get('ingest_type') == "pdf"
         ingest_type = request.get('ingest_type')
-        base_url = request['base_url']
+
+        # parse/clean URL
+        # note that we pass through the original/raw URL, and that is what gets
+        # persisted in database table
+        base_url = clean_url(request['base_url'])
 
         force_recrawl = bool(request.get('force_recrawl', False))
 
