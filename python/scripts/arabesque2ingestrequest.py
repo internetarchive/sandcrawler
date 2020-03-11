@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 """
 This script is intended to be used for backfill ingest of old crawls. It can

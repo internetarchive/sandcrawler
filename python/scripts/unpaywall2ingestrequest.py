@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 """
 Transform an unpaywall dump (JSON) into ingest requests.
