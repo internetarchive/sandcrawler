@@ -36,6 +36,9 @@ internetarchive = "*"
 Flask = ">=1"
 urlcanon = "*"
 
+# this is only to lock to a python3.5-compatible version
+zipp = "<2.0.0"
+
 [requires]
 python_version = "3.5"
 
