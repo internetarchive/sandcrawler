@@ -117,9 +117,23 @@ Or:
 Can also do some quick lookups for a specific domain and protocol like:
 
     SELECT *
-        FROM ingest_file_result
-        WHERE terminal_url LIKE 'https://insights.ovid.com/%'
-        LIMIT 10;
+    FROM ingest_file_result
+    WHERE terminal_url LIKE 'https://insights.ovid.com/%'
+    LIMIT 10;
+
+For a given DOI prefix:
+
+    SELECT *
+    FROM ingest_file_result
+    WHERE base_url LIKE 'https://doi.org/10.17223/a%'
+    AND status = 'no-pdf-link'
+    LIMIT 10;
+
+    SELECT status, count(*)
+    FROM ingest_file_result
+    WHERE base_url LIKE 'https://doi.org/10.17223/%'
+    GROUP BY status
+    ORDER BY count(*) DESC;
 
 ## Bulk Ingest
 
