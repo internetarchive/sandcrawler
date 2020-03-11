@@ -17,7 +17,9 @@ def run_single_ingest(args):
     )
     if args.force_recrawl:
         request['force_recrawl'] = True
-    ingester = IngestFileWorker()
+    ingester = IngestFileWorker(
+        try_spn2=not args.no_spn2,
+    )
     result = ingester.process(request)
     print(json.dumps(result, sort_keys=True))
     return result
@@ -51,6 +53,9 @@ def main():
     sub_single.add_argument('--force-recrawl',
         action='store_true',
         help="ignore GWB history and use SPNv2 to re-crawl")
+    sub_single.add_argument('--no-spn2',
+        action='store_true',
+        help="don't use live web (SPNv2)")
     sub_single.add_argument('--type',
         default="pdf",
         help="type of ingest (pdf, html, etc)")
