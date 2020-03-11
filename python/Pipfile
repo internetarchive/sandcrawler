@@ -34,6 +34,7 @@ python-magic = "*"
 ftfy = "*"
 internetarchive = "*"
 Flask = ">=1"
+urlcanon = "*"
 
 [requires]
 python_version = "3.5"
