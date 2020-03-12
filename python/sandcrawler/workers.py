@@ -52,6 +52,12 @@ class SandcrawlerWorker(object):
         print("Worker: {}".format(self.counts), file=sys.stderr)
         return self.counts
 
+    def process(self, task):
+        """
+        Derived workers need to implement business logic here.
+        """
+        raise NotImplementedError('implementation required')
+
 class MultiprocessWrapper(SandcrawlerWorker):
 
     def __init__(self, worker, sink, jobs=None):
