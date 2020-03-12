@@ -55,8 +55,15 @@ retention (on both a size and time basis).
         => ~1TB capacity; 8x crossref partitions, 4x datacite
         => key compaction possible
 
+    fatcat-ENV.ftp-pubmed
+        => new citations from FTP server, from: ftp://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+        => raw XML, one record per message (PubmedArticle, up to 25k records/day and 650MB/day)
+        => key: PMID
+        => key compaction possible
+
     fatcat-ENV.api-crossref-state
     fatcat-ENV.api-datacite-state
+    fatcat-ENV.ftp-pubmed-state
     fatcat-ENV.oaipmh-pubmed-state
     fatcat-ENV.oaipmh-arxiv-state
     fatcat-ENV.oaipmh-doaj-journals-state (DISABLED)
@@ -135,11 +142,12 @@ exists`; this seems safe, and the settings won't be over-ridden.
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.api-crossref
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.api-datacite --config cleanup.policy=compact
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.ftp-pubmed --config cleanup.policy=compact
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.api-crossref-state
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.api-datacite-state
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.ftp-pubmed-state
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 4 --topic fatcat-qa.oaipmh-pubmed
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 4 --topic fatcat-qa.oaipmh-arxiv
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.oaipmh-pubmed-state
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.oaipmh-arxiv-state
-
