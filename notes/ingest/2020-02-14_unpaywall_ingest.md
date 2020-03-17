@@ -474,3 +474,13 @@ Note: will probably end up re-running the below after crawling+ingesting the abo
     ) TO '/grande/snapshots/unpaywall_fail_cookie_other_20200304.rows.json';
     => 654,885
 
+## Batch Ingest
+
+Test small batch:
+
+    head -n200 /grande/snapshots/unpaywall_nocapture_20200304.rows.json | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
+Full batch:
+
+    cat /grande/snapshots/unpaywall_nocapture_20200304.rows.json | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
