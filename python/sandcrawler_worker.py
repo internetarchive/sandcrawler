@@ -58,6 +58,7 @@ def run_persist_grobid(args):
         s3_access_key=args.s3_access_key,
         s3_secret_key=args.s3_secret_key,
         s3_only=args.s3_only,
+        db_only=args.db_only,
     )
     pusher = KafkaJsonPusher(
         worker=worker,
@@ -173,6 +174,9 @@ def main():
     sub_persist_grobid.add_argument('--s3-only',
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
+    sub_persist_grobid.add_argument('--db-only',
+        action='store_true',
+        help="only write status to database (don't upload TEI-XML to S3)")
     sub_persist_grobid.set_defaults(func=run_persist_grobid)
 
     sub_persist_pdftrio = subparsers.add_parser('persist-pdftrio',
