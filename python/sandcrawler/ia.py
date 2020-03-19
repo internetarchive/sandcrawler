@@ -758,7 +758,7 @@ class SavePageNowClient:
         self.poll_count = 60
         self.poll_seconds = 3.0
 
-    def save_url_now_v2(self, request_url):
+    def save_url_now_v2(self, request_url, force_get=0):
         """
         Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
         at all, or raises an exception if there was an error with SPN itself.
@@ -797,6 +797,7 @@ class SavePageNowClient:
                 'capture_all': 1,
                 'capture_screenshot': 0,
                 'if_not_archived_within': '1d',
+                'force_get': force_get,
             },
         )
         if resp.status_code == 429:
@@ -866,14 +867,14 @@ class SavePageNowClient:
                 None,
             )
 
-    def crawl_resource(self, start_url, wayback_client):
+    def crawl_resource(self, start_url, wayback_client, force_get=0):
         """
         Runs a SPN2 crawl, then fetches body from wayback.
 
         TODO: possible to fetch from petabox?
         """
 
-        spn_result = self.save_url_now_v2(start_url)
+        spn_result = self.save_url_now_v2(start_url, force_get=force_get)
 
         if not spn_result.success:
             status = spn_result.status

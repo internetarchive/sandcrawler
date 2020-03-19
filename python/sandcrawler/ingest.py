@@ -93,6 +93,15 @@ class IngestFileWorker(SandcrawlerWorker):
             "digital.ucd.ie/",      # ireland national historical
         ]
 
+        # these are special-case web domains for which we want SPN2 to not run
+        # a headless browser (brozzler), but instead simply run wget.
+        # the motivation could be to work around browser issues, or in the
+        # future possibly to increase download efficiency (wget/fetch being
+        # faster than browser fetch)
+        self.spn2_simple_get_domains = [
+        ]
+
+
     def check_existing_ingest(self, base_url):
         """
         Check in sandcrawler-db (postgres) to see if we have already ingested
@@ -138,7 +147,12 @@ class IngestFileWorker(SandcrawlerWorker):
 
         if self.try_spn2 and (not resource or not resource.hit or soft404):
             via = "spn2"
-            resource = self.spn_client.crawl_resource(url, self.wayback_client)
+            force_get = 0
+            for domain in self.spn2_simple_get_domains:
+                if domain in url:
+                    force_get = 1
+                    break
+            resource = self.spn_client.crawl_resource(url, self.wayback_client, force_get=force_get)
         print("[FETCH {}\t] {}\t{}".format(
                 via,
                 resource.status,
