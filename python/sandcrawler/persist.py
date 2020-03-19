@@ -240,6 +240,8 @@ class PersistGrobidWorker(SandcrawlerWorker):
             default_bucket=kwargs['s3_bucket'],
         )
         self.s3_only = kwargs.get('s3_only', False)
+        self.db_only = kwargs.get('db_only', False)
+        assert not (self.s3_only and self.db_only), "Only one of s3_only and db_only allowed"
 
     def process(self, record):
         """
@@ -264,13 +266,14 @@ class PersistGrobidWorker(SandcrawlerWorker):
                 continue
 
             assert len(r['key']) == 40
-            resp = self.s3.put_blob(
-                folder="grobid",
-                blob=r['tei_xml'],
-                sha1hex=r['key'],
-                extension=".tei.xml",
-            )
-            self.counts['s3-put'] += 1
+            if not self.db_only:
+                resp = self.s3.put_blob(
+                    folder="grobid",
+                    blob=r['tei_xml'],
+                    sha1hex=r['key'],
+                    extension=".tei.xml",
+                )
+                self.counts['s3-put'] += 1
 
             # enhance with teixml2json metadata, if available
             try:

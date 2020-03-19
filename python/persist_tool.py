@@ -41,6 +41,7 @@ def run_grobid(args):
         s3_access_key=args.s3_access_key,
         s3_secret_key=args.s3_secret_key,
         s3_only=args.s3_only,
+        db_only=args.db_only,
     )
     pusher = JsonLinePusher(
         worker,
@@ -135,6 +136,9 @@ def main():
     sub_grobid.add_argument('--s3-only',
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
+    sub_grobid.add_argument('--db-only',
+        action='store_true',
+        help="only write status to sandcrawler-db (don't save TEI-XML to S3)")
 
     sub_grobid_disk = subparsers.add_parser('grobid-disk',
         help="dump GRBOID output to (local) files on disk")
