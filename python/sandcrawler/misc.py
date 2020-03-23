@@ -10,6 +10,7 @@ import urlcanon
 
 
 def clean_url(s):
+    s = s.strip()
     parsed = urlcanon.parse_url(s)
     if not parsed.port and parsed.colon_before_port:
         parsed.colon_before_port = b''
