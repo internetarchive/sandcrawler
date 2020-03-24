@@ -543,8 +543,8 @@ class WaybackClient:
         if redirect_url and redirect_url.startswith("https://web.archive.org/web/"):
             redirect_url = "/".join(redirect_url.split("/")[5:])
         #print(redirect_url, file=sys.stderr)
-        redirect_url = clean_url(redirect_url)
         if redirect_url and redirect_url.startswith("http"):
+            redirect_url = clean_url(redirect_url)
             return redirect_url
         else:
             return None
@@ -667,13 +667,15 @@ class WaybackClient:
                         next_url = domain_prefix + resource.location
                     else:
                         next_url = resource.location
-                    next_url = clean_url(next_url)
+                    if next_url:
+                        next_url = clean_url(next_url)
                 else:
                     next_url = self.fetch_replay_redirect(
                         url=cdx_row.url,
                         datetime=cdx_row.datetime,
                     )
-                    next_url = clean_url(next_url)
+                    if next_url:
+                        next_url = clean_url(next_url)
                     cdx_row = cdx_partial_from_row(cdx_row)
                     if not next_url:
                         print("bad redirect record: {}".format(cdx_row), file=sys.stderr)
