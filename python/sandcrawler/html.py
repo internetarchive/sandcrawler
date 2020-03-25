@@ -310,4 +310,15 @@ def extract_fulltext_url(html_url, html_body):
             if url and url.startswith('http'):
                 return dict(pdf_url=url, technique='figshare-json')
 
+    # eurosurveillance
+    # https://www.eurosurveillance.org/content/10.2807/1560-7917.ES.2020.25.11.2000230
+    if "://www.eurosurveillance.org/content/" in html_url:
+        # <a href="/deliver/fulltext/eurosurveillance/25/11/eurosurv-25-11-3.pdf?itemId=/content/10.2807/1560-7917.ES.2020.25.11.2000230&mimeType=pdf&containerItemId=content/eurosurveillance" class="pdf " title="Download" rel="http://instance.metastore.ingenta.com/content/10.2807/1560-7917.ES.2020.25.11.2000230" target="/content/10.2807/1560-7917.ES.2020.25.11.2000230-pdf" >
+        href = soup.find('a', attrs={"class":"pdf", "title": "Download"})
+        if href:
+            url = href['href'].strip()
+            if not url.startswith('http'):
+                url = host_prefix + url
+            return dict(pdf_url=url, technique='eurosurveillance-href')
+
     return dict()
