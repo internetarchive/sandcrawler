@@ -87,6 +87,8 @@ class IngestFileWorker(SandcrawlerWorker):
             "www.gbif.org/",
             "doi.pangaea.de/",
             "www.plate-archive.org/",
+            "://doi.org/10.25642/ipk/gbis/",
+            "://apex.ipk-gatersleben.de/",
 
             # Historical non-paper content:
             "dhz.uni-passau.de/",   # newspapers
