@@ -863,6 +863,8 @@ class SavePageNowClient:
                 final_json['resources'],
             )
         else:
+            if final_json['status'] == 'pending':
+                final_json['status'] = 'error:pending'
             return SavePageNowResult(
                 False,
                 final_json.get('status_ext') or final_json['status'],
