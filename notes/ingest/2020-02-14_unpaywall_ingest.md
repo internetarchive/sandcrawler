@@ -484,3 +484,141 @@ Full batch:
 
     cat /grande/snapshots/unpaywall_nocapture_20200304.rows.json | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
 
+    # there was a broken line in there, so...
+    # parse error: Expected separator between values at line 1367873, column 175
+    # tail -n+1367875 /grande/snapshots/unpaywall_nocapture_20200304.rows.json | rg -v "\\\\" | jq . -c > /dev/null
+    tail -n+1367875 /grande/snapshots/unpaywall_nocapture_20200304.rows.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
+Note that the crawl is not entirely complete and not all CDX seem to have been
+loaded, so may need to iterate. About 10% are still "no capture". May want or
+need to additionally crawl the terminal URLs, not the base URLs.
+
+## Post-ingest stats
+
+Overall status:
+
+    SELECT ingest_file_result.status, COUNT(*)
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_file_result.ingest_type = ingest_request.ingest_type
+        AND ingest_file_result.base_url = ingest_request.base_url
+    WHERE 
+        ingest_request.ingest_type = 'pdf'
+        AND ingest_request.link_source = 'unpaywall'
+    GROUP BY status
+    ORDER BY COUNT DESC
+    LIMIT 20;
+
+             status          |  count
+    -------------------------+----------
+     success                 | 17354494
+     no-pdf-link             |  1471076
+     no-capture              |  1135992
+     redirect-loop           |   837842
+     terminal-bad-status     |   803081
+     cdx-error               |   219746
+     wrong-mimetype          |   100723
+     link-loop               |    16013
+     wayback-error           |    12448
+     null-body               |     9444
+     redirects-exceeded      |      600
+     petabox-error           |      411
+     bad-redirect            |       17
+     bad-gzip-encoding       |        4
+     spn2-cdx-lookup-failure |        3
+     gateway-timeout         |        1
+     spn2-error:job-failed   |        1
+     spn2-error              |        1
+    (18 rows)
+
+Failures by domain:
+
+    SELECT domain, status, COUNT((domain, status))
+    FROM (
+        SELECT
+            ingest_file_result.ingest_type,
+            ingest_file_result.status,
+            substring(ingest_file_result.terminal_url FROM '[^/]+://([^/]*)') AS domain
+        FROM ingest_file_result
+        LEFT JOIN ingest_request
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE 
+            ingest_file_result.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+    ) t1
+    WHERE t1.domain != ''
+        AND t1.status != 'success'
+        AND t1.status != 'no-capture'
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 30;
+
+                  domain               |       status        | count
+    -----------------------------------+---------------------+--------
+     academic.oup.com                  | no-pdf-link         | 330211
+     watermark.silverchair.com         | terminal-bad-status | 324599
+     www.tandfonline.com               | no-pdf-link         | 242724
+     journals.sagepub.com              | no-pdf-link         | 202050
+     iopscience.iop.org                | terminal-bad-status | 144063
+     files-journal-api.frontiersin.org | terminal-bad-status | 121719
+     pubs.acs.org                      | no-pdf-link         | 104535
+     www.ahajournals.org               | no-pdf-link         | 102653
+     society.kisti.re.kr               | no-pdf-link         | 101787
+     www.degruyter.com                 | redirect-loop       |  95130
+     www.nature.com                    | redirect-loop       |  87534
+     onlinelibrary.wiley.com           | no-pdf-link         |  84432
+     www.cell.com                      | redirect-loop       |  61496
+     www.degruyter.com                 | terminal-bad-status |  42919
+     babel.hathitrust.org              | terminal-bad-status |  41813
+     www.ncbi.nlm.nih.gov              | redirect-loop       |  40488
+     scialert.net                      | no-pdf-link         |  38341
+     ashpublications.org               | no-pdf-link         |  34889
+     dialnet.unirioja.es               | terminal-bad-status |  32076
+     www.journal.csj.jp                | no-pdf-link         |  30881
+     pure.mpg.de                       | redirect-loop       |  26163
+     www.jci.org                       | redirect-loop       |  24701
+     espace.library.uq.edu.au          | redirect-loop       |  24591
+     www.valueinhealthjournal.com      | redirect-loop       |  23740
+     www.vr-elibrary.de                | no-pdf-link         |  23332
+     aip.scitation.org                 | wrong-mimetype      |  22144
+     osf.io                            | redirect-loop       |  18513
+     www.journals.elsevier.com         | no-pdf-link         |  16710
+     www.spandidos-publications.com    | redirect-loop       |  15711
+     www.biorxiv.org                   | wrong-mimetype      |  15513
+    (30 rows)
+
+Dump lists for another iteration of bulk ingest:
+
+    COPY (
+        SELECT row_to_json(ingest_request.*)
+        FROM ingest_request
+        LEFT JOIN ingest_file_result
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE
+            ingest_request.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+            AND ingest_file_result.status = 'no-capture'
+    ) TO '/grande/snapshots/unpaywall_nocapture_20200323.rows.json';
+    => 278,876
+
+    COPY (
+        SELECT row_to_json(ingest_request.*)
+        FROM ingest_request
+        LEFT JOIN ingest_file_result
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE
+            ingest_request.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+            AND ingest_file_result.status != 'success'
+            AND ingest_file_result.terminal_url NOT LIKE '%/cookieAbsent'
+    ) TO '/grande/snapshots/unpaywall_fail_nocookie_20200323.rows.json';
+    =>
+
+
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/unpaywall_nocapture_20200323.rows.json > unpaywall_nocapture_20200323.json
+
+    cat unpaywall_nocapture_20200323.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
