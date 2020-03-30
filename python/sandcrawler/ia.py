@@ -307,6 +307,9 @@ class WaybackClient:
         self.rstore = None
         self.max_redirects = 25
         self.wayback_endpoint = "https://web.archive.org/web/"
+        self.replay_headers = {
+            'User-Agent': 'Mozilla/5.0 sandcrawler.WaybackClient',
+        }
 
     def fetch_petabox(self, csize, offset, warc_path, resolve_revisit=True):
         """
@@ -464,6 +467,7 @@ class WaybackClient:
             resp = requests.get(
                 self.wayback_endpoint + datetime + "id_/" + url,
                 allow_redirects=False,
+                headers=self.replay_headers,
             )
         except requests.exceptions.TooManyRedirects:
             raise WaybackError("redirect loop (wayback replay fetch)")
@@ -519,6 +523,7 @@ class WaybackClient:
             resp = requests.get(
                 self.wayback_endpoint + datetime + "id_/" + url,
                 allow_redirects=False,
+                headers=self.replay_headers,
             )
         except requests.exceptions.TooManyRedirects:
             raise WaybackError("redirect loop (wayback replay fetch)")
