@@ -7,6 +7,7 @@ Transform an unpaywall dump (JSON) into ingest requests.
 import sys
 import json
 import argparse
+import urlcanon
 
 DOMAIN_BLOCKLIST = [
     # large OA publishers (we get via DOI)
@@ -31,6 +32,9 @@ RELEASE_STAGE_MAP = {
     'updatedVersion':   'updated',
 }
 
+def canon(s):
+    parsed = urlcanon.parse_url(s)
+    return str(urlcanon.whatwg(parsed))
 
 def transform(obj):
     """
@@ -53,9 +57,13 @@ def transform(obj):
                 skip = True
         if skip:
             continue
+        try:
+            base_url = canon(location['url_for_pdf'])
+        except UnicodeEncodeError:
+            continue
 
         request = {
-            'base_url': location['url_for_pdf'],
+            'base_url': base_url,
             'ingest_type': 'pdf',
             'link_source': 'unpaywall',
             'link_source_id': obj['doi'].lower(),
