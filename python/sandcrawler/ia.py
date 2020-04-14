@@ -769,7 +769,7 @@ class SavePageNowClient:
         self.poll_count = 60
         self.poll_seconds = 3.0
 
-    def save_url_now_v2(self, request_url, force_get=0):
+    def save_url_now_v2(self, request_url, force_get=0, capture_outlinks=0):
         """
         Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
         at all, or raises an exception if there was an error with SPN itself.
@@ -789,6 +789,8 @@ class SavePageNowClient:
         TODO: parse SPN error codes (status string) and handle better. Eg,
         non-200 remote statuses, invalid hosts/URLs, timeouts, backoff, etc.
         """
+        if capture_outlinks:
+            print("  capturing outlinks!", file=sys.stdout)
         if not (self.ia_access_key and self.ia_secret_key):
             raise Exception("SPN2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
         if request_url.startswith("ftp://"):
@@ -806,6 +808,7 @@ class SavePageNowClient:
             data={
                 'url': request_url,
                 'capture_all': 1,
+                'capture_outlinks': capture_outlinks,
                 'capture_screenshot': 0,
                 'if_not_archived_within': '1d',
                 'force_get': force_get,
@@ -887,7 +890,11 @@ class SavePageNowClient:
         TODO: possible to fetch from petabox?
         """
 
-        spn_result = self.save_url_now_v2(start_url, force_get=force_get)
+        # HACK: capture CNKI domains with outlinks (for COVID-19 crawling)
+        if 'gzbd.cnki.net/' in start_url:
+            spn_result = self.save_url_now_v2(start_url, force_get=force_get, capture_outlinks=1)
+        else:
+            spn_result = self.save_url_now_v2(start_url, force_get=force_get)
 
         if not spn_result.success:
             status = spn_result.status
