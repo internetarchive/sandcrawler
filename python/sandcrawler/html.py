@@ -321,4 +321,15 @@ def extract_fulltext_url(html_url, html_body):
                 url = host_prefix + url
             return dict(pdf_url=url, technique='eurosurveillance-href')
 
+    # CNKI COVID-19 landing pages
+    # http://en.gzbd.cnki.net/gzbt/detail/detail.aspx?FileName=HBGF202002003&DbName=GZBJ7920&DbCode=GZBJ
+    if '://en.gzbd.cnki.net/KCMS/detail/detail.aspx' in html_url:
+        # <a onclick="WriteKrsDownLog()" target="_blank" id="pdfDown" name="pdfDown" href="/gzbt/download.aspx?filename=4Q1ZYpFdKFUZ6FDR1QkRrolayRXV2ZzattyQ3QFa2JXTyZXUSV3QRFkbndzaGV2KyJXWZVEbFdVYnZndD9EOxg1Tj5Eeys2SMFzLZ5kcuFkM3dEbsR2ZjxEaShVdJhFdp90KhlVVzcjVVlXUVNHWBtWS5Rlb5cnc&amp;tablename=GZBJLAST2020&amp;dflag=pdfdown&#xA;                      "><i></i>PDF Download</a>
+        href = soup.find('a', attrs={"id":"pdfDown"})
+        if href:
+            url = href['href'].strip().replace('&#xA;', '')
+            if not url.startswith('http'):
+                url = host_prefix + url
+            return dict(pdf_url=url, technique='cnki-href')
+
     return dict()
