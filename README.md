@@ -40,6 +40,6 @@ tasks first; see README files in subdirectories.
 
 ## Running Python Code
 
-You need python3.5 (or python3.6+ and `pyenv`) and `pipenv` to set up the
+You need python3.7 (or python3.6+ and `pyenv`) and `pipenv` to set up the
 environment. You may also need the debian packages `libpq-dev` and `
 python-dev` to install some dependencies.
