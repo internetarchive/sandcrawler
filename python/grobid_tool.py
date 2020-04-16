@@ -55,8 +55,14 @@ def run_extract_cdx(args):
 
 def run_extract_zipfile(args):
     grobid_client = GrobidClient(host_url=args.grobid_host)
-    worker = GrobidBlobWorker(grobid_client, sink=args.sink)
-    pusher = ZipfilePusher(worker, args.zip_file)
+    if args.jobs > 1:
+        print("multi-processing: {}".format(args.jobs), file=sys.stderr)
+        worker = GrobidBlobWorker(grobid_client, sink=None)
+        multi_worker = MultiprocessWrapper(worker, args.sink, jobs=args.jobs)
+        pusher = ZipfilePusher(multi_worker, args.zip_file, batch_size=args.jobs)
+    else:
+        worker = GrobidBlobWorker(grobid_client, sink=args.sink)
+        pusher = ZipfilePusher(worker, args.zip_file)
     pusher.run()
 
 def run_transform(args):
