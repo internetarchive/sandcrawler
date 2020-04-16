@@ -40,7 +40,7 @@ urlcanon = "*"
 zipp = "<2.0.0"
 
 [requires]
-python_version = "3.5"
+python_version = "3.7"
 
 [packages.globalwayback]
 version = ">=0.3"
