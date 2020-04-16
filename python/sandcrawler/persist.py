@@ -191,7 +191,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
 
         file_meta_batch = [r['file_meta'] for r in batch if r.get('hit') and r.get('file_meta')]
         if file_meta_batch:
-            resp = self.db.insert_file_meta(self.cur, file_meta_batch, on_conflict="update")
+            resp = self.db.insert_file_meta(self.cur, file_meta_batch, on_conflict="nothing")
             self.counts['insert-file_meta'] += resp[0]
             self.counts['update-file_meta'] += resp[1]
 
