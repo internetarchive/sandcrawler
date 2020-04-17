@@ -78,7 +78,7 @@ def extract_fulltext_url(html_url, html_body):
     #   https://pubs.acs.org/doi/10.1021/acs.estlett.9b00379
     #   <a href="/doi/pdf/10.1021/acs.estlett.9b00379" title="PDF" target="_blank" class="button_primary"><i class="icon-file-pdf-o"></i><span>PDF (1 MB)</span></a>
     href = soup.find('a', attrs={"title":"PDF"})
-    if href:
+    if href and 'href' in href:
         url = href['href'].strip()
         if url.startswith('http'):
             return dict(pdf_url=url, technique='href_title')
