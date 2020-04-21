@@ -1,11 +1,12 @@
 image: ubuntu:xenial
 before_script:
   - apt update -qy
-  - apt install -y apt-transport-https
+  - apt install -y apt-transport-https software-properties-common
   - echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
   - apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
+  - add-apt-repository -y ppa:deadsnakes/ppa
   - apt update -qy
-  - apt install -y python3-dev python3-pip python3-wheel libjpeg-dev openjdk-8-jdk-headless sbt libpq-dev python-dev
+  - apt install -y python3-dev python3-pip python3-wheel libjpeg-dev openjdk-8-jdk-headless sbt libpq-dev python-dev python3.7 python3.7-dev python3.7-venv python3.7-distutils pkg-config python3-pytest git
   - pip3 install pipenv
   - pipenv --version
 
