@@ -1,5 +1,15 @@
 
-## Rebalance Storage Between Brokers
+## Rebalance Storage Between Brokers (kafka-manager web)
+
+For each topic you want to rebalance (eg, the large or high-throughput ones),
+go to the topic page and do the blue "reassign partitions" button (or
+potentially "generate" or "manual").
+
+Monitor progress with the "Reassign Partitions" link at top of the page.
+
+Finally, run a preferred replica election after partition movement is complete.
+
+## Rebalance Storage Between Brokers (CLI)
 
 For example, after adding or removing brokers from the cluster.
 
@@ -27,3 +37,6 @@ If that looks good, start the rebalance:
 Then monitor progress:
 
     ./kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file /tmp/new-plan.json --verify
+
+Finally, run a preferred replica election after partition movement is complete.
+Currently do this through the web interface (linked above).
