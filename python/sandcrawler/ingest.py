@@ -229,6 +229,15 @@ class IngestFileWorker(SandcrawlerWorker):
         result.pop('key', None)
         return result
 
+    def timeout_response(self, task):
+        print("[TIMEOUT]", file=sys.stderr)
+        return dict(
+            request=task,
+            hit=False,
+            status="timeout",
+            error_message="ingest worker internal timeout",
+        )
+
     def process(self, request):
 
         # backwards compatibility
