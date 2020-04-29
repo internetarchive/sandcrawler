@@ -87,6 +87,15 @@ class GrobidWorker(SandcrawlerWorker):
         self.sink = sink
         self.consolidate_mode = 2
 
+    def timeout_response(self, task):
+        default_key = task['sha1hex']
+        return dict(
+            status="error-timeout",
+            error_msg="internal GROBID worker timeout",
+            source=task,
+            key=default_key,
+        )
+
     def process(self, record):
         default_key = record['sha1hex']
         if record.get('warc_path') and record.get('warc_offset'):
