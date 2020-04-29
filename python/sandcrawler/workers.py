@@ -69,10 +69,10 @@ class SandcrawlerWorker(object):
             self.counts['timeout'] += 1
             resp = self.timeout_response(task) # pylint: disable=assignment-from-none
             # TODO: what if it is this push_record() itself that is timing out?
-            if self.sink:
+            if resp and self.sink:
                 self.sink.push_record(resp)
                 self.counts['pushed'] += 1
-            else:
+            elif resp:
                 print(json.dumps(resp))
         finally:
             signal.alarm(0)
