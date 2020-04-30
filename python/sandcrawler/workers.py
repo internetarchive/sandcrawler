@@ -27,6 +27,9 @@ class SandcrawlerWorker(object):
 
     def push_record(self, task):
         self.counts['total'] += 1
+        if not self.want(task):
+            self.counts['skip'] += 1
+            return
         result = self.process(task)
         if not result:
             self.counts['failed'] += 1
@@ -89,6 +92,12 @@ class SandcrawlerWorker(object):
             self.sink.finish()
         print("Worker: {}".format(self.counts), file=sys.stderr)
         return self.counts
+
+    def want(self, task):
+        """
+        Optionally override this as a filter in implementations.
+        """
+        return True
 
     def process(self, task):
         """
