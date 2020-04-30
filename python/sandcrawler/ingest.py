@@ -238,6 +238,11 @@ class IngestFileWorker(SandcrawlerWorker):
             error_message="ingest worker internal timeout",
         )
 
+    def want(self, request):
+        if not request.get('ingest_type') in ('file', 'pdf'):
+            return False
+        return True
+
     def process(self, request):
 
         # backwards compatibility
