@@ -54,6 +54,9 @@ def extract_fulltext_url(html_url, html_body):
     if not meta:
         # researchgate does this; maybe others also?
         meta = soup.find('meta', attrs={"property":"citation_pdf_url"})
+    # if tag is only partially populated
+    if not meta.get('content'):
+        meta = None
     # wiley has a weird almost-blank page we don't want to loop on
     if meta and not "://onlinelibrary.wiley.com/doi/pdf/" in html_url:
         url = meta['content'].strip()
