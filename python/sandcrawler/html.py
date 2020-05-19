@@ -42,7 +42,10 @@ def extract_fulltext_url(html_url, html_body):
     try:
         soup = BeautifulSoup(html_body, 'html.parser')
     except TypeError as te:
-        print("{} (url={})".format(te, html_url, file=sys.stderr))
+        print(f"{te} (url={html_url})", file=sys.stderr)
+        return dict()
+    except UnboundLocalError as ule:
+        print(f"{ule} (url={html_url})", file=sys.stderr)
         return dict()
 
     ### General Tricks ###
