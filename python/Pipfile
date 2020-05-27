@@ -16,14 +16,12 @@ responses = ">=0.10"
 pytest-cov = "*"
 pytest-mock = "*"
 pylint = "*"
-
-# newer ipython conflicts with python3.5
-ipython = "<7.0.0"
+ipython = "*"
+mypy = "*"
 
 [packages]
 requests = ">=2"
 raven = {extras = ['flask'],version = "*"}
-pykafka = "*"
 confluent-kafka = "*"
 python-snappy = "*"
 boto3 = "*"
@@ -35,9 +33,6 @@ ftfy = "*"
 internetarchive = "*"
 Flask = ">=1"
 urlcanon = "*"
-
-# this is only to lock to a python3.5-compatible version
-zipp = "<2.0.0"
 
 [requires]
 python_version = "3.7"
