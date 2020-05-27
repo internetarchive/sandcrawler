@@ -52,6 +52,8 @@ Second time:
     ) TO '/grande/snapshots/unpaywall_noingest_2020-04-08.rows.json';
     => 3696189
 
+    WARNING: forgot to transform from rows to ingest requests.
+
     cat /grande/snapshots/unpaywall_noingest_2020-04-08.rows.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
 
 Second time:
@@ -69,6 +71,8 @@ Second time:
             AND ingest_file_result.status IS NULL
     ) TO '/grande/snapshots/unpaywall_noingest_2020-05-03.rows.json';
     => 1799760
+
+    WARNING: forgot to transform from rows to ingest requests.
 
     cat /grande/snapshots/unpaywall_noingest_2020-05-03.rows.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
 
@@ -113,17 +117,49 @@ or may not bother trying to ingest (due to expectation of failure).
     ) TO '/grande/snapshots/unpaywall_nocapture_2020-05-04.rows.json';
     => 2602408
 
+NOTE: forgot here to transform from "rows" to ingest requests.
+
 Not actually a very significant size difference after all.
 
 See `journal-crawls` repo for details on seedlist generation and crawling.
 
 ## Re-Ingest Post-Crawl
 
-Test small batch:
+NOTE: if we *do* want to do cleanup eventually, could look for fatcat edits
+between 2020-04-01 and 2020-05-25 which have limited "extra" metadata (eg, no
+evidence or `oa_status`).
 
-    zcat /grande/snapshots/unpaywall_nocapture_all_2020-05-04.rows.json.gz | head -n200 | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+The earlier bulk ingests were done wrong (forgot to transform from rows to full
+ingest request docs), so going to re-do those, which should be a superset of
+the nocapture crawl URLs.:
 
-Run the whole batch:
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/unpaywall_noingest_2020-04-08.rows.json | pv -l > /grande/snapshots/unpaywall_noingest_2020-04-08.json
+    => 1.26M 0:00:58 [21.5k/s]
+    => previously: 3,696,189
 
-    zcat /grande/snapshots/unpaywall_nocapture_all_2020-05-04.rows.json.gz | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/unpaywall_noingest_2020-05-03.rows.json | pv -l > /grande/snapshots/unpaywall_noingest_2020-05-03.json
+    => 1.26M 0:00:56 [22.3k/s]
 
+Crap, looks like the 2020-04-08 segment got overwriten with 2020-05 data by
+accident. Hrm... need to re-ingest *all* recent unpaywall URLs:
+
+    COPY (
+        SELECT row_to_json(ingest_request.*)
+        FROM ingest_request
+        WHERE
+            ingest_request.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+            AND date(ingest_request.created) > '2020-04-01'
+    ) TO '/grande/snapshots/unpaywall_all_recent_requests_2020-05-26.rows.json';
+    => COPY 5691106
+
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/unpaywall_all_recent_requests_2020-05-26.rows.json | pv -l | shuf > /grande/snapshots/unpaywall_all_recent_requests_2020-05-26.requests.json
+    => 5.69M 0:04:26 [21.3k/s]
+   
+Start small:
+
+    cat /grande/snapshots/unpaywall_all_recent_requests_2020-05-26.requests.json | head -n200 | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
+Looks good (whew), run the full thing:
+
+    cat /grande/snapshots/unpaywall_all_recent_requests_2020-05-26.requests.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
