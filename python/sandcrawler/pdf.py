@@ -125,7 +125,7 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
             sha1hex=default_key,
         )
 
-    def process(self, record) -> dict:
+    def process(self, record, key: Optional[str] = None):
         default_key = record['sha1hex']
 
         fetch_result = self.fetch_blob(record)

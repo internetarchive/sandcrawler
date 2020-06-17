@@ -23,7 +23,7 @@ class IngestFileWorker(SandcrawlerWorker):
     but is an HTML 200, treats it as a landing page, tries to extract
     fulltext link, then fetches that resource.
 
-        process(request) -> response
+        process(request, key=None) -> response
             Does all the things!
 
     Check existing processing (short circuit):
@@ -243,7 +243,7 @@ class IngestFileWorker(SandcrawlerWorker):
             return False
         return True
 
-    def process(self, request):
+    def process(self, request, key=None):
 
         # backwards compatibility
         if request.get('ingest_type') in ('file', None):

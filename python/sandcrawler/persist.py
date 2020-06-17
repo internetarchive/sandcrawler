@@ -35,7 +35,7 @@ class PersistCdxWorker(SandcrawlerWorker):
         self.db = SandcrawlerPostgresClient(db_url)
         self.cur = self.db.conn.cursor()
 
-    def process(self, record):
+    def process(self, record, key=None):
         """
         Only do batches (as transactions)
         """
@@ -60,7 +60,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         self.db = SandcrawlerPostgresClient(db_url)
         self.cur = self.db.conn.cursor()
 
-    def process(self, record):
+    def process(self, record, key=None):
         """
         Only do batches (as transactions)
         """
@@ -203,7 +203,7 @@ class PersistIngestRequestWorker(PersistIngestFileResultWorker):
     def __init__(self, db_url, **kwargs):
         super().__init__(db_url=db_url)
 
-    def process(self, record):
+    def process(self, record, key=None):
         """
         Only do batches (as transactions)
         """
@@ -243,7 +243,7 @@ class PersistGrobidWorker(SandcrawlerWorker):
         self.db_only = kwargs.get('db_only', False)
         assert not (self.s3_only and self.db_only), "Only one of s3_only and db_only allowed"
 
-    def process(self, record):
+    def process(self, record, key=None):
         """
         Only do batches (as transactions)
         """
@@ -327,7 +327,7 @@ class PersistGrobidDiskWorker(SandcrawlerWorker):
         )
         return obj_path
 
-    def process(self, record):
+    def process(self, record, key=None):
 
         if record.get('status_code') != 200 or not record.get('tei_xml'):
             return False
@@ -347,7 +347,7 @@ class PersistPdfTrioWorker(SandcrawlerWorker):
         self.db = SandcrawlerPostgresClient(db_url)
         self.cur = self.db.conn.cursor()
 
-    def process(self, record):
+    def process(self, record, key=None):
         """
         Only do batches (as transactions)
         """

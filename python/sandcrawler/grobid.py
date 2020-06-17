@@ -95,7 +95,7 @@ class GrobidWorker(SandcrawlerFetchWorker):
             key=default_key,
         )
 
-    def process(self, record):
+    def process(self, record, key=None):
         default_key = record['sha1hex']
 
         fetch_result = self.fetch_blob(record)
@@ -121,7 +121,7 @@ class GrobidBlobWorker(SandcrawlerWorker):
         self.sink = sink
         self.consolidate_mode = 2
 
-    def process(self, blob):
+    def process(self, blob, key=None):
         if not blob:
             return None
         result = self.grobid_client.process_fulltext(blob, consolidate_mode=self.consolidate_mode)

@@ -78,7 +78,7 @@ class PdfTrioWorker(SandcrawlerFetchWorker):
         self.pdftrio_client = pdftrio_client
         self.sink = sink
 
-    def process(self, record):
+    def process(self, record, key=None):
         start_process = time.time()
         default_key = record['sha1hex']
         fetch_sec = None
@@ -115,7 +115,7 @@ class PdfTrioBlobWorker(SandcrawlerWorker):
         self.sink = sink
         self.mode = mode
 
-    def process(self, blob):
+    def process(self, blob, key=None):
         start_process = time.time()
         if not blob:
             return None
