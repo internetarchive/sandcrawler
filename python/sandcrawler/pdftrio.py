@@ -2,7 +2,7 @@
 import time
 import requests
 
-from .workers import SandcrawlerWorker
+from .workers import SandcrawlerWorker, SandcrawlerFetchWorker
 from .misc import gen_file_metadata, requests_retry_session
 from .ia import WaybackClient, WaybackError, PetaboxError
 
@@ -68,92 +68,28 @@ class PdfTrioClient(object):
         return info
 
 
-class PdfTrioWorker(SandcrawlerWorker):
+class PdfTrioWorker(SandcrawlerFetchWorker):
     """
     This class is basically copied directly from GrobidWorker
     """
 
     def __init__(self, pdftrio_client, wayback_client=None, sink=None, **kwargs):
-        super().__init__()
+        super().__init__(wayback_client=wayback_client)
         self.pdftrio_client = pdftrio_client
-        self.wayback_client = wayback_client
         self.sink = sink
 
     def process(self, record):
         start_process = time.time()
         default_key = record['sha1hex']
-        wayback_sec = None
-        petabox_sec = None
-        if record.get('warc_path') and record.get('warc_offset'):
-            # it's a full CDX dict. fetch using WaybackClient
-            if not self.wayback_client:
-                raise Exception("wayback client not configured for this PdfTrioWorker")
-            try:
-                start = time.time()
-                blob = self.wayback_client.fetch_petabox_body(
-                    csize=record['warc_csize'],
-                    offset=record['warc_offset'],
-                    warc_path=record['warc_path'],
-                )
-                wayback_sec = time.time() - start
-            except (WaybackError, PetaboxError) as we:
-                return dict(
-                    key=default_key,
-                    source=record,
-                    pdf_trio=dict(
-                        status="error-wayback",
-                        error_msg=str(we),
-                    ),
-                )
-        elif record.get('url') and record.get('datetime'):
-            # it's a partial CDX dict or something? fetch using WaybackClient
-            if not self.wayback_client:
-                raise Exception("wayback client not configured for this PdfTrioWorker")
-            try:
-                start = time.time()
-                blob = self.wayback_client.fetch_replay_body(
-                    url=record['url'],
-                    datetime=record['datetime'],
-                )
-                wayback_sec = time.time() - start
-            except WaybackError as we:
-                return dict(
-                    key=default_key,
-                    source=record,
-                    pdf_trio=dict(
-                        status="error-wayback",
-                        error_msg=str(we),
-                    ),
-                )
-        elif record.get('item') and record.get('path'):
-            # it's petabox link; fetch via HTTP
-            start = time.time()
-            resp = requests.get("https://archive.org/serve/{}/{}".format(
-                record['item'], record['path']))
-            petabox_sec = time.time() - start
-            try:
-                resp.raise_for_status()
-            except Exception as e:
-                return dict(
-                    key=default_key,
-                    source=record,
-                    pdf_trio=dict(
-                        status="error-petabox",
-                        error_msg=str(e),
-                    ),
-                )
-            blob = resp.content
-        else:
-            raise ValueError("not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")
-        if not blob:
-            return dict(
-                key=default_key,
-                source=record,
-                pdf_trio=dict(
-                    status="error",
-                    error_msg="empty blob",
-                ),
-            )
+        fetch_sec = None
+
+        start = time.time()
+        fetch_result = self.fetch_blob(record)
+        fetch_sec = time.time() - start
+        if fetch_result['status'] != 'success':
+            return fetch_result
+        blob = fetch_result['blob']
+
         result = dict()
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']
@@ -163,10 +99,8 @@ class PdfTrioWorker(SandcrawlerWorker):
             pdftrio_sec=result['pdf_trio'].pop('_total_sec', None),
             total_sec=time.time() - start_process,
         )
-        if wayback_sec:
-            result['timing']['wayback_sec'] = wayback_sec
-        if petabox_sec:
-            result['timing']['petabox_sec'] = wayback_sec
+        if fetch_sec:
+            result['timing']['fetch_sec'] = fetch_sec
         return result
 
 class PdfTrioBlobWorker(SandcrawlerWorker):
