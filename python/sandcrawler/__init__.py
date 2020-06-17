@@ -7,4 +7,4 @@ from .ia import WaybackClient, WaybackError, CdxApiClient, CdxApiError, SavePage
 from .ingest import IngestFileWorker
 from .persist import PersistCdxWorker, PersistIngestFileResultWorker, PersistGrobidWorker, PersistGrobidDiskWorker, PersistPdfTrioWorker, PersistIngestRequestWorker
 from .db import SandcrawlerPostgrestClient, SandcrawlerPostgresClient
-
+from .pdf import PdfExtractWorker
