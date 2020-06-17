@@ -29,5 +29,5 @@ test: lint ## Run all tests and lints
 
 .PHONY: coverage
 coverage: ## Run all tests with coverage
-	pipenv run pytest
+	pipenv run pytest --cov
 
