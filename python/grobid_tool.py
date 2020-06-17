@@ -140,7 +140,7 @@ def main():
     if args.kafka_mode:
         produce_topic = "sandcrawler-{}.grobid-output-pg".format(args.kafka_env)
         print("Running in kafka output mode, publishing to {}\n".format(produce_topic))
-        args.sink = KafkaGrobidSink(kafka_hosts=args.kafka_hosts,
+        args.sink = KafkaCompressSink(kafka_hosts=args.kafka_hosts,
             produce_topic=produce_topic)
 
     args.func(args)

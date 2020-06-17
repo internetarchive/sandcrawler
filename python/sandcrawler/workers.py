@@ -217,7 +217,7 @@ class KafkaSink(SandcrawlerWorker):
         return self.counts
 
 
-class KafkaGrobidSink(KafkaSink):
+class KafkaCompressSink(KafkaSink):
     """
     Variant of KafkaSink for large documents. Used for, eg, GROBID output.
     """
