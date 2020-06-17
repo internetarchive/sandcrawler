@@ -18,6 +18,9 @@ pytest-mock = "*"
 pylint = "*"
 ipython = "*"
 mypy = "*"
+pytype = "*"
+flake8 = "*"
+flake8-annotations = "*"
 
 [packages]
 requests = ">=2"
@@ -35,6 +38,10 @@ Flask = ">=1"
 urlcanon = "*"
 pillow = ">=3"
 poppler = ">=0.2"
+
+# must lock black to an exact version because it is still "beta"
+# see: https://github.com/psf/black/issues/517
+black = "==19.10b0"
 
 [requires]
 python_version = "3.7"
