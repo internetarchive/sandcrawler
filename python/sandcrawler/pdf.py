@@ -16,15 +16,16 @@ from .ia import WaybackClient, WaybackError, PetaboxError
 class PdfExtractResult:
     sha1hex: str
     status: str
-    error_msg: Optional[str]
-    file_meta: Optional[Dict[str,Any]]
-    text: Optional[str]
-    page0_thumbnail: Optional[bytes]
-    meta_xml: Optional[str]
-    pdf_info: Optional[Dict[str,Any]]
-    pdf_extra: Optional[Dict[str,Any]]
+    error_msg: Optional[str] = None
+    file_meta: Optional[Dict[str,Any]] = None
+    text: Optional[str] = None
+    page0_thumbnail: Optional[bytes] = None
+    meta_xml: Optional[str] = None
+    pdf_info: Optional[Dict[str,Any]] = None
+    pdf_extra: Optional[Dict[str,Any]] = None
+    source: Optional[Dict[str,Any]] = None
 
-    def to_text_dict(self) -> dict:
+    def to_pdftext_dict(self) -> dict:
         """
         Outputs a JSON string as would be published to Kafka text/info topic.
         """
@@ -38,6 +39,7 @@ class PdfExtractResult:
             'meta_xml': self.meta_xml,
             'pdf_info': self.pdf_info,
             'pdf_extra': self.pdf_extra,
+            'source': self.source,
         }
 
 
@@ -71,9 +73,9 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         img.thumbnail(thumb_size, Image.BICUBIC)
         buf = BytesIO()
         img.save(buf, thumb_type)
-        page0_thumbnail = buf.bytes.getvalue()
+        page0_thumbnail = buf.getvalue()
         # assuming that very small images mean something went wrong
-        if len(page0_thumbnail) < 50:
+        if page0_thumbnail is None or len(page0_thumbnail) < 50:
             page0_thumbnail = None
     except Exception as e:
         print(str(e), file=sys.stderr)
@@ -116,7 +118,7 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
         self.sink = sink
         self.thumbnail_sink = kwargs.get('thumbnail_sink')
 
-    def timeout_response(self, task):
+    def timeout_response(self, task) -> Dict:
         default_key = task['sha1hex']
         return dict(
             status="error-timeout",
@@ -137,7 +139,7 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
         result.source = record
         if self.thumbnail_sink and result.page0_thumbnail is not None:
             self.thumbnail_sink.push_record(result.page0_thumbnail)
-        return result.to_thing()
+        return result.to_pdftext_dict()
 
 class PdfExtractBlobWorker(SandcrawlerWorker):
     """
@@ -148,10 +150,15 @@ class PdfExtractBlobWorker(SandcrawlerWorker):
     def __init__(self, sink=None, **kwargs):
         super().__init__()
         self.sink = sink
+        self.thumbnail_sink = kwargs.get('thumbnail_sink')
 
-    def process(self, blob):
+    def process(self, blob, key: Optional[str] = None):
         if not blob:
             return None
+
         result = process_pdf(blob)
+        if self.thumbnail_sink and result.page0_thumbnail is not None:
+            self.thumbnail_sink.push_record(result.page0_thumbnail)
+
         return result
 

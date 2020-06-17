@@ -11,7 +11,7 @@ from collections import namedtuple
 import http.client
 
 # not sure this will really work. Should go before wayback imports.
-http.client._MAXHEADERS = 1000
+http.client._MAXHEADERS = 1000  # type: ignore
 
 import wayback.exception
 from http.client import IncompleteRead
