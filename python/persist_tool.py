@@ -75,6 +75,23 @@ def run_pdftrio(args):
     )
     pusher.run()
 
+def run_pdftext(args):
+    worker = PersistPdfTextWorker(
+        db_url=args.db_url,
+        s3_url=args.s3_url,
+        s3_bucket=args.s3_bucket,
+        s3_access_key=args.s3_access_key,
+        s3_secret_key=args.s3_secret_key,
+        s3_only=args.s3_only,
+        db_only=args.db_only,
+    )
+    pusher = JsonLinePusher(
+        worker,
+        args.json_file,
+        batch_size=50,
+    )
+    pusher.run()
+
 def run_ingest_file_result(args):
     worker = PersistIngestFileResultWorker(
         db_url=args.db_url,
@@ -137,6 +154,19 @@ def main():
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
     sub_grobid.add_argument('--db-only',
+        action='store_true',
+        help="only write status to sandcrawler-db (don't save TEI-XML to S3)")
+
+    sub_pdftext = subparsers.add_parser('pdftext',
+        help="backfill a pdftext JSON ('pg') dump into postgresql and s3 (minio)")
+    sub_pdftext.set_defaults(func=run_pdftext)
+    sub_pdftext.add_argument('json_file',
+        help="pdftext file to import from (or '-' for stdin)",
+        type=argparse.FileType('r'))
+    sub_pdftext.add_argument('--s3-only',
+        action='store_true',
+        help="only upload TEI-XML to S3 (don't write to database)")
+    sub_pdftext.add_argument('--db-only',
         action='store_true',
         help="only write status to sandcrawler-db (don't save TEI-XML to S3)")
 
