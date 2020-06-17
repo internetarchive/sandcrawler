@@ -31,3 +31,6 @@ test: lint ## Run all tests and lints
 coverage: ## Run all tests with coverage
 	pipenv run pytest --cov
 
+.PHONY: coverage-html
+coverage-html: ## Run all tests with coverage, HTML report output
+	pipenv run pytest --cov --cov-report html
