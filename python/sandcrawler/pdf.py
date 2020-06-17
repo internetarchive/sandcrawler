@@ -1,5 +1,6 @@
 
 import sys
+import datetime
 from io import BytesIO
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
@@ -87,23 +88,24 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         pageN = pdf.create_page(n)
         full_text += pageN.text()
     pdf_info = pdf.infos()
-    # Is this actually needed? or does json marshalling work automatically?
-    #for k in pdf_info.keys():
-    #    if isinstance(pdf_info[k], datetime.datetime):
-    #        pdf_info[k] = datetime.datetime.isoformat(pdf_info[k])
+    # TODO: is this actually needed? or does json marshalling work automatically?
+    for k in pdf_info.keys():
+        if isinstance(pdf_info[k], datetime.datetime):
+            pdf_info[k] = datetime.datetime.isoformat(pdf_info[k])
 
     return PdfExtractResult(
         sha1hex=sha1hex,
         file_meta=file_meta,
         status='success',
         error_msg=None,
-        text=full_text,
+        text=full_text or None,
         page0_thumbnail=page0_thumbnail,
-        meta_xml=pdf.metadata,
+        meta_xml=pdf.metadata or None,
         pdf_info=pdf.infos(),
         pdf_extra=dict(
             height=page0rect.height,
             width=page0rect.width,
+            page_count=pdf.pages,
             permanent_id=pdf.pdf_id.permanent_id,
             update_id=pdf.pdf_id.update_id,
             pdf_version=f"{pdf.pdf_version[0]}.{pdf.pdf_version[1]}",
@@ -155,6 +157,7 @@ class PdfExtractBlobWorker(SandcrawlerWorker):
     def process(self, blob, key: Optional[str] = None):
         if not blob:
             return None
+        assert isinstance(blob, bytes)
 
         result = process_pdf(blob)
         if self.thumbnail_sink and result.page0_thumbnail is not None:
