@@ -33,6 +33,8 @@ ftfy = "*"
 internetarchive = "*"
 Flask = ">=1"
 urlcanon = "*"
+pillow = ">=3"
+poppler = ">=0.2"
 
 [requires]
 python_version = "3.7"
