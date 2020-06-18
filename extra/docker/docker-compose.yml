@@ -1,0 +1,39 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka:2.11-2.0.0
+    ports:
+      - "9092:9092"
+    environment:
+      #HOSTNAME_COMMAND: "docker info | grep ^Name: | cut -d' ' -f 2"
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "fatcat-dev.changelog:1:1,fatcat-dev.release-updates:3:1:compact"
+      KAFKA_MESSAGE_MAX_BYTES: 50000000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
+  postgrest:
+    image: postgrest/postgrest
+    network_mode: "host"
+    ports:
+      - "3000:3000"
+    environment:
+      PGRST_DB_URI: "postgres://fatcat:tactaf@localhost/sandcrawler"
+      PGRST_DB_ANON_ROLE: "fatcat"
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    entrypoint: sh
+    command: -c "mkdir -p /tmp/minio/sandcrawler && mkdir -p /tmp/minio/thumbnail && mkdir -p /tmp/minio/sandcrawler-dev && /usr/bin/minio server /tmp/minio"
+
