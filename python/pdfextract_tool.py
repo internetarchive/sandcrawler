@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 
 """
-These are generally for running one-off tasks from the command line. Output
-might go to stdout, or might go to Kafka topic.
-
-Example of large parallel run, locally:
-
-    cat /srv/sandcrawler/tasks/ungrobided.2019-09-23.json         | pv -l | parallel -j30 --pipe         ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
+KNOWN ISSUE: thumbnails are not published to kafka in multi-processing mode
 """
 
 import sys
@@ -21,7 +16,7 @@ from sandcrawler import *
 def run_extract_json(args):
     wayback_client = WaybackClient()
     if args.jobs > 1:
-        worker = PdfExtractWorker(wayback_client, sink=None, thumbnail_sink=args.thumbnail_sink)
+        worker = PdfExtractWorker(wayback_client, sink=None, thumbnail_sink=None)
         multi_worker = MultiprocessWrapper(worker, args.sink)
         pusher = JsonLinePusher(multi_worker, args.json_file, batch_size=args.jobs)
     else:
@@ -32,7 +27,7 @@ def run_extract_json(args):
 def run_extract_cdx(args):
     wayback_client = WaybackClient()
     if args.jobs > 1:
-        worker = PdfExtractWorker(wayback_client, sink=None)
+        worker = PdfExtractWorker(wayback_client, sink=None, thumbnail_sink=None)
         multi_worker = MultiprocessWrapper(worker, args.sink)
         pusher = CdxLinePusher(
             multi_worker,
@@ -58,12 +53,12 @@ def run_extract_zipfile(args):
         multi_worker = MultiprocessWrapper(worker, args.sink, jobs=args.jobs)
         pusher = ZipfilePusher(multi_worker, args.zip_file, batch_size=args.jobs)
     else:
-        worker = PdfExtractBlobWorker(sink=args.sink, thumbnail_sink=None)
+        worker = PdfExtractBlobWorker(sink=args.sink, thumbnail_sink=args.thumbnail_sink)
         pusher = ZipfilePusher(worker, args.zip_file)
     pusher.run()
 
 def run_single(args):
-    worker = PdfExtractBlobWorker(sink=None, thumbnail_sink=None)
+    worker = PdfExtractBlobWorker(sink=args.sink, thumbnail_sink=args.thumbnail_sink)
     with open(args.pdf_file, 'rb') as pdf_file:
         pdf_bytes = pdf_file.read()
     result = worker.process(pdf_bytes)
@@ -123,8 +118,8 @@ def main():
     args.text_sink = None
     args.thumbnail_sink = None
     if args.kafka_mode:
-        text_topic = "sandcrawler-{}.pdftext".format(args.kafka_env)
-        thumbnail_topic = "sandcrawler-{}.thumbnail-180px-jpeg".format(args.kafka_env)
+        text_topic = "sandcrawler-{}.pdf-text".format(args.kafka_env)
+        thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.kafka_env)
         args.sink = KafkaCompressSink(kafka_hosts=args.kafka_hosts,
             produce_topic=text_topic)
         args.thumbnail_sink = KafkaCompressSink(kafka_hosts=args.kafka_hosts,
@@ -133,6 +128,7 @@ def main():
             text_topic, thumbnail_topic), file=sys.stderr)
     else:
         args.sink = None
+        args.thumbnail_sink = None
 
     args.func(args)
 
