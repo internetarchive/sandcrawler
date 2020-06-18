@@ -233,7 +233,7 @@ class BlackholeSink(SandcrawlerWorker):
     Useful for tests.
     """
 
-    def push_record(self, task):
+    def push_record(self, task, key=None):
         return
 
     def push_batch(self, tasks):
@@ -528,7 +528,7 @@ class KafkaJsonPusher(RecordPusher):
                         # without decoding as JSON. Eg, for thumbnails (where
                         # message bytes are JPEG, and we need # the sha1hex key
                         # from the message)
-                        record = msg
+                        record = msg.value()
                     else:
                         record = json.loads(msg.value().decode('utf-8'))
                     # This complex bit of code implements backoff/backpressure

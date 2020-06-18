@@ -135,7 +135,8 @@ def run_persist_thumbnail(args):
         kafka_hosts=args.kafka_hosts,
         consume_topic=consume_topic,
         group="persist-pdf-thumbnail",
-        raw_record=True,
+        push_batches=False,
+        raw_records=True,
         batch_size=25,
     )
     pusher.run()

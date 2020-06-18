@@ -1,5 +1,6 @@
 
 import sys
+import json
 import datetime
 from io import BytesIO
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ class PdfExtractResult:
     file_meta: Optional[Dict[str,Any]] = None
     text: Optional[str] = None
     page0_thumbnail: Optional[bytes] = None
+    has_page0_thumbnail: bool = False
     meta_xml: Optional[str] = None
     pdf_info: Optional[Dict[str,Any]] = None
     pdf_extra: Optional[Dict[str,Any]] = None
@@ -31,17 +33,74 @@ class PdfExtractResult:
         Outputs a JSON string as would be published to Kafka text/info topic.
         """
         return {
+            'key': self.sha1hex,
             'sha1hex': self.sha1hex,
             'status': self.status,
             'file_meta': self.file_meta,
             'error_msg': self.error_msg,
             'text': self.text,
-            'page0_thumbnail': self.page0_thumbnail is not None,
+            'has_page0_thumbnail': self.has_page0_thumbnail,
             'meta_xml': self.meta_xml,
             'pdf_info': self.pdf_info,
             'pdf_extra': self.pdf_extra,
             'source': self.source,
         }
+
+    @classmethod
+    def from_pdftext_dict(cls, record):
+        """
+        Outputs a JSON string as would be published to Kafka text/info topic.
+        """
+        if record['status'] != 'success':
+            return PdfExtractResult(
+                sha1hex=record['sha1hex'],
+                status=record['status'],
+                error_msg=record.get('error_msg'),
+            )
+        else:
+            return PdfExtractResult(
+                sha1hex=record['sha1hex'],
+                status=record['status'],
+                file_meta=record.get('file_meta'),
+                text=record.get('text'),
+                has_page0_thumbnail=bool(record.get('has_page0_thumbnail', False)),
+                meta_xml=record.get('meta_xml'),
+                pdf_info=record.get('pdf_info'),
+                pdf_extra=record.get('pdf_extra'),
+            )
+
+    def to_sql_tuple(self) -> tuple:
+        # pdf_meta (sha1hex, updated, status, page0_thumbnail, page_count,
+        # word_count, page0_height, page0_width, permanent_id, pdf_created,
+        # pdf_version, metadata)
+        word_count: Optional[int] = None
+        if self.text:
+            word_count = len(self.text.split())
+        metadata: Optional[Dict] = None
+        pdf_extra = self.pdf_extra or dict()
+        pdf_created = None
+        # TODO: form, encrypted
+        if self.pdf_info:
+            metadata = dict()
+            for k in ('Title', 'Subject', 'Author', 'Creator', 'Producer', 'doi'):
+                if k in self.pdf_info:
+                    metadata[k.lower()] = self.pdf_info[k]
+            if 'CreationDate' in self.pdf_info:
+                pdf_created = self.pdf_info['CreationDate']
+        return (
+            self.sha1hex,
+            datetime.datetime.now(), # updated
+            self.status,
+            self.has_page0_thumbnail,
+            pdf_extra.get('page_count'),
+            word_count,
+            pdf_extra.get('page0_height'),
+            pdf_extra.get('page0_width'),
+            pdf_extra.get('permanent_id'),
+            pdf_created,
+            pdf_extra.get('pdf_version'),
+            metadata and json.dumps(metadata, sort_keys=True),
+        )
 
 
 def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtractResult:
@@ -70,6 +129,7 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
                 sha1hex=sha1hex,
                 status='empty-pdf',
                 file_meta=file_meta,
+                has_page0_thumbnail=False,
             )
         page0 = pdf.create_page(0)
         if page0 is None:
@@ -131,6 +191,7 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         status='success',
         error_msg=None,
         text=full_text or None,
+        has_page0_thumbnail=page0_thumbnail is not None,
         page0_thumbnail=page0_thumbnail,
         meta_xml=pdf.metadata or None,
         pdf_info=pdf_info,
@@ -172,7 +233,7 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
         result = process_pdf(blob)
         result.source = record
         if self.thumbnail_sink and result.page0_thumbnail is not None:
-            self.thumbnail_sink.push_record(result.page0_thumbnail)
+            self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)
         return result.to_pdftext_dict()
 
 class PdfExtractBlobWorker(SandcrawlerWorker):
@@ -193,7 +254,7 @@ class PdfExtractBlobWorker(SandcrawlerWorker):
 
         result = process_pdf(blob)
         if self.thumbnail_sink and result.page0_thumbnail is not None:
-            self.thumbnail_sink.push_record(result.page0_thumbnail)
+            self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)
 
         return result
 
