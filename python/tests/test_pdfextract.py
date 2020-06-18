@@ -4,7 +4,7 @@ import struct
 import responses
 
 from sandcrawler import PdfExtractWorker, PdfExtractBlobWorker, CdxLinePusher, BlackholeSink, WaybackClient
-from sandcrawler.pdf import process_pdf
+from sandcrawler.pdfextract import process_pdf
 from test_wayback import wayback_client, cdx_client
 
 

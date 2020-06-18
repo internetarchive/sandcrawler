@@ -10,7 +10,6 @@ Kafka feeds, but sometimes we have bulk processing output we want to backfill.
 import os
 import sys
 import argparse
-import datetime
 
 from sandcrawler import *
 from sandcrawler.persist import *
@@ -158,7 +157,7 @@ def main():
         help="only write status to sandcrawler-db (don't save TEI-XML to S3)")
 
     sub_pdftext = subparsers.add_parser('pdftext',
-        help="backfill a pdftext JSON ('pg') dump into postgresql and s3 (minio)")
+        help="backfill a pdftext JSON ('pg') dump into postgresql and s3 (seaweedfs)")
     sub_pdftext.set_defaults(func=run_pdftext)
     sub_pdftext.add_argument('json_file',
         help="pdftext file to import from (or '-' for stdin)",

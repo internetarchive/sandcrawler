@@ -63,10 +63,11 @@ def run_extract_zipfile(args):
     pusher.run()
 
 def run_single(args):
-    worker = PdfExtractBlobWorker(sink=args.sink, thumbnail_sink=None)
+    worker = PdfExtractBlobWorker(sink=None, thumbnail_sink=None)
     with open(args.pdf_file, 'rb') as pdf_file:
-        result = worker.process(pdf_file.open())
-    print(json.dumps(result, sort_keys=True))
+        pdf_bytes = pdf_file.read()
+    result = worker.process(pdf_bytes)
+    print(json.dumps(result.to_pdftext_dict(), sort_keys=True))
 
 
 def main():
@@ -130,6 +131,8 @@ def main():
             produce_topic=thumbnail_topic)
         print("Running in kafka output mode, publishing to {} and {}\n".format(
             text_topic, thumbnail_topic), file=sys.stderr)
+    else:
+        args.sink = None
 
     args.func(args)
 
