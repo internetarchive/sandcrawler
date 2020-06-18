@@ -65,8 +65,24 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
 
     try:
         pdf = poppler.load_from_data(blob)
+        if pdf is None:
+            return PdfExtractResult(
+                sha1hex=sha1hex,
+                status='empty-pdf',
+                file_meta=file_meta,
+            )
         page0 = pdf.create_page(0)
-    except NotImplementedError as e:
+        if page0 is None:
+            return PdfExtractResult(
+                sha1hex=sha1hex,
+                status='empty-page0',
+                file_meta=file_meta,
+            )
+        # this call sometimes fails an returns an AttributeError
+        page0rect = page0.page_rect()
+    except AttributeError as e:
+        # may need to expand the set of exceptions caught here over time, but
+        # starting with a narrow set
         return PdfExtractResult(
             sha1hex=sha1hex,
             status='parse-error',
@@ -74,6 +90,7 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
             file_meta=file_meta,
         )
 
+    assert page0 is not None
     page0_thumbnail: Optional[bytes] = None
     renderer = poppler.PageRenderer()
     try:
@@ -90,7 +107,6 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         print(str(e), file=sys.stderr)
         page0_thumbnail = None
 
-    page0rect = page0.page_rect()
     full_text = page0.text()
     for n in range(1, pdf.pages):
         pageN = pdf.create_page(n)
@@ -101,6 +117,14 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         if isinstance(pdf_info[k], datetime.datetime):
             pdf_info[k] = datetime.datetime.isoformat(pdf_info[k])
 
+    permanent_id: Optional[str] = None
+    update_id: Optional[str] = None
+    try:
+        permanent_id = pdf.pdf_id.permanent_id
+        update_id = pdf.pdf_id.update_id
+    except TypeError:
+        pass
+
     return PdfExtractResult(
         sha1hex=sha1hex,
         file_meta=file_meta,
@@ -109,13 +133,13 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         text=full_text or None,
         page0_thumbnail=page0_thumbnail,
         meta_xml=pdf.metadata or None,
-        pdf_info=pdf.infos(),
+        pdf_info=pdf_info,
         pdf_extra=dict(
             height=page0rect.height,
             width=page0rect.width,
             page_count=pdf.pages,
-            permanent_id=pdf.pdf_id.permanent_id,
-            update_id=pdf.pdf_id.update_id,
+            permanent_id=permanent_id,
+            update_id=update_id,
             pdf_version=f"{pdf.pdf_version[0]}.{pdf.pdf_version[1]}",
         ),
     )
