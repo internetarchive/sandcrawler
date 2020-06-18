@@ -45,6 +45,14 @@ class PdfExtractResult:
 
 
 def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtractResult:
+    """
+    A known issue is that output text is in "physical layout" mode, which means
+    columns will be side-by-side. We would prefer a single stream of tokens!
+
+    Tried using page.text(layout_mode=poppler.TextLayout.raw_order_layout)
+    instead of the default mode (poppler.TextLayout.physical_layout), but that
+    didn't seem to work at all (returned empty strings).
+    """
     file_meta = gen_file_metadata(blob)
     sha1hex = file_meta['sha1hex']
     if file_meta['mimetype'] != 'application/pdf':
