@@ -452,6 +452,7 @@ class PersistThumbnailWorker(SandcrawlerWorker):
             default_bucket=kwargs['s3_bucket'],
         )
         self.s3_extension = kwargs.get('s3_extension', ".jpg")
+        self.s3_folder = kwargs.get('s3_folder', "pdf")
 
     def process(self, blob, key=None):
         """
@@ -463,7 +464,7 @@ class PersistThumbnailWorker(SandcrawlerWorker):
         assert len(blob) >= 50
 
         resp = self.s3.put_blob(
-            folder="thumbnail",
+            folder=self.s3_folder,
             blob=blob,
             sha1hex=key,
             extension=self.s3_extension,

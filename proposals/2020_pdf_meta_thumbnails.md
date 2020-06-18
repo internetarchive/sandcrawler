@@ -22,7 +22,7 @@ against the existing SQL table to avoid duplication of processing.
 
 ## PDF Metadata and Text
 
-Kafka topic (name: `sandcrawler-ENV.pdftext`; 12x partitions; gzip
+Kafka topic (name: `sandcrawler-ENV.pdf-text`; 12x partitions; gzip
 compression) JSON schema:
 
     sha1hex (string; used as key)
@@ -73,8 +73,9 @@ Kafka, and we don't want SQL table size to explode. Schema:
 Kafka Schema is raw image bytes as message body; sha1sum of PDF as the key. No
 compression, 12x partitions.
 
-Topic name is `sandcrawler-ENV.thumbnail-SIZE-png`. Thus, topic name contains
-the "metadata" of thumbail size/shape.
+Kafka topic name is `sandcrawler-ENV.pdf-thumbnail-SIZE-TYPE` (eg,
+`sandcrawler-qa.pdf-thumbnail-180px-jpg`). Thus, topic name contains the
+"metadata" of thumbail size/shape.
 
 Have decided to use JPEG thumbnails, 180px wide (and max 300px high, though
 width restriction is almost always the limiting factor). This size matches that
