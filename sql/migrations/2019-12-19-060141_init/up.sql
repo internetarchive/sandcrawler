@@ -88,6 +88,32 @@ CREATE TABLE IF NOT EXISTS pdftrio (
     image_score         REAL
 );
 
+CREATE TABLE IF NOT EXISTS pdf_meta (
+    sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
+    updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    status              TEXT CHECK (octet_length(status) >= 1) NOT NULL,
+    has_page0_thumbnail BOOLEAN NOT NULL,
+    page_count          INT CHECK (page_count >= 0),
+    word_count          INT CHECK (word_count >= 0),
+    page0_height        REAL CHECK (page0_height >= 0),
+    page0_width         REAL CHECK (page0_width >= 0),
+    permanent_id        TEXT CHECK (octet_length(permanent_id) >= 1),
+    pdf_created         TIMESTAMP WITH TIME ZONE,
+    pdf_version         TEXT CHECK (octet_length(pdf_version) >= 1),
+    metadata            JSONB
+    -- maybe some analysis of available fields?
+    -- metadata JSON fields:
+    --    title
+    --    subject
+    --    author
+    --    creator
+    --    producer
+    --    CrossMarkDomains
+    --    doi
+    --    form
+    --    encrypted
+);
+
 CREATE TABLE IF NOT EXISTS ingest_request (
     link_source             TEXT NOT NULL CHECK (octet_length(link_source) >= 1),
     link_source_id          TEXT NOT NULL CHECK (octet_length(link_source_id) >= 1),

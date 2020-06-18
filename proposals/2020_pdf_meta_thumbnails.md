@@ -45,15 +45,15 @@ Kafka, and we don't want SQL table size to explode. Schema:
         sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
         updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
         status              TEXT CHECK (octet_length(status) >= 1) NOT NULL,
-        page0_thumbnail     BOOLEAN NOT NULL,
+        has_page0_thumbnail BOOLEAN NOT NULL,
         page_count          INT CHECK (page_count >= 0),
         word_count          INT CHECK (word_count >= 0),
-        page0_height        FLOAT CHECK (page0_height >= 0),
-        page0_width         FLOAT CHECK (page0_width >= 0),
+        page0_height        REAL CHECK (page0_height >= 0),
+        page0_width         REAL CHECK (page0_width >= 0),
         permanent_id        TEXT CHECK (octet_length(permanent_id) >= 1),
-        creation date       TIMESTAMP WITH TIME ZONE,
+        pdf_created         TIMESTAMP WITH TIME ZONE,
         pdf_version         TEXT CHECK (octet_length(pdf_version) >= 1),
-        metadata            JSONB;
+        metadata            JSONB
         -- maybe some analysis of available fields?
         -- metadata JSON fields:
         --    title
