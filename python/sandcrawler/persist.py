@@ -232,8 +232,6 @@ class PersistGrobidWorker(SandcrawlerWorker):
 
     def __init__(self, db_url, **kwargs):
         super().__init__()
-        self.db = SandcrawlerPostgresClient(db_url)
-        self.cur = self.db.conn.cursor()
         self.grobid = GrobidClient()
         self.s3 = SandcrawlerMinioClient(
             host_url=kwargs.get('s3_url', 'localhost:9000'),
@@ -244,6 +242,12 @@ class PersistGrobidWorker(SandcrawlerWorker):
         self.s3_only = kwargs.get('s3_only', False)
         self.db_only = kwargs.get('db_only', False)
         assert not (self.s3_only and self.db_only), "Only one of s3_only and db_only allowed"
+        if not self.s3_only:
+            self.db = SandcrawlerPostgresClient(db_url)
+            self.cur = self.db.conn.cursor()
+        else:
+            self.db = None
+            self.cur = None
 
     def process(self, record, key=None):
         """
@@ -385,8 +389,6 @@ class PersistPdfTextWorker(SandcrawlerWorker):
 
     def __init__(self, db_url, **kwargs):
         super().__init__()
-        self.db = SandcrawlerPostgresClient(db_url)
-        self.cur = self.db.conn.cursor()
         self.s3 = SandcrawlerMinioClient(
             host_url=kwargs.get('s3_url', 'localhost:9000'),
             access_key=kwargs['s3_access_key'],
@@ -396,6 +398,12 @@ class PersistPdfTextWorker(SandcrawlerWorker):
         self.s3_only = kwargs.get('s3_only', False)
         self.db_only = kwargs.get('db_only', False)
         assert not (self.s3_only and self.db_only), "Only one of s3_only and db_only allowed"
+        if not self.s3_only:
+            self.db = SandcrawlerPostgresClient(db_url)
+            self.cur = self.db.conn.cursor()
+        else:
+            self.db = None
+            self.cur = None
 
     def process(self, record, key=None):
         """

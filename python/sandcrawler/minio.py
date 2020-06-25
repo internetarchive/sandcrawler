@@ -66,6 +66,12 @@ class SandcrawlerMinioClient(object):
         content_type = "application/octet-stream"
         if extension.endswith('.xml'):
             content_type = "application/xml"
+        if extension.endswith('.png'):
+            content_type = "image/png"
+        elif extension.endswith('.jpg') or extension.endswith('.jpeg'):
+            content_type = "image/jpeg"
+        elif extension.endswith('.txt'):
+            content_type = "text/plain"
         self.mc.put_object(
             bucket,
             obj_path,
