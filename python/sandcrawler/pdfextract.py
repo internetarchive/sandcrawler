@@ -87,6 +87,9 @@ class PdfExtractResult:
                     metadata[k.lower()] = self.pdf_info[k]
             if 'CreationDate' in self.pdf_info:
                 pdf_created = self.pdf_info['CreationDate']
+        metadata_json: Optional[str] = None
+        if metadata:
+            metadata_json = json.dumps(metadata, sort_keys=True)
         return (
             self.sha1hex,
             datetime.datetime.now(), # updated
@@ -99,7 +102,7 @@ class PdfExtractResult:
             pdf_extra.get('permanent_id'),
             pdf_created,
             pdf_extra.get('pdf_version'),
-            metadata and json.dumps(metadata, sort_keys=True),
+            metadata_json,
         )
 
 
