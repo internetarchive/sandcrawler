@@ -49,6 +49,35 @@ def run_grobid_extract(args):
     )
     pusher.run()
 
+def run_pdf_extract(args):
+    consume_topic = "sandcrawler-{}.unextracted".format(args.env)
+    text_topic = "sandcrawler-{}.pdf-text".format(args.kafka_env)
+    thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.kafka_env)
+    text_sink = KafkaCompressSink(
+        kafka_hosts=args.kafka_hosts,
+        produce_topic=text_topic,
+    )
+    thumbnail_sink = KafkaSink(
+        kafka_hosts=args.kafka_hosts,
+        produce_topic=thumbnail_topic,
+    )
+    wayback_client = WaybackClient(
+        host_url=args.grobid_host,
+    )
+    worker = PdfExtractWorker(
+        wayback_client=wayback_client,
+        sink=text_sink,
+        thumbnail_sink=thumbnail_sink,
+    )
+    pusher = KafkaJsonPusher(
+        worker=worker,
+        kafka_hosts=args.kafka_hosts,
+        consume_topic=consume_topic,
+        group="pdf-extract",
+        batch_size=1,
+    )
+    pusher.run()
+
 def run_persist_grobid(args):
     consume_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
     worker = PersistGrobidWorker(
@@ -237,8 +266,12 @@ def main():
     subparsers = parser.add_subparsers()
 
     sub_grobid_extract = subparsers.add_parser('grobid-extract',
-        help="daemon that consumes CDX JSON objects from Kafka, extracts, pushes to Kafka")
+        help="daemon that consumes CDX JSON objects from Kafka, uses GROBID to extract XML, pushes to Kafka")
     sub_grobid_extract.set_defaults(func=run_grobid_extract)
+
+    sub_pdf_extract = subparsers.add_parser('pdf-extract',
+        help="daemon that consumes CDX JSON objects from Kafka, extracts text and thumbnail, pushes to Kafka")
+    sub_pdf_extract.set_defaults(func=run_pdf_extract)
 
     sub_persist_grobid = subparsers.add_parser('persist-grobid',
         help="daemon that consumes GROBID output from Kafka and pushes to minio and postgres")
