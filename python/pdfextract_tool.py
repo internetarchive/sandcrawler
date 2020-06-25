@@ -122,7 +122,7 @@ def main():
         thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.kafka_env)
         args.sink = KafkaCompressSink(kafka_hosts=args.kafka_hosts,
             produce_topic=text_topic)
-        args.thumbnail_sink = KafkaCompressSink(kafka_hosts=args.kafka_hosts,
+        args.thumbnail_sink = KafkaSink(kafka_hosts=args.kafka_hosts,
             produce_topic=thumbnail_topic)
         print("Running in kafka output mode, publishing to {} and {}\n".format(
             text_topic, thumbnail_topic), file=sys.stderr)
