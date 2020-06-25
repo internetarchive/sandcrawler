@@ -89,11 +89,14 @@ def run_persist_grobid(args):
         s3_only=args.s3_only,
         db_only=args.db_only,
     )
+    kafka_group = "persist-grobid"
+    if args.s3_only:
+        kafka_group += "-s3"
     pusher = KafkaJsonPusher(
         worker=worker,
         kafka_hosts=args.kafka_hosts,
         consume_topic=consume_topic,
-        group="persist-grobid",
+        group=kafka_group,
         push_batches=True,
         batch_size=25,
     )
@@ -110,11 +113,14 @@ def run_persist_pdftext(args):
         s3_only=args.s3_only,
         db_only=args.db_only,
     )
+    kafka_group = "persist-pdf-text"
+    if args.s3_only:
+        kafka_group += "-s3"
     pusher = KafkaJsonPusher(
         worker=worker,
         kafka_hosts=args.kafka_hosts,
         consume_topic=consume_topic,
-        group="persist-pdf-text",
+        group=kafka_group,
         push_batches=True,
         batch_size=25,
     )
