@@ -199,8 +199,8 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         meta_xml=pdf.metadata or None,
         pdf_info=pdf_info,
         pdf_extra=dict(
-            height=page0rect.height,
-            width=page0rect.width,
+            page0_height=page0rect.height,
+            page0_width=page0rect.width,
             page_count=pdf.pages,
             permanent_id=permanent_id,
             update_id=update_id,
