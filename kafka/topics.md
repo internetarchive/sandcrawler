@@ -47,6 +47,24 @@ retention (on both a size and time basis).
         => 6 partitions
         => key is sha1hex of PDF; enable key compaction
 
+    sandcrawler-ENV.unextracted
+        => PDF files in IA needing extraction (thumbnails and text)
+        => schema is sandcrawler-db style JSON. Can be either `cdx` or `petabox` object
+        => fewer partitions with batch mode, but still a bunch (12? 24?)
+        => key is sha1hex of PDF. enable time compaction (6 months?)
+
+    sandcrawler-ENV.pdf-text
+        => fulltext (raw text) and PDF metadata for pdfs
+        => schema is JSON; see pdf_meta proposal for fields. large objects.
+        => 12 partitions
+        => key is sha1hex of PDF; enable key compaction; gzip compression
+
+    sandcrawler-ENV.pdf-thumbnail-SIZE-TYPE
+        => thumbnail images (eg, png, jpg) from PDFs
+        => raw bytes in message (no JSON or other wrapping). fields average 10 KByte
+        => 12 partitions; expect a TByte or so total
+        => key is sha1hex of PDF; enable key compaction; no compression
+
     fatcat-ENV.api-crossref
     fatcat-ENV.api-datacite
         => all new and updated DOIs (regardless of type)
@@ -151,3 +169,9 @@ exists`; this seems safe, and the settings won't be over-ridden.
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 4 --topic fatcat-qa.oaipmh-arxiv
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.oaipmh-pubmed-state
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 1 --topic fatcat-qa.oaipmh-arxiv-state
+
+    # only 3 partitions in QA
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic sandcrawler-qa.pdf-text --config compression.type=gzip --config cleanup.policy=compact
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic sandcrawler-qa.pdf-thumbnail-180px-jpg --config cleanup.policy=compact
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 24 --topic sandcrawler-qa.unextracted
+
