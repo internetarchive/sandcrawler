@@ -28,8 +28,8 @@ def test_process_dummy_pdf():
     print(resp.pdf_extra)
     assert resp.pdf_info['Author'] == "Evangelos Vlachogiannis"
     # 595 x 842
-    assert resp.pdf_extra['height'] == 842
-    assert resp.pdf_extra['width'] == 595
+    assert resp.pdf_extra['page0_height'] == 842
+    assert resp.pdf_extra['page0_width'] == 595
     assert resp.pdf_extra['page_count'] == 1
 
 def test_pdfextract_worker_cdx(wayback_client):
