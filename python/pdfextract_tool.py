@@ -61,8 +61,11 @@ def run_single(args):
     worker = PdfExtractBlobWorker(sink=args.sink, thumbnail_sink=args.thumbnail_sink)
     with open(args.pdf_file, 'rb') as pdf_file:
         pdf_bytes = pdf_file.read()
-    result = worker.process(pdf_bytes)
-    print(json.dumps(result.to_pdftext_dict(), sort_keys=True))
+    worker.push_record(pdf_bytes)
+    worker.finish()
+    if args.thumbnail_sink:
+        args.thumbnail_sink.finish()
+
 
 
 def main():

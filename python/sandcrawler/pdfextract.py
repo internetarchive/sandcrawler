@@ -259,5 +259,5 @@ class PdfExtractBlobWorker(SandcrawlerWorker):
         if self.thumbnail_sink and result.page0_thumbnail is not None:
             self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)
 
-        return result
+        return result.to_pdftext_dict()
 
