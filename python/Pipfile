@@ -37,7 +37,7 @@ internetarchive = "*"
 Flask = ">=1"
 urlcanon = "*"
 pillow = ">=3"
-python-poppler = ">=0.2"
+python-poppler = ">=0.2.1"
 
 # must lock black to an exact version because it is still "beta"
 # see: https://github.com/psf/black/issues/517
