@@ -51,8 +51,8 @@ def run_grobid_extract(args):
 
 def run_pdf_extract(args):
     consume_topic = "sandcrawler-{}.unextracted".format(args.env)
-    text_topic = "sandcrawler-{}.pdf-text".format(args.kafka_env)
-    thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.kafka_env)
+    text_topic = "sandcrawler-{}.pdf-text".format(args.env)
+    thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.env)
     text_sink = KafkaCompressSink(
         kafka_hosts=args.kafka_hosts,
         produce_topic=text_topic,
