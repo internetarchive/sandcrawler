@@ -99,35 +99,6 @@ def run_persist_grobid(args):
     )
     pusher.run()
 
-def run_pdf_extract(args):
-    consume_topic = "sandcrawler-{}.unextracted".format(args.env)
-    text_topic = "sandcrawler-{}.pdf-text".format(args.env)
-    thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.env)
-    text_sink = KafkaSink(
-        kafka_hosts=args.kafka_hosts,
-        produce_topic=text_topic,
-    )
-    thumbnail_sink = KafkaSink(
-        kafka_hosts=args.kafka_hosts,
-        produce_topic=thumbnail_topic,
-    )
-    wayback_client = WaybackClient(
-        host_url=args.grobid_host,
-    )
-    worker = PdfExtractWorker(
-        wayback_client=wayback_client,
-        sink=text_sink,
-        thumbnail_sink=thumbnail_sink,
-    )
-    pusher = KafkaJsonPusher(
-        worker=worker,
-        kafka_hosts=args.kafka_hosts,
-        consume_topic=consume_topic,
-        group="pdf-extract",
-        batch_size=1,
-    )
-    pusher.run()
-
 def run_persist_pdftext(args):
     consume_topic = "sandcrawler-{}.pdf-text".format(args.env)
     worker = PersistPdfTextWorker(
