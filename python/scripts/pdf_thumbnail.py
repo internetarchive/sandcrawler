@@ -22,7 +22,7 @@ def run(inpath, outpath):
 
     renderer = poppler.PageRenderer()
     full_page = renderer.render_page(page)
-    img = Image.frombuffer("RGBA", (full_page.width, full_page.height), full_page.data, 'raw', "RGBA", 0, 1)
+    img = Image.frombuffer("RGBA", (full_page.width, full_page.height), full_page.data, 'raw', "BGRA", 0, 1)
     img.thumbnail((180,300), Image.BICUBIC)
     #img.thumbnail((360,600), Image.BICUBIC)
     img.save(outpath)

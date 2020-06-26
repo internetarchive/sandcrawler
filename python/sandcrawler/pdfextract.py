@@ -158,7 +158,7 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
     renderer = poppler.PageRenderer()
     try:
         full_img = renderer.render_page(page0)
-        img = Image.frombuffer("RGBA", (full_img.width, full_img.height), full_img.data, 'raw', "RGBA", 0, 1)
+        img = Image.frombuffer("RGBA", (full_img.width, full_img.height), full_img.data, 'raw', "BGRA", 0, 1)
         img.thumbnail(thumb_size, Image.BICUBIC)
         buf = BytesIO()
         img.save(buf, thumb_type)
