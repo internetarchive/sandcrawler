@@ -78,7 +78,7 @@ class PdfExtractResult:
             return PdfExtractResult(
                 sha1hex=record['sha1hex'],
                 status=record['status'],
-                error_msg=record.get('metadata', {}).get('error_msg'),
+                error_msg=(record.get('metadata') or {}).get('error_msg'),
             )
         else:
             pdf_extra = dict()
