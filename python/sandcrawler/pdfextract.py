@@ -194,11 +194,18 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         print(str(e), file=sys.stderr)
         page0_thumbnail = None
 
-    full_text = page0.text()
-    for n in range(1, pdf.pages):
-        pageN = pdf.create_page(n)
-        if pageN:
+    try:
+        full_text = page0.text()
+        for n in range(1, pdf.pages):
+            pageN = pdf.create_page(n)
             full_text += pageN.text()
+    except AttributeError as e:
+        return PdfExtractResult(
+            sha1hex=sha1hex,
+            status='parse-error',
+            error_msg=str(e),
+            file_meta=file_meta,
+        )
 
     # Kafka message size limit; cap at about 1 MByte
     if len(full_text)> 1000000:
