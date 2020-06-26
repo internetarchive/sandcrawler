@@ -139,10 +139,8 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                 return dict(
                     key=default_key,
                     source=record,
-                    pdf_trio=dict(
-                        status="error-wayback",
-                        error_msg=str(we),
-                    ),
+                    status="error-wayback",
+                    error_msg=str(we),
                 )
         elif record.get('url') and record.get('datetime'):
             # it's a partial CDX dict or something? fetch using WaybackClient
@@ -159,10 +157,8 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                 return dict(
                     key=default_key,
                     source=record,
-                    pdf_trio=dict(
-                        status="error-wayback",
-                        error_msg=str(we),
-                    ),
+                    status="error-wayback",
+                    error_msg=str(we),
                 )
         elif record.get('item') and record.get('path'):
             # it's petabox link; fetch via HTTP
@@ -176,10 +172,8 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                 return dict(
                     key=default_key,
                     source=record,
-                    pdf_trio=dict(
-                        status="error-petabox",
-                        error_msg=str(e),
-                    ),
+                    status="error-petabox",
+                    error_msg=str(e),
                 )
             blob = resp.content
         else:
