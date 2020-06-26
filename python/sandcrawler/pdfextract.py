@@ -69,6 +69,30 @@ class PdfExtractResult:
                 pdf_extra=record.get('pdf_extra'),
             )
 
+    @classmethod
+    def from_pdf_meta_dict(cls, record):
+        """
+        Parses what would be returned from postgrest
+        """
+        if record['status'] != 'success':
+            return PdfExtractResult(
+                sha1hex=record['sha1hex'],
+                status=record['status'],
+                error_msg=record.get('metadata', {}).get('error_msg'),
+            )
+        else:
+            pdf_extra = dict()
+            for k in ('page_count', 'page0_height', 'page0_width', 'permanent_id', 'pdf_version'):
+                if record.get(k):
+                    pdf_extra[k] = record[k]
+            return PdfExtractResult(
+                sha1hex=record['sha1hex'],
+                status=record['status'],
+                has_page0_thumbnail=bool(record.get('has_page0_thumbnail', False)),
+                pdf_info=record.get('metadata'),
+                pdf_extra=pdf_extra,
+            )
+
     def to_sql_tuple(self) -> tuple:
         # pdf_meta (sha1hex, updated, status, page0_thumbnail, page_count,
         # word_count, page0_height, page0_width, permanent_id, pdf_created,

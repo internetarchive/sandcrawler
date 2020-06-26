@@ -73,6 +73,10 @@ def test_ingest_success(ingest_worker_pdf):
         'http://dummy-postgrest/grobid?sha1hex=eq.{}'.format("90ffd2359008d82298821d16b21778c5c39aec36"),
         status=200,
         body=json.dumps([]))
+    responses.add(responses.GET,
+        'http://dummy-postgrest/pdf_meta?sha1hex=eq.{}'.format("90ffd2359008d82298821d16b21778c5c39aec36"),
+        status=200,
+        body=json.dumps([]))
     responses.add(responses.POST,
         'http://dummy-grobid/api/processFulltextDocument', status=200,
         body=REAL_TEI_XML, content_type='text/xml')
@@ -99,6 +103,9 @@ def test_ingest_success(ingest_worker_pdf):
     assert 'grobid_version' not in resp['grobid']['metadata']
     assert 'fatcat_release' not in resp['grobid']['metadata']
     assert not 'tei_xml' in resp['grobid']
+    assert resp['pdf_meta']['status'] == "success"
+    assert resp['pdf_meta']['pdf_extra']['page_count'] == 1
+    assert resp['pdf_meta'].get('text') is None
 
 @responses.activate
 def test_ingest_landing(ingest_worker):
