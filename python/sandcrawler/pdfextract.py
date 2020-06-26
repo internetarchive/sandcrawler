@@ -215,7 +215,16 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
             file_meta=file_meta,
         )
 
-    pdf_info = pdf.infos()
+    try:
+        pdf_info = pdf.infos()
+    except UnicodeDecodeError:
+        return PdfExtractResult(
+            sha1hex=sha1hex,
+            status='bad-unicode',
+            error_msg="in infos()",
+            file_meta=file_meta,
+        )
+
     # TODO: is this actually needed? or does json marshalling work automatically?
     for k in pdf_info.keys():
         if isinstance(pdf_info[k], datetime.datetime):
