@@ -389,15 +389,15 @@ class WaybackClient:
             assert len(revisit_dt) == 14
             try:
                 revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
+                body = self.fetch_petabox_body(
+                    csize=revisit_cdx.warc_csize,
+                    offset=revisit_cdx.warc_offset,
+                    warc_path=revisit_cdx.warc_path,
+                    resolve_revisit=False,
+                    expected_status_code=revisit_cdx.status_code,
+                )
             except KeyError as ke:
                 raise WaybackError("Revist resolution failed: {}".format(ke))
-            body = self.fetch_petabox_body(
-                csize=revisit_cdx.warc_csize,
-                offset=revisit_cdx.warc_offset,
-                warc_path=revisit_cdx.warc_path,
-                resolve_revisit=False,
-                expected_status_code=revisit_cdx.status_code,
-            )
         elif status_code in (200, 226):
             try:
                 body = gwb_record.open_raw_content().read()
