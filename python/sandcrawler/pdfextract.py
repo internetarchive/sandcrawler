@@ -167,7 +167,7 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
             )
         # this call sometimes fails an returns an AttributeError
         page0rect = page0.page_rect()
-    except (AttributeError, poppler.LockedDocumentError) as e:
+    except (AttributeError, poppler.document.LockedDocumentError) as e:
         # may need to expand the set of exceptions caught here over time, but
         # starting with a narrow set
         return PdfExtractResult(

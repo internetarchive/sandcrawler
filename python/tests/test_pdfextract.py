@@ -15,6 +15,11 @@ def test_process_fake_pdf():
     print(resp)
     assert resp.status == "not-pdf"
 
+    with open('tests/files/dummy_zip.zip', 'rb') as f:
+        pdf_bytes = f.read()
+    resp = process_pdf(pdf_bytes)
+    assert resp.status == 'not-pdf'
+
 def test_process_dummy_pdf():
     with open('tests/files/dummy.pdf', 'rb') as f:
         pdf_bytes = f.read()
