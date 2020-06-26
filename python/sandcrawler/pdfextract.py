@@ -198,6 +198,23 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
     for n in range(1, pdf.pages):
         pageN = pdf.create_page(n)
         full_text += pageN.text()
+
+    # Kafka message size limit; cap at about 1 MByte
+    if len(full_text)> 1000000:
+        return PdfExtractResult(
+            sha1hex=sha1hex,
+            status='text-too-large',
+            error_msg="full_text chars: {}".format(len(full_text)),
+            file_meta=file_meta,
+        )
+    if len(pdf.metadata)> 1000000:
+        return PdfExtractResult(
+            sha1hex=sha1hex,
+            status='text-too-large',
+            error_msg="meta_xml chars: {}".format(len(full_text)),
+            file_meta=file_meta,
+        )
+
     pdf_info = pdf.infos()
     # TODO: is this actually needed? or does json marshalling work automatically?
     for k in pdf_info.keys():
