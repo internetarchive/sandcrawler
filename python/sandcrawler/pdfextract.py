@@ -53,7 +53,7 @@ class PdfExtractResult:
         """
         if record['status'] != 'success':
             return PdfExtractResult(
-                sha1hex=record['sha1hex'],
+                sha1hex=record.get('sha1hex') or record['key'],
                 status=record['status'],
                 error_msg=record.get('error_msg'),
             )
