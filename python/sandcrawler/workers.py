@@ -135,7 +135,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                     warc_path=record['warc_path'],
                 )
                 wayback_sec = time.time() - start
-            except (WaybackError, PetaboxError) as we:
+            except (WaybackError, PetaboxError, KeyError) as we:
                 return dict(
                     key=default_key,
                     source=record,
