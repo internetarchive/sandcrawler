@@ -178,7 +178,12 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
             blob = resp.content
         else:
             raise ValueError("not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")
-        assert blob
+        if not blob:
+            return dict(
+                key=default_key,
+                source=record,
+                status="empty-blob",
+            )
         return dict(
             key=default_key,
             status="success",
