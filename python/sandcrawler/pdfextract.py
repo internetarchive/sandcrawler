@@ -14,6 +14,14 @@ from .misc import gen_file_metadata
 from .ia import WaybackClient, WaybackError, PetaboxError
 
 
+# This is a hack to work around timeouts when processing certain PDFs with
+# poppler. For some reason, the usual Kafka timeout catcher isn't working on
+# these, maybe due to threading.
+BAD_PDF_SHA1HEX = [
+    "373f84dfab4ed47047826e604e2918a9cd6a95b2",
+    "88edcbab1cac2d70af5870422974afc253f4f0c6",
+]
+
 @dataclass
 class PdfExtractResult:
     sha1hex: str
@@ -146,6 +154,14 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
             sha1hex=sha1hex,
             status='not-pdf',
             error_msg=f"mimetype is '{file_meta['mimetype']}'",
+            file_meta=file_meta,
+        )
+
+    if sha1hex in BAD_PDF_SHA1HEX:
+        return PdfExtractResult(
+            sha1hex=sha1hex,
+            status='bad-pdf',
+            error_msg=f"PDF known to cause processing issues",
             file_meta=file_meta,
         )
 
