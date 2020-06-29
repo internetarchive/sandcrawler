@@ -488,6 +488,7 @@ class KafkaJsonPusher(RecordPusher):
         if self.batch_size in (0, 1):
             self.batch_size = 1
         self.batch_worker = kwargs.get('batch_worker', False)
+        self.process_timeout_sec = kwargs.get('process_timeout_sec', 300)
 
     def run(self):
         while True:
@@ -539,7 +540,7 @@ class KafkaJsonPusher(RecordPusher):
                     while not done:
                         try:
                             # use timeouts; don't want kafka itself to timeout
-                            self.worker.push_record_timeout(record, key=msg.key(), timeout=300)
+                            self.worker.push_record_timeout(record, key=msg.key(), timeout=self.process_timeout_sec)
                             break
                         except SandcrawlerBackoffError as be:
                             print("Backing off for 200 seconds: {}".format(be))

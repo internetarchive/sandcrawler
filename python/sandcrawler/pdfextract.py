@@ -278,7 +278,7 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
         default_key = task['sha1hex']
         return dict(
             status="error-timeout",
-            error_msg="internal GROBID worker timeout",
+            error_msg="internal pdf-extract worker timeout",
             source=task,
             sha1hex=default_key,
         )

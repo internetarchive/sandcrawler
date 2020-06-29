@@ -75,6 +75,7 @@ def run_pdf_extract(args):
         consume_topic=consume_topic,
         group="pdf-extract",
         batch_size=1,
+        push_timeout_sec=120,
     )
     pusher.run()
 
