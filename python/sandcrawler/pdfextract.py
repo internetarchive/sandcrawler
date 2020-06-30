@@ -20,6 +20,7 @@ from .ia import WaybackClient, WaybackError, PetaboxError
 BAD_PDF_SHA1HEX = [
     "373f84dfab4ed47047826e604e2918a9cd6a95b2",
     "88edcbab1cac2d70af5870422974afc253f4f0c6",
+    "8e4f03c29ae1fe7227140ab4b625f375f6c00d31",
 ]
 
 @dataclass
