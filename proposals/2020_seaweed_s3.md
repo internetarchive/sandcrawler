@@ -11,7 +11,7 @@ Problem: minio inserts slowed down after inserting 80M or more objects.
 
 Summary: I did four test runs, three failed, one (testrun-4) succeeded.
 
-* [testrun-4](https://git.archive.org/webgroup/sandcrawler/-/blob/martin-seaweed-s3/proposals/2020_seaweed_s3.md#testrun-4)
+* [testrun-4](https://git.archive.org/webgroup/sandcrawler/-/blob/master/proposals/2020_seaweed_s3.md#testrun-4)
 
 So far, in a non-distributed mode, the project looks usable. Added 200M objects
 (about 550G) in 6 days. Full CPU load, 400M RAM usage, constant insert times.
@@ -54,9 +54,9 @@ on wbgrp-svc170.us.archive.org (4 core E5-2620 v4, 4GB RAM).
 ## Setup
 
 There are frequent [releases](https://github.com/chrislusf/seaweedfs/releases)
-but for the test, we used a build off the master branch.
+but for the test, we used a build off master branch.
 
-Directions from configuring AWS CLI for seaweedfs:
+Directions for configuring AWS CLI for seaweedfs:
 [https://github.com/chrislusf/seaweedfs/wiki/AWS-CLI-with-SeaweedFS](https://github.com/chrislusf/seaweedfs/wiki/AWS-CLI-with-SeaweedFS).
 
 ### Build the binary
@@ -79,7 +79,7 @@ a7f8f0b49e6183da06fc2d1411c7a0714a2cc96b
 
 A single, 55M binary emerges after a few seconds. The binary contains
 subcommands to run different parts of seaweed, e.g. master or volume servers,
-filer and commands for maintenance tasks, like backup and compact.
+filer and commands for maintenance tasks, like backup and compaction.
 
 To *deploy*, just copy this binary to the destination.
 
@@ -199,8 +199,8 @@ total size:820752408 file_count:261934
 
 ### Custom S3 benchmark
 
-To simulate the use case of S3 use case for 100-500M small files (grobid xml,
-pdftotext, ...), I created a synthetic benchmark.
+To simulate the use case of S3 for 100-500M small files (grobid xml, pdftotext,
+...), I created a synthetic benchmark.
 
 * [https://gist.github.com/miku/6f3fee974ba82083325c2f24c912b47b](https://gist.github.com/miku/6f3fee974ba82083325c2f24c912b47b)
 
@@ -210,8 +210,8 @@ We just try to fill up the datastore with millions of 5k blobs.
 
 ### testrun-1
 
-Small set, just to run. Status: done. Learned that the default in memory volume
-index grows too quickly for the 4GB machine.
+Small set, just to run. Status: done. Learned that the default in-memory volume
+index grows too quickly for the 4GB RAM machine.
 
 ```
 $ weed server -dir /tmp/martin-seaweedfs-testrun-1 -s3 -volume.max 512 -master.volumeSizeLimitMB 100
@@ -299,7 +299,7 @@ Sustained 400 S3 puts/s, RAM usage 41% of a 4G machine. 56G on disk.
 
 * use leveldb, leveldbLarge
 * try "auto" volumes
-* Status: done. Observed: rapid memory usage.
+* Status: done. Observed: rapid memory usage increase.
 
 ```
 $ weed server -dir /tmp/martin-seaweedfs-testrun-3 -s3 -volume.max 0 -volume.index=leveldbLarge -filer=false -master.volumeSizeLimitMB 100
@@ -413,6 +413,8 @@ sys     0m0.293s
 ```
 
 #### Single process random reads
+
+* via [s3read.go](https://gist.github.com/miku/6f3fee974ba82083325c2f24c912b47b#file-s3read-go)
 
 Running 1000 random reads takes 49s.
 
