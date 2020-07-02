@@ -19,6 +19,7 @@ from .ia import WaybackClient, WaybackError, PetaboxError
 # these, maybe due to threading.
 BAD_PDF_SHA1HEX = [
     "373f84dfab4ed47047826e604e2918a9cd6a95b2",
+    "64d821d728f9a3dc944b4c03be00feea0b57e314",
     "88edcbab1cac2d70af5870422974afc253f4f0c6",
     "8e4f03c29ae1fe7227140ab4b625f375f6c00d31",
 ]
