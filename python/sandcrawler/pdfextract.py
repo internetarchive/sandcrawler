@@ -22,6 +22,8 @@ BAD_PDF_SHA1HEX = [
     "64d821d728f9a3dc944b4c03be00feea0b57e314",
     "88edcbab1cac2d70af5870422974afc253f4f0c6",
     "8e4f03c29ae1fe7227140ab4b625f375f6c00d31",
+    "b2b66b9c7f817a20144456f99c0be805602e8597",
+    "d6b0f405bf13c23d0e90c54eea527442786d1cd3",
 ]
 
 @dataclass
