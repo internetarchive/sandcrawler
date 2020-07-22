@@ -812,6 +812,7 @@ class SavePageNowClient:
                 'capture_screenshot': 0,
                 'if_not_archived_within': '1d',
                 'force_get': force_get,
+                'skip_first_archive': 1,
             },
         )
         if resp.status_code == 429:
