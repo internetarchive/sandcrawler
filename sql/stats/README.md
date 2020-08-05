@@ -53,7 +53,7 @@ Processed or not:
 
 Counts:
 
-    SELECT COUNT(DISTINCT fatcat_release) AS unique_releases, COUNT(*) AS total  FROM grobid;
+    SELECT COUNT(*) AS total_files, COUNT(DISTINCT fatcat_release) AS unique_releases FROM grobid;
 
 Status?
 
@@ -101,7 +101,7 @@ Results by source:
         ON ingest_request.base_url = ingest_file_result.base_url
         AND ingest_request.ingest_type = ingest_file_result.ingest_type
         AND ingest_file_result.ingest_type IS NOT NULL
-    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY attempts DESC LIMIT 25;
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY attempts DESC LIMIT 35;
 
 Ingest result by status:
 
