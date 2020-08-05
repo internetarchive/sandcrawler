@@ -813,6 +813,7 @@ class SavePageNowClient:
                 'if_not_archived_within': '1d',
                 'force_get': force_get,
                 'skip_first_archive': 1,
+                'outlinks_availability': 0,
             },
         )
         if resp.status_code == 429:
