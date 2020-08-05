@@ -814,6 +814,7 @@ class SavePageNowClient:
                 'force_get': force_get,
                 'skip_first_archive': 1,
                 'outlinks_availability': 0,
+                'js_behavior_timeout': 0,
             },
         )
         if resp.status_code == 429:
