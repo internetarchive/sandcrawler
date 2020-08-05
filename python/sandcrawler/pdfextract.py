@@ -27,6 +27,12 @@ BAD_PDF_SHA1HEX = [
     "445968ef735b228c08c3ff4238d99fc9f4824619",
     "09cba9b00494d12759c50cb914f1fb7c9746f5d1",
     "447fa6b5a90742a86429a932f6608d8e141688c0",
+    "0641822e68c5a07538b967489fd19a1d5dc371a5",
+    "09db7c9f2efb496c974427a61e84292ae27fc702",
+    "057c7a9dfb611bfd52f7de6c39b2d5757c5e4e53",
+    "018dfe9824de6d2ac068ce0f7dc9961bffa1b558",
+    "20589d9dd0a22c8c938ad97b7f4f12648aa119fa",
+    "182749ad1db1d5e999d07f010bdcfc2978dadc88",
 ]
 
 @dataclass
@@ -172,6 +178,7 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
             file_meta=file_meta,
         )
 
+    print(f"\tpoppler processing: {sha1hex}", file=sys.stderr)
     try:
         pdf = poppler.load_from_data(blob)
         if pdf is None:
