@@ -55,6 +55,8 @@ def extract_fulltext_url(html_url, html_body):
     if not meta:
         meta = soup.find('meta', attrs={"name":"bepress_citation_pdf_url"})
     if not meta:
+        meta = soup.find('meta', attrs={"name":"wkhealth_pdf_url"})
+    if not meta:
         # researchgate does this; maybe others also?
         meta = soup.find('meta', attrs={"property":"citation_pdf_url"})
     # if tag is only partially populated
@@ -63,12 +65,19 @@ def extract_fulltext_url(html_url, html_body):
     # wiley has a weird almost-blank page we don't want to loop on
     if meta and not "://onlinelibrary.wiley.com/doi/pdf/" in html_url:
         url = meta['content'].strip()
-        if url.startswith('/'):
+        if '://doi.org/' in url:
+            print(f"\tdoi.org in citation_pdf_url (loop?): {url}", file=sys.stderr)
+        elif url.startswith('/'):
             return dict(pdf_url=host_prefix+url, technique='citation_pdf_url')
         elif url.startswith('http'):
             return dict(pdf_url=url, technique='citation_pdf_url')
         else:
-            print("malformed citation_pdf_url? {}".format(url), file=sys.stderr)
+            print("\tmalformed citation_pdf_url? {}".format(url), file=sys.stderr)
+
+    meta = soup.find('meta', attrs={"name":"generator"})
+    meta_generator = None
+    if meta and meta.get('content'):
+        meta_generator = meta['content'].strip()
 
     # sage, and also utpjournals (see below)
     # https://journals.sagepub.com/doi/10.1177/2309499019888836
@@ -344,6 +353,24 @@ def extract_fulltext_url(html_url, html_body):
         url = f"{html_url}/files/{record_id}.pdf"
         if record_id.isdigit() and url.encode('utf-8') in html_body:
             return dict(pdf_url=url, technique='rwth-aachen-url')
+
+    # physchemaspects.ru
+    if '://physchemaspects.ru/' in html_url and soup:
+        for href in soup.find_all('a'):
+            if href.text == "download PDF file":
+                url = href['href']
+                if url.startswith('/'):
+                    url = host_prefix + url
+                return dict(pdf_url=url, technique='physchemaspects-href')
+
+    # OJS 3 (some)
+    if meta_generator and meta_generator.startswith("Open Journal Systems"):
+        href = soup.find('a', attrs={"class":"obj_galley_link file"})
+        if href and href.text and "pdf" in href.text.lower():
+            url = href['href'].strip()
+            if url.startswith('/'):
+                url = host_prefix + url
+            return dict(pdf_url=url, technique='ojs-galley-href')
 
     ### below here we are doing guesses
 
