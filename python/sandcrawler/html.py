@@ -338,4 +338,19 @@ def extract_fulltext_url(html_url, html_body):
                 url = host_prefix + url
             return dict(pdf_url=url, technique='cnki-href')
 
+    # RWTH AACHEN repository
+    if '://publications.rwth-aachen.de/record/' in html_url:
+        record_id = html_url.split('/')[-1]
+        url = f"{html_url}/files/{record_id}.pdf"
+        if record_id.isdigit() and url.encode('utf-8') in html_body:
+            return dict(pdf_url=url, technique='rwth-aachen-url')
+
+    ### below here we are doing guesses
+
+    # generic guess: try current URL plus .pdf, if it exists in the HTML body
+    if not '.pdf' in html_url:
+        url = html_url + ".pdf"
+        if url.encode('utf-8') in html_body:
+            return dict(pdf_url=url, technique='guess-url-plus-pdf')
+
     return dict()
