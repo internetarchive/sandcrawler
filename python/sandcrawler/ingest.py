@@ -70,6 +70,9 @@ class IngestFileWorker(SandcrawlerWorker):
         self.try_spn2 = kwargs.get('try_spn2', True)
 
         self.base_url_blocklist = [
+            # robot blocking
+            "://hkvalidate.perfdrive.com/",
+
             # temporary, until we implement specific fetch and 'petabox' output
             "://archive.org/",
             "://web.archive.org/web/",
