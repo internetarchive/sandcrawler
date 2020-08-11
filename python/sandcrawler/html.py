@@ -372,6 +372,12 @@ def extract_fulltext_url(html_url, html_body):
                 url = host_prefix + url
             return dict(pdf_url=url, technique='ojs-galley-href')
 
+    # ETH zurich e-periodica
+    if '://www.e-periodica.ch/digbib/view' in html_url:
+        url = html_url.replace('digbib/view', 'cntmng').split('#')[0]
+        if url.encode('utf-8') in html_body:
+            return dict(pdf_url=url, technique='href-eperiodica')
+
     ### below here we are doing guesses
 
     # generic guess: try current URL plus .pdf, if it exists in the HTML body
