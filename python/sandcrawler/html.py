@@ -59,6 +59,8 @@ def extract_fulltext_url(html_url, html_body):
     if not meta:
         # researchgate does this; maybe others also?
         meta = soup.find('meta', attrs={"property":"citation_pdf_url"})
+    if not meta:
+        meta = soup.find('meta', attrs={"name":"eprints.document_url"})
     # if tag is only partially populated
     if meta and not meta.get('content'):
         meta = None
