@@ -113,6 +113,19 @@ class IngestFileWorker(SandcrawlerWorker):
         # future possibly to increase download efficiency (wget/fetch being
         # faster than browser fetch)
         self.spn2_simple_get_domains = [
+            # direct PDF links
+            "://arxiv.org/pdf/",
+            "://europepmc.org/backend/ptpmcrender.fcgi",
+            "://pdfs.semanticscholar.org/",
+            "://res.mdpi.com/",
+
+            # platform sites
+            "://zenodo.org/",
+            "://figshare.org/",
+            "://springernature.figshare.com/",
+
+            # popular simple cloud storage or direct links
+            "://s3-eu-west-1.amazonaws.com/",
         ]
 
 
