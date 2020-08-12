@@ -105,6 +105,8 @@ class IngestFileWorker(SandcrawlerWorker):
         self.wall_blocklist = [
             # loginwall
             "://profile.thieme.de/HTML/sso/ejournals/login.htm",
+            "://login.bepress.com/"
+            "?SAMLRequest="
         ]
 
         # these are special-case web domains for which we want SPN2 to not run
