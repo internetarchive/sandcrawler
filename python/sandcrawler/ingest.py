@@ -323,6 +323,19 @@ class IngestFileWorker(SandcrawlerWorker):
         while len(hops) <= self.max_hops:
 
             result['hops'] = hops
+
+            # check against blocklist again on each hop
+            for block in self.base_url_blocklist:
+                if block in next_url:
+                    result['status'] = "skip-url-blocklist"
+                    return result
+
+            # check for popular cookie blocking URL patterns. On successful SPN
+            # crawls, shouldn't see these redirect URLs
+            if '/cookieAbsent' in next_url or 'cookieSet=1' in next_url:
+                result['status'] = 'blocked-cookie'
+                return result
+
             try:
                 resource = self.find_resource(next_url, best_mimetype, force_recrawl=force_recrawl)
             except SavePageNowError as e:
