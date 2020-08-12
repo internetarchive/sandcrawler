@@ -102,6 +102,11 @@ class IngestFileWorker(SandcrawlerWorker):
             "digital.ucd.ie/",      # ireland national historical
         ]
 
+        self.wall_blocklist = [
+            # loginwall
+            "://profile.thieme.de/HTML/sso/ejournals/login.htm",
+        ]
+
         # these are special-case web domains for which we want SPN2 to not run
         # a headless browser (brozzler), but instead simply run wget.
         # the motivation could be to work around browser issues, or in the
@@ -328,6 +333,12 @@ class IngestFileWorker(SandcrawlerWorker):
             for block in self.base_url_blocklist:
                 if block in next_url:
                     result['status'] = "skip-url-blocklist"
+                    return result
+
+            # check against known loginwall URLs
+            for block in self.wall_blocklist:
+                if block in next_url:
+                    result['status'] = "skip-wall"
                     return result
 
             # check for popular cookie blocking URL patterns. On successful SPN

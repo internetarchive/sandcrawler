@@ -173,3 +173,21 @@ def test_ingest_blocklist(ingest_worker):
     assert resp['status'] == "skip-url-blocklist"
     assert resp['request'] == request
 
+
+@responses.activate
+def test_ingest_wall_blocklist(ingest_worker):
+
+    ingest_worker.wall_blocklist = [
+        '://test.fatcat.wiki/',
+    ]
+    request = {
+        'ingest_type': 'pdf',
+        'base_url': "https://test.fatcat.wiki/asdfasdf.pdf",
+    }
+
+    resp = ingest_worker.process(request)
+
+    assert resp['hit'] == False
+    assert resp['status'] == "skip-wall"
+    assert resp['request'] == request
+
