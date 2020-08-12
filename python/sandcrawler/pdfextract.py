@@ -47,6 +47,7 @@ BAD_PDF_SHA1HEX = [
     "b5bf8b7467fb095c90adf3b49aa1687291e4469c",
     "ccb1debcfae006a3fc984e9e91309b9706a5c375",
     "cd8a7c3b8d850ebedc1ca791ccb37b9a2689f9c3",
+    "d17b1e254cce82df5c6eb4fd492cef91e7e11558",
     "d188762a7e3ab5d4ee8a897204316513e4e636ec",
     "d6b0f405bf13c23d0e90c54eea527442786d1cd3",
 ]
