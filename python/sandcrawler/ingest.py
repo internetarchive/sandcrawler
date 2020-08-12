@@ -156,12 +156,12 @@ class IngestFileWorker(SandcrawlerWorker):
 
         if self.try_spn2 and (not resource or not resource.hit or soft404):
             via = "spn2"
-            force_get = 0
+            force_simple_get = 0
             for domain in self.spn2_simple_get_domains:
                 if domain in url:
-                    force_get = 1
+                    force_simple_get = 1
                     break
-            resource = self.spn_client.crawl_resource(url, self.wayback_client, force_get=force_get)
+            resource = self.spn_client.crawl_resource(url, self.wayback_client, force_simple_get=force_simple_get)
         print("[FETCH {}\t] {}\t{}".format(
                 via,
                 resource.status,

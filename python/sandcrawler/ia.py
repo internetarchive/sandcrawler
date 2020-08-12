@@ -769,7 +769,7 @@ class SavePageNowClient:
         self.poll_count = 60
         self.poll_seconds = 3.0
 
-    def save_url_now_v2(self, request_url, force_get=0, capture_outlinks=0):
+    def save_url_now_v2(self, request_url, force_simple_get=0, capture_outlinks=0):
         """
         Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
         at all, or raises an exception if there was an error with SPN itself.
@@ -811,7 +811,7 @@ class SavePageNowClient:
                 'capture_outlinks': capture_outlinks,
                 'capture_screenshot': 0,
                 'if_not_archived_within': '1d',
-                'force_get': force_get,
+                'force_get': force_simple_get,
                 'skip_first_archive': 1,
                 'outlinks_availability': 0,
                 'js_behavior_timeout': 0,
@@ -886,7 +886,7 @@ class SavePageNowClient:
                 None,
             )
 
-    def crawl_resource(self, start_url, wayback_client, force_get=0):
+    def crawl_resource(self, start_url, wayback_client, force_simple_get=0):
         """
         Runs a SPN2 crawl, then fetches body from wayback.
 
@@ -895,9 +895,9 @@ class SavePageNowClient:
 
         # HACK: capture CNKI domains with outlinks (for COVID-19 crawling)
         if 'gzbd.cnki.net/' in start_url:
-            spn_result = self.save_url_now_v2(start_url, force_get=force_get, capture_outlinks=1)
+            spn_result = self.save_url_now_v2(start_url, force_simple_get=force_simple_get, capture_outlinks=1)
         else:
-            spn_result = self.save_url_now_v2(start_url, force_get=force_get)
+            spn_result = self.save_url_now_v2(start_url, force_simple_get=force_simple_get)
 
         if not spn_result.success:
             status = spn_result.status
