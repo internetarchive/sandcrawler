@@ -50,6 +50,7 @@ BAD_PDF_SHA1HEX = [
     "d17b1e254cce82df5c6eb4fd492cef91e7e11558",
     "d188762a7e3ab5d4ee8a897204316513e4e636ec",
     "d6b0f405bf13c23d0e90c54eea527442786d1cd3",
+    "eb5fffaa590a52bcc3705b888c6ff9c4dc4c45b2",
 ]
 
 @dataclass
