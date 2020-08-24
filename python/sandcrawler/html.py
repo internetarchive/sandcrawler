@@ -105,7 +105,7 @@ def extract_fulltext_url(html_url, html_body):
     # http://www.jasstudies.com/DergiTamDetay.aspx?ID=3401
     # <embed src="/files/jass_makaleler/1359848334_33-Okt.%20Yasemin%20KARADEM%C4%B0R.pdf" type="application/pdf" />
     embed = soup.find('embed', attrs={"type": "application/pdf"})
-    if embed:
+    if embed and embed.get('src'):
         url = embed['src'].strip()
         if url.startswith('/'):
             url = host_prefix+url
