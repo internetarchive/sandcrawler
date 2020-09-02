@@ -18,6 +18,11 @@ Full batch:
 
     cat dump_unextracted_pdf_petabox.2020-07-22.json | rg -v "\\\\" | jq . -c | pv -l | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.unextracted -p -1
 
+Re-ran on 2020-08-19:
+
+    wc -l dump_unextracted_pdf_petabox.2020-08-19.json 
+    971194 dump_unextracted_pdf_petabox.2020-08-19.json
+
 ## `pdf_meta` missing CDX rows
 
 First, the GROBID-ized rows but only if has a fatcat file as well.
@@ -25,6 +30,13 @@ First, the GROBID-ized rows but only if has a fatcat file as well.
 10,755,365! That is a lot still to process.
 
     cat dump_unextracted_pdf.fatcat.2020-07-22.json | rg -v "\\\\" | jq . -c | pv -l | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.unextracted -p -1
+
+Re-ran on 2020-08-19:
+
+    wc -l dump_unextracted_pdf.fatcat.2020-08-19.json 
+    65517 dump_unextracted_pdf.fatcat.2020-08-19.json
+
+Enqueued!
 
 ## `GROBID` missing petabox rows
 
@@ -38,6 +50,13 @@ Start small:
 Full batch:
 
     cat dump_ungrobided_pdf_petabox.2020-07-22.json | rg -v "\\\\" | jq . -c | pv -l | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ungrobided-pg -p -1
+
+Re-ran on 2020-08-19:
+
+    wc -l dump_ungrobided_pdf_petabox.2020-08-19.json 
+    933 dump_ungrobided_pdf_petabox.2020-08-19.json
+
+Enqueued!
 
 ## `GROBID` for missing CDX rows in fatcat
 
