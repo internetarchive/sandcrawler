@@ -163,3 +163,118 @@ Start small:
 Looks good (whew), run the full thing:
 
     cat /grande/snapshots/unpaywall_all_recent_requests_2020-05-26.requests.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
+## Post-ingest stats (2020-08-28)
+
+Overall status:
+
+    SELECT ingest_file_result.status, COUNT(*)
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_file_result.ingest_type = ingest_request.ingest_type
+        AND ingest_file_result.base_url = ingest_request.base_url
+    WHERE 
+        ingest_request.ingest_type = 'pdf'
+        AND ingest_request.link_source = 'unpaywall'
+    GROUP BY status
+    ORDER BY COUNT DESC
+    LIMIT 20;
+
+                   status                |  count   
+    -------------------------------------+----------
+     success                             | 22063013
+     no-pdf-link                         |  2192606
+     redirect-loop                       |  1471135
+     terminal-bad-status                 |   995106
+     no-capture                          |   359440
+     cdx-error                           |   358909
+     wrong-mimetype                      |   111685
+     wayback-error                       |    50705
+     link-loop                           |    29359
+     null-body                           |    13667
+     gateway-timeout                     |     3689
+     spn2-cdx-lookup-failure             |     1229
+     petabox-error                       |     1007
+     redirects-exceeded                  |      747
+     invalid-host-resolution             |      464
+     spn2-error                          |      107
+     spn2-error:job-failed               |       91
+     bad-redirect                        |       26
+     spn2-error:soft-time-limit-exceeded |        9
+     bad-gzip-encoding                   |        5
+    (20 rows)
+
+Failures by domain:
+
+    SELECT domain, status, COUNT((domain, status))
+    FROM (
+        SELECT
+            ingest_file_result.ingest_type,
+            ingest_file_result.status,
+            substring(ingest_file_result.terminal_url FROM '[^/]+://([^/]*)') AS domain
+        FROM ingest_file_result
+        LEFT JOIN ingest_request
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE 
+            ingest_file_result.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+    ) t1
+    WHERE t1.domain != ''
+        AND t1.status != 'success'
+        AND t1.status != 'no-capture'
+    GROUP BY domain, status
+    ORDER BY COUNT DESC
+    LIMIT 30;
+
+                  domain               |       status        | count  
+    -----------------------------------+---------------------+--------
+     academic.oup.com                  | no-pdf-link         | 415441
+     watermark.silverchair.com         | terminal-bad-status | 345937
+     www.tandfonline.com               | no-pdf-link         | 262488
+     journals.sagepub.com              | no-pdf-link         | 235707
+     onlinelibrary.wiley.com           | no-pdf-link         | 225876
+     iopscience.iop.org                | terminal-bad-status | 170783
+     www.nature.com                    | redirect-loop       | 145522
+     www.degruyter.com                 | redirect-loop       | 131898
+     files-journal-api.frontiersin.org | terminal-bad-status | 126091
+     pubs.acs.org                      | no-pdf-link         | 119223
+     society.kisti.re.kr               | no-pdf-link         | 112401
+     www.ahajournals.org               | no-pdf-link         | 105953
+     dialnet.unirioja.es               | terminal-bad-status |  96505
+     www.cell.com                      | redirect-loop       |  87560
+     www.ncbi.nlm.nih.gov              | redirect-loop       |  49890
+     ageconsearch.umn.edu              | redirect-loop       |  45989
+     ashpublications.org               | no-pdf-link         |  45833
+     pure.mpg.de                       | redirect-loop       |  45278
+     www.degruyter.com                 | terminal-bad-status |  43642
+     babel.hathitrust.org              | terminal-bad-status |  42057
+     osf.io                            | redirect-loop       |  41119
+     scialert.net                      | no-pdf-link         |  39009
+     dialnet.unirioja.es               | redirect-loop       |  38839
+     www.jci.org                       | redirect-loop       |  34209
+     www.spandidos-publications.com    | redirect-loop       |  33167
+     www.journal.csj.jp                | no-pdf-link         |  30915
+     journals.openedition.org          | redirect-loop       |  30409
+     www.valueinhealthjournal.com      | redirect-loop       |  30090
+     dergipark.org.tr                  | no-pdf-link         |  29146
+     journals.ametsoc.org              | no-pdf-link         |  29133
+    (30 rows)
+
+Enqueue internal failures for re-ingest:
+
+    COPY (
+        SELECT row_to_json(ingest_request.*)
+        FROM ingest_request
+        LEFT JOIN ingest_file_result
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE
+            ingest_request.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+            AND (
+                ingest_file_result.status = 'cdx-error' OR
+                ingest_file_result.status = 'wayback-error'
+            )
+    ) TO '/grande/snapshots/unpaywall_errors_2020-08-28.rows.json';
+
