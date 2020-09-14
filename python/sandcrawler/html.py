@@ -70,9 +70,15 @@ def extract_fulltext_url(html_url, html_body):
         if '://doi.org/' in url:
             print(f"\tdoi.org in citation_pdf_url (loop?): {url}", file=sys.stderr)
         elif url.startswith('/'):
-            return dict(pdf_url=host_prefix+url, technique='citation_pdf_url')
+            if host_prefix+url == html_url:
+                print(f"\tavoiding citation_pdf_url link-loop", file=sys.stderr)
+            else:
+                return dict(pdf_url=host_prefix+url, technique='citation_pdf_url')
         elif url.startswith('http'):
-            return dict(pdf_url=url, technique='citation_pdf_url')
+            if url == html_url:
+                print(f"\tavoiding citation_pdf_url link-loop", file=sys.stderr)
+            else:
+                return dict(pdf_url=url, technique='citation_pdf_url')
         else:
             print("\tmalformed citation_pdf_url? {}".format(url), file=sys.stderr)
 
