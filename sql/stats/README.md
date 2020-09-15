@@ -29,7 +29,7 @@ Counts and total file size:
 
 Top mimetypes:
 
-    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 10;
+    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 20;
 
 Missing full metadata:
 
@@ -43,11 +43,7 @@ Total and unique-by-sha1 counts:
 
 mimetype counts:
 
-    SELECT mimetype, COUNT(*) FROM cdx GROUP BY mimetype ORDER BY COUNT(*) DESC;
-
-Processed or not:
-
-    # TODO:
+    SELECT mimetype, COUNT(*) FROM cdx GROUP BY mimetype ORDER BY COUNT(*) DESC LIMIT 25;
 
 ## GROBID
 
@@ -106,6 +102,10 @@ Results by source:
 Ingest result by status:
 
     SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 25;
+
+Failed ingest by terminal status code:
+
+    SELECT ingest_type, terminal_status_code, COUNT(*) FROM ingest_file_result WHERE hit = false GROUP BY ingest_type, terminal_status_code ORDER BY COUNT DESC LIMIT 25;
 
 ## Fatcat Files
 

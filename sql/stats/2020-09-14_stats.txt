@@ -1,0 +1,340 @@
+
+## SQL Table Sizes
+
+    SELECT
+        table_name,
+        pg_size_pretty(table_size) AS table_size,
+        pg_size_pretty(indexes_size) AS indexes_size,
+        pg_size_pretty(total_size) AS total_size
+      FROM (
+          SELECT
+              table_name,
+              pg_table_size(table_name) AS table_size,
+              pg_indexes_size(table_name) AS indexes_size,
+              pg_total_relation_size(table_name) AS total_size
+          FROM (
+              SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
+              FROM information_schema.tables
+              WHERE table_schema = 'public'
+          ) AS all_tables
+          ORDER BY total_size DESC
+      ) AS pretty_sizes;
+
+
+              table_name           | table_size | indexes_size | total_size 
+    -------------------------------+------------+--------------+------------
+     "public"."cdx"                | 44 GB      | 45 GB        | 89 GB
+     "public"."grobid"             | 66 GB      | 8127 MB      | 74 GB
+     "public"."ingest_request"     | 34 GB      | 40 GB        | 73 GB
+     "public"."ingest_file_result" | 28 GB      | 44 GB        | 72 GB
+     "public"."grobid_shadow"      | 64 GB      | 6902 MB      | 71 GB
+     "public"."file_meta"          | 33 GB      | 30 GB        | 63 GB
+     "public"."shadow"             | 9111 MB    | 10204 MB     | 19 GB
+     "public"."fatcat_file"        | 12 GB      | 6656 MB      | 18 GB
+     "public"."pdf_meta"           | 12 GB      | 2924 MB      | 15 GB
+     "public"."pdftrio"            | 618 MB     | 432 MB       | 1051 MB
+     "public"."petabox"            | 403 MB     | 594 MB       | 997 MB
+    (11 rows)
+
+
+## File Metadata
+
+Counts and total file size:
+
+    SELECT COUNT(*) as total_count, SUM(size_bytes) as total_size FROM file_meta;
+
+     total_count |   total_size
+    -------------+-----------------
+       167021210 | 221982345333674
+    (1 row)
+
+Top mimetypes:
+
+    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 10;
+
+               mimetype            |   count
+    -------------------------------+-----------
+     application/pdf               | 166765214
+     application/octet-stream      |    155517
+     application/xml               |     42170
+     text/html                     |     18708
+     text/plain                    |     15990
+     application/gzip              |      6491
+                                   |      6036
+     application/postscript        |      4912
+     application/vnd.ms-powerpoint |      1672
+     application/msword            |       921
+    (10 rows)
+
+Missing full metadata:
+
+    SELECT COUNT(*) FROM file_meta WHERE sha256hex IS NULL;
+
+     count
+    -------
+    62960
+    (1 row)
+
+
+## CDX
+
+Total and unique-by-sha1 counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM cdx;
+
+     unique_sha1 |   total   
+    -------------+-----------
+       102123051 | 126550160
+    (1 row)
+
+mimetype counts:
+
+    SELECT mimetype, COUNT(*) FROM cdx GROUP BY mimetype ORDER BY COUNT(*) DESC LIMIT 25;
+
+              mimetype          |   count   
+    ----------------------------+-----------
+     application/pdf            | 116885565
+     warc/revisit               |   7951816
+     text/xml                   |    519042
+     application/octet-stream   |    327639
+     text/html                  |    295725
+     unk                        |    172491
+     application/postscript     |     81095
+     application/save           |     80900
+     binary/octet-stream        |     61783
+     text/plain                 |     33684
+     image/pdf                  |     32856
+     application/x-download     |     32418
+     application/download       |     27672
+     application/force-download |     10892
+     multipart/form-data        |      5750
+     application/x-msdownload   |      3832
+     application/x-octetstream  |      3516
+     application                |      3499
+     .pdf                       |      3038
+     application/x-pdf          |      2701
+     application/binary         |      1322
+     pdf                        |      1232
+     file/unknown               |      1199
+     application/pdf'           |      1192
+     file                       |       979
+    (25 rows)
+
+## GROBID
+
+Counts:
+
+    SELECT COUNT(*) AS total_files, COUNT(DISTINCT fatcat_release) AS unique_releases FROM grobid;
+
+     total_files | unique_releases
+    -------------+-----------------
+       101494314 |        18919012
+    (1 row)
+
+Status?
+
+    SELECT status_code, COUNT(*) FROM grobid GROUP BY status_code ORDER BY COUNT DESC LIMIT 10;
+
+     status_code |  count
+    -------------+----------
+             200 | 93730358
+             500 |  7759103
+              -4 |     4683
+             503 |      150
+    (4 rows)
+
+What version used?
+
+    SELECT grobid_version, COUNT(*) FROM grobid WHERE status_code = 200 GROUP BY grobid_version ORDER BY COUNT DESC LIMIT 10;
+
+     grobid_version |  count
+    ----------------+----------
+     0.5.5-fatcat   | 80838234
+                    | 12892145
+    (2 rows)
+
+## Petabox
+
+Counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM petabox;
+unique_sha1 |  total
+    -------------+---------
+         2868825 | 2887834
+    (1 row)
+
+## Ingests
+
+Requests by source:
+
+    SELECT ingest_type, link_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type |   link_source   |  count
+    -------------+-----------------+----------
+     pdf         | oai             | 51185088
+     pdf         | mag             | 35015357
+     pdf         | unpaywall       | 27653003
+     pdf         | doi             | 17362763
+     pdf         | pmc             |  2248854
+     pdf         | arxiv           |   835400
+     pdf         | cnki_covid19    |     2034
+     pdf         | wanfang_covid19 |      975
+     pdf         | spn             |      197
+    (9 rows)
+
+    SELECT ingest_type, link_source, ingest_request_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source, ingest_request_source ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type |   link_source   |  ingest_request_source  |  count   
+    -------------+-----------------+-------------------------+----------
+     pdf         | oai             | metha-bulk              | 51185088
+     pdf         | mag             | mag-corpus              | 35015357
+     pdf         | unpaywall       | unpaywall               | 27653003
+     pdf         | doi             | fatcat-ingest           |  8399261
+     pdf         | doi             | fatcat-changelog        |  5449349
+     pdf         | doi             | fatcat-ingest-container |  3515873
+     pdf         | pmc             | fatcat-ingest-container |  2028825
+     pdf         | arxiv           | fatcat-ingest           |   634665
+     pdf         | pmc             | fatcat-ingest           |   210453
+     pdf         | arxiv           | fatcat-changelog        |   200707
+     pdf         | pmc             | fatcat-changelog        |     9582
+     pdf         | cnki_covid19    | scrape-covid19          |     2034
+     pdf         | wanfang_covid19 | scrape-covid19          |      975
+     pdf         | spn             | savepapernow-web        |      197
+     pdf         | arxiv           | fatcat-ingest-container |       26
+     pdf         | doi             | savepapernow-web        |       21
+     pdf         | arxiv           | savepapernow-web        |        2
+    (17 rows)
+
+Uncrawled requests by source:
+
+    # TODO: verify this?
+    SELECT ingest_request.ingest_type, ingest_request.link_source, COUNT(*)
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+    WHERE ingest_file_result.base_url IS NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type | link_source | count
+    -------------+-------------+--------
+     pdf         | mag         | 170304
+     pdf         | oai         |  15287
+     pdf         | unpaywall   |      1
+    (3 rows)
+
+Results by source:
+
+    SELECT
+        ingest_request.ingest_type,
+        ingest_request.link_source,
+        COUNT(*) as attempts,
+        COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) hits, 
+        ROUND(1.0 * COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) / COUNT(*), 3) as fraction
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+        AND ingest_file_result.ingest_type IS NOT NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY attempts DESC LIMIT 35;
+
+     ingest_type |   link_source   | attempts |   hits   | fraction
+    -------------+-----------------+----------+----------+----------
+     pdf         | oai             | 51185088 | 14144314 |    0.276
+     pdf         | mag             | 35015357 | 24811947 |    0.709
+     pdf         | unpaywall       | 27653003 | 22302629 |    0.807
+     pdf         | doi             | 17363369 |  3533568 |    0.204
+     pdf         | pmc             |  2248860 |  1713197 |    0.762
+     pdf         | arxiv           |   835400 |   685219 |    0.820
+     pdf         | cnki_covid19    |     2034 |        0 |    0.000
+     pdf         | wanfang_covid19 |      975 |      764 |    0.784
+     pdf         | spn             |      197 |      138 |    0.701
+    (9 rows)
+
+Ingest result by status:
+
+    SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type |               status                |  count
+    -------------+-------------------------------------+----------
+     pdf         | success                             | 58265365
+     pdf         | no-pdf-link                         | 27216435
+     pdf         | no-capture                          | 21982611
+     pdf         | redirect-loop                       |  8457469
+     pdf         | terminal-bad-status                 |  2695023
+     pdf         | link-loop                           |  2209672
+     pdf         | wrong-mimetype                      |   767508
+     pdf         | gateway-timeout                     |   548870
+     pdf         | cdx-error                           |   391611
+     pdf         | skip-url-blocklist                  |   220661
+     pdf         | null-body                           |   182215
+     pdf         | wayback-error                       |   146869
+     pdf         | spn2-cdx-lookup-failure             |   107229
+     pdf         | spn-error                           |    85128
+     pdf         | invalid-host-resolution             |    37352
+     pdf         | petabox-error                       |    32490
+     pdf         | spn2-error                          |    29212
+     pdf         | spn-remote-error                    |    27927
+     pdf         | other-mimetype                      |     2305
+     pdf         | bad-redirect                        |     1524
+     pdf         | spn2-error:job-failed               |     1521
+     pdf         | timeout                             |      842
+     pdf         | spn2-error:soft-time-limit-exceeded |      793
+     pdf         | redirects-exceeded                  |      748
+     pdf         | spn2-error:invalid-url-syntax       |      417
+    (25 rows)
+
+Failed ingest by terminal status code:
+
+    SELECT ingest_type, terminal_status_code, COUNT(*)
+    FROM ingest_file_result
+    WHERE hit = false
+    GROUP BY ingest_type, terminal_status_code
+    ORDER BY COUNT DESC
+    LIMIT 25;
+
+     ingest_type | terminal_status_code |  count
+    -------------+----------------------+----------
+     pdf         |                  200 | 34064937
+     pdf         |                      | 20514531
+     pdf         |                  301 |  7271700
+     pdf         |                  302 |   720632
+     pdf         |                  503 |   712697
+     pdf         |                  400 |   444209
+     pdf         |                  404 |   331495
+     pdf         |                  403 |   323030
+     pdf         |                  401 |   259327
+     pdf         |                  500 |   236122
+     pdf         |                  303 |   101609
+     pdf         |                  429 |    47738
+     pdf         |                  502 |    36183
+     pdf         |                  420 |    26603
+     pdf         |                  509 |    15113
+     pdf         |                  409 |    14790
+     pdf         |                  999 |     8996
+     pdf         |                  307 |     3769
+     pdf         |                  308 |     3422
+     pdf         |                  202 |     3228
+     pdf         |                  520 |     2058
+     pdf         |                  410 |     1734
+     pdf         |                  521 |     1033
+     pdf         |                  504 |      868
+     pdf         |                  505 |      424
+    (25 rows)
+
+## Fatcat Files
+
+Count of PDF files that GROBID processed and matched to a release (via
+glutton), but no PDF in `fatcat_file`:
+
+    SELECT COUNT(*) as total_count, COUNT(DISTINCT grobid.fatcat_release) as release_count
+    FROM grobid
+    LEFT JOIN fatcat_file ON grobid.sha1hex = fatcat_file.sha1hex
+    WHERE fatcat_file.sha1hex IS NULL
+      AND grobid.fatcat_release IS NOT NULL;
+
+    total_count | release_count
+    -------------+---------------
+        6600758 |       5213294
+    (1 row)
+
