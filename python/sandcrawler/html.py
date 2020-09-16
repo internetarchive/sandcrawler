@@ -395,6 +395,12 @@ def extract_fulltext_url(html_url, html_body):
         if url.encode('utf-8') in html_body:
             return dict(pdf_url=url, technique='href-eperiodica')
 
+    # JMIR
+    # https://mhealth.jmir.org/2020/7/e17891/
+    if '.jmir.org/' in html_url and not "/pdf" in html_url and html_url.endswith("/"):
+        url = html_url + "pdf"
+        return dict(pdf_url=url, technique='jmir-url')
+
     ### below here we are doing guesses
 
     # generic guess: try current URL plus .pdf, if it exists in the HTML body
