@@ -18,6 +18,7 @@ from .ia import WaybackClient, WaybackError, PetaboxError
 # poppler. For some reason, the usual Kafka timeout catcher isn't working on
 # these, maybe due to threading.
 BAD_PDF_SHA1HEX = [
+    "011478a1e63a2a31eae1a93832a74cc95f220760",
     "018dfe9824de6d2ac068ce0f7dc9961bffa1b558",
     "057c7a9dfb611bfd52f7de6c39b2d5757c5e4e53",
     "0641822e68c5a07538b967489fd19a1d5dc371a5",
