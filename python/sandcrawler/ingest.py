@@ -499,7 +499,7 @@ class IngestFileWorker(SandcrawlerWorker):
         print("[SUCCESS\t] sha1:{} grobid:{} pdfextract:{}".format(
                 result.get('file_meta', {}).get('sha1hex'),
                 result.get('grobid', {}).get('status_code'),
-                result.get('pdfextract', {}).get('status'),
+                result.get('pdf_meta', {}).get('status'),
             ),
             file=sys.stderr)
         return result
