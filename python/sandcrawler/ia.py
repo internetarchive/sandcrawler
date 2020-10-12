@@ -589,7 +589,7 @@ class WaybackClient:
                     start_url=start_url,
                     hit=False,
                     status="no-capture",
-                    terminal_url=None,
+                    terminal_url=next_url,
                     terminal_dt=None,
                     terminal_status_code=None,
                     body=None,

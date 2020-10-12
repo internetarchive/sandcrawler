@@ -387,7 +387,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
             if not resource.hit:
                 result['status'] = resource.status
-                if resource.terminal_dt and resource.terminal_status_code:
+                if resource.terminal_url:
                     result['terminal'] = {
                         "terminal_url": resource.terminal_url,
                         "terminal_dt": resource.terminal_dt,
@@ -465,7 +465,7 @@ class IngestFileWorker(SandcrawlerWorker):
             result['status'] = "max-hops-exceeded"
             return result
 
-        if resource.terminal_dt:
+        if resource.terminal_url:
             result['terminal'] = {
                 "terminal_url": resource.terminal_url,
                 "terminal_dt": resource.terminal_dt,
