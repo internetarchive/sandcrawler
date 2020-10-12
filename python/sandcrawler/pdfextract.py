@@ -85,6 +85,7 @@ BAD_PDF_SHA1HEX = [
     "eb5fffaa590a52bcc3705b888c6ff9c4dc4c45b2",
     "ee9530a2c5a3d1e3813ccb51a55cc8b0d9b5dfc7",
     "f68f9a9202a75d2aee35252e104d796f9515001e",
+    "f9314d3bf2eac78a7d78d18adcccdb35542054ef",
 ]
 
 @dataclass
