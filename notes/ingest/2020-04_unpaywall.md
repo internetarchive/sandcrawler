@@ -277,4 +277,36 @@ Enqueue internal failures for re-ingest:
                 ingest_file_result.status = 'wayback-error'
             )
     ) TO '/grande/snapshots/unpaywall_errors_2020-08-28.rows.json';
+    => 409606
 
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/unpaywall_errors_2020-08-28.rows.json | pv -l | shuf > /grande/snapshots/unpaywall_errors_2020-08-28.requests.json
+
+    cat /grande/snapshots/unpaywall_errors_2020-08-28.requests.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
+And after *that* (which ran quickly):
+
+                   status                |  count   
+    -------------------------------------+----------
+     success                             | 22281874
+     no-pdf-link                         |  2258352
+     redirect-loop                       |  1499251
+     terminal-bad-status                 |  1004781
+     no-capture                          |   401333
+     wrong-mimetype                      |   112068
+     cdx-error                           |    32259
+     link-loop                           |    30137
+     null-body                           |    13886
+     wayback-error                       |    11653
+     gateway-timeout                     |     3689
+     spn2-cdx-lookup-failure             |     1229
+     petabox-error                       |     1036
+     redirects-exceeded                  |      749
+     invalid-host-resolution             |      464
+     spn2-error                          |      107
+     spn2-error:job-failed               |       91
+     bad-redirect                        |       26
+     spn2-error:soft-time-limit-exceeded |        9
+     bad-gzip-encoding                   |        5
+    (20 rows)
+
+22063013 -> 22281874 = + 218,861 success, not bad!
