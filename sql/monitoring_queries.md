@@ -1,21 +1,21 @@
 
 ## fatcat-changelog pipeline
 
-Overall ingest status, past 3 days:
+Overall ingest status, past 30 days:
 
     SELECT ingest_file_result.ingest_type, ingest_file_result.status, COUNT(*)
     FROM ingest_file_result
     LEFT JOIN ingest_request
         ON ingest_file_result.ingest_type = ingest_request.ingest_type
         AND ingest_file_result.base_url = ingest_request.base_url
-    WHERE ingest_request.created >= NOW() - '3 day'::INTERVAL
+    WHERE ingest_request.created >= NOW() - '30 day'::INTERVAL
         AND ingest_request.ingest_type = 'pdf'
         AND ingest_request.ingest_request_source = 'fatcat-changelog'
     GROUP BY ingest_file_result.ingest_type, ingest_file_result.status
     ORDER BY COUNT DESC
     LIMIT 20;
 
-Broken domains, past 3 days:
+Broken domains, past 30 days:
 
     SELECT domain, status, COUNT((domain, status))
     FROM (
@@ -29,7 +29,7 @@ Broken domains, past 3 days:
             AND ingest_file_result.base_url = ingest_request.base_url
         WHERE
             -- ingest_request.created >= NOW() - '3 day'::INTERVAL
-            ingest_file_result.updated >= NOW() - '3 day'::INTERVAL
+            ingest_file_result.updated >= NOW() - '30 day'::INTERVAL
             AND ingest_request.ingest_type = 'pdf'
             AND ingest_request.ingest_request_source = 'fatcat-changelog'
     ) t1
@@ -39,7 +39,7 @@ Broken domains, past 3 days:
     ORDER BY COUNT DESC
     LIMIT 25;
 
-Throughput per day, and success, for past month:
+Throughput per day, and success, for past 30 days:
 
     SELECT ingest_request.ingest_type,
            date(ingest_request.created),
