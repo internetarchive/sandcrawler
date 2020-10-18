@@ -910,6 +910,9 @@ class SavePageNowClient:
                 raise SavePageNowBackoffError("SPNv2 user-session-limit")
             elif status.startswith("error:"):
                 status = "spn2-" + status
+            # despite other errors, call these a failure (so we don't retry)
+            if spn_result.terminal_url and (spn_result.terminal_url.endswith('/cookieAbsent') or spn_result.terminal_url.endswith("cookieSet=1")):
+                status = "blocked-cookie"
             return ResourceResult(
                 start_url=start_url,
                 hit=False,
@@ -922,6 +925,34 @@ class SavePageNowClient:
                 revisit_cdx=None,
             )
         #print(spn_result, file=sys.stderr)
+
+        # detect partial URL response (aka, missing full URL)
+        if spn_result.terminal_url.startswith('/'):
+            return ResourceResult(
+                start_url=start_url,
+                hit=False,
+                status="spn2-success-partial-url",
+                terminal_url=spn_result.terminal_url,
+                terminal_dt=spn_result.terminal_dt,
+                terminal_status_code=None,
+                body=None,
+                cdx=None,
+                revisit_cdx=None,
+            )
+
+        # don't try to CDX fetch for this common cookie block terminal
+        if spn_result.terminal_url.endswith('/cookieAbsent') or spn_result.terminal_url.endswith("cookieSet=1"):
+            return ResourceResult(
+                start_url=start_url,
+                hit=False,
+                status="blocked-cookie",
+                terminal_url=spn_result.terminal_url,
+                terminal_dt=spn_result.terminal_dt,
+                terminal_status_code=None,
+                body=None,
+                cdx=None,
+                revisit_cdx=None,
+            )
 
         cdx_row = None
         # hack to work around elsevier weirdness
