@@ -1017,10 +1017,23 @@ class SavePageNowClient:
                 revisit_cdx = resource.revisit_cdx
         else:
             # note: currently not trying to verify cdx_row.sha1hex
-            body = wayback_client.fetch_replay_body(
-                url=cdx_row.url,
-                datetime=cdx_row.datetime,
-            )
+            try:
+                body = wayback_client.fetch_replay_body(
+                    url=cdx_row.url,
+                    datetime=cdx_row.datetime,
+                )
+            except WaybackError as we:
+                return ResourceResult(
+                    start_url=start_url,
+                    hit=False,
+                    status="spn2-wayback-error",
+                    terminal_url=cdx_row.url,
+                    terminal_dt=cdx_row.datetime,
+                    terminal_status_code=None,
+                    body=None,
+                    cdx=None,
+                    revisit_cdx=None,
+                )
             # warc_path etc will change, so strip them out
             cdx_row = cdx_partial_from_row(cdx_row)
 
