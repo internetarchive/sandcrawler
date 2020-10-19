@@ -175,7 +175,11 @@ class IngestFileWorker(SandcrawlerWorker):
         #if resource and resource.hit and resource.terminal_url.endswith('/cookieAbsent'):
         #    soft404 = True
 
-        if self.try_spn2 and (not resource or (not resource.hit and soft404)):
+        old_failure = False
+        if resource and not resource.hit and resource.terminal_dt < '20190000000000':
+            old_failure = True
+
+        if self.try_spn2 and (resource == None or (resource.status == 'no-capture') or soft404 or old_failure):
             via = "spn2"
             force_simple_get = 0
             for domain in self.spn2_simple_get_domains:
