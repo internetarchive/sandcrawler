@@ -169,12 +169,13 @@ class IngestFileWorker(SandcrawlerWorker):
             resource = self.wayback_client.lookup_resource(url, best_mimetype)
 
         # check for "soft 404" conditions, where we should retry with live SPNv2
-        # TODO: could refactor these into the resource fetch things themselves?
         soft404 = False
-        if resource and resource.hit and resource.terminal_url.endswith('/cookieAbsent'):
-            soft404 = True
+        # NOTE: these are often not working with SPNv2 either, so disabling. If
+        # we really want to try again, should do force-recrawl
+        #if resource and resource.hit and resource.terminal_url.endswith('/cookieAbsent'):
+        #    soft404 = True
 
-        if self.try_spn2 and (not resource or not resource.hit or soft404):
+        if self.try_spn2 and (not resource or (not resource.hit and soft404)):
             via = "spn2"
             force_simple_get = 0
             for domain in self.spn2_simple_get_domains:
