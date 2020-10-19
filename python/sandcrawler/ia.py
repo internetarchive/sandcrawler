@@ -4,6 +4,7 @@
 # pylint: skip-file
 
 import os, sys, time
+import json
 import requests
 import datetime
 from collections import namedtuple
@@ -861,6 +862,7 @@ class SavePageNowClient:
         # if there was a recent crawl of same URL, fetch the status of that
         # crawl to get correct datetime
         if final_json.get('original_job_id'):
+            print(f"  SPN recent capture: {job_id} -> {final_json['original_job_id']}", file=sys.stderr)
             resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, final_json['original_job_id']))
             try:
                 resp.raise_for_status()
@@ -871,6 +873,8 @@ class SavePageNowClient:
         #print(final_json, file=sys.stderr)
 
         if final_json['status'] == "success":
+            if final_json.get('original_url').startswith('/'):
+                print(f"  truncateded URL in JSON: {request_url} {json.dumps(final_json)}", file=sys.stderr)
             return SavePageNowResult(
                 True,
                 "success",
