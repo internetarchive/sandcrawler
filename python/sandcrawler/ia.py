@@ -106,18 +106,24 @@ def fuzzy_match_url(left, right):
     if left == right:
         return True
     if '://' in left and '://' in right:
-        if left.split('://')[1:] == right.split('://')[1:]:
-            return True
+        left = '://'.join(left.split('://')[1:])
+        right = '://'.join(right.split('://')[1:])
+    if left == right:
+        return True
+    if left == right + "/" or right == left + "/":
+        return True
     return False
 
 def test_fuzzy_match_url():
     assert fuzzy_match_url("http://thing.com", "http://thing.com") == True
     assert fuzzy_match_url("http://thing.com", "https://thing.com") == True
     assert fuzzy_match_url("http://thing.com", "ftp://thing.com") == True
+    assert fuzzy_match_url("http://thing.com", "http://thing.com/") == True
+    assert fuzzy_match_url("https://thing.com", "http://thing.com/") == True
+    assert fuzzy_match_url("https://thing.com/", "http://thing.com") == True
     assert fuzzy_match_url("http://thing.com", "http://thing.com/blue") == False
 
     # should probably handle these?
-    assert fuzzy_match_url("http://thing.com", "http://thing.com/") == False
     assert fuzzy_match_url("http://thing.com", "http://www.thing.com") == False
     assert fuzzy_match_url("http://www.thing.com", "http://www2.thing.com") == False
     assert fuzzy_match_url("http://www.thing.com", "https://www2.thing.com") == False
