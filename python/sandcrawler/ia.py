@@ -977,7 +977,7 @@ class SavePageNowClient:
         if not cdx_row:
             # lookup exact
             try:
-                filter_status_code = 200
+                filter_status_code = None
                 if spn_result.terminal_url.startswith("ftp://"):
                     filter_status_code = 226
                 cdx_row = wayback_client.cdx_client.fetch(
