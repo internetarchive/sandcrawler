@@ -932,8 +932,8 @@ class SavePageNowClient:
             )
         #print(spn_result, file=sys.stderr)
 
-        # detect partial URL response (aka, missing full URL)
-        if spn_result.terminal_url.startswith('/'):
+        # detect partial URL response (aka, success, but missing full URL)
+        if not "://" in spn_result.terminal_url or spn_result.terminal_url.startswith('/'):
             return ResourceResult(
                 start_url=start_url,
                 hit=False,
