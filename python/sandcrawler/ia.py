@@ -836,6 +836,7 @@ class SavePageNowClient:
                 "Didn't get expected 'job_id' field in SPN2 response: {}".format(resp_json))
 
         job_id = resp_json['job_id']
+        print(f"  SPNv2 running: job_id={job_id} url={request_url}", file=sys.stdout)
 
         # poll until complete
         final_json = None
