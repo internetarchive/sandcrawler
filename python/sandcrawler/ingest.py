@@ -176,7 +176,7 @@ class IngestFileWorker(SandcrawlerWorker):
         #    soft404 = True
 
         old_failure = False
-        if resource and not resource.hit and resource.terminal_dt < '20190000000000':
+        if resource and not resource.hit and resource.terminal_dt and resource.terminal_dt < '20190000000000':
             old_failure = True
 
         if self.try_spn2 and (resource == None or (resource.status == 'no-capture') or soft404 or old_failure):
