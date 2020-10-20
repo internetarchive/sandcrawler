@@ -2,6 +2,7 @@
 import sys
 import json
 import gzip
+import time
 import base64
 import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -380,6 +381,8 @@ class IngestFileWorker(SandcrawlerWorker):
             except CdxApiError as e:
                 result['status'] = 'cdx-error'
                 result['error_message'] = str(e)[:1600]
+                # add a sleep in cdx-error path as a slow-down
+                time.sleep(2.0)
                 return result
             except WaybackError as e:
                 result['status'] = 'wayback-error'
