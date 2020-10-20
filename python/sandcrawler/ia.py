@@ -211,16 +211,20 @@ class CdxApiClient:
             params['filter'] = "statuscode:{}".format(filter_status_code)
         resp = self._query_api(params)
         if not resp:
-            if retry_sleep:
-                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep), file=sys.stderr)
+            if retry_sleep and retry_sleep > 0:
+                next_sleep = None
+                if retry_sleep > 3:
+                    next_sleep = retry_sleep - 3
+                    retry_sleep = 3
+                print("  CDX fetch failed; will sleep {}sec and try again".format(retry_sleep), file=sys.stderr)
                 time.sleep(retry_sleep)
-                return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=None)
+                return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=next_sleep)
             raise KeyError("CDX url/datetime not found: {} {}".format(url, datetime))
         row = resp[0]
         # allow fuzzy http/https match
         if not (fuzzy_match_url(row.url, url) and row.datetime == datetime):
-            if retry_sleep:
-                print("CDX fetch failed; will sleep {}sec and try again".format(retry_sleep), file=sys.stderr)
+            if retry_sleep and retry_sleep > 0:
+                print("  CDX fetch failed; will sleep {}sec and try again".format(retry_sleep), file=sys.stderr)
                 time.sleep(retry_sleep)
                 return self.fetch(url, datetime, filter_status_code=filter_status_code, retry_sleep=None)
             raise KeyError("Didn't get exact CDX url/datetime match. url:{} dt:{} got:{}".format(url, datetime, row))
