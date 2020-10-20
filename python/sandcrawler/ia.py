@@ -993,7 +993,7 @@ class SavePageNowClient:
                     url=spn_result.terminal_url,
                     datetime=spn_result.terminal_dt,
                     filter_status_code=filter_status_code,
-                    retry_sleep=10.0,
+                    retry_sleep=40.0,
                 )
             except KeyError as ke:
                 print("CDX KeyError: {}".format(ke), file=sys.stderr)
