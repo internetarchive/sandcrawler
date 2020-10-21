@@ -10,7 +10,7 @@ from collections import Counter
 from confluent_kafka import Consumer, Producer, KafkaException
 
 from .misc import parse_cdx_line
-from .ia import SandcrawlerBackoffError, WaybackError, PetaboxError
+from .ia import SandcrawlerBackoffError, WaybackError, WaybackContentError, PetaboxError
 
 
 class SandcrawlerWorker(object):
@@ -135,7 +135,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                     warc_path=record['warc_path'],
                 )
                 wayback_sec = time.time() - start
-            except (WaybackError, PetaboxError, KeyError) as we:
+            except (WaybackError, WaybackContentError, PetaboxError, KeyError) as we:
                 return dict(
                     key=default_key,
                     source=record,
@@ -153,7 +153,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                     datetime=record['datetime'],
                 )
                 wayback_sec = time.time() - start
-            except WaybackError as we:
+            except (WaybackError, WaybackContentError) as we:
                 return dict(
                     key=default_key,
                     source=record,

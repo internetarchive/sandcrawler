@@ -296,6 +296,9 @@ class CdxApiClient:
 class WaybackError(Exception):
     pass
 
+class WaybackContentError(Exception):
+    pass
+
 class PetaboxError(Exception):
     pass
 
@@ -376,7 +379,7 @@ class WaybackClient:
         try:
             status_code = gwb_record.get_status()[0]
         except http.client.HTTPException:
-            raise WaybackError("too many HTTP headers (in wayback fetch)")
+            raise WaybackContentError("too many HTTP headers (in wayback fetch)")
         location = gwb_record.get_location() or None
 
         if status_code is None and gwb_record.target_uri.startswith(b"ftp://") and not gwb_record.is_revisit():
@@ -387,10 +390,10 @@ class WaybackClient:
         revisit_cdx = None
         if gwb_record.is_revisit():
             if not resolve_revisit:
-                raise WaybackError("found revisit record, but won't resolve (loop?)")
+                raise WaybackContentError("found revisit record, but won't resolve (loop?)")
             revisit_uri, revisit_dt = gwb_record.refers_to
             if not (revisit_uri and revisit_dt):
-                raise WaybackError("revisit record missing URI and/or DT: warc:{} offset:{}".format(
+                raise WaybackContentError("revisit record missing URI and/or DT: warc:{} offset:{}".format(
                     warc_path, offset))
             # convert revisit_dt
             # len("2018-07-24T11:56:49"), or with "Z"
@@ -416,7 +419,7 @@ class WaybackClient:
                 raise WaybackError(
                     "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
         elif status_code is None:
-            raise WaybackError(
+            raise WaybackContentError(
                 "got a None status_code in (W)ARC record")
         return WarcResource(
             status_code=status_code,
@@ -481,11 +484,11 @@ class WaybackClient:
                 headers=self.replay_headers,
             )
         except requests.exceptions.TooManyRedirects:
-            raise WaybackError("redirect loop (wayback replay fetch)")
+            raise WaybackContentError("redirect loop (wayback replay fetch)")
         except requests.exceptions.ChunkedEncodingError:
             raise WaybackError("ChunkedEncodingError (wayback replay fetch)")
         except UnicodeDecodeError:
-            raise WaybackError("UnicodeDecodeError in replay request (can mean nasty redirect URL): {}".format(url))
+            raise WaybackContentError("UnicodeDecodeError in replay request (can mean nasty redirect URL): {}".format(url))
 
         try:
             resp.raise_for_status()
@@ -508,7 +511,7 @@ class WaybackClient:
                         cdx_sha1hex,
                         file_meta['sha1hex']),
                     file=sys.stderr)
-                raise WaybackError("replay fetch body didn't match CDX hash cdx:{} body:{}".format(
+                raise WaybackContentError("replay fetch body didn't match CDX hash cdx:{} body:{}".format(
                     cdx_sha1hex,
                     file_meta['sha1hex']),
                 )
@@ -537,9 +540,9 @@ class WaybackClient:
                 headers=self.replay_headers,
             )
         except requests.exceptions.TooManyRedirects:
-            raise WaybackError("redirect loop (wayback replay fetch)")
+            raise WaybackContentError("redirect loop (wayback replay fetch)")
         except UnicodeDecodeError:
-            raise WaybackError("UnicodeDecodeError in replay request (can mean nasty redirect URL): {}".format(url))
+            raise WaybackContentError("UnicodeDecodeError in replay request (can mean nasty redirect URL): {}".format(url))
         try:
             resp.raise_for_status()
         except Exception as e:
@@ -1030,7 +1033,7 @@ class SavePageNowClient:
                     url=cdx_row.url,
                     datetime=cdx_row.datetime,
                 )
-            except WaybackError as we:
+            except (WaybackError, WaybackContentError) as we:
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,

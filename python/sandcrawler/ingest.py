@@ -8,7 +8,7 @@ import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from collections import namedtuple
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult
+from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.pdfextract import process_pdf, PdfExtractResult
 from sandcrawler.misc import gen_file_metadata, clean_url
@@ -386,6 +386,10 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
             except WaybackError as e:
                 result['status'] = 'wayback-error'
+                result['error_message'] = str(e)[:1600]
+                return result
+            except WaybackContentError as e:
+                result['status'] = 'wayback-content-error'
                 result['error_message'] = str(e)[:1600]
                 return result
             except NotImplementedError as e:

@@ -11,7 +11,6 @@ from PIL import Image
 
 from .workers import SandcrawlerWorker, SandcrawlerFetchWorker
 from .misc import gen_file_metadata
-from .ia import WaybackClient, WaybackError, PetaboxError
 
 
 # This is a hack to work around timeouts when processing certain PDFs with
