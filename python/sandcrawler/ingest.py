@@ -414,6 +414,17 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
             file_meta = gen_file_metadata(resource.body)
 
+            if resource.terminal_url and ('/cookieAbsent' in next_url or 'cookieSet=1' in resource.terminal_url):
+                result['status'] = 'blocked-cookie'
+                result['terminal'] = {
+                    "terminal_url": resource.terminal_url,
+                    "terminal_dt": resource.terminal_dt,
+                    "terminal_status_code": resource.terminal_status_code,
+                }
+                if resource.terminal_url not in result['hops']:
+                    result['hops'].append(resource.terminal_url)
+                return result
+
             # crude handling of content-encoding; wayback fetch library usually
             # (and should always?) handle this
             if file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
