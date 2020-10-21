@@ -29,7 +29,7 @@ Counts and total file size:
 
 Top mimetypes:
 
-    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 20;
+    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 30;
 
 Missing full metadata:
 
@@ -43,7 +43,7 @@ Total and unique-by-sha1 counts:
 
 mimetype counts:
 
-    SELECT mimetype, COUNT(*) FROM cdx GROUP BY mimetype ORDER BY COUNT(*) DESC LIMIT 25;
+    SELECT mimetype, COUNT(*) FROM cdx GROUP BY mimetype ORDER BY COUNT(*) DESC LIMIT 30;
 
 ## GROBID
 
@@ -53,11 +53,11 @@ Counts:
 
 Status?
 
-    SELECT status_code, COUNT(*) FROM grobid GROUP BY status_code ORDER BY COUNT DESC LIMIT 10;
+    SELECT status_code, COUNT(*) FROM grobid GROUP BY status_code ORDER BY COUNT DESC LIMIT 25;
 
 What version used?
 
-    SELECT grobid_version, COUNT(*) FROM grobid WHERE status_code = 200 GROUP BY grobid_version ORDER BY COUNT DESC LIMIT 10;
+    SELECT grobid_version, COUNT(*) FROM grobid WHERE status_code = 200 GROUP BY grobid_version ORDER BY COUNT DESC LIMIT 25;
 
 ## Petabox
 
@@ -71,7 +71,7 @@ Requests by source:
 
     SELECT ingest_type, link_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source ORDER BY COUNT DESC LIMIT 25;
 
-    SELECT ingest_type, link_source, ingest_request_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source, ingest_request_source ORDER BY COUNT DESC LIMIT 25;
+    SELECT ingest_type, link_source, ingest_request_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source, ingest_request_source ORDER BY COUNT DESC LIMIT 35;
 
 Uncrawled requests by source:
 
@@ -82,7 +82,7 @@ Uncrawled requests by source:
         ON ingest_request.base_url = ingest_file_result.base_url
         AND ingest_request.ingest_type = ingest_file_result.ingest_type
     WHERE ingest_file_result.base_url IS NULL
-    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY COUNT DESC LIMIT 25;
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY COUNT DESC LIMIT 35;
 
 Results by source:
 
@@ -101,11 +101,11 @@ Results by source:
 
 Ingest result by status:
 
-    SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 25;
+    SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 50;
 
 Failed ingest by terminal status code:
 
-    SELECT ingest_type, terminal_status_code, COUNT(*) FROM ingest_file_result WHERE hit = false GROUP BY ingest_type, terminal_status_code ORDER BY COUNT DESC LIMIT 25;
+    SELECT ingest_type, terminal_status_code, COUNT(*) FROM ingest_file_result WHERE hit = false GROUP BY ingest_type, terminal_status_code ORDER BY COUNT DESC LIMIT 50;
 
 ## Fatcat Files
 
