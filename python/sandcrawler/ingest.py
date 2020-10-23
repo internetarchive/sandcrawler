@@ -101,6 +101,9 @@ class IngestFileWorker(SandcrawlerWorker):
             # Historical non-paper content:
             "dhz.uni-passau.de/",   # newspapers
             "digital.ucd.ie/",      # ireland national historical
+
+            # DOI prefixes
+            "://doi.org/10.2307/",  # JSTOR; slow and many redirects
         ]
 
         self.wall_blocklist = [
