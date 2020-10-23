@@ -1,3 +1,4 @@
 *part-000*
 *.tar.gz
 *.tsv.gz
+htmlcov/
