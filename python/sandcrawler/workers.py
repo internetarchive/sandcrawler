@@ -2,6 +2,7 @@
 import sys
 import json
 import time
+import signal
 import zipfile
 import requests
 import multiprocessing.pool
@@ -56,25 +57,30 @@ class SandcrawlerWorker(object):
         """
         A wrapper around self.push_record which sets a timeout.
 
-        Current implementation uses multiprocessing instead of signal.
+        Note that this uses signals and *will behave wrong/weirdly* with
+        multithreading or if signal-based timeouts are used elsewhere in the
+        same process.
         """
 
-        with multiprocessing.pool.Pool(1) as p:
-            proc = p.apply_async(self._push_record_helper, (task, key))
-            try:
-                resp = proc.get(timeout=timeout)
-            except TimeoutError:
-                self.counts['timeout'] += 1
-                resp = self.timeout_response(task) # pylint: disable=assignment-from-none
-                # TODO: what if it is this push_record() itself that is timing out?
-                if resp and self.sink:
-                    self.sink.push_record(resp)
-                    self.counts['pushed'] += 1
-                elif resp:
-                    print(json.dumps(resp))
-                raise TimeoutError("timeout processing record")
-            else:
-                return resp
+        def timeout_handler(signum, frame):
+            raise TimeoutError("timeout processing record")
+        signal.signal(signal.SIGALRM, timeout_handler)
+        resp = None
+        signal.alarm(int(timeout))
+        try:
+            resp = self.push_record(task, key=key)
+        except TimeoutError:
+            self.counts['timeout'] += 1
+            resp = self.timeout_response(task) # pylint: disable=assignment-from-none
+            # TODO: what if it is this push_record() itself that is timing out?
+            if resp and self.sink:
+                self.sink.push_record(resp)
+                self.counts['pushed'] += 1
+            elif resp:
+                print(json.dumps(resp))
+        finally:
+            signal.alarm(0)
+        return resp
 
     def push_batch(self, tasks):
         results = []
