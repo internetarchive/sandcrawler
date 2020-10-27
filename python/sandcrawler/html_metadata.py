@@ -8,12 +8,20 @@ import pydantic
 
 
 # this is a map of metadata keys to CSS selectors
+# sources for this list include:
+#  - google scholar crawling notes (https://scholar.google.com/intl/ja/scholar/inclusion.html#indexing)
+#  - inspection of actual publisher HTML
+#  - http://div.div1.com.au/div-thoughts/div-commentaries/66-div-commentary-metadata
+# order of these are mostly by preference/quality (best option first), though
+# also/sometimes re-ordered for lookup efficiency (lookup stops after first
+# match)
 HEAD_META_PATTERNS: Any = {
     "title": [
         "meta[name='citation_title']",
-        "meta[name='bepress_citation_title']",
         "meta[name='eprints.title']",
         "meta[name='prism.title']",
+        "meta[name='bepress_citation_title']",
+        "meta[name='dcterms.title']",
         "meta[name='dc.title']",
     ],
     "subtitle": [
@@ -21,20 +29,31 @@ HEAD_META_PATTERNS: Any = {
     ],
     "doi": [
         "meta[name='citation_doi']",
-        "meta[name='prism.doi']",
         "meta[name='DOI']",
         "meta[id='DOI']",
+        "meta[name='prism.doi']",
+        "meta[name='bepress_citation_doi']",
         "meta[name='dc.identifier.doi']",
+    ],
+    "pmid": [
+        "meta[name='citation_pmid']",
     ],
     "abstract": [
         "meta[name='citation_abstract']",
+        "meta[name='bepress_citation_abstract']",
+        "meta[name='eprints.abstract']",
+        "meta[name='dcterms.abstract']",
+        "meta[name='prism.teaser']",
         "meta[name='dc.description']",
         "meta[name='og:description']",
     ],
     "container_name": [
         "meta[name='citation_journal_title']",
+        "meta[name='bepress_citation_journal_title']",
         "meta[name='citation_conference_title']",
+        "meta[name='bepress_citation_conference_title']",
         "meta[name='prism.publicationName']",
+        "meta[name='eprints.publication']",
         "meta[name='dc.relation.ispartof']",
         "meta[name='dc.source']",
         "meta[property='og:site_name']",
@@ -44,77 +63,107 @@ HEAD_META_PATTERNS: Any = {
     ],
     "raw_date": [
         "meta[name='citation_publication_date']",
-        "meta[name='citation_date']",
+        "meta[name='bepress_citation_publication_date']",
         "meta[name='prism.publicationDate']",
+        "meta[name='citation_date']",
+        "meta[name='bepress_citation_date']",
+        "meta[name='citation_online_date']",
+        "meta[name='bepress_citation_online_date']",
         "meta[itemprop='datePublished']",
+        "meta[name='eprints.datestamp']",
+        "meta[name='eprints.date']",
         "meta[name='dc.date.created']",
         "meta[name='dc.issued']",
+        "meta[name='dcterms.date']",
         "meta[name='dc.date']",
     ],
     "release_year": [
+        "meta[itemprop='citation_year']",
         "meta[itemprop='prism:copyrightYear']",
     ],
     "first_page": [
         "meta[name='citation_firstpage']",
+        "meta[name='bepress_citation_firstpage']",
         "meta[name='prism.startingPage']",
         "meta[name='dc.citation.spage']",
     ],
     "last_page": [
         "meta[name='citation_lastpage']",
+        "meta[name='bepress_citation_lastpage']",
         "meta[name='prism.endingPage']",
         "meta[name='dc.citation.epage']",
     ],
     "issue": [
         "meta[name='citation_issue']",
+        "meta[name='bepress_citation_issue']",
         "meta[name='prism.issueIdentifier']",
         "meta[name='dc.citation.issue']",
     ],
     "volume": [
         "meta[name='citation_volume']",
+        "meta[name='bepress_citation_volume']",
         "meta[name='prism.volume']",
         "meta[name='dc.citation.volume']",
     ],
     "number": [
         "meta[name='citation_technical_report_number']",
+        "meta[name='bepress_citation_technical_report_number']",
         "meta[name='citation_number']",
+        "meta[name='bepress_citation_number']",
         "meta[name='prism.number']",
     ],
     "container_issn": [
         "meta[name='citation_issn']",
+        "meta[name='bepress_citation_issn']",
         "meta[name='prism.issn']",
         "meta[name='prism.eIssn']",
+        "meta[name='eprints.issn']",
         "meta[name='dc.source.issn']",
     ],
     "isbn": [
         "meta[name='citation_isbn']",
+        "meta[name='bepress_citation_isbn']",
         "meta[name='prism.isbn']",
     ],
     "publisher": [
         "meta[name='citation_publisher']",
+        "meta[name='bepress_citation_publisher']",
+        "meta[name='eprints.publisher']",
+        "meta[name='citation_technical_report_institution']",
+        "meta[name='dcterms.publisher']",
         "meta[name='dc.publisher']",
     ],
     "raw_release_type": [
         "meta[name='citation_article_type']",
+        "meta[name='bepress_citation_article_type']",
         "meta[name='prism.contentType']",
+        "meta[name='eprints.type']",
         "meta[name='dc.type']",
     ],
     "lang": [
         "meta[name='citation_language']",
+        "meta[name='bepress_citation_language']",
+        "meta[name='dcterms.language']",
         "meta[name='dc.language']",
     ],
     "html_fulltext_url": [
         "meta[name='citation_fulltext_html_url']",
+        "meta[name='bepress_citation_fulltext_html_url']",
     ],
     "xml_fulltext_url": [
     ],
     "pdf_fulltext_url": [
         "meta[name='citation_pdf_url']",
+        "meta[name='bepress_citation_pdf_url']",
     ],
 }
 
 HEAD_META_LIST_PATTERNS: Any = {
     "contrib_names": [
         "meta[name='citation_author']",
+        "meta[name='bepress_citation_author']",
+        "meta[name='eprints.creators_name']",
+        "meta[name='dcterms.creator']",
         "meta[name='dc.creator']",
         "meta[name='dc.contributor']",
     ],
@@ -123,6 +172,8 @@ HEAD_META_LIST_PATTERNS: Any = {
         "meta[name='citation_reference']",
     ],
     "raw_identifiers": [
+        "meta[name='eprints.id_number']",
+        "meta[name='dcterms.identifier']",
         "meta[name='dc.identifier']",
     ],
 }
