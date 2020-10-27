@@ -219,7 +219,9 @@ def html_extract_biblio(doc: HTMLParser) -> Optional[BiblioMetadata]:
 
     raw_date = meta.pop('raw_date', None)
     if raw_date:
-        meta['release_date'] = dateparser.parse(raw_date).date()
+        parsed = dateparser.parse(raw_date)
+        if parsed:
+            meta['release_date'] = parsed.date()
 
     raw_release_type = meta.pop('raw_release_type', None)
     if raw_release_type:
