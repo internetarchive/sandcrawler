@@ -110,6 +110,22 @@ retention (on both a size and time basis).
     fatcat-ENV.file-updates
         => key: fcid
         => 4x partitions
+    fatcat-ENV.work-ident-updates
+        => work identifiers when updated and needs re-indexing (eg, in scholar)
+        => 6x partitions
+        => key: doc ident ("work_{ident}")
+        => key compaction possible; long retention
+
+    scholar-ENV.sim-updates
+        => 6x partitions
+        => key: "sim_item_{}"
+        => key compaction possible; long retention
+    scholar-ENV.update-docs
+        => 12x partitions
+        => key: scholar doc identifer
+        => gzip compression
+        => key compaction possible
+        => short time-based retention (2 months?)
 
 ### Deprecated/Unused Topics
 
@@ -157,6 +173,7 @@ exists`; this seems safe, and the settings won't be over-ridden.
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.work-updates
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 4 --topic fatcat-qa.file-updates
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 4 --topic fatcat-qa.container-updates
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 6 --topic fatcat-qa.work-ident-updates
 
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.api-crossref
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 8 --topic fatcat-qa.api-datacite --config cleanup.policy=compact
@@ -175,3 +192,5 @@ exists`; this seems safe, and the settings won't be over-ridden.
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic sandcrawler-qa.pdf-thumbnail-180px-jpg --config cleanup.policy=compact
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 24 --topic sandcrawler-qa.unextracted
 
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 6 --topic scholar-qa.sim-updates
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic scholar-qa.update-docs --config compression.type=gzip --config cleanup.policy=compact --config retention.ms=7889400000
