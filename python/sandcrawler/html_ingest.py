@@ -36,6 +36,25 @@ class WebResource(pydantic.BaseModel):
     sha256hex: Optional[str]
     resource_type: Optional[str]
 
+    class Config:
+        json_encoders = {
+            datetime.datetime: lambda dt: dt.isoformat()
+        }
+
+class IngestWebResult(pydantic.BaseModel):
+    status: str
+    request: Optional[Any]  # TODO
+    html_resource: Optional[ResourceResult]
+    file_meta: Optional[dict]
+    html_fulltext: Optional[dict]
+    html_meta: Optional[BiblioMetadata]
+    subresources: Optional[List[WebResource]]
+
+    class Config:
+        json_encoders = {
+            datetime.datetime: lambda dt: dt.isoformat()
+        }
+
 
 def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, when: Optional[datetime.datetime]) -> List[WebResource]:
     """
@@ -82,13 +101,11 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
         wayback_resp = wayback_client.lookup_resource(resource['url'])
         if not wayback_resp:
             raise Exception("wayback lookup failed")
+        # XXX
         assert wayback_resp.status == 'success'
-        if wayback_resp.cdx.url != resource['url']:
-            pass
-            #raise Exception(
-            #    f"CDX lookup URL mismatch: {cdx_row.url} != {resource['url']}")
         file_meta = gen_file_metadata(wayback_resp.body)
-        assert file_meta['sha1hex'] == wayback_resp.cdx.sha1hex
+        if file_meta['sha1hex'] != wayback_resp.cdx.sha1hex:
+            raise Exception("wayback payload sha1hex mismatch")
         full.append(WebResource(
             surt=wayback_resp.cdx.surt,
             timestamp=wayback_resp.cdx.datetime,
@@ -104,19 +121,26 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
     return full
 
 
-def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = False) -> None:
+def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = False) -> IngestWebResult:
 
     adblock = load_adblock_rules()
     wayback_client = WaybackClient()
 
     html_resource = wayback_client.lookup_resource(url, "text/html")
     if html_resource.status != "success":
-        print(json.dumps(html_resource, indent=2))
-        return
+        return IngestWebResult(
+            status=html_resource.status,
+            html_resource=html_resource,
+        )
 
     file_meta = gen_file_metadata(html_resource.body)
-    # XXX:
-    assert file_meta['mimetype'] == "text/html"
+
+    if file_meta['mimetype'] != "text/html":
+        return IngestWebResult(
+            status="wrong-mimetype",
+            html_resource=html_resource,
+            file_meta=file_meta,
+        )
 
     html_doc = HTMLParser(html_resource.body)
     html_meta = html_extract_biblio(html_doc)
@@ -132,17 +156,15 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
     else:
         full_resources = fetch_html_resources(raw_resources, wayback_client, when)
 
-    output = dict(
+    output = IngestWebResult(
         status="success",
-        #html_resource=html_resource,
+        html_resource=html_resource,
         file_meta=file_meta,
         html_fulltext=html_fulltext,
-        # XXX:
-        html_meta=html_meta and html_meta.dict(exclude_none=True, exclude={'release_date'}),
-        resources=[r.dict(exclude_none=True, exclude={'timestamp'}) for r in full_resources],
+        html_meta=html_meta,
+        subresources=full_resources,
     )
-
-    print(json.dumps(output, indent=2))
+    return output
 
 
 def main() -> None:
@@ -183,7 +205,8 @@ def main() -> None:
         sys.exit(-1)
 
     if args.func == "run_single":
-        run_single(args.url, args.timestamp, args.quick_mode)
+        result = run_single(args.url, args.timestamp, args.quick_mode)
+        print(result.json(indent=2))
     else:
         #func = getattr(wp, args.func)
         #func()
