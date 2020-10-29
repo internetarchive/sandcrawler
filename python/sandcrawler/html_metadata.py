@@ -1,10 +1,12 @@
 
 import datetime
 from typing import List, Optional, Any
+import urllib.parse
 
 import dateparser
 from selectolax.parser import HTMLParser
 import pydantic
+import braveblock
 
 
 # this is a map of metadata keys to CSS selectors
@@ -21,6 +23,7 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='eprints.title']",
         "meta[name='prism.title']",
         "meta[name='bepress_citation_title']",
+        "meta[name='og:title']",
         "meta[name='dcterms.title']",
         "meta[name='dc.title']",
     ],
@@ -34,6 +37,7 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='prism.doi']",
         "meta[name='bepress_citation_doi']",
         "meta[name='dc.identifier.doi']",
+        "meta[name='dc.identifier'][scheme='doi']",
     ],
     "pmid": [
         "meta[name='citation_pmid']",
@@ -70,6 +74,7 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='citation_online_date']",
         "meta[name='bepress_citation_online_date']",
         "meta[itemprop='datePublished']",
+        "meta[name='article:published']",
         "meta[name='eprints.datestamp']",
         "meta[name='eprints.date']",
         "meta[name='dc.date.created']",
@@ -145,12 +150,14 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='bepress_citation_language']",
         "meta[name='dcterms.language']",
         "meta[name='dc.language']",
+        "meta[name='og:locale']",
     ],
     "html_fulltext_url": [
         "meta[name='citation_fulltext_html_url']",
         "meta[name='bepress_citation_fulltext_html_url']",
     ],
     "xml_fulltext_url": [
+        "meta[name='citation_xml_url']",
     ],
     "pdf_fulltext_url": [
         "meta[name='citation_pdf_url']",
@@ -164,6 +171,7 @@ HEAD_META_LIST_PATTERNS: Any = {
         "meta[name='bepress_citation_author']",
         "meta[name='eprints.creators_name']",
         "meta[name='dcterms.creator']",
+        "meta[name='article:author']",
         "meta[name='dc.creator']",
         "meta[name='dc.contributor']",
     ],
@@ -281,3 +289,97 @@ def html_extract_biblio(doc: HTMLParser) -> Optional[BiblioMetadata]:
             meta['release_type'] = release_type
 
     return BiblioMetadata(**meta)
+
+def load_adblock_rules() -> braveblock.Adblocker:
+    """
+    TODO: consider blocking very generic assets:
+
+    - favicon.ico
+    - ://fonts.googleapis.com/css*
+    - ://widgets.figshare.com/*
+    - ://crossmark-cdn.crossref.org/widget/*
+    - ://code.jquery.com/*
+        => hrm
+    - ://platform.twitter.com/widgets.js
+    - ://journals.plos.org/plosone/resource/img/icon.*
+    """
+    return braveblock.Adblocker(
+        include_easylist=True,
+        include_easyprivacy=True,
+        rules=[
+            "/favicon.ico^",
+            "||fonts.googleapis.com^",
+            "||widgets.figshare.com^",
+            "||crossmark-cdn.crossref.org^",
+            "||platform.twitter.com^",
+            "||verify.nature.com^",
+            "||s7.addthis.com^",
+            "||www.mendeley.com^",
+            "||pbs.twimg.com^",
+            "||badge.dimensions.ai^",
+
+            # not sure about these CC badges (usually via a redirect)
+            #"||licensebuttons.net^",
+            #"||i.creativecommons.org^",
+
+            # Should we skip jquery, or other generic javascript CDNs?
+            #"||code.jquery.com^",
+            #"||ajax.googleapis.com^",
+            #"||cdnjs.cloudflare.com^",
+
+            # PLOS images
+            "/resource/img/icon.*.16.png^",
+        ],
+    )
+
+
+def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name: str) -> list:
+    resources = []
+
+    for node in doc.css(selector):
+        for attr in attrs:
+            url = node.attrs.get(attr)
+            if url:
+                resources.append(dict(url=url, type=type_name))
+
+    return resources
+
+
+def html_extract_resources(doc_url: str, doc: HTMLParser, adblock: braveblock.Adblocker) -> list:
+    """
+    This function tries to find all the important resources in a page. The
+    presumption is that the HTML document is article fulltext, and we want the
+    list of all resoures (by URL) necessary to replay the page.
+
+    The returned resource URLs each have a type (script, img, css, etc), and
+    should be fully-qualified URLs (not relative).
+
+    Adblock filtering is run to remove unwanted resources.
+    """
+    resources = []
+
+    # select various resource references
+    resources += _extract_generic(doc, "script", ["src"], "script")
+    resources += _extract_generic(doc, "link[rel='stylesheet']", ["href"], "stylesheet")
+    # TODO: srcset and parse
+    # eg: https://dfzljdn9uc3pi.cloudfront.net/2018/4375/1/fig-5-2x.jpg 1200w, https://dfzljdn9uc3pi.cloudfront.net/2018/4375/1/fig-5-1x.jpg 600w, https://dfzljdn9uc3pi.cloudfront.net/2018/4375/1/fig-5-small.jpg 355w
+    resources += _extract_generic(doc, "img", ["src"], "image")
+    resources += _extract_generic(doc, "audio", ["src"], "audio")
+    resources += _extract_generic(doc, "video", ["src"], "media")
+    resources += _extract_generic(doc, "source", ["src"], "media")
+    resources += _extract_generic(doc, "track", ["src"], "media")
+    resources += _extract_generic(doc, "iframe", ["src"], "subdocument")
+    resources += _extract_generic(doc, "embed", ["src"], "media")
+
+    # ensure URLs are absolute
+    for r in resources:
+        r['url'] = urllib.parse.urljoin(doc_url, r['url'])
+
+    # filter using adblocker
+    resources = [r for r in resources if adblock.check_network_urls(r['url'], source_url=doc_url, request_type=r['type']) == False]
+
+    # remove duplicates
+    resources = [dict(t) for t in {tuple(d.items()) for d in resources}]
+
+    return resources
+
