@@ -3,20 +3,22 @@ import base64
 import magic
 import hashlib
 import datetime
+from typing import Optional
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry # pylint: disable=import-error
 import urlcanon
 
 
-def clean_url(s):
+def clean_url(s: str) -> str:
     s = s.strip()
     parsed = urlcanon.parse_url(s)
     if not parsed.port and parsed.colon_before_port:
         parsed.colon_before_port = b''
     return str(urlcanon.whatwg(parsed))
 
-def gen_file_metadata(blob):
+def gen_file_metadata(blob: bytes) -> dict:
     """
     Takes a file blob (bytestream) and returns hashes and other metadata.
 
@@ -39,7 +41,7 @@ def gen_file_metadata(blob):
         mimetype=mimetype,
     )
 
-def b32_hex(s):
+def b32_hex(s: str) -> str:
     """
     Converts a base32-encoded SHA-1 checksum into hex-encoded
 
@@ -62,7 +64,7 @@ NORMAL_MIME = (
     'application/octet-stream',
 )
 
-def normalize_mime(raw):
+def normalize_mime(raw: str) -> Optional[str]:
     raw = raw.lower().strip()
     for norm in NORMAL_MIME:
         if raw.startswith(norm):
@@ -103,7 +105,7 @@ def test_normalize_mime():
     assert normalize_mime("binary/octet-stream") == "application/octet-stream"
 
 
-def parse_cdx_line(raw_cdx, normalize=True):
+def parse_cdx_line(raw_cdx: str, normalize=True) -> Optional[dict]:
     """
     This method always filters a few things out:
 
@@ -138,32 +140,34 @@ def parse_cdx_line(raw_cdx, normalize=True):
         mime = normalize_mime(mime)
 
     sha1hex = b32_hex(sha1b32)
-    http_status = int(http_status)
-    c_size = int(c_size)
-    offset = int(offset)
 
     return dict(
         surt=surt,
         url=url,
         datetime=dt,
         mimetype=mime,
-        http_status=http_status,
+        http_status=int(http_status),
         sha1b32=sha1b32,
         sha1hex=sha1hex,
-        warc_csize=c_size,
-        warc_offset=offset,
+        warc_csize=int(c_size),
+        warc_offset=int(offset),
         warc_path=warc,
     )
 
-def parse_cdx_datetime(dt_str):
+def parse_cdx_datetime(dt_str: str) -> Optional[datetime.datetime]:
     try:
-        return datetime.strptime(dt_str, "%Y%m%d%H%M%S")
+        return datetime.datetime.strptime(dt_str, "%Y%m%d%H%M%S")
     except Exception:
         return None
 
+def test_parse_cdx_datetime() -> None:
+    assert parse_cdx_datetime("") == None
+    assert parse_cdx_datetime("asdf") == None
+    assert parse_cdx_datetime("19930203123045") != None
+
 
 def requests_retry_session(retries=10, backoff_factor=3,
-        status_forcelist=(500, 502, 504), session=None):
+        status_forcelist=(500, 502, 504), session=None) -> requests.Session:
     """
     From: https://www.peterbe.com/plog/best-practice-with-retries-with-requests
     """
