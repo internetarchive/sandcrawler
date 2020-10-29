@@ -1,5 +1,6 @@
 
 import datetime
+import pytest
 
 from sandcrawler.html_metadata import *
 
@@ -62,6 +63,31 @@ def test_html_metadata_elife() -> None:
     # 2019-04-18
     assert meta.release_date == datetime.date(year=2019, month=4, day=18)
     assert meta.publisher == "eLife Sciences Publications Limited"
+
+
+def test_html_metadata_peerj() -> None:
+ 
+    with open('tests/files/peerj_oa_article.html', 'r') as f:
+        peerj_html = f.read()
+
+    meta = html_extract_biblio(HTMLParser(peerj_html))
+    assert meta is not None
+    assert meta.title == "The state of OA: a large-scale analysis of the prevalence and impact of Open Access articles"
+    assert meta.doi == "10.7717/peerj.4375"
+    assert meta.contrib_names == [
+            "Heather Piwowar",
+      "Jason Priem",
+      "Vincent Larivière",
+      "Juan Pablo Alperin",
+      "Lisa Matthias",
+      "Bree Norlander",
+      "Ashley Farley",
+      "Jevin West",
+      "Stefanie Haustein",
+    ]
+    assert meta.container_name == "PeerJ"
+    # "2018-02-13"
+    assert meta.release_date == datetime.date(year=2018, month=2, day=13)
 
 
 def test_html_metadata_nature() -> None:
@@ -136,3 +162,65 @@ def test_html_metadata_dc_case() -> None:
     meta = html_extract_biblio(HTMLParser(snippet))
     assert meta is not None
     assert meta.issue == "123"
+
+@pytest.fixture
+def adblock() -> Any:
+    return load_adblock_rules()
+
+def test_html_resources(adblock) -> None:
+
+    with open('tests/files/dlib_05vanhyning.html', 'r') as f:
+        dlib_html = f.read()
+
+    resources = html_extract_resources(
+        "http://www.dlib.org/dlib/may17/vanhyning/05vanhyning.html",
+        HTMLParser(dlib_html),
+        adblock,
+    )
+
+    assert dict(url="http://www.dlib.org/style/style1.css", type="stylesheet") in resources
+
+    # check that adblock working
+    for r in resources:
+        assert '/ga.js' not in r['url']
+
+    with open('tests/files/plos_one_article.html', 'r') as f:
+        plos_html = f.read()
+
+    resources = html_extract_resources(
+        "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0213978",
+        HTMLParser(plos_html),
+        adblock,
+    )
+
+    # check that custom adblock working
+    for r in resources:
+        assert 'crossmark-cdn.crossref.org' not in r['url']
+
+    with open('tests/files/first_monday_ojs3_landingpage.html', 'r') as f:
+        monday_html = f.read()
+
+    resources = html_extract_resources(
+        "https://firstmonday.org/blah/",
+        HTMLParser(monday_html),
+        adblock,
+    )
+
+    with open('tests/files/elife_article.html', 'r') as f:
+        elife_html = f.read()
+
+    resources = html_extract_resources(
+        "https://elife.org/blah/",
+        HTMLParser(elife_html),
+        adblock,
+    )
+
+    with open('tests/files/nature_article.html', 'r') as f:
+        nature_html = f.read()
+
+    resources = html_extract_resources(
+        "https://nature.com/blah/",
+        HTMLParser(nature_html),
+        adblock,
+    )
+
