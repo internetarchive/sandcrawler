@@ -11,5 +11,4 @@ include-ids=yes
 notes=FIXME,XXX,DELETEME
 
 [TYPECHECK]
-ignored-modules=responses
-extension-pkg-whitelist=selectolax
+extension-pkg-whitelist=selectolax,pydantic,responses
