@@ -14,6 +14,8 @@ import braveblock
 #  - google scholar crawling notes (https://scholar.google.com/intl/ja/scholar/inclusion.html#indexing)
 #  - inspection of actual publisher HTML
 #  - http://div.div1.com.au/div-thoughts/div-commentaries/66-div-commentary-metadata
+#  - "HTML meta tags used by journal articles"
+#    https://gist.github.com/hubgit/5985963
 # order of these are mostly by preference/quality (best option first), though
 # also/sometimes re-ordered for lookup efficiency (lookup stops after first
 # match)

@@ -1,16 +1,19 @@
 
+import io
 import sys
+import gzip
 import json
 import datetime
 import argparse
+import xml.etree.ElementTree as ET
 from typing import List, Optional, Any
 
 import trafilatura
 import pydantic
 from selectolax.parser import HTMLParser
 
-from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult
-from sandcrawler.misc import gen_file_metadata
+from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict
+from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 
 
@@ -24,6 +27,15 @@ def html_extract_fulltext_teixml(doc: bytes) -> dict:
         return dict(status="success", tei_xml=tei_xml)
     else:
         return dict(status="empty-xml")
+
+def teixml_body_text(doc_xml: str) -> str:
+    ns = {"tei": "http://www.tei-c.org/ns/1.0"}
+    tree = ET.fromstring(doc_xml)
+    body = tree.find('.//tei:body', ns)
+    if body:
+        return " ".join(body.itertext())
+    else:
+        return ""
 
 class WebResource(pydantic.BaseModel):
     surt: str
@@ -43,17 +55,43 @@ class WebResource(pydantic.BaseModel):
 
 class IngestWebResult(pydantic.BaseModel):
     status: str
+    hit: bool
+    cdx: Optional[dict]
+    terminal: Optional[Any] # TODO
     request: Optional[Any]  # TODO
-    html_resource: Optional[ResourceResult]
     file_meta: Optional[dict]
+    html_biblio: Optional[BiblioMetadata]
+    html_scope: Optional[str]
     html_fulltext: Optional[dict]
-    html_meta: Optional[BiblioMetadata]
     subresources: Optional[List[WebResource]]
 
     class Config:
+        arbitrary_types_allowed = True
         json_encoders = {
-            datetime.datetime: lambda dt: dt.isoformat()
+            datetime.datetime: lambda dt: dt.isoformat(),
         }
+
+
+def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> (dict, ResourceResult):
+    if file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
+        print("transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
+        inner_body = gzip.decompress(resource.body)
+        inner_resource = ResourceResult(
+            body=inner_body,
+            # copy all other fields
+            start_url=resource.start_url,
+            hit=resource.hit,
+            status=resource.status,
+            terminal_url=resource.terminal_url,
+            terminal_dt=resource.terminal_dt,
+            terminal_status_code=resource.terminal_status_code,
+            cdx=resource.cdx,
+            revisit_cdx=resource.revisit_cdx,
+        )
+        inner_file_meta = gen_file_metadata(inner_resource.body)
+        return (inner_file_meta, inner_resource)
+    else:
+        return (file_meta, resource)
 
 
 def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, when: Optional[datetime.datetime]) -> List[WebResource]:
@@ -65,8 +103,9 @@ def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, 
     """
 
     full = []
+    closest = when and datetime_to_cdx(when)
     for resource in resources:
-        cdx_row = cdx_client.lookup_best(resource['url'])
+        cdx_row = cdx_client.lookup_best(resource['url'], closest=closest)
         if not cdx_row:
             raise Exception("CDX lookup failed")
         if cdx_row.url != resource['url']:
@@ -97,8 +136,9 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
     """
 
     full = []
+    closest = when and datetime_to_cdx(when)
     for resource in resources:
-        wayback_resp = wayback_client.lookup_resource(resource['url'])
+        wayback_resp = wayback_client.lookup_resource(resource['url'], closest=closest)
         if not wayback_resp:
             raise Exception("wayback lookup failed")
         # XXX
@@ -108,7 +148,7 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
             raise Exception("wayback payload sha1hex mismatch")
         full.append(WebResource(
             surt=wayback_resp.cdx.surt,
-            timestamp=wayback_resp.cdx.datetime,
+            timestamp=parse_cdx_datetime(wayback_resp.cdx.datetime),
             url=wayback_resp.cdx.url,
             sha1hex=file_meta['sha1hex'],
             mimetype=file_meta['mimetype'],
@@ -121,34 +161,92 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
     return full
 
 
+def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata], tei_xml: Optional[str]) -> str:
+    """
+    This function tries to guess if an HTML document represents one of:
+
+    - article-fulltext
+    - article-abstract
+    - article-sample
+    - supplement
+    - component
+    - issue-fulltext
+    - landingpage
+    - paywall
+    - loginwall
+    - blockpage
+    - errorpage
+    - stub
+    - unknown
+    """
+
+    # basic paywall and loginwall detection based on URL
+    if url.endswith("/cookieAbsent"):
+        return "blockpage"
+    if "://page-one.live.cf.public.springer.com" in url:
+        return "article-sample"
+
+    if biblio and biblio.html_fulltext_url == url:
+        return "article-fulltext"
+
+    # fallback: guess based word count (arbitrary guesses here)
+    if not tei_xml:
+        return "unknown"
+    body_txt = teixml_body_text(tei_xml)
+    word_count = len(body_txt.split())
+    #print(f"  body text word count: {word_count}", file=sys.stderr)
+    if word_count < 20:
+        return "stub"
+    elif word_count > 800:
+        return "article-fulltext"
+
+    return "unknown"
+
+
 def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = False) -> IngestWebResult:
 
     adblock = load_adblock_rules()
     wayback_client = WaybackClient()
 
-    html_resource = wayback_client.lookup_resource(url, "text/html")
+    html_resource = wayback_client.lookup_resource(url, "text/html", closest=timestamp)
     if html_resource.status != "success":
         return IngestWebResult(
             status=html_resource.status,
-            html_resource=html_resource,
+            hit=False,
+            cdx=html_resource.cdx and cdx_to_dict(html_resource.cdx),
         )
 
-    file_meta = gen_file_metadata(html_resource.body)
+    assert html_resource.terminal_status_code == 200
 
-    if file_meta['mimetype'] != "text/html":
+    file_meta = gen_file_metadata(html_resource.body)
+    file_meta, html_resource = fix_transfer_encoding(file_meta, html_resource)
+
+    if file_meta['mimetype'] not in ("text/html", "text/xml"):
         return IngestWebResult(
             status="wrong-mimetype",
-            html_resource=html_resource,
+            hit=False,
+            cdx=html_resource.cdx and cdx_to_dict(html_resource.cdx),
             file_meta=file_meta,
         )
 
     html_doc = HTMLParser(html_resource.body)
-    html_meta = html_extract_biblio(html_doc)
+    html_biblio = html_extract_biblio(html_doc)
     html_fulltext = html_extract_fulltext_teixml(html_resource.body)
-    raw_resources = html_extract_resources(html_resource.terminal_url, html_doc, adblock)
+    html_scope = html_guess_scope(url, html_doc, html_biblio, html_fulltext.get('tei_xml'))
+    if html_scope not in ('article-fulltext', 'unknown'):
+        return IngestWebResult(
+            status="wrong-scope",
+            hit=False,
+            cdx=html_resource.cdx and cdx_to_dict(html_resource.cdx),
+            file_meta=file_meta,
+            html_biblio=html_biblio,
+            html_scope=html_scope,
+        )
 
-    # XXX:
-    when = None
+    raw_resources = html_extract_resources(html_resource.terminal_url, html_doc, adblock)
+    assert len(raw_resources) <= 200
+
+    when = parse_cdx_datetime(html_resource.cdx.datetime)
 
     full_resources: List[WebResource] = []
     if quick_mode:
@@ -158,10 +256,12 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
 
     output = IngestWebResult(
         status="success",
-        html_resource=html_resource,
+        hit=True,
+        cdx=html_resource.cdx and cdx_to_dict(html_resource.cdx),
         file_meta=file_meta,
         html_fulltext=html_fulltext,
-        html_meta=html_meta,
+        html_biblio=html_biblio,
+        html_scope=html_scope,
         subresources=full_resources,
     )
     return output
@@ -206,7 +306,7 @@ def main() -> None:
 
     if args.func == "run_single":
         result = run_single(args.url, args.timestamp, args.quick_mode)
-        print(result.json(indent=2))
+        print(result.json(indent=2, exclude_none=True))
     else:
         #func = getattr(wp, args.func)
         #func()
