@@ -155,6 +155,8 @@ def parse_cdx_line(raw_cdx: str, normalize=True) -> Optional[dict]:
     )
 
 def parse_cdx_datetime(dt_str: str) -> Optional[datetime.datetime]:
+    if not dt_str:
+        return None
     try:
         return datetime.datetime.strptime(dt_str, "%Y%m%d%H%M%S")
     except Exception:
@@ -164,7 +166,16 @@ def test_parse_cdx_datetime() -> None:
     assert parse_cdx_datetime("") == None
     assert parse_cdx_datetime("asdf") == None
     assert parse_cdx_datetime("19930203123045") != None
+    assert parse_cdx_datetime("20201028235103") == datetime.datetime(year=2020, month=10, day=28, hour=23, minute=51, second=3)
 
+def datetime_to_cdx(dt: datetime.datetime) -> str:
+    return '%04d%02d%02d%02d%02d%02d' % (
+        dt.year, dt.month, dt.day,
+        dt.hour, dt.minute, dt.second,
+    )
+
+def test_datetime_to_cdx() -> None:
+    assert "20201028235103" == datetime_to_cdx(datetime.datetime(year=2020, month=10, day=28, hour=23, minute=51, second=3))
 
 def requests_retry_session(retries=10, backoff_factor=3,
         status_forcelist=(500, 502, 504), session=None) -> requests.Session:
