@@ -232,7 +232,7 @@ class CdxApiClient:
             assert row.status_code == filter_status_code
         return row
 
-    def lookup_best(self, url, max_age_days=None, best_mimetype=None):
+    def lookup_best(self, url, max_age_days=None, best_mimetype=None, closest=None):
         """
         Fetches multiple CDX rows for the given URL, tries to find the most recent.
 
@@ -270,7 +270,13 @@ class CdxApiClient:
         if max_age_days:
             since = datetime.date.today() - datetime.timedelta(days=max_age_days)
             params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day),
+        if closest:
+            params['closest'] = closest
+            params['sort'] = "closest"
+        print(params)
         rows = self._query_api(params)
+        for r in rows:
+            print(f"  {r.datetime}")
         if not rows:
             return None
 
@@ -568,7 +574,7 @@ class WaybackClient:
         else:
             return None
 
-    def lookup_resource(self, start_url, best_mimetype=None):
+    def lookup_resource(self, start_url, best_mimetype=None, closest=None):
         """
         Looks in wayback for a resource starting at the URL, following any
         redirects. Returns a ResourceResult object, which may indicate a
@@ -596,7 +602,7 @@ class WaybackClient:
         urls_seen = [start_url]
         for i in range(self.max_redirects):
             print("  URL: {}".format(next_url), file=sys.stderr)
-            cdx_row = self.cdx_client.lookup_best(next_url, best_mimetype=best_mimetype)
+            cdx_row = self.cdx_client.lookup_best(next_url, best_mimetype=best_mimetype, closest=closest)
             #print(cdx_row, file=sys.stderr)
             if not cdx_row:
                 return ResourceResult(
