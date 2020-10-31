@@ -25,6 +25,9 @@ def html_extract_fulltext_teixml(doc: bytes) -> dict:
     )
     if tei_xml:
         return dict(status="success", tei_xml=tei_xml)
+    elif doc.startswith(b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 2012"http://www.w3.org/TR/html4/loose.dtd">'):
+        # hack for firstmonday.org
+        return html_extract_fulltext_teixml(doc[106:])
     else:
         return dict(status="empty-xml")
 
