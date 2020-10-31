@@ -10,7 +10,7 @@ def test_html_metadata_plos() -> None:
     with open('tests/files/plos_one_article.html', 'r') as f:
         plos_html = f.read()
 
-    meta = html_extract_biblio(HTMLParser(plos_html))
+    meta = html_extract_biblio("http://example.org", HTMLParser(plos_html))
     assert meta is not None
     assert meta.title == "Assessment on reticuloendotheliosis virus infection in specific-pathogen-free chickens based on detection of yolk antibody"
     assert meta.doi == "10.1371/journal.pone.0213978"
@@ -46,7 +46,7 @@ def test_html_metadata_elife() -> None:
     with open('tests/files/elife_article.html', 'r') as f:
         elife_html = f.read()
 
-    meta = html_extract_biblio(HTMLParser(elife_html))
+    meta = html_extract_biblio("http://example.org", HTMLParser(elife_html))
     assert meta is not None
     assert meta.title == "Parallel visual circuitry in a basal chordate"
     assert meta.doi == "10.7554/eLife.44753"
@@ -70,7 +70,7 @@ def test_html_metadata_peerj() -> None:
     with open('tests/files/peerj_oa_article.html', 'r') as f:
         peerj_html = f.read()
 
-    meta = html_extract_biblio(HTMLParser(peerj_html))
+    meta = html_extract_biblio("http://example.org", HTMLParser(peerj_html))
     assert meta is not None
     assert meta.title == "The state of OA: a large-scale analysis of the prevalence and impact of Open Access articles"
     assert meta.doi == "10.7717/peerj.4375"
@@ -88,6 +88,7 @@ def test_html_metadata_peerj() -> None:
     assert meta.container_name == "PeerJ"
     # "2018-02-13"
     assert meta.release_date == datetime.date(year=2018, month=2, day=13)
+    assert meta.xml_fulltext_url and ".xml" in meta.xml_fulltext_url
 
 
 def test_html_metadata_nature() -> None:
@@ -95,7 +96,7 @@ def test_html_metadata_nature() -> None:
     with open('tests/files/nature_article.html', 'r') as f:
         nature_html = f.read()
 
-    meta = html_extract_biblio(HTMLParser(nature_html))
+    meta = html_extract_biblio("http://example.org", HTMLParser(nature_html))
     assert meta is not None
     assert meta.title == "More than 100 scientific journals have disappeared from the Internet"
     assert meta.doi == "10.1038/d41586-020-02610-z"
@@ -115,7 +116,7 @@ def test_html_metadata_ojs3() -> None:
     with open('tests/files/first_monday_ojs3_landingpage.html', 'r') as f:
         ojs3_html = f.read()
 
-    meta = html_extract_biblio(HTMLParser(ojs3_html))
+    meta = html_extract_biblio("http://example.org", HTMLParser(ojs3_html))
     assert meta is not None
     assert meta.title == "Surveillance, stigma & sociotechnical design for HIV"
     assert meta.doi == "10.5210/fm.v25i10.10274"
@@ -140,7 +141,7 @@ def test_html_metadata_dlib() -> None:
     with open('tests/files/dlib_05vanhyning.html', 'r') as f:
         dlib_html = f.read()
 
-    meta = html_extract_biblio(HTMLParser(dlib_html))
+    meta = html_extract_biblio("http://example.org", HTMLParser(dlib_html))
     assert meta is not None
     assert meta.doi == "10.1045/may2017-vanhyning"
     # "2017-05-15"
@@ -159,7 +160,7 @@ def test_html_metadata_dc_case() -> None:
     <body>Hi.</body>
     </html>"""
 
-    meta = html_extract_biblio(HTMLParser(snippet))
+    meta = html_extract_biblio("http://example.org", HTMLParser(snippet))
     assert meta is not None
     assert meta.issue == "123"
 

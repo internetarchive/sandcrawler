@@ -6,7 +6,7 @@ import json
 import datetime
 import argparse
 import xml.etree.ElementTree as ET
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Tuple
 
 import trafilatura
 import pydantic
@@ -75,7 +75,7 @@ class IngestWebResult(pydantic.BaseModel):
         }
 
 
-def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> (dict, ResourceResult):
+def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> Tuple[dict, ResourceResult]:
     if file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
         print("transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
         inner_body = gzip.decompress(resource.body)
@@ -233,7 +233,7 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
         )
 
     html_doc = HTMLParser(html_resource.body)
-    html_biblio = html_extract_biblio(html_doc)
+    html_biblio = html_extract_biblio(url, html_doc)
     html_fulltext = html_extract_fulltext_teixml(html_resource.body)
     html_scope = html_guess_scope(url, html_doc, html_biblio, html_fulltext.get('tei_xml'))
     if html_scope not in ('article-fulltext', 'unknown'):

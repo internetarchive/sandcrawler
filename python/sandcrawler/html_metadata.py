@@ -232,11 +232,7 @@ class BiblioMetadata(pydantic.BaseModel):
     xml_fulltext_url: Optional[str]
 
 
-def html_extract_biblio(doc: HTMLParser) -> Optional[BiblioMetadata]:
-    """
-    TODO:
-    - meta dc.identifier: parse DOI
-    """
+def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadata]:
 
     meta: Any = dict()
     head = doc.css_first("head")
@@ -261,6 +257,12 @@ def html_extract_biblio(doc: HTMLParser) -> Optional[BiblioMetadata]:
                             meta[field] = []
                         meta[field].append(val.attrs['content'])
                 break
+
+    # non-<meta> lookups
+    if not meta.get('xml_fulltext_url'):
+        val = head.css_first("link[rel='alternate'][type='application/xml']")
+        if val and val.attrs['href']:
+            meta['xml_fulltext_url'] = val.attrs['href']
 
     # TODO: replace with clean_doi() et al
     if meta.get('doi') and meta.get('doi').startswith('doi:'):
@@ -289,6 +291,11 @@ def html_extract_biblio(doc: HTMLParser) -> Optional[BiblioMetadata]:
         release_type = RELEASE_TYPE_MAP.get(raw_release_type.lower().strip())
         if release_type:
             meta['release_type'] = release_type
+
+    # resolve relative URLs
+    for key in ('pdf_fulltext_url', 'html_fulltext_url', 'xml_fulltext_url'):
+        if meta.get(key):
+            meta[key] = urllib.parse.urljoin(doc_url, meta[key])
 
     return BiblioMetadata(**meta)
 
