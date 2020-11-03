@@ -39,6 +39,32 @@ Broken domains, past 30 days:
     ORDER BY COUNT DESC
     LIMIT 25;
 
+Summary of significant domains and status, past 7 days:
+
+    SELECT domain, status, count
+    FROM (
+        SELECT domain, status, COUNT((domain, status)) as count
+        FROM (
+            SELECT
+                ingest_file_result.ingest_type,
+                ingest_file_result.status,
+                substring(ingest_file_result.terminal_url FROM '[^/]+://([^/]*)') AS domain
+            FROM ingest_file_result
+            LEFT JOIN ingest_request
+                ON ingest_file_result.ingest_type = ingest_request.ingest_type
+                AND ingest_file_result.base_url = ingest_request.base_url
+            WHERE
+                ingest_file_result.updated >= NOW() - '7 day'::INTERVAL
+                AND ingest_request.ingest_type = 'pdf'
+                AND ingest_request.ingest_request_source = 'fatcat-changelog'
+        ) t1
+        WHERE t1.domain != ''
+        GROUP BY CUBE (domain, status)
+    ) t2
+    WHERE count > 500
+    ORDER BY domain ASC , count DESC;
+
+
 Throughput per day, and success, for past 30 days:
 
     SELECT ingest_request.ingest_type,
