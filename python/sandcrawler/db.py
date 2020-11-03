@@ -43,6 +43,15 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
+    def get_html_meta(self, sha1):
+        resp = requests.get(self.api_url + "/html_meta", params=dict(sha1hex='eq.'+sha1))
+        resp.raise_for_status()
+        resp = resp.json()
+        if resp:
+            return resp[0]
+        else:
+            return None
+
     def get_file_meta(self, sha1):
         resp = requests.get(self.api_url + "/file_meta", params=dict(sha1hex='eq.'+sha1))
         resp.raise_for_status()
@@ -219,6 +228,41 @@ class SandcrawlerPostgresClient:
                 pdf_created=EXCLUDED.pdf_created,
                 pdf_version=EXCLUDED.pdf_version,
                 metadata=EXCLUDED.metadata
+            """
+        else:
+            raise NotImplementedError("on_conflict: {}".format(on_conflict))
+        sql += " RETURNING xmax;"
+        batch = [d.to_sql_tuple() for d in batch]
+        # filter out duplicate rows by key (sha1hex)
+        batch_dict = dict()
+        for b in batch:
+            batch_dict[b[0]] = b
+        batch = list(batch_dict.values())
+        resp = psycopg2.extras.execute_values(cur, sql, batch, page_size=250, fetch=True)
+        return self._inserts_and_updates(resp, on_conflict)
+
+    def insert_html_meta(self, cur, batch, on_conflict="nothing"):
+        """
+        batch elements are expected to have .to_sql_tuple() method
+        """
+        sql = """
+            INSERT INTO
+            html_meta (sha1hex, updated, status, has_teixml, has_thumbnail, word_count, resource_count, biblio, resources)
+            VALUES %s
+            ON CONFLICT (sha1hex) DO
+        """
+        if on_conflict.lower() == "nothing":
+            sql += " NOTHING"
+        elif on_conflict.lower() == "update":
+            sql += """ UPDATE SET
+                updated=EXCLUDED.updated,
+                status=EXCLUDED.status,
+                has_teixml=EXCLUDED.has_teixml,
+                has_thumbnail=EXCLUDED.has_thumbnail,
+                word_count=EXCLUDED.word_count,
+                resource_count=EXCLUDED.resource_count,
+                biblio=EXCLUDED.biblio,
+                resources=EXCLUDED.resources
             """
         else:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))

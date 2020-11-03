@@ -114,6 +114,20 @@ CREATE TABLE IF NOT EXISTS pdf_meta (
     --    encrypted
 );
 
+CREATE TABLE IF NOT EXISTS html_meta (
+    sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
+    updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    status              TEXT CHECK (octet_length(status) >= 1) NOT NULL,
+    has_teixml          BOOLEAN NOT NULL,
+    has_thumbnail       BOOLEAN NOT NULL,
+    word_count          INT CHECK (word_count >= 0),
+    resource_count      INT CHECK (resource_count >= 0),
+    biblio              JSONB,
+    resources           JSONB,
+    -- biblio JSON fields are similar to fatcat release schema
+    -- resources JSON object is a list of objects with keys like webcapture CDX schema
+);
+
 CREATE TABLE IF NOT EXISTS ingest_request (
     link_source             TEXT NOT NULL CHECK (octet_length(link_source) >= 1),
     link_source_id          TEXT NOT NULL CHECK (octet_length(link_source_id) >= 1),
@@ -128,6 +142,7 @@ CREATE TABLE IF NOT EXISTS ingest_request (
     --   ext_ids (source/source_id sometimes enough)
     --   fatcat_release (if ext_ids and source/source_id not specific enough; eg SPN)
     --   edit_extra
+    -- ingest type can be: pdf, xml, html
 
     PRIMARY KEY (link_source, link_source_id, ingest_type, base_url)
 );
