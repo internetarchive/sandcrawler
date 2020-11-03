@@ -273,10 +273,8 @@ class CdxApiClient:
         if closest:
             params['closest'] = closest
             params['sort'] = "closest"
-        print(params)
+        #print(params, file=sys.stderr)
         rows = self._query_api(params)
-        for r in rows:
-            print(f"  {r.datetime}")
         if not rows:
             return None
 
@@ -984,6 +982,7 @@ class SavePageNowClient:
             elsevier_pdf_cdx = wayback_client.cdx_client.lookup_best(
                 spn_result.request_url,
                 best_mimetype="application/pdf",
+                closest=closest,
             )
             if elsevier_pdf_cdx and elsevier_pdf_cdx.mimetype == "application/pdf":
                 print("Trying pdf.sciencedirectassets.com hack!", file=sys.stderr)
