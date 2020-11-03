@@ -76,8 +76,10 @@ class IngestFileWorker(SandcrawlerWorker):
 
             # temporary, until we implement specific fetch and 'petabox' output
             "://archive.org/",
+            "://www.archive.org/",
             "://web.archive.org/web/",
             "://openlibrary.org/",
+            "://www.openlibrary.org/",
             "://fatcat.wiki/",
 
             # Domain squats
