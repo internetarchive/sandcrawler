@@ -49,7 +49,8 @@ Start small, to test no-capture behavior:
 
     cat /grande/snapshots/unpaywall_noingest_2020-10-09.ingest_request.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
 
-Overall status after that:
+
+## Check Pre-Crawl Status
 
     SELECT ingest_file_result.status, COUNT(*)
     FROM ingest_request
@@ -61,55 +62,91 @@ Overall status after that:
         AND ingest_request.link_source = 'unpaywall'
     GROUP BY status
     ORDER BY COUNT DESC
-    LIMIT 25;
+    LIMIT 20;
 
-                   status                |  count   
-    -------------------------------------+----------
-     success                             | 23661084
-     no-capture                          |  3015448
-     no-pdf-link                         |  2302092
-     redirect-loop                       |  1542484
-     terminal-bad-status                 |  1044654
-     wrong-mimetype                      |   114315
-     link-loop                           |    36357
-     cdx-error                           |    20055
-     null-body                           |    14513
-     wayback-error                       |    14175
-     gateway-timeout                     |     3747
-     spn2-cdx-lookup-failure             |     1250
-     petabox-error                       |     1171
-     redirects-exceeded                  |      752
-     invalid-host-resolution             |      464
-     bad-redirect                        |      131
-     spn2-error                          |      109
-     spn2-error:job-failed               |       91
-     timeout                             |       19
-                                         |       13
-     spn2-error:soft-time-limit-exceeded |        9
-     bad-gzip-encoding                   |        6
-     spn2-error:pending                  |        1
-     skip-url-blocklist                  |        1
-     pending                             |        1
-    (25 rows)
 
-## Crawl
+             status          |  count   
+    -------------------------+----------
+     success                 | 23661282
+     no-capture              |  3015447
+     no-pdf-link             |  2302102
+     redirect-loop           |  1542566
+     terminal-bad-status     |  1044676
+     wrong-mimetype          |   114315
+     link-loop               |    36358
+     cdx-error               |    20150
+     null-body               |    14513
+     wayback-error           |    13644
+     gateway-timeout         |     3776
+     spn2-cdx-lookup-failure |     1260
+     petabox-error           |     1171
+     redirects-exceeded      |      752
+     invalid-host-resolution |      464
+     spn2-error              |      147
+     bad-redirect            |      131
+     spn2-error:job-failed   |       91
+     wayback-content-error   |       45
+     timeout                 |       19
+    (20 rows)
 
-Re-crawl broadly (eg, all URLs that have failed before, not just `no-capture`):
+## Dump Seedlist
+
+Dump rows:
 
     COPY (
-        SELECT row_to_json(r) FROM (
-            SELECT ingest_request.*, ingest_file_result.terminal_url as terminal_url
+        SELECT row_to_json(t1.*)
+        FROM (
+            SELECT ingest_request.*, ingest_file_result as result
             FROM ingest_request
             LEFT JOIN ingest_file_result
                 ON ingest_file_result.ingest_type = ingest_request.ingest_type
                 AND ingest_file_result.base_url = ingest_request.base_url
             WHERE
                 ingest_request.ingest_type = 'pdf'
-                AND ingest_request.ingest_request_source = 'unpaywall'
-                AND ingest_file_result.status != 'success'
-        ) r
-    ) TO '/grande/snapshots/oa_doi_reingest_recrawl_20201014.rows.json';
-    => 8111845
+                AND ingest_request.link_source = 'unpaywall'
+                AND (ingest_file_result.status = 'no-capture'
+                    OR ingest_file_result.status = 'cdx-error'
+                    OR ingest_file_result.status = 'wayback-error'
+                    OR ingest_file_result.status = 'gateway-timeout'
+                    OR ingest_file_result.status = 'spn2-cdx-lookup-failure'
+                )
+                AND ingest_request.base_url NOT LIKE '%journals.sagepub.com%'
+                AND ingest_request.base_url NOT LIKE '%pubs.acs.org%'
+                AND ingest_request.base_url NOT LIKE '%ahajournals.org%'
+                AND ingest_request.base_url NOT LIKE '%www.journal.csj.jp%'
+                AND ingest_request.base_url NOT LIKE '%aip.scitation.org%'
+                AND ingest_request.base_url NOT LIKE '%academic.oup.com%'
+                AND ingest_request.base_url NOT LIKE '%tandfonline.com%'
+                AND ingest_file_result.terminal_url NOT LIKE '%journals.sagepub.com%'
+                AND ingest_file_result.terminal_url NOT LIKE '%pubs.acs.org%'
+                AND ingest_file_result.terminal_url NOT LIKE '%ahajournals.org%'
+                AND ingest_file_result.terminal_url NOT LIKE '%www.journal.csj.jp%'
+                AND ingest_file_result.terminal_url NOT LIKE '%aip.scitation.org%'
+                AND ingest_file_result.terminal_url NOT LIKE '%academic.oup.com%'
+                AND ingest_file_result.terminal_url NOT LIKE '%tandfonline.com%'
+        ) t1
+    ) TO '/grande/snapshots/unpaywall_seedlist_2020-11-02.rows.json';
+    => 2,936,404
 
-Hrm. Not sure how to feel about the no-pdf-link. Guess it is fine!
+    # TODO: in the future also exclude "www.archive.org"
 
+Prep ingest requests (for post-crawl use):
+
+    ./scripts/ingestrequest_row2json.py /grande/snapshots/unpaywall_seedlist_2020-11-02.rows.json | pv -l > /grande/snapshots/unpaywall_crawl_ingest_2020-11-02.json
+
+And actually dump seedlist(s):
+
+    cat /grande/snapshots/unpaywall_seedlist_2020-11-02.rows.json | jq -r .base_url | sort -u -S 4G > /grande/snapshots/unpaywall_seedlist_2020-11-02.url.txt
+    cat /grande/snapshots/unpaywall_seedlist_2020-11-02.rows.json | rg '"no-capture"' | jq -r .result.terminal_url | rg -v ^null$ | sort -u -S 4G > /grande/snapshots/unpaywall_seedlist_2020-11-02.terminal_url.txt
+    cat /grande/snapshots/unpaywall_seedlist_2020-11-02.rows.json | rg -v '"no-capture"' | jq -r .base_url | sort -u -S 4G > /grande/snapshots/unpaywall_seedlist_2020-11-02.no_terminal_url.txt
+
+    wc -l unpaywall_seedlist_2020-11-02.*.txt
+     2701178 unpaywall_seedlist_2020-11-02.terminal_url.txt
+     2713866 unpaywall_seedlist_2020-11-02.url.txt
+
+With things like jsessionid, suspect that crawling just the terminal URLs is
+going to work better than both full and terminal.
+
+Finding a fraction of `no-capture` which have partial/stub URLs as terminal.
+
+TODO: investigate scale of partial/stub `terminal_url` (eg, not HTTP/S or FTP).
