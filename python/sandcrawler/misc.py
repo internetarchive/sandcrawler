@@ -26,6 +26,10 @@ def gen_file_metadata(blob: bytes) -> dict:
     """
     assert blob
     mimetype = magic.Magic(mime=True).from_buffer(blob)
+    if mimetype in ("application/xml", "text/xml"):
+        # crude check for JATS XML, using only first 1 kB of file
+        if b"<article " in blob[:1024] and not b"<html" in blob[:1024]:
+            mimetype = "application/jats+xml"
     hashes = [
         hashlib.sha1(),
         hashlib.sha256(),
