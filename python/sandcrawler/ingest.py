@@ -18,6 +18,7 @@ from sandcrawler.html import extract_fulltext_url
 from sandcrawler.html_metadata import html_extract_fulltext_url, XML_FULLTEXT_PATTERNS
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
+from sandcrawler.xml import xml_reserialize
 
 
 class IngestFileWorker(SandcrawlerWorker):
@@ -316,10 +317,11 @@ class IngestFileWorker(SandcrawlerWorker):
         count), or attempting to fetch sub-resources.
         """
         if self.xmldoc_sink and file_meta['mimetype'] == "application/jats+xml":
+            jats_xml = xml_reserialize(resource.body)
             msg = dict(
                 sha1hex=file_meta["sha1hex"],
                 status="success",
-                jats_xml=resource.body.encode('utf-8'),
+                jats_xml=jats_xml,
             )
             self.xmldoc_sink.push_record(msg, key=file_meta['sha1hex'])
         return dict(status="success")

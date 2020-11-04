@@ -10,8 +10,8 @@ x differential JATS XML and scielo XML from generic XML?
     if startswith "<article " and "<article-meta>" => JATS
 x refactor ingest worker to be more general
 x have ingest code publish body to kafka topic
+x write a persist worker
 / create/configure kafka topic
-/ write a persist worker
 - test everything locally
 - fatcat: ingest tool to create requests
 - fatcat: entity updates worker creates XML ingest requests for specific sources
@@ -26,6 +26,23 @@ that we currently ingest PDF fulltext.
 
 Currently this will just fetch the single XML document, which is often lacking
 figures, tables, and other required files.
+
+## Text Encoding
+
+Because we would like to treat XML as a string in a couple contexts, but XML
+can have multiple encodings (indicated in an XML header), we are in a bit of a
+bind. Simply parsing into unicode and then re-encoding as UTF-8 could result in
+a header/content mismatch. Any form of re-encoding will change the hash of the
+document. For recording in fatcat, the file metadata will be passed through.
+For storing in Kafka and blob store (for downstream analysis), we will parse
+the raw XML document (as "bytes") with an XML parser, then re-output with UTF-8
+encoding. The hash of the *original* XML file will be used as the key for
+refering to this document. This is unintuitive, but similar to what we are
+doing with PDF and HTML documents (extracting in a useful format, but keeping
+the original document's hash as a key).
+
+Unclear if we need to do this re-encode process for XML documents already in
+UTF-8 encoding.
 
 ## Ingest Worker
 
