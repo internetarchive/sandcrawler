@@ -20,7 +20,7 @@ grobid
 """
 
 import os
-from typing import Optional
+from typing import Optional, AnyStr
 import xml.etree.ElementTree
 
 from sandcrawler.workers import SandcrawlerWorker
@@ -518,12 +518,17 @@ class GenericPersistDocWorker(SandcrawlerWorker):
         self.s3_folder = kwargs.get('s3_folder', "unknown")
         self.doc_key = "unknown"
 
-    def process(self, record: dict, key: Optional[str] = None) -> None:
+    def process(self, record: dict, raw_key: Optional[AnyStr] = None) -> None:
 
         if record.get('status') != 'success' or not record.get(self.doc_key):
             return
 
-        assert key is not None and len(key) == 40 and isinstance(key, str)
+        assert raw_key is not None
+        if isinstance(raw_key, bytes):
+            key = raw_key.decode('utf-8')
+        elif isinstance(raw_key, str):
+            key = raw_key
+        assert len(key) == 40
         if 'sha1hex' in record:
             assert key == record['sha1hex']
 

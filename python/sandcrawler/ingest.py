@@ -336,7 +336,7 @@ class IngestFileWorker(SandcrawlerWorker):
         )
 
     def want(self, request: dict) -> bool:
-        if not request.get('ingest_type') in ('file', 'pdf'):
+        if not request.get('ingest_type') in ('file', 'pdf', 'xml'):
             return False
         return True
 

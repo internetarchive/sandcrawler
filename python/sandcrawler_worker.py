@@ -163,7 +163,6 @@ def run_persist_xml_doc(args: argparse.Namespace) -> None:
         consume_topic=consume_topic,
         group="persist-xml-doc",
         push_batches=False,
-        raw_records=True,
         batch_size=25,
     )
     pusher.run()
@@ -182,7 +181,6 @@ def run_persist_html_teixml(args: argparse.Namespace) -> None:
         consume_topic=consume_topic,
         group="persist-html-teixml",
         push_batches=False,
-        raw_records=True,
         batch_size=25,
     )
     pusher.run()
