@@ -8,12 +8,14 @@ import requests
 from typing import Optional, Tuple, Any, Dict
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from collections import namedtuple
+from selectolax.parser import HTMLParser
 
 from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackContentError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult, fix_transfer_encoding
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.pdfextract import process_pdf, PdfExtractResult
 from sandcrawler.misc import gen_file_metadata, clean_url
 from sandcrawler.html import extract_fulltext_url
+from sandcrawler.html_metadata import html_extract_fulltext_url, XML_FULLTEXT_PATTERNS
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
 
@@ -241,7 +243,7 @@ class IngestFileWorker(SandcrawlerWorker):
             }
         elif ingest_type == "xml":
             # TODO
-            raise NotImplementedError(f"process {ingest_type} hit")
+            return {}
         else:
             raise NotImplementedError(f"process {ingest_type} hit")
 
@@ -441,39 +443,50 @@ class IngestFileWorker(SandcrawlerWorker):
                 result['status'] = 'null-body'
                 return result
 
-            # here is where we split based on ingest type
+            # here we split based on ingest type to try and extract a next hop
             html_ish_resource = bool(
                 "html" in file_meta['mimetype']
                 or "xhtml" in file_meta['mimetype']
                 or "application/xml" in file_meta['mimetype']
                 or "text/xml" in file_meta['mimetype']
             )
-            if ingest_type == "pdf":
-                if html_ish_resource:
-                    # Got landing page or similar. Some XHTML detected as "application/xml"
-                    fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
+            if ingest_type == "pdf" and html_ish_resource:
+                # Got landing page or similar. Some XHTML detected as "application/xml"
+                fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
+                result['extract_next_hop'] = fulltext_url
 
-                    result['html'] = fulltext_url
-                    if not fulltext_url:
-                        result['status'] = 'no-pdf-link'
-                        return result
-                    next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url')
-                    assert next_url
-                    next_url = clean_url(next_url)
+                if not fulltext_url:
+                    result['status'] = 'no-pdf-link'
+                    return result
+                next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url')
+                assert next_url
+                next_url = clean_url(next_url)
+                print("[PARSE  {:>6}] {}  {}".format(
+                        ingest_type,
+                        fulltext_url.get('technique'),
+                        next_url,
+                    ),
+                    file=sys.stderr)
+                if next_url in hops:
+                    result['status'] = 'link-loop'
+                    result['error_message'] = "repeated: {}".format(next_url)
+                    return result
+                hops.append(next_url)
+                continue
+            elif ingest_type == "xml" and html_ish_resource:
+                # parse with selectolax, extract XML fulltext URL
+                html_doc = HTMLParser(resource.body)
+                extract_next_hop = html_extract_fulltext_url(resource.terminal_url, html_doc, XML_FULLTEXT_PATTERNS)
+                if extract_next_hop:
+                    next_url = extract_next_hop[0]
+                    technique = extract_next_hop[1]
                     print("[PARSE  {:>6}] {}  {}".format(
                             ingest_type,
-                            fulltext_url.get('technique'),
+                            technique,
                             next_url,
                         ),
                         file=sys.stderr)
-                    if next_url in hops:
-                        result['status'] = 'link-loop'
-                        result['error_message'] = "repeated: {}".format(next_url)
-                        return result
-                    hops.append(next_url)
                     continue
-            else:
-                raise NotImplementedError()
 
             # default is to NOT keep hopping
             break
@@ -501,8 +514,12 @@ class IngestFileWorker(SandcrawlerWorker):
             result['revisit_cdx'] = cdx_to_dict(resource.revisit_cdx)
 
         if ingest_type == "pdf":
-            if not file_meta['mimetype'] == "application/pdf":
+            if file_meta['mimetype'] != "application/pdf":
                 result['status'] = "wrong-mimetype"  # formerly: "other-mimetype"
+                return result
+        elif ingest_type == "xml":
+            if file_meta['mimetype'] not in ("application/xml", "text/xml", "application/jats+xml"):
+                result['status'] = "wrong-mimetype"
                 return result
         else:
             raise NotImplementedError()
