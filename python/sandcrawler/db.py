@@ -1,6 +1,7 @@
 
 import json
 import datetime
+from typing import Optional
 
 import psycopg2
 import psycopg2.extras
@@ -43,12 +44,15 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
-    def get_html_meta(self, sha1):
-        resp = requests.get(self.api_url + "/html_meta", params=dict(sha1hex='eq.'+sha1))
+    def get_html_meta(self, sha1hex: str) -> Optional[dict]:
+        resp = requests.get(
+            self.api_url + "/html_meta",
+            params=dict(sha1hex=f"eq.{sha1hex}"),
+        )
         resp.raise_for_status()
-        resp = resp.json()
-        if resp:
-            return resp[0]
+        resp_json = resp.json()
+        if resp_json:
+            return resp_json[0]
         else:
             return None
 
@@ -61,12 +65,15 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
-    def get_ingest_file_result(self, url):
-        resp = requests.get(self.api_url + "/ingest_file_result", params=dict(base_url='eq.'+url))
+    def get_ingest_file_result(self, ingest_type: str, url: str) -> Optional[dict]:
+        resp = requests.get(
+            self.api_url + "/ingest_file_result",
+            params=dict(ingest_type=f"eq.{ingest_type}", base_url=f"eq.{url}"),
+        )
         resp.raise_for_status()
-        resp = resp.json()
-        if resp:
-            return resp[0]
+        resp_json = resp.json()
+        if resp_json:
+            return resp_json[0]
         else:
             return None
 
@@ -247,7 +254,7 @@ class SandcrawlerPostgresClient:
         """
         sql = """
             INSERT INTO
-            html_meta (sha1hex, updated, status, has_teixml, has_thumbnail, word_count, resource_count, biblio, resources)
+            html_meta (sha1hex, updated, status, scope, has_teixml, has_thumbnail, word_count, biblio, resources)
             VALUES %s
             ON CONFLICT (sha1hex) DO
         """
@@ -257,10 +264,10 @@ class SandcrawlerPostgresClient:
             sql += """ UPDATE SET
                 updated=EXCLUDED.updated,
                 status=EXCLUDED.status,
+                scope=EXCLUDED.scope,
                 has_teixml=EXCLUDED.has_teixml,
                 has_thumbnail=EXCLUDED.has_thumbnail,
                 word_count=EXCLUDED.word_count,
-                resource_count=EXCLUDED.resource_count,
                 biblio=EXCLUDED.biblio,
                 resources=EXCLUDED.resources
             """

@@ -118,12 +118,12 @@ CREATE TABLE IF NOT EXISTS html_meta (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     status              TEXT CHECK (octet_length(status) >= 1) NOT NULL,
+    scope               TEXT CHECK (octet_length(status) >= 1),
     has_teixml          BOOLEAN NOT NULL,
     has_thumbnail       BOOLEAN NOT NULL,
     word_count          INT CHECK (word_count >= 0),
-    resource_count      INT CHECK (resource_count >= 0),
     biblio              JSONB,
-    resources           JSONB,
+    resources           JSONB
     -- biblio JSON fields are similar to fatcat release schema
     -- resources JSON object is a list of objects with keys like webcapture CDX schema
 );
