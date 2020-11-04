@@ -363,7 +363,7 @@ class WaybackClient:
             #print("offset: {} csize: {} uri: {}".format(offset, csize, warc_uri), file=sys.stderr)
             gwb_record = self.rstore.load_resource(warc_uri, offset, csize)
         except wayback.exception.ResourceUnavailable:
-            print("Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
+            print("  Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
             raise PetaboxError("failed to load file contents from wayback/petabox (ResourceUnavailable)")
         except ValueError as ve:
             raise PetaboxError("failed to load file contents from wayback/petabox (ValueError: {})".format(ve))
@@ -511,7 +511,7 @@ class WaybackClient:
             # TODO: don't need *all* these hashes, just sha1
             file_meta = gen_file_metadata(resp.content)
             if cdx_sha1hex != file_meta['sha1hex']:
-                print("REPLAY MISMATCH: cdx:{} replay:{}".format(
+                print("  REPLAY MISMATCH: cdx:{} replay:{}".format(
                         cdx_sha1hex,
                         file_meta['sha1hex']),
                     file=sys.stderr)
@@ -672,7 +672,7 @@ class WaybackClient:
                     )
                     assert 300 <= resource.status_code < 400
                     if not resource.location:
-                        print("bad redirect record: {}".format(cdx_row), file=sys.stderr)
+                        print("  bad redirect record: {}".format(cdx_row), file=sys.stderr)
                         return ResourceResult(
                             start_url=start_url,
                             hit=False,
@@ -701,7 +701,7 @@ class WaybackClient:
                         next_url = clean_url(next_url)
                     cdx_row = cdx_partial_from_row(cdx_row)
                     if not next_url:
-                        print("bad redirect record: {}".format(cdx_row), file=sys.stderr)
+                        print("  bad redirect record: {}".format(cdx_row), file=sys.stderr)
                         return ResourceResult(
                             start_url=start_url,
                             hit=False,
@@ -982,13 +982,12 @@ class SavePageNowClient:
             elsevier_pdf_cdx = wayback_client.cdx_client.lookup_best(
                 spn_result.request_url,
                 best_mimetype="application/pdf",
-                closest=closest,
             )
             if elsevier_pdf_cdx and elsevier_pdf_cdx.mimetype == "application/pdf":
-                print("Trying pdf.sciencedirectassets.com hack!", file=sys.stderr)
+                print("  Trying pdf.sciencedirectassets.com hack!", file=sys.stderr)
                 cdx_row = elsevier_pdf_cdx
             else:
-                print("Failed pdf.sciencedirectassets.com hack!", file=sys.stderr)
+                print("  Failed pdf.sciencedirectassets.com hack!", file=sys.stderr)
                 #print(elsevier_pdf_cdx, file=sys.stderr)
 
         if not cdx_row:
@@ -1004,7 +1003,7 @@ class SavePageNowClient:
                     retry_sleep=9.0,
                 )
             except KeyError as ke:
-                print("CDX KeyError: {}".format(ke), file=sys.stderr)
+                print("  CDX KeyError: {}".format(ke), file=sys.stderr)
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,

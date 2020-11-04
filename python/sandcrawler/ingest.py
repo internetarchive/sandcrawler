@@ -193,7 +193,7 @@ class IngestFileWorker(SandcrawlerWorker):
                     force_simple_get = 1
                     break
             resource = self.spn_client.crawl_resource(url, self.wayback_client, force_simple_get=force_simple_get)
-        print("[FETCH {}\t] {}\t{}".format(
+        print("[FETCH {:>6}] {}  {}".format(
                 via,
                 resource.status,
                 resource.terminal_url or url),
@@ -331,10 +331,10 @@ class IngestFileWorker(SandcrawlerWorker):
 
         for block in self.base_url_blocklist:
             if block in base_url:
-                print("[SKIP {}\t] {}".format(ingest_type, base_url), file=sys.stderr)
+                print("[SKIP {:>6}] {}".format(ingest_type, base_url), file=sys.stderr)
                 return dict(request=request, hit=False, status="skip-url-blocklist")
 
-        print("[INGEST {}\t] {}".format(ingest_type, base_url), file=sys.stderr)
+        print("[INGEST {:>6}] {}".format(ingest_type, base_url), file=sys.stderr)
 
         best_mimetype = None
         if ingest_type == "pdf":
