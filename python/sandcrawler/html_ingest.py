@@ -16,19 +16,21 @@ from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 
 
-def html_extract_fulltext_teixml(doc: bytes) -> dict:
+TRAFILATURA_AGENT = f"trafilatura/{trafilatura.__version__}"
+
+def html_extract_body_teixml(doc: bytes) -> dict:
     tei_xml = trafilatura.extract(doc,
         tei_output=True,
         include_comments=False,
         include_formatting=True,
     )
     if tei_xml:
-        return dict(status="success", tei_xml=tei_xml)
+        return dict(status="success", agent=TRAFILATURA_AGENT, tei_xml=tei_xml)
     elif doc.startswith(b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 2012"http://www.w3.org/TR/html4/loose.dtd">'):
         # hack for firstmonday.org
-        return html_extract_fulltext_teixml(doc[106:])
+        return html_extract_body_teixml(doc[106:])
     else:
-        return dict(status="empty-xml")
+        return dict(status="empty-xml", agent=TRAFILATURA_AGENT)
 
 def teixml_body_text(doc_xml: str) -> str:
     ns = {"tei": "http://www.tei-c.org/ns/1.0"}
@@ -58,14 +60,15 @@ class WebResource(pydantic.BaseModel):
 class IngestWebResult(pydantic.BaseModel):
     status: str
     hit: bool
+    error_message: Optional[str]
     cdx: Optional[dict]
     terminal: Optional[Any] # TODO
     request: Optional[Any]  # TODO
     file_meta: Optional[dict]
     html_biblio: Optional[BiblioMetadata]
-    html_scope: Optional[str]
-    html_fulltext: Optional[dict]
-    subresources: Optional[List[WebResource]]
+    scope: Optional[str]
+    html_body: Optional[dict]
+    html_resources: Optional[List[WebResource]]
 
     class Config:
         arbitrary_types_allowed = True
@@ -228,8 +231,8 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
 
     html_doc = HTMLParser(html_resource.body)
     html_biblio = html_extract_biblio(url, html_doc)
-    html_fulltext = html_extract_fulltext_teixml(html_resource.body)
-    html_scope = html_guess_scope(url, html_doc, html_biblio, html_fulltext.get('tei_xml'))
+    html_body = html_extract_body_teixml(html_resource.body)
+    html_scope = html_guess_scope(url, html_doc, html_biblio, html_body.get('tei_xml'))
     if html_scope not in ('article-fulltext', 'unknown'):
         return IngestWebResult(
             status="wrong-scope",
@@ -237,7 +240,7 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
             cdx=html_resource.cdx and cdx_to_dict(html_resource.cdx),
             file_meta=file_meta,
             html_biblio=html_biblio,
-            html_scope=html_scope,
+            scope=html_scope,
         )
 
     raw_resources = html_extract_resources(html_resource.terminal_url, html_doc, adblock)
@@ -256,10 +259,10 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
         hit=True,
         cdx=html_resource.cdx and cdx_to_dict(html_resource.cdx),
         file_meta=file_meta,
-        html_fulltext=html_fulltext,
+        html_body=html_body,
         html_biblio=html_biblio,
-        html_scope=html_scope,
-        subresources=full_resources,
+        scope=html_scope,
+        html_resources=full_resources,
     )
     return output
 

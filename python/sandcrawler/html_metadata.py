@@ -1,6 +1,6 @@
 
 import datetime
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Tuple, Dict
 import urllib.parse
 
 import dateparser
@@ -158,9 +158,6 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='citation_fulltext_html_url']",
         "meta[name='bepress_citation_fulltext_html_url']",
     ],
-    "xml_fulltext_url": [
-        "meta[name='citation_xml_url']",
-    ],
     "pdf_fulltext_url": [
         "meta[name='citation_pdf_url']",
         "meta[name='bepress_citation_pdf_url']",
@@ -187,6 +184,19 @@ HEAD_META_LIST_PATTERNS: Any = {
         "meta[name='dc.identifier']",
     ],
 }
+
+XML_FULLTEXT_PATTERNS: List[dict] = [
+    {
+        "selector": "meta[name='citation_xml_url']",
+        "attr": "content",
+        "why": "citation_xml_url",
+    },
+    {
+        "selector": "link[rel='alternate'][type='application/xml']",
+        "attr": "href",
+        "why": "alternate link",
+    },
+]
 
 RELEASE_TYPE_MAP = {
     "research article": "article-journal",
@@ -232,6 +242,27 @@ class BiblioMetadata(pydantic.BaseModel):
     xml_fulltext_url: Optional[str]
 
 
+def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict]) -> Optional[Tuple[str, str]]:
+    """
+    Tries to quickly extract fulltext URLs using a set of patterns. This
+    function is intendend to be generic across various extraction techniques.
+
+    Returns null or a tuple of (url, why)
+    """
+    for pattern in patterns:
+        if not 'selector' in pattern:
+            continue
+        elem = doc.css_first(pattern['selector'])
+        if not elem:
+            continue
+        if 'attr' in pattern:
+            val = elem.attrs[pattern['attr']]
+            if val:
+                val = urllib.parse.urljoin(doc_url, val)
+                assert val
+                return (val, pattern.get('why', 'unknown'))
+    return None
+
 def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadata]:
 
     meta: Any = dict()
@@ -258,11 +289,10 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
                         meta[field].append(val.attrs['content'])
                 break
 
-    # non-<meta> lookups
-    if not meta.get('xml_fulltext_url'):
-        val = head.css_first("link[rel='alternate'][type='application/xml']")
-        if val and val.attrs['href']:
-            meta['xml_fulltext_url'] = val.attrs['href']
+    # (some) fulltext extractions
+    xml_fulltext_url = html_extract_fulltext_url(doc_url, doc, XML_FULLTEXT_PATTERNS)
+    if xml_fulltext_url:
+        meta['xml_fulltext_url'] = xml_fulltext_url[0]
 
     # TODO: replace with clean_doi() et al
     if meta.get('doi') and meta.get('doi').startswith('doi:'):
@@ -293,7 +323,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
             meta['release_type'] = release_type
 
     # resolve relative URLs
-    for key in ('pdf_fulltext_url', 'html_fulltext_url', 'xml_fulltext_url'):
+    for key in ('pdf_fulltext_url', 'html_fulltext_url'):
         if meta.get(key):
             meta[key] = urllib.parse.urljoin(doc_url, meta[key])
 
