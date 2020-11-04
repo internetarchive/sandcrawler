@@ -1,7 +1,6 @@
 
 import io
 import sys
-import gzip
 import json
 import datetime
 import argparse
@@ -12,7 +11,7 @@ import trafilatura
 import pydantic
 from selectolax.parser import HTMLParser
 
-from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict
+from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding
 from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 
@@ -74,27 +73,22 @@ class IngestWebResult(pydantic.BaseModel):
             datetime.datetime: lambda dt: dt.isoformat(),
         }
 
-
-def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> Tuple[dict, ResourceResult]:
-    if file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
-        print("transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
-        inner_body = gzip.decompress(resource.body)
-        inner_resource = ResourceResult(
-            body=inner_body,
-            # copy all other fields
-            start_url=resource.start_url,
-            hit=resource.hit,
-            status=resource.status,
-            terminal_url=resource.terminal_url,
-            terminal_dt=resource.terminal_dt,
-            terminal_status_code=resource.terminal_status_code,
-            cdx=resource.cdx,
-            revisit_cdx=resource.revisit_cdx,
+    def to_sql_tuple(self) -> Tuple:
+        """
+        This is for the html_meta SQL table.
+        """
+        assert self.file_meta and "sha1hex" in self.file_meta
+        return (
+            self.file_meta["sha1hex"],
+            datetime.datetime.now(), # updated
+            self.status,
+            self.scope,
+            bool(self.html_body and self.html_body['status'] == 'success' and self.html_body['tei_xml']),
+            False,  # has_thumbnail
+            (self.html_body and self.html_body.get('word_count')) or None,
+            self.html_biblio,
+            self.html_resources,
         )
-        inner_file_meta = gen_file_metadata(inner_resource.body)
-        return (inner_file_meta, inner_resource)
-    else:
-        return (file_meta, resource)
 
 
 def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, when: Optional[datetime.datetime]) -> List[WebResource]:

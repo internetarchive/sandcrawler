@@ -3,10 +3,14 @@
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
-import os, sys, time
+import os
+import sys
+import time
+import gzip
 import json
 import requests
 import datetime
+from typing import Tuple
 from collections import namedtuple
 
 import http.client
@@ -1064,3 +1068,24 @@ class SavePageNowClient:
             revisit_cdx=revisit_cdx,
         )
 
+
+def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> Tuple[dict, ResourceResult]:
+    if resource.body and file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
+        print("  transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
+        inner_body = gzip.decompress(resource.body)
+        inner_resource = ResourceResult(
+            body=inner_body,
+            # copy all other fields
+            start_url=resource.start_url,
+            hit=resource.hit,
+            status=resource.status,
+            terminal_url=resource.terminal_url,
+            terminal_dt=resource.terminal_dt,
+            terminal_status_code=resource.terminal_status_code,
+            cdx=resource.cdx,
+            revisit_cdx=resource.revisit_cdx,
+        )
+        inner_file_meta = gen_file_metadata(inner_resource.body)
+        return (inner_file_meta, inner_resource)
+    else:
+        return (file_meta, resource)
