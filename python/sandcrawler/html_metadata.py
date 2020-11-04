@@ -189,12 +189,19 @@ XML_FULLTEXT_PATTERNS: List[dict] = [
     {
         "selector": "meta[name='citation_xml_url']",
         "attr": "content",
-        "why": "citation_xml_url",
+        "technique": "citation_xml_url",
     },
     {
         "selector": "link[rel='alternate'][type='application/xml']",
         "attr": "href",
-        "why": "alternate link",
+        "technique": "alternate link",
+    },
+    {
+        "in_doc_url": "scielo",
+        "in_fulltext_url": "articleXML",
+        "selector": "a[target='xml']",
+        "attr": "href",
+        "technique": "SciElo XML link",
     },
 ]
 
@@ -247,11 +254,14 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict
     Tries to quickly extract fulltext URLs using a set of patterns. This
     function is intendend to be generic across various extraction techniques.
 
-    Returns null or a tuple of (url, why)
+    Returns null or a tuple of (url, technique)
     """
     for pattern in patterns:
         if not 'selector' in pattern:
             continue
+        if 'in_doc_url' in pattern:
+            if not pattern['in_doc_url'] in doc_url:
+                continue
         elem = doc.css_first(pattern['selector'])
         if not elem:
             continue
@@ -260,7 +270,10 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict
             if val:
                 val = urllib.parse.urljoin(doc_url, val)
                 assert val
-                return (val, pattern.get('why', 'unknown'))
+                if 'in_fulltext_url' in pattern:
+                    if not pattern['in_fulltext_url'] in val:
+                        continue
+                return (val, pattern.get('technique', 'unknown'))
     return None
 
 def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadata]:
