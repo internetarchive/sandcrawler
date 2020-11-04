@@ -66,6 +66,7 @@ class IngestFileWorker(SandcrawlerWorker):
         self.grobid_sink = kwargs.get('grobid_sink')
         self.thumbnail_sink = kwargs.get('thumbnail_sink')
         self.pdftext_sink = kwargs.get('pdftext_sink')
+        self.xmldoc_sink = kwargs.get('xmldoc_sink')
         self.max_hops = 6
 
         self.try_existing_ingest = kwargs.get('try_existing_ingest', False)
@@ -242,8 +243,9 @@ class IngestFileWorker(SandcrawlerWorker):
                 'pdf_meta': self.process_pdfextract(resource, file_meta),
             }
         elif ingest_type == "xml":
-            # TODO
-            return {}
+            return {
+                'xml_meta': self.process_xml(resource, file_meta),
+            }
         else:
             raise NotImplementedError(f"process {ingest_type} hit")
 
@@ -300,11 +302,27 @@ class IngestFileWorker(SandcrawlerWorker):
         if self.thumbnail_sink and result.page0_thumbnail is not None:
             self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)
         if self.pdftext_sink:
-            self.pdftext_sink.push_record(result.to_pdftext_dict())
+            self.pdftext_sink.push_record(result.to_pdftext_dict(), key=result.sha1hex)
         result.page0_thumbnail = None
         result.text = None
         result.file_meta = None
         return result.to_pdftext_dict()
+
+    def process_xml(self, resource: ResourceResult, file_meta: dict) -> dict:
+        """
+        Simply publishes to Kafka topic.
+
+        In the future, could extract other metadata here (like body word
+        count), or attempting to fetch sub-resources.
+        """
+        if self.xmldoc_sink and file_meta['mimetype'] == "application/jats+xml":
+            msg = dict(
+                sha1hex=file_meta["sha1hex"],
+                status="success",
+                jats_xml=resource.body.encode('utf-8'),
+            )
+            self.xmldoc_sink.push_record(msg, key=file_meta['sha1hex'])
+        return dict(status="success")
 
     def timeout_response(self, task: dict) -> dict:
         print("[TIMEOUT]", file=sys.stderr)
