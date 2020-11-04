@@ -13,6 +13,7 @@ import datetime
 import raven
 
 from sandcrawler import *
+from sandcrawler.persist import PersistXmlDocWorker, PersistHtmlTeiXmlWorker
 
 # Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
 try:
@@ -142,6 +143,44 @@ def run_persist_thumbnail(args):
         kafka_hosts=args.kafka_hosts,
         consume_topic=consume_topic,
         group="persist-pdf-thumbnail",
+        push_batches=False,
+        raw_records=True,
+        batch_size=25,
+    )
+    pusher.run()
+
+def run_persist_xml_doc(args: argparse.Namespace) -> None:
+    consume_topic = f"sandcrawler-{args.env}.xml-doc"
+    worker = PersistXmlDocWorker(
+        s3_url=args.s3_url,
+        s3_bucket=args.s3_bucket,
+        s3_access_key=args.s3_access_key,
+        s3_secret_key=args.s3_secret_key,
+    )
+    pusher = KafkaJsonPusher(
+        worker=worker,
+        kafka_hosts=args.kafka_hosts,
+        consume_topic=consume_topic,
+        group="persist-xml-doc",
+        push_batches=False,
+        raw_records=True,
+        batch_size=25,
+    )
+    pusher.run()
+
+def run_persist_html_teixml(args: argparse.Namespace) -> None:
+    consume_topic = f"sandcrawler-{args.env}.html-teixml"
+    worker = PersistHtmlTeiXmlWorker(
+        s3_url=args.s3_url,
+        s3_bucket=args.s3_bucket,
+        s3_access_key=args.s3_access_key,
+        s3_secret_key=args.s3_secret_key,
+    )
+    pusher = KafkaJsonPusher(
+        worker=worker,
+        kafka_hosts=args.kafka_hosts,
+        consume_topic=consume_topic,
+        group="persist-html-teixml",
         push_batches=False,
         raw_records=True,
         batch_size=25,
@@ -292,6 +331,14 @@ def main():
     sub_persist_thumbnail = subparsers.add_parser('persist-thumbnail',
         help="daemon that consumes thumbnail output from Kafka and pushes to S3 (seaweedfs) and postgres")
     sub_persist_thumbnail.set_defaults(func=run_persist_thumbnail)
+
+    sub_persist_xml_doc = subparsers.add_parser('persist-xml-doc',
+        help="daemon that consumes xml-doc output from Kafka and pushes to S3 (seaweedfs) bucket")
+    sub_persist_xml_doc.set_defaults(func=run_persist_xml_doc)
+
+    sub_persist_html_teixml = subparsers.add_parser('persist-html-teixml',
+        help="daemon that consumes html-teixml output from Kafka and pushes to S3 (seaweedfs) bucket")
+    sub_persist_html_teixml.set_defaults(func=run_persist_html_teixml)
 
     sub_persist_pdftrio = subparsers.add_parser('persist-pdftrio',
         help="daemon that consumes pdftrio output from Kafka and pushes to postgres")
