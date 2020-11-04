@@ -28,6 +28,7 @@ from sandcrawler.db import SandcrawlerPostgresClient
 from sandcrawler.minio import SandcrawlerMinioClient
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.pdfextract import PdfExtractResult
+from sandcrawler.html_ingest import HtmlMetaRow
 
 
 class PersistCdxWorker(SandcrawlerWorker):
@@ -159,8 +160,21 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             result['terminal_sha1hex'] = terminal.get('terminal_sha1hex')
         return result
 
-    def result_to_html_meta(self, record: dict) -> Optional[dict]:
-        raise NotImplementedError()
+    def result_to_html_meta(self, record: dict) -> Optional[HtmlMetaRow]:
+        html_body = record.get('html_body')
+        file_meta = record.get('file_meta')
+        if not (file_meta and html_body):
+            return None
+        return HtmlMetaRow(
+            sha1hex=file_meta["sha1hex"],
+            status=record.get('status'),
+            scope=record.get('scope'),
+            has_teixml=bool(html_body and html_body['status'] == 'success' and html_body.get('tei_xml')),
+            has_thumbnail=False,  # TODO
+            word_count=(html_body and html_body.get('word_count')) or None,
+            biblio=record.get('html_biblio'),
+            resources=record.get('html_resources'),
+        )
 
     def push_batch(self, batch):
         self.counts['total'] += len(batch)
@@ -200,7 +214,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             self.counts['insert-file_meta'] += resp[0]
             self.counts['update-file_meta'] += resp[1]
 
-        html_meta_batch = [self.result_to_html_meta(r) for r in batch if r.get('hit') and r.get('html_meta')]
+        html_meta_batch = [self.result_to_html_meta(r) for r in batch if r.get('hit') and r.get('html_body')]
         if html_meta_batch:
             resp = self.db.insert_html_meta(self.cur, html_meta_batch, on_conflict="nothing")
             self.counts['insert-html_meta'] += resp[0]

@@ -248,6 +248,11 @@ class BiblioMetadata(pydantic.BaseModel):
     html_fulltext_url: Optional[str]
     xml_fulltext_url: Optional[str]
 
+    class Config:
+        json_encoders = {
+            datetime.date: lambda dt: dt.isoformat()
+        }
+
 
 def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict]) -> Optional[Tuple[str, str]]:
     """

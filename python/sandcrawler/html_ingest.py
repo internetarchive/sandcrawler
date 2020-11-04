@@ -76,21 +76,36 @@ class IngestWebResult(pydantic.BaseModel):
             datetime.datetime: lambda dt: dt.isoformat(),
         }
 
+class HtmlMetaRow(pydantic.BaseModel):
+    sha1hex: str
+    status: str
+    scope: Optional[str]
+    has_teixml: bool
+    has_thumbnail: bool
+    word_count: Optional[int]
+    biblio: Optional[dict]
+    resources: Optional[List[dict]]
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            datetime.datetime: lambda dt: dt.isoformat(),
+        }
+
     def to_sql_tuple(self) -> Tuple:
         """
         This is for the html_meta SQL table.
         """
-        assert self.file_meta and "sha1hex" in self.file_meta
         return (
-            self.file_meta["sha1hex"],
+            self.sha1hex,
             datetime.datetime.now(), # updated
             self.status,
             self.scope,
-            bool(self.html_body and self.html_body['status'] == 'success' and self.html_body['tei_xml']),
-            False,  # has_thumbnail
-            (self.html_body and self.html_body.get('word_count')) or None,
-            self.html_biblio,
-            self.html_resources,
+            self.has_teixml,
+            self.has_thumbnail,
+            self.word_count,
+            self.biblio and json.dumps(self.biblio, sort_keys=True),
+            self.resources and json.dumps(self.resources, sort_keys=True),
         )
 
 

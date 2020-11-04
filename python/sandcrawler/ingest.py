@@ -5,7 +5,7 @@ import gzip
 import time
 import base64
 import requests
-from typing import Optional, Tuple, Any, Dict
+from typing import Optional, Tuple, Any, Dict, List
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from collections import namedtuple
 from selectolax.parser import HTMLParser
@@ -13,9 +13,14 @@ from selectolax.parser import HTMLParser
 from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackContentError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult, fix_transfer_encoding
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.pdfextract import process_pdf, PdfExtractResult
-from sandcrawler.misc import gen_file_metadata, clean_url
+from sandcrawler.misc import gen_file_metadata, clean_url, parse_cdx_datetime
 from sandcrawler.html import extract_fulltext_url
-from sandcrawler.html_metadata import html_extract_fulltext_url, XML_FULLTEXT_PATTERNS
+from sandcrawler.html_ingest import fetch_html_resources, \
+    quick_fetch_html_resources, html_guess_scope, html_extract_body_teixml, \
+    WebResource
+from sandcrawler.html_metadata import html_extract_fulltext_url, \
+    XML_FULLTEXT_PATTERNS, BiblioMetadata, html_extract_resources, \
+    html_extract_biblio, load_adblock_rules
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.xml import xml_reserialize
@@ -75,6 +80,8 @@ class IngestFileWorker(SandcrawlerWorker):
         self.try_existing_pdfextract = kwargs.get('try_existing_pdfextract', True)
         self.try_wayback = kwargs.get('try_wayback', True)
         self.try_spn2 = kwargs.get('try_spn2', True)
+        self.html_quick_mode = False
+        self.adblock_rules = load_adblock_rules()
 
         self.base_url_blocklist = [
             # robot blocking
@@ -247,6 +254,8 @@ class IngestFileWorker(SandcrawlerWorker):
             return {
                 'xml_meta': self.process_xml(resource, file_meta),
             }
+        elif ingest_type == "html":
+            return self.process_html(resource, file_meta)
         else:
             raise NotImplementedError(f"process {ingest_type} hit")
 
@@ -326,6 +335,33 @@ class IngestFileWorker(SandcrawlerWorker):
             self.xmldoc_sink.push_record(msg, key=file_meta['sha1hex'])
         return dict(status="success")
 
+    def process_html(self, resource: ResourceResult, file_meta: dict) -> dict:
+
+        html_doc = HTMLParser(resource.body)
+        html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
+        html_body = html_extract_body_teixml(resource.body)
+        html_scope = html_guess_scope(resource.terminal_url, html_doc, html_biblio, html_body.get('tei_xml'))
+
+        assert html_biblio
+
+        raw_resources = html_extract_resources(resource.terminal_url, html_doc, self.adblock_rules)
+        assert len(raw_resources) <= 200
+
+        when = parse_cdx_datetime(resource.cdx.datetime)
+
+        full_resources: List[WebResource] = []
+        if self.html_quick_mode:
+            full_resources = quick_fetch_html_resources(raw_resources, self.wayback_client.cdx_client, when)
+        else:
+            full_resources = fetch_html_resources(raw_resources, self.wayback_client, when)
+
+        return dict(
+            html_body=html_body,
+            html_biblio=json.loads(html_biblio.json(exclude_none=True)),
+            scope=html_scope,
+            html_resources=[json.loads(r.json(exclude_none=True)) for r in full_resources],
+        )
+
     def timeout_response(self, task: dict) -> dict:
         print("[TIMEOUT]", file=sys.stderr)
         return dict(
@@ -336,7 +372,7 @@ class IngestFileWorker(SandcrawlerWorker):
         )
 
     def want(self, request: dict) -> bool:
-        if not request.get('ingest_type') in ('file', 'pdf', 'xml'):
+        if not request.get('ingest_type') in ('file', 'pdf', 'xml', 'html'):
             return False
         return True
 
@@ -347,7 +383,7 @@ class IngestFileWorker(SandcrawlerWorker):
             request['ingest_type'] = 'pdf'
 
         ingest_type = request.get('ingest_type')
-        if ingest_type not in ("pdf", "xml"):
+        if ingest_type not in ("pdf", "xml", "html"):
             raise NotImplementedError(f"can't handle ingest_type={ingest_type}")
 
         # parse/clean URL
@@ -541,11 +577,20 @@ class IngestFileWorker(SandcrawlerWorker):
             if file_meta['mimetype'] not in ("application/xml", "text/xml", "application/jats+xml"):
                 result['status'] = "wrong-mimetype"
                 return result
+        elif ingest_type == "html":
+            if file_meta['mimetype'] not in ("text/html",):
+                result['status'] = "wrong-mimetype"
+                return result
         else:
             raise NotImplementedError()
 
         info = self.process_hit(ingest_type, resource, file_meta)
         result.update(info)
+
+        # scope is getting calculated in process_hit()
+        if result.get('scope') and result['scope'] not in ('article-fulltext', 'unknown'):
+            result['status'] = "wrong-scope"
+            return result
 
         result['status'] = "success"
         result['hit'] = True
