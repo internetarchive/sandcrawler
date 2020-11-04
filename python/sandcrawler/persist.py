@@ -452,9 +452,11 @@ class PersistPdfTextWorker(SandcrawlerWorker):
 
 class PersistThumbnailWorker(SandcrawlerWorker):
     """
-    Pushes text file to blob store (S3/seaweed/minio) and PDF metadata to SQL table.
+    Pushes text file to blob store (S3/seaweed/minio) and PDF metadata to SQL
+    table.
 
-    This worker *must* be used with raw kakfa mode.
+    This worker *must* be used with raw kakfa mode; thumbnails are *not*
+    wrapped in JSON like most sandcrawler kafka messages.
     """
 
     def __init__(self, **kwargs):

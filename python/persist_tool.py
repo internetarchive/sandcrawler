@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Commands for backfilling content from bulk files into postgresql and s3 (minio).
+Commands for backfilling content from bulk files into postgresql and s3 (seaweedfs).
 
 Normally this is done by workers (in sandcrawler_worker.py) consuming from
 Kafka feeds, but sometimes we have bulk processing output we want to backfill.
@@ -120,16 +120,16 @@ def main():
         help="postgresql database connection string",
         default="postgres:///sandcrawler")
     parser.add_argument('--s3-url',
-        help="S3 (minio) backend URL",
+        help="S3 (seaweedfs) backend URL",
         default="localhost:9000")
     parser.add_argument('--s3-access-key',
-        help="S3 (minio) credential",
-        default=os.environ.get('MINIO_ACCESS_KEY'))
+        help="S3 (seaweedfs) credential",
+        default=os.environ.get('SANDCRAWLER_BLOB_ACCESS_KEY') or os.environ.get('MINIO_ACCESS_KEY'))
     parser.add_argument('--s3-secret-key',
-        help="S3 (minio) credential",
-        default=os.environ.get('MINIO_SECRET_KEY'))
+        help="S3 (seaweedfs) credential",
+        default=os.environ.get('SANDCRAWLER_BLOB_ACCESS_KEY') or os.environ.get('MINIO_SECRET_KEY'))
     parser.add_argument('--s3-bucket',
-        help="S3 (minio) bucket to persist into",
+        help="S3 (seaweedfs) bucket to persist into",
         default="sandcrawler-dev")
     subparsers = parser.add_subparsers()
 
@@ -144,7 +144,7 @@ def main():
         help="ignore mimetype filtering; insert all content types (eg, assuming pre-filtered)")
 
     sub_grobid = subparsers.add_parser('grobid',
-        help="backfill a grobid JSON ('pg') dump into postgresql and s3 (minio)")
+        help="backfill a grobid JSON ('pg') dump into postgresql and s3 (seaweedfs)")
     sub_grobid.set_defaults(func=run_grobid)
     sub_grobid.add_argument('json_file',
         help="grobid file to import from (or '-' for stdin)",
@@ -180,7 +180,7 @@ def main():
         type=str)
 
     sub_pdftrio = subparsers.add_parser('pdftrio',
-        help="backfill a pdftrio JSON ('pg') dump into postgresql and s3 (minio)")
+        help="backfill a pdftrio JSON ('pg') dump into postgresql and s3 (seaweedfs)")
     sub_pdftrio.set_defaults(func=run_pdftrio)
     sub_pdftrio.add_argument('json_file',
         help="pdftrio file to import from (or '-' for stdin)",

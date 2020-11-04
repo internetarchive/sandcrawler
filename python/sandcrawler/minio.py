@@ -17,8 +17,8 @@ class SandcrawlerMinioClient(object):
         Example config:
 
             host="localhost:9000",
-            access_key=os.environ['MINIO_ACCESS_KEY'],
-            secret_key=os.environ['MINIO_SECRET_KEY'],
+            access_key=os.environ['SANDCRAWLER_BLOB_ACCESS_KEY'],
+            secret_key=os.environ['SANDCRAWLER_BLOB_ACCESS_KEY'],
         """
         self.mc = minio.Minio(
             host_url,

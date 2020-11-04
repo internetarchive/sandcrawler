@@ -3,7 +3,7 @@
 """
 These are generally for continuously running workers that consume from Kafka.
 Outputs might either be pushed back into Kafka, or directly into sandcrawler-db
-or minio.
+or S3 (SeaweedFS).
 """
 
 import os
@@ -242,16 +242,16 @@ def main():
         help="postgresql database connection string",
         default="postgres:///sandcrawler")
     parser.add_argument('--s3-url',
-        help="S3 (minio) backend URL",
+        help="S3 (seaweedfs) backend URL",
         default="localhost:9000")
     parser.add_argument('--s3-access-key',
-        help="S3 (minio) credential",
-        default=os.environ.get('MINIO_ACCESS_KEY'))
+        help="S3 (seaweedfs) credential",
+        default=os.environ.get('SANDCRAWLER_BLOB_ACCESS_KEY') or os.environ.get('MINIO_ACCESS_KEY'))
     parser.add_argument('--s3-secret-key',
-        help="S3 (minio) credential",
-        default=os.environ.get('MINIO_SECRET_KEY'))
+        help="S3 (seaweedfs) credential",
+        default=os.environ.get('SANDCRAWLER_BLOB_SECRET_KEY') or os.environ.get('MINIO_SECRET_KEY'))
     parser.add_argument('--s3-bucket',
-        help="S3 (minio) bucket to persist into",
+        help="S3 (seaweedfs) bucket to persist into",
         default="sandcrawler-dev")
     subparsers = parser.add_subparsers()
 
@@ -264,7 +264,7 @@ def main():
     sub_pdf_extract.set_defaults(func=run_pdf_extract)
 
     sub_persist_grobid = subparsers.add_parser('persist-grobid',
-        help="daemon that consumes GROBID output from Kafka and pushes to minio and postgres")
+        help="daemon that consumes GROBID output from Kafka and pushes to S3 (seaweedfs) and postgres")
     sub_persist_grobid.add_argument('--s3-only',
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
@@ -274,7 +274,7 @@ def main():
     sub_persist_grobid.set_defaults(func=run_persist_grobid)
 
     sub_persist_pdftext = subparsers.add_parser('persist-pdftext',
-        help="daemon that consumes pdftext output from Kafka and pushes to minio and postgres")
+        help="daemon that consumes pdftext output from Kafka and pushes to S3 (seaweedfs) and postgres")
     sub_persist_pdftext.add_argument('--s3-only',
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
@@ -284,7 +284,7 @@ def main():
     sub_persist_pdftext.set_defaults(func=run_persist_pdftext)
 
     sub_persist_thumbnail = subparsers.add_parser('persist-thumbnail',
-        help="daemon that consumes thumbnail output from Kafka and pushes to minio and postgres")
+        help="daemon that consumes thumbnail output from Kafka and pushes to S3 (seaweedfs) and postgres")
     sub_persist_thumbnail.set_defaults(func=run_persist_thumbnail)
 
     sub_persist_pdftrio = subparsers.add_parser('persist-pdftrio',
