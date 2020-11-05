@@ -532,24 +532,24 @@ class GenericPersistDocWorker(SandcrawlerWorker):
         self.s3_folder = kwargs.get('s3_folder', "unknown")
         self.doc_key = "unknown"
 
-    def process(self, record: dict, raw_key: Optional[AnyStr] = None) -> None:
+    def process(self, record: dict, key: Optional[AnyStr] = None) -> None:
 
         if record.get('status') != 'success' or not record.get(self.doc_key):
             return
 
-        assert raw_key is not None
-        if isinstance(raw_key, bytes):
-            key = raw_key.decode('utf-8')
-        elif isinstance(raw_key, str):
-            key = raw_key
-        assert len(key) == 40
+        assert key is not None
+        if isinstance(key, bytes):
+            key_str = key.decode('utf-8')
+        elif isinstance(key, str):
+            key_str = key
+        assert len(key_str) == 40
         if 'sha1hex' in record:
-            assert key == record['sha1hex']
+            assert key_str == record['sha1hex']
 
         resp = self.s3.put_blob(
             folder=self.s3_folder,
             blob=record[self.doc_key].encode('utf-8'),
-            sha1hex=key,
+            sha1hex=key_str,
             extension=self.s3_extension,
         )
         self.counts['s3-put'] += 1
