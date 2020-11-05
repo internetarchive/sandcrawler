@@ -21,7 +21,7 @@ http.client._MAXHEADERS = 1000  # type: ignore
 import wayback.exception
 from http.client import IncompleteRead
 from wayback.resourcestore import ResourceStore
-from gwb.loader import CDXLoaderFactory
+from gwb.loader import CDXLoaderFactory3
 
 from .misc import b32_hex, requests_retry_session, gen_file_metadata, clean_url
 
@@ -360,9 +360,9 @@ class WaybackClient:
             raise ValueError("what looks like a liveweb/SPN temporary warc path: {}".format(warc_path))
         warc_uri = self.warc_uri_prefix + warc_path
         if not self.rstore:
-            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
+            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory3(
                 webdata_secret=self.petabox_webdata_secret,
-                download_base_url=self.petabox_base_url))
+            ))
         try:
             #print("offset: {} csize: {} uri: {}".format(offset, csize, warc_uri), file=sys.stderr)
             gwb_record = self.rstore.load_resource(warc_uri, offset, csize)
@@ -406,8 +406,11 @@ class WaybackClient:
             # convert revisit_dt
             # len("2018-07-24T11:56:49"), or with "Z"
             assert len(revisit_dt) in (19, 20)
-            revisit_uri = revisit_uri.decode('utf-8')
-            revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
+            if type(revisit_uri) is bytes:
+                revisit_uri = revisit_uri.decode('utf-8')
+            if type(revisit_dt) is bytes:
+                revisit_dt = revisit_dt.decode('utf-8')
+            revisit_dt = revisit_dt.replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
             assert len(revisit_dt) == 14
             try:
                 revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
