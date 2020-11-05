@@ -212,6 +212,7 @@ def run_ingest_file(args):
     pdftext_topic = "sandcrawler-{}.pdf-text".format(args.env)
     thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.env)
     xmldoc_topic = "sandcrawler-{}.xml-doc".format(args.env)
+    htmlteixml_topic = "sandcrawler-{}.html-teixml".format(args.env)
     sink = KafkaSink(
         kafka_hosts=args.kafka_hosts,
         produce_topic=produce_topic,
@@ -235,6 +236,10 @@ def run_ingest_file(args):
         kafka_hosts=args.kafka_hosts,
         produce_topic=xmldoc_topic,
     )
+    htmlteixml_sink = KafkaSink(
+        kafka_hosts=args.kafka_hosts,
+        produce_topic=htmlteixml_topic,
+    )
     worker = IngestFileWorker(
         grobid_client=grobid_client,
         sink=sink,
@@ -242,6 +247,7 @@ def run_ingest_file(args):
         thumbnail_sink=thumbnail_sink,
         pdftext_sink=pdftext_sink,
         xmldoc_sink=xmldoc_sink,
+        htmlteixml_sink=htmlteixml_sink,
         # don't SPNv2 for --bulk backfill
         try_spn2=not args.bulk,
     )

@@ -73,6 +73,7 @@ class IngestFileWorker(SandcrawlerWorker):
         self.thumbnail_sink = kwargs.get('thumbnail_sink')
         self.pdftext_sink = kwargs.get('pdftext_sink')
         self.xmldoc_sink = kwargs.get('xmldoc_sink')
+        self.htmlteixml_sink = kwargs.get('htmlteixml_sink')
         self.max_hops = 6
 
         self.try_existing_ingest = kwargs.get('try_existing_ingest', False)
@@ -82,6 +83,7 @@ class IngestFileWorker(SandcrawlerWorker):
         self.try_spn2 = kwargs.get('try_spn2', True)
         self.html_quick_mode = False
         self.adblock_rules = load_adblock_rules()
+        self.max_html_resources = 200
 
         self.base_url_blocklist = [
             # robot blocking
@@ -339,13 +341,26 @@ class IngestFileWorker(SandcrawlerWorker):
 
         html_doc = HTMLParser(resource.body)
         html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
+        assert html_biblio
         html_body = html_extract_body_teixml(resource.body)
         html_scope = html_guess_scope(resource.terminal_url, html_doc, html_biblio, html_body.get('tei_xml'))
 
-        assert html_biblio
+        if html_scope not in ('article-fulltext', 'unknown'):
+            html_body.pop("tei_xml", None)
+            return dict(
+                status="html-body-wrong-scope",
+                html_biblio=html_biblio,
+                html_scope=html_scope,
+            )
 
         raw_resources = html_extract_resources(resource.terminal_url, html_doc, self.adblock_rules)
-        assert len(raw_resources) <= 200
+        if len(raw_resources) > self.max_html_resources:
+            html_body.pop("tei_xml", None)
+            return dict(
+                status="too-many-resources",
+                html_biblio=html_biblio,
+                html_scope=html_scope,
+            )
 
         when = parse_cdx_datetime(resource.cdx.datetime)
 
@@ -354,6 +369,11 @@ class IngestFileWorker(SandcrawlerWorker):
             full_resources = quick_fetch_html_resources(raw_resources, self.wayback_client.cdx_client, when)
         else:
             full_resources = fetch_html_resources(raw_resources, self.wayback_client, when)
+
+        if self.htmlteixml_sink and html_body['status'] == "success":
+            self.htmlteixml_sink.push_record(html_body, key=file_meta['sha1hex'])
+
+        html_body.pop("tei_xml", None)
 
         return dict(
             html_body=html_body,
@@ -587,9 +607,9 @@ class IngestFileWorker(SandcrawlerWorker):
         info = self.process_hit(ingest_type, resource, file_meta)
         result.update(info)
 
-        # scope is getting calculated in process_hit()
-        if result.get('scope') and result['scope'] not in ('article-fulltext', 'unknown'):
-            result['status'] = "wrong-scope"
+        # check if processing turned up an error
+        if info.get('status') not in ('success', None):
+            result['status'] = info['status']
             return result
 
         result['status'] = "success"
