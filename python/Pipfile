@@ -45,6 +45,7 @@ dateparser = "*"
 braveblock = "*"
 dynaconf = ">=3"
 sentry-sdk = { version = ">=0.14.0", extras = [] }
+zstandard = "*"
 
 # must lock black to an exact version because it is still "beta"
 # see: https://github.com/psf/black/issues/517
@@ -54,9 +55,9 @@ black = "==19.10b0"
 python_version = "3.7"
 
 [packages.globalwayback]
-version = ">=0.3"
+version = ">=0.6.5"
 index = "ia"
 
 [packages.wayback]
-version = ">=0.2.1.2"
+version = ">=0.6.3"
 index = "ia"
