@@ -59,6 +59,18 @@ retention (on both a size and time basis).
         => 12 partitions
         => key is sha1hex of PDF; enable key compaction; gzip compression
 
+    sandcrawler-ENV.xml-doc
+        => fulltext XML; mostly JATS XML
+        => schema is JSON, with 'jats_xml' field containing the XML as a string
+        => 6 partitions
+        => key is sha1hex of XML document; enable key compaction; gzip compression
+
+    sandcrawler-ENV.html-teixml
+        => extracted fulltext from HTML; mostly TEI-XML
+        => schema is JSON, with 'tei_xml' field containing the XML as a string
+        => 6 partitions
+        => key is sha1hex of source HTML document; enable key compaction; gzip compression
+
     sandcrawler-ENV.pdf-thumbnail-SIZE-TYPE
         => thumbnail images (eg, png, jpg) from PDFs
         => raw bytes in message (no JSON or other wrapping). fields average 10 KByte
@@ -174,4 +186,7 @@ exists`; this seems safe, and the settings won't be over-ridden.
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic sandcrawler-qa.pdf-text --config compression.type=gzip --config cleanup.policy=compact
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 12 --topic sandcrawler-qa.pdf-thumbnail-180px-jpg --config cleanup.policy=compact
     ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 24 --topic sandcrawler-qa.unextracted
+
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 6 --topic sandcrawler-qa.xml-doc --config compression.type=gzip --config cleanup.policy=compact
+    ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 2 --partitions 6 --topic sandcrawler-qa.html-teixml --config compression.type=gzip --config cleanup.policy=compact
 
