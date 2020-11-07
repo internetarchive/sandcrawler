@@ -366,10 +366,33 @@ class IngestFileWorker(SandcrawlerWorker):
         when = parse_cdx_datetime(resource.cdx.datetime)
 
         full_resources: List[WebResource] = []
-        if self.html_quick_mode:
-            full_resources = quick_fetch_html_resources(raw_resources, self.wayback_client.cdx_client, when)
-        else:
-            full_resources = fetch_html_resources(raw_resources, self.wayback_client, when)
+
+        partial_result = dict(
+            html_biblio=html_biblio_dict,
+            html_scope=html_scope,
+        )
+
+        try:
+            if self.html_quick_mode:
+                full_resources = quick_fetch_html_resources(raw_resources, self.wayback_client.cdx_client, when)
+            else:
+                full_resources = fetch_html_resources(raw_resources, self.wayback_client, when)
+        except PetaboxError as e:
+            partial_result['status'] = 'petabox-error'
+            partial_result['error_message'] = str(e)[:1600]
+            return partial_result
+        except CdxApiError as e:
+            partial_result['status'] = 'cdx-error'
+            partial_result['error_message'] = str(e)[:1600]
+            return partial_result
+        except WaybackError as e:
+            partial_result['status'] = 'wayback-error'
+            partial_result['error_message'] = str(e)[:1600]
+            return partial_result
+        except WaybackContentError as e:
+            partial_result['status'] = 'wayback-content-error'
+            partial_result['error_message'] = str(e)[:1600]
+            return partial_result
 
         if self.htmlteixml_sink and html_body['status'] == "success":
             self.htmlteixml_sink.push_record(html_body, key=file_meta['sha1hex'])
