@@ -18,9 +18,11 @@ pytest-mock = "*"
 pylint = "*"
 ipython = "*"
 mypy = "*"
-pytype = "*"
 flake8 = "*"
 flake8-annotations = "*"
+
+# pytype is failing to install on xenial VMs
+#pytype = "*"
 
 [packages]
 requests = ">=2"
