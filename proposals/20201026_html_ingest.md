@@ -22,6 +22,7 @@ Example HTML articles to start testing:
 - first mondays (OJS): <https://firstmonday.org/ojs/index.php/fm/article/view/10274/9729>
 - d-lib: <http://www.dlib.org/dlib/july17/williams/07williams.html> 
 
+
 ## Ingest Process
 
 Follow base URL to terminal document, which is assumed to be a status=200 HTML document.
@@ -32,43 +33,64 @@ Extract list of sub-resources. Filter out unwanted (eg favicon, analytics,
 unnecessary), apply a sanity limit. Convert to fully qualified URLs. For each
 sub-resource, fetch down to the terminal resource, and compute hashes/metadata.
 
-TODO:
+Open questions:
+
 - will probably want to parallelize sub-resource fetching. async?
 - behavior when failure fetching sub-resources
 
 
 ## Ingest Result Schema
 
-JSON should
+JSON should be basically compatible with existing `ingest_file_result` objects,
+with some new sub-objects.
 
-The minimum that could be persisted for later table lookup are:
+Overall object (`IngestWebResult`):
 
-- (url, datetime): CDX table 
-- sha1hex: `file_meta` table
-
-Probably makes most sense to have all this end up in a large JSON object though.
+- `status`: str
+- `hit`: bool
+- `error_message`: optional, if an error
+- `hops`: optional, array of URLs
+- `cdx`: optional; single CDX row of primary HTML document
+- `terminal`: optional; same as ingest result
+    - `terminal_url`
+    - `terminal_dt`
+    - `terminal_status_code`
+    - `terminal_sha1hex`
+- `request`: optional but usually present; ingest request object, verbatim
+- `file_meta`: optional; file metadata about primary HTML document
+- `html_biblio`: optional; extracted biblio metadata from primary HTML document
+- `scope`: optional; detected/guessed scope (fulltext, etc)
+- `html_resources`: optional; array of sub-resources. primary HTML is not included
+- `html_body`: optional; just the status code and some metadata is passed through;
+  actual document would go through a different KafkaTopic
+    - `status`: str
+    - `agent`: str, eg "trafilatura/0.4"
+    - `tei_xml`: optional, str
+    - `word_count`: optional, str
 
 
 ## New SQL Tables
 
 `html_meta`
-    surt,
-    timestamp (str?)
-    primary key: (surt, timestamp)
-    sha1hex (indexed)
-    updated
+    sha1hex (primary key)
+    updated (of SQL row)
     status
+    scope
     has_teixml
+    has_thumbnail
+    word_count (from teixml fulltext)
     biblio (JSON)
     resources (JSON)
 
 Also writes to `ingest_file_result`, `file_meta`, and `cdx`, all only for the base HTML document.
+
 
 ## Fatcat API Wants
 
 Would be nice to have lookup by SURT+timestamp, and/or by sha1hex of terminal base file.
 
 `hide` option for cdx rows; also for fileset equivalent.
+
 
 ## New Workers
 
@@ -78,7 +100,7 @@ ingest file worker
   => same as existing worker, because could be calling SPN
 
 persist result
-  => same as existing worker
+  => same as existing worker; adds persisting various HTML metadata
 
 persist html text
   => talks to seaweedfs
@@ -89,9 +111,17 @@ persist html text
 HTML ingest result topic (webcapture-ish)
 
 sandcrawler-ENV.html-teixml
-    JSON
-    same as other fulltext topics
+    JSON wrapping TEI-XML (same as other fulltext topics)
+    key compaction and content compression enabled
 
-## TODO
+JSON schema:
 
-- refactor ingest worker to be more general
+- `key` and `sha1hex`: str; used as kafka key
+- `status`: str
+- `tei_xml`: str, optional
+- `word_count`: int, optional
+
+## New S3/SeaweedFS Content
+
+`sandcrawler` bucket, `html` folder, `.tei.xml` suffix.
+
