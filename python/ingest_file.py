@@ -78,7 +78,7 @@ def main():
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
-        print("tell me what to do!", file=sys.stderr)
+        parser.print_help(file=sys.stderr)
         sys.exit(-1)
 
     args.func(args)

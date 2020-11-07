@@ -3,10 +3,14 @@
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
-import os, sys, time
+import os
+import sys
+import time
+import gzip
 import json
 import requests
 import datetime
+from typing import Tuple
 from collections import namedtuple
 
 import http.client
@@ -17,7 +21,7 @@ http.client._MAXHEADERS = 1000  # type: ignore
 import wayback.exception
 from http.client import IncompleteRead
 from wayback.resourcestore import ResourceStore
-from gwb.loader import CDXLoaderFactory
+from gwb.loader import CDXLoaderFactory3
 
 from .misc import b32_hex, requests_retry_session, gen_file_metadata, clean_url
 
@@ -232,7 +236,7 @@ class CdxApiClient:
             assert row.status_code == filter_status_code
         return row
 
-    def lookup_best(self, url, max_age_days=None, best_mimetype=None):
+    def lookup_best(self, url, max_age_days=None, best_mimetype=None, closest=None):
         """
         Fetches multiple CDX rows for the given URL, tries to find the most recent.
 
@@ -270,6 +274,10 @@ class CdxApiClient:
         if max_age_days:
             since = datetime.date.today() - datetime.timedelta(days=max_age_days)
             params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day),
+        if closest:
+            params['closest'] = closest
+            params['sort'] = "closest"
+        #print(params, file=sys.stderr)
         rows = self._query_api(params)
         if not rows:
             return None
@@ -352,14 +360,14 @@ class WaybackClient:
             raise ValueError("what looks like a liveweb/SPN temporary warc path: {}".format(warc_path))
         warc_uri = self.warc_uri_prefix + warc_path
         if not self.rstore:
-            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
+            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory3(
                 webdata_secret=self.petabox_webdata_secret,
-                download_base_url=self.petabox_base_url))
+            ))
         try:
             #print("offset: {} csize: {} uri: {}".format(offset, csize, warc_uri), file=sys.stderr)
             gwb_record = self.rstore.load_resource(warc_uri, offset, csize)
         except wayback.exception.ResourceUnavailable:
-            print("Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
+            print("  Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
             raise PetaboxError("failed to load file contents from wayback/petabox (ResourceUnavailable)")
         except ValueError as ve:
             raise PetaboxError("failed to load file contents from wayback/petabox (ValueError: {})".format(ve))
@@ -398,8 +406,11 @@ class WaybackClient:
             # convert revisit_dt
             # len("2018-07-24T11:56:49"), or with "Z"
             assert len(revisit_dt) in (19, 20)
-            revisit_uri = revisit_uri.decode('utf-8')
-            revisit_dt = revisit_dt.decode('utf-8').replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
+            if type(revisit_uri) is bytes:
+                revisit_uri = revisit_uri.decode('utf-8')
+            if type(revisit_dt) is bytes:
+                revisit_dt = revisit_dt.decode('utf-8')
+            revisit_dt = revisit_dt.replace('-', '').replace(':', '').replace('T', '').replace('Z', '')
             assert len(revisit_dt) == 14
             try:
                 revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
@@ -507,7 +518,7 @@ class WaybackClient:
             # TODO: don't need *all* these hashes, just sha1
             file_meta = gen_file_metadata(resp.content)
             if cdx_sha1hex != file_meta['sha1hex']:
-                print("REPLAY MISMATCH: cdx:{} replay:{}".format(
+                print("  REPLAY MISMATCH: cdx:{} replay:{}".format(
                         cdx_sha1hex,
                         file_meta['sha1hex']),
                     file=sys.stderr)
@@ -568,7 +579,7 @@ class WaybackClient:
         else:
             return None
 
-    def lookup_resource(self, start_url, best_mimetype=None):
+    def lookup_resource(self, start_url, best_mimetype=None, closest=None):
         """
         Looks in wayback for a resource starting at the URL, following any
         redirects. Returns a ResourceResult object, which may indicate a
@@ -596,7 +607,7 @@ class WaybackClient:
         urls_seen = [start_url]
         for i in range(self.max_redirects):
             print("  URL: {}".format(next_url), file=sys.stderr)
-            cdx_row = self.cdx_client.lookup_best(next_url, best_mimetype=best_mimetype)
+            cdx_row = self.cdx_client.lookup_best(next_url, best_mimetype=best_mimetype, closest=closest)
             #print(cdx_row, file=sys.stderr)
             if not cdx_row:
                 return ResourceResult(
@@ -668,7 +679,7 @@ class WaybackClient:
                     )
                     assert 300 <= resource.status_code < 400
                     if not resource.location:
-                        print("bad redirect record: {}".format(cdx_row), file=sys.stderr)
+                        print("  bad redirect record: {}".format(cdx_row), file=sys.stderr)
                         return ResourceResult(
                             start_url=start_url,
                             hit=False,
@@ -697,7 +708,7 @@ class WaybackClient:
                         next_url = clean_url(next_url)
                     cdx_row = cdx_partial_from_row(cdx_row)
                     if not next_url:
-                        print("bad redirect record: {}".format(cdx_row), file=sys.stderr)
+                        print("  bad redirect record: {}".format(cdx_row), file=sys.stderr)
                         return ResourceResult(
                             start_url=start_url,
                             hit=False,
@@ -980,10 +991,10 @@ class SavePageNowClient:
                 best_mimetype="application/pdf",
             )
             if elsevier_pdf_cdx and elsevier_pdf_cdx.mimetype == "application/pdf":
-                print("Trying pdf.sciencedirectassets.com hack!", file=sys.stderr)
+                print("  Trying pdf.sciencedirectassets.com hack!", file=sys.stderr)
                 cdx_row = elsevier_pdf_cdx
             else:
-                print("Failed pdf.sciencedirectassets.com hack!", file=sys.stderr)
+                print("  Failed pdf.sciencedirectassets.com hack!", file=sys.stderr)
                 #print(elsevier_pdf_cdx, file=sys.stderr)
 
         if not cdx_row:
@@ -999,7 +1010,7 @@ class SavePageNowClient:
                     retry_sleep=9.0,
                 )
             except KeyError as ke:
-                print("CDX KeyError: {}".format(ke), file=sys.stderr)
+                print("  CDX KeyError: {}".format(ke), file=sys.stderr)
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,
@@ -1060,3 +1071,24 @@ class SavePageNowClient:
             revisit_cdx=revisit_cdx,
         )
 
+
+def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> Tuple[dict, ResourceResult]:
+    if resource.body and file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
+        print("  transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
+        inner_body = gzip.decompress(resource.body)
+        inner_resource = ResourceResult(
+            body=inner_body,
+            # copy all other fields
+            start_url=resource.start_url,
+            hit=resource.hit,
+            status=resource.status,
+            terminal_url=resource.terminal_url,
+            terminal_dt=resource.terminal_dt,
+            terminal_status_code=resource.terminal_status_code,
+            cdx=resource.cdx,
+            revisit_cdx=resource.revisit_cdx,
+        )
+        inner_file_meta = gen_file_metadata(inner_resource.body)
+        return (inner_file_meta, inner_resource)
+    else:
+        return (file_meta, resource)

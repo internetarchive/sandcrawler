@@ -1,6 +1,7 @@
 
 import json
 import datetime
+from typing import Optional
 
 import psycopg2
 import psycopg2.extras
@@ -43,6 +44,18 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
+    def get_html_meta(self, sha1hex: str) -> Optional[dict]:
+        resp = requests.get(
+            self.api_url + "/html_meta",
+            params=dict(sha1hex=f"eq.{sha1hex}"),
+        )
+        resp.raise_for_status()
+        resp_json = resp.json()
+        if resp_json:
+            return resp_json[0]
+        else:
+            return None
+
     def get_file_meta(self, sha1):
         resp = requests.get(self.api_url + "/file_meta", params=dict(sha1hex='eq.'+sha1))
         resp.raise_for_status()
@@ -52,12 +65,15 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
-    def get_ingest_file_result(self, url):
-        resp = requests.get(self.api_url + "/ingest_file_result", params=dict(base_url='eq.'+url))
+    def get_ingest_file_result(self, ingest_type: str, url: str) -> Optional[dict]:
+        resp = requests.get(
+            self.api_url + "/ingest_file_result",
+            params=dict(ingest_type=f"eq.{ingest_type}", base_url=f"eq.{url}"),
+        )
         resp.raise_for_status()
-        resp = resp.json()
-        if resp:
-            return resp[0]
+        resp_json = resp.json()
+        if resp_json:
+            return resp_json[0]
         else:
             return None
 
@@ -219,6 +235,41 @@ class SandcrawlerPostgresClient:
                 pdf_created=EXCLUDED.pdf_created,
                 pdf_version=EXCLUDED.pdf_version,
                 metadata=EXCLUDED.metadata
+            """
+        else:
+            raise NotImplementedError("on_conflict: {}".format(on_conflict))
+        sql += " RETURNING xmax;"
+        batch = [d.to_sql_tuple() for d in batch]
+        # filter out duplicate rows by key (sha1hex)
+        batch_dict = dict()
+        for b in batch:
+            batch_dict[b[0]] = b
+        batch = list(batch_dict.values())
+        resp = psycopg2.extras.execute_values(cur, sql, batch, page_size=250, fetch=True)
+        return self._inserts_and_updates(resp, on_conflict)
+
+    def insert_html_meta(self, cur, batch, on_conflict="nothing"):
+        """
+        batch elements are expected to have .to_sql_tuple() method
+        """
+        sql = """
+            INSERT INTO
+            html_meta (sha1hex, updated, status, scope, has_teixml, has_thumbnail, word_count, biblio, resources)
+            VALUES %s
+            ON CONFLICT (sha1hex) DO
+        """
+        if on_conflict.lower() == "nothing":
+            sql += " NOTHING"
+        elif on_conflict.lower() == "update":
+            sql += """ UPDATE SET
+                updated=EXCLUDED.updated,
+                status=EXCLUDED.status,
+                scope=EXCLUDED.scope,
+                has_teixml=EXCLUDED.has_teixml,
+                has_thumbnail=EXCLUDED.has_thumbnail,
+                word_count=EXCLUDED.word_count,
+                biblio=EXCLUDED.biblio,
+                resources=EXCLUDED.resources
             """
         else:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))

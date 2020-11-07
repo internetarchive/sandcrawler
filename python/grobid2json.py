@@ -59,7 +59,7 @@ def all_authors(elem: Optional[ET.Element]) -> List[Dict[str, Any]]:
             addr_e = ae.find("./{%s}address" % ns)
             if addr_e:
                 address = dict()
-                for t in addr_e.getchildren():
+                for t in addr_e:
                     address[t.tag.split("}")[-1]] = t.text
                 if address:
                     affiliation["address"] = address

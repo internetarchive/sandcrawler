@@ -2,6 +2,7 @@
 import pytest
 import struct
 import responses
+import poppler
 
 from sandcrawler import PdfExtractWorker, PdfExtractBlobWorker, CdxLinePusher, BlackholeSink, WaybackClient
 from sandcrawler.pdfextract import process_pdf
@@ -20,6 +21,7 @@ def test_process_fake_pdf():
     resp = process_pdf(pdf_bytes)
     assert resp.status == 'not-pdf'
 
+@pytest.mark.skipif(poppler.version_string() == '0.71.0', reason="unsupported version of poppler")
 def test_process_dummy_pdf():
     with open('tests/files/dummy.pdf', 'rb') as f:
         pdf_bytes = f.read()

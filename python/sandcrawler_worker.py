@@ -3,7 +3,7 @@
 """
 These are generally for continuously running workers that consume from Kafka.
 Outputs might either be pushed back into Kafka, or directly into sandcrawler-db
-or minio.
+or S3 (SeaweedFS).
 """
 
 import os
@@ -13,6 +13,7 @@ import datetime
 import raven
 
 from sandcrawler import *
+from sandcrawler.persist import PersistXmlDocWorker, PersistHtmlTeiXmlWorker
 
 # Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
 try:
@@ -148,6 +149,42 @@ def run_persist_thumbnail(args):
     )
     pusher.run()
 
+def run_persist_xml_doc(args: argparse.Namespace) -> None:
+    consume_topic = f"sandcrawler-{args.env}.xml-doc"
+    worker = PersistXmlDocWorker(
+        s3_url=args.s3_url,
+        s3_bucket=args.s3_bucket,
+        s3_access_key=args.s3_access_key,
+        s3_secret_key=args.s3_secret_key,
+    )
+    pusher = KafkaJsonPusher(
+        worker=worker,
+        kafka_hosts=args.kafka_hosts,
+        consume_topic=consume_topic,
+        group="persist-xml-doc",
+        push_batches=False,
+        batch_size=25,
+    )
+    pusher.run()
+
+def run_persist_html_teixml(args: argparse.Namespace) -> None:
+    consume_topic = f"sandcrawler-{args.env}.html-teixml"
+    worker = PersistHtmlTeiXmlWorker(
+        s3_url=args.s3_url,
+        s3_bucket=args.s3_bucket,
+        s3_access_key=args.s3_access_key,
+        s3_secret_key=args.s3_secret_key,
+    )
+    pusher = KafkaJsonPusher(
+        worker=worker,
+        kafka_hosts=args.kafka_hosts,
+        consume_topic=consume_topic,
+        group="persist-html-teixml",
+        push_batches=False,
+        batch_size=25,
+    )
+    pusher.run()
+
 def run_persist_pdftrio(args):
     consume_topic = "sandcrawler-{}.pdftrio-output".format(args.env)
     worker = PersistPdfTrioWorker(
@@ -174,6 +211,8 @@ def run_ingest_file(args):
     grobid_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
     pdftext_topic = "sandcrawler-{}.pdf-text".format(args.env)
     thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.env)
+    xmldoc_topic = "sandcrawler-{}.xml-doc".format(args.env)
+    htmlteixml_topic = "sandcrawler-{}.html-teixml".format(args.env)
     sink = KafkaSink(
         kafka_hosts=args.kafka_hosts,
         produce_topic=produce_topic,
@@ -193,12 +232,22 @@ def run_ingest_file(args):
         kafka_hosts=args.kafka_hosts,
         produce_topic=thumbnail_topic,
     )
+    xmldoc_sink = KafkaSink(
+        kafka_hosts=args.kafka_hosts,
+        produce_topic=xmldoc_topic,
+    )
+    htmlteixml_sink = KafkaSink(
+        kafka_hosts=args.kafka_hosts,
+        produce_topic=htmlteixml_topic,
+    )
     worker = IngestFileWorker(
         grobid_client=grobid_client,
         sink=sink,
         grobid_sink=grobid_sink,
         thumbnail_sink=thumbnail_sink,
         pdftext_sink=pdftext_sink,
+        xmldoc_sink=xmldoc_sink,
+        htmlteixml_sink=htmlteixml_sink,
         # don't SPNv2 for --bulk backfill
         try_spn2=not args.bulk,
     )
@@ -242,16 +291,16 @@ def main():
         help="postgresql database connection string",
         default="postgres:///sandcrawler")
     parser.add_argument('--s3-url',
-        help="S3 (minio) backend URL",
+        help="S3 (seaweedfs) backend URL",
         default="localhost:9000")
     parser.add_argument('--s3-access-key',
-        help="S3 (minio) credential",
-        default=os.environ.get('MINIO_ACCESS_KEY'))
+        help="S3 (seaweedfs) credential",
+        default=os.environ.get('SANDCRAWLER_BLOB_ACCESS_KEY') or os.environ.get('MINIO_ACCESS_KEY'))
     parser.add_argument('--s3-secret-key',
-        help="S3 (minio) credential",
-        default=os.environ.get('MINIO_SECRET_KEY'))
+        help="S3 (seaweedfs) credential",
+        default=os.environ.get('SANDCRAWLER_BLOB_SECRET_KEY') or os.environ.get('MINIO_SECRET_KEY'))
     parser.add_argument('--s3-bucket',
-        help="S3 (minio) bucket to persist into",
+        help="S3 (seaweedfs) bucket to persist into",
         default="sandcrawler-dev")
     subparsers = parser.add_subparsers()
 
@@ -264,7 +313,7 @@ def main():
     sub_pdf_extract.set_defaults(func=run_pdf_extract)
 
     sub_persist_grobid = subparsers.add_parser('persist-grobid',
-        help="daemon that consumes GROBID output from Kafka and pushes to minio and postgres")
+        help="daemon that consumes GROBID output from Kafka and pushes to S3 (seaweedfs) and postgres")
     sub_persist_grobid.add_argument('--s3-only',
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
@@ -274,7 +323,7 @@ def main():
     sub_persist_grobid.set_defaults(func=run_persist_grobid)
 
     sub_persist_pdftext = subparsers.add_parser('persist-pdftext',
-        help="daemon that consumes pdftext output from Kafka and pushes to minio and postgres")
+        help="daemon that consumes pdftext output from Kafka and pushes to S3 (seaweedfs) and postgres")
     sub_persist_pdftext.add_argument('--s3-only',
         action='store_true',
         help="only upload TEI-XML to S3 (don't write to database)")
@@ -284,8 +333,16 @@ def main():
     sub_persist_pdftext.set_defaults(func=run_persist_pdftext)
 
     sub_persist_thumbnail = subparsers.add_parser('persist-thumbnail',
-        help="daemon that consumes thumbnail output from Kafka and pushes to minio and postgres")
+        help="daemon that consumes thumbnail output from Kafka and pushes to S3 (seaweedfs) and postgres")
     sub_persist_thumbnail.set_defaults(func=run_persist_thumbnail)
+
+    sub_persist_xml_doc = subparsers.add_parser('persist-xml-doc',
+        help="daemon that consumes xml-doc output from Kafka and pushes to S3 (seaweedfs) bucket")
+    sub_persist_xml_doc.set_defaults(func=run_persist_xml_doc)
+
+    sub_persist_html_teixml = subparsers.add_parser('persist-html-teixml',
+        help="daemon that consumes html-teixml output from Kafka and pushes to S3 (seaweedfs) bucket")
+    sub_persist_html_teixml.set_defaults(func=run_persist_html_teixml)
 
     sub_persist_pdftrio = subparsers.add_parser('persist-pdftrio',
         help="daemon that consumes pdftrio output from Kafka and pushes to postgres")
@@ -304,7 +361,7 @@ def main():
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
-        print("tell me what to do!")
+        parser.print_help(file=sys.stderr)
         sys.exit(-1)
 
     args.func(args)
