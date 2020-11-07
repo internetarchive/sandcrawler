@@ -154,14 +154,6 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='dc.language']",
         "meta[name='og:locale']",
     ],
-    "html_fulltext_url": [
-        "meta[name='citation_fulltext_html_url']",
-        "meta[name='bepress_citation_fulltext_html_url']",
-    ],
-    "pdf_fulltext_url": [
-        "meta[name='citation_pdf_url']",
-        "meta[name='bepress_citation_pdf_url']",
-    ],
 }
 
 HEAD_META_LIST_PATTERNS: Any = {
@@ -202,6 +194,27 @@ XML_FULLTEXT_PATTERNS: List[dict] = [
         "selector": "a[target='xml']",
         "attr": "href",
         "technique": "SciElo XML link",
+    },
+]
+
+HTML_FULLTEXT_PATTERNS: List[dict] = [
+    {
+        "selector": "meta[name='citation_fulltext_html_url']",
+        "attr": "content",
+        "technique": "citation_fulltext_html_url",
+    },
+]
+
+PDF_FULLTEXT_PATTERNS: List[dict] = [
+    {
+        "selector": "meta[name='citation_pdf_url']",
+        "attr": "content",
+        "technique": "citation_pdf_url",
+    },
+    {
+        "selector": "meta[name='bepress_citation_pdf_url']",
+        "attr": "content",
+        "technique": "citation_pdf_url",
     },
 ]
 
@@ -308,9 +321,15 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
                 break
 
     # (some) fulltext extractions
+    pdf_fulltext_url = html_extract_fulltext_url(doc_url, doc, PDF_FULLTEXT_PATTERNS)
+    if pdf_fulltext_url:
+        meta['pdf_fulltext_url'] = pdf_fulltext_url[0]
     xml_fulltext_url = html_extract_fulltext_url(doc_url, doc, XML_FULLTEXT_PATTERNS)
     if xml_fulltext_url:
         meta['xml_fulltext_url'] = xml_fulltext_url[0]
+    html_fulltext_url = html_extract_fulltext_url(doc_url, doc, HTML_FULLTEXT_PATTERNS)
+    if html_fulltext_url:
+        meta['html_fulltext_url'] = html_fulltext_url[0]
 
     # TODO: replace with clean_doi() et al
     if meta.get('doi') and meta.get('doi').startswith('doi:'):
@@ -340,24 +359,12 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
         if release_type:
             meta['release_type'] = release_type
 
-    # resolve relative URLs
-    for key in ('pdf_fulltext_url', 'html_fulltext_url'):
-        if meta.get(key):
-            meta[key] = urllib.parse.urljoin(doc_url, meta[key])
-
     return BiblioMetadata(**meta)
 
 def load_adblock_rules() -> braveblock.Adblocker:
     """
     TODO: consider blocking very generic assets:
-
-    - favicon.ico
     - ://fonts.googleapis.com/css*
-    - ://widgets.figshare.com/*
-    - ://crossmark-cdn.crossref.org/widget/*
-    - ://code.jquery.com/*
-        => hrm
-    - ://platform.twitter.com/widgets.js
     - ://journals.plos.org/plosone/resource/img/icon.*
     """
     return braveblock.Adblocker(
@@ -383,6 +390,9 @@ def load_adblock_rules() -> braveblock.Adblocker:
             #"||code.jquery.com^",
             #"||ajax.googleapis.com^",
             #"||cdnjs.cloudflare.com^",
+
+            # badges, "share" buttons, etc
+            "apis.google.com/js/plusone",
 
             # PLOS images
             "/resource/img/icon.*.16.png^",

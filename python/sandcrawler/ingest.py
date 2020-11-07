@@ -19,8 +19,8 @@ from sandcrawler.html_ingest import fetch_html_resources, \
     quick_fetch_html_resources, html_guess_scope, html_extract_body_teixml, \
     WebResource
 from sandcrawler.html_metadata import html_extract_fulltext_url, \
-    XML_FULLTEXT_PATTERNS, BiblioMetadata, html_extract_resources, \
-    html_extract_biblio, load_adblock_rules
+    XML_FULLTEXT_PATTERNS, HTML_FULLTEXT_PATTERNS, BiblioMetadata, \
+    html_extract_resources, html_extract_biblio, load_adblock_rules
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.xml import xml_reserialize
@@ -563,6 +563,29 @@ class IngestFileWorker(SandcrawlerWorker):
                             next_url,
                         ),
                         file=sys.stderr)
+                    if next_url in hops:
+                        result['status'] = 'link-loop'
+                        result['error_message'] = "repeated: {}".format(next_url)
+                        return result
+                    hops.append(next_url)
+                    continue
+            elif ingest_type == "html" and html_ish_resource:
+                # parse with selectolax, extract XML fulltext URL
+                html_doc = HTMLParser(resource.body)
+                extract_next_hop = html_extract_fulltext_url(resource.terminal_url, html_doc, HTML_FULLTEXT_PATTERNS)
+                if extract_next_hop:
+                    next_url = extract_next_hop[0]
+                    technique = extract_next_hop[1]
+                    if next_url in hops:
+                        # for HTML ingest, we don't count this as a link-loop
+                        break
+                    print("[PARSE  {:>6}] {}  {}".format(
+                            ingest_type,
+                            technique,
+                            next_url,
+                        ),
+                        file=sys.stderr)
+                    hops.append(next_url)
                     continue
 
             # default is to NOT keep hopping
