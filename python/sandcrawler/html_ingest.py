@@ -25,7 +25,9 @@ def html_extract_body_teixml(doc: bytes) -> dict:
         include_formatting=True,
     )
     if tei_xml:
-        return dict(status="success", agent=TRAFILATURA_AGENT, tei_xml=tei_xml)
+        body_txt = teixml_body_text(tei_xml)
+        word_count = len(body_txt.split())
+        return dict(status="success", agent=TRAFILATURA_AGENT, tei_xml=tei_xml, word_count=word_count)
     elif doc.startswith(b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 2012"http://www.w3.org/TR/html4/loose.dtd">'):
         # hack for firstmonday.org
         return html_extract_body_teixml(doc[106:])
@@ -104,8 +106,8 @@ class HtmlMetaRow(pydantic.BaseModel):
             self.has_teixml,
             self.has_thumbnail,
             self.word_count,
-            self.biblio and json.dumps(self.biblio, sort_keys=True),
-            self.resources and json.dumps(self.resources, sort_keys=True),
+            (self.biblio or None) and json.dumps(self.biblio, sort_keys=True),
+            (self.resources or None) and json.dumps(self.resources, sort_keys=True),
         )
 
 
@@ -154,10 +156,9 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
     closest = when and datetime_to_cdx(when)
     for resource in resources:
         wayback_resp = wayback_client.lookup_resource(resource['url'], closest=closest)
-        if not wayback_resp:
+        if not wayback_resp or wayback_resp.status != 'success':
+            # TODO: raise a specific exception so we can catch it elsewhere?
             raise Exception("wayback lookup failed")
-        # XXX
-        assert wayback_resp.status == 'success'
         file_meta = gen_file_metadata(wayback_resp.body)
         if file_meta['sha1hex'] != wayback_resp.cdx.sha1hex:
             raise Exception("wayback payload sha1hex mismatch")
@@ -167,7 +168,7 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
             url=wayback_resp.cdx.url,
             sha1hex=file_meta['sha1hex'],
             mimetype=file_meta['mimetype'],
-            status_code=wayback_resp.cdx.status_code,
+            status_code=wayback_resp.cdx.status_code or wayback_resp.revisit_cdx.status_code,
             size=file_meta['size_bytes'],
             sha256hex=file_meta['sha256hex'],
             resource_type=resource['type'],
@@ -176,7 +177,7 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
     return full
 
 
-def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata], tei_xml: Optional[str]) -> str:
+def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata], word_count: Optional[int]) -> str:
     """
     This function tries to guess if an HTML document represents one of:
 
@@ -201,15 +202,20 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
     if "://page-one.live.cf.public.springer.com" in url:
         return "article-sample"
 
+    if "scielo" in url:
+        if "sci_abstract" in url:
+            return "landingpage"
+        if "sci_arttext" in url:
+            return "article-fulltext"
+
     if biblio and biblio.html_fulltext_url == url:
         return "article-fulltext"
 
     # fallback: guess based word count (arbitrary guesses here)
-    if not tei_xml:
+    if word_count == None:
         return "unknown"
-    body_txt = teixml_body_text(tei_xml)
-    word_count = len(body_txt.split())
     #print(f"  body text word count: {word_count}", file=sys.stderr)
+    assert word_count is not None
     if word_count < 20:
         return "stub"
     elif word_count > 800:
@@ -247,7 +253,7 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
     html_doc = HTMLParser(html_resource.body)
     html_biblio = html_extract_biblio(url, html_doc)
     html_body = html_extract_body_teixml(html_resource.body)
-    html_scope = html_guess_scope(url, html_doc, html_biblio, html_body.get('tei_xml'))
+    html_scope = html_guess_scope(url, html_doc, html_biblio, html_body.get('word_count'))
     if html_scope not in ('article-fulltext', 'unknown'):
         return IngestWebResult(
             status="wrong-scope",

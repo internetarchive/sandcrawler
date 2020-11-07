@@ -97,7 +97,6 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
                 self.counts['skip-request-fields'] += 1
                 return None
         if raw['ingest_type'] not in ('pdf', 'xml', 'html'):
-            print(raw['ingest_type'])
             self.counts['skip-ingest-type'] += 1
             return None
         request = {

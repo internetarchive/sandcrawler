@@ -343,13 +343,14 @@ class IngestFileWorker(SandcrawlerWorker):
         html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
         assert html_biblio
         html_body = html_extract_body_teixml(resource.body)
-        html_scope = html_guess_scope(resource.terminal_url, html_doc, html_biblio, html_body.get('tei_xml'))
+        html_scope = html_guess_scope(resource.terminal_url, html_doc, html_biblio, html_body.get('word_count'))
+        html_biblio_dict = json.loads(html_biblio.json(exclude_none=True))
 
         if html_scope not in ('article-fulltext', 'unknown'):
             html_body.pop("tei_xml", None)
             return dict(
                 status="html-body-wrong-scope",
-                html_biblio=html_biblio,
+                html_biblio=html_biblio_dict,
                 html_scope=html_scope,
             )
 
@@ -358,7 +359,7 @@ class IngestFileWorker(SandcrawlerWorker):
             html_body.pop("tei_xml", None)
             return dict(
                 status="too-many-resources",
-                html_biblio=html_biblio,
+                html_biblio=html_biblio_dict,
                 html_scope=html_scope,
             )
 
@@ -377,7 +378,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         return dict(
             html_body=html_body,
-            html_biblio=json.loads(html_biblio.json(exclude_none=True)),
+            html_biblio=html_biblio_dict,
             scope=html_scope,
             html_resources=[json.loads(r.json(exclude_none=True)) for r in full_resources],
         )
