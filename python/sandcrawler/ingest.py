@@ -257,7 +257,11 @@ class IngestFileWorker(SandcrawlerWorker):
                 'xml_meta': self.process_xml(resource, file_meta),
             }
         elif ingest_type == "html":
-            return self.process_html(resource, file_meta)
+            html_info = self.process_html(resource, file_meta)
+            # if there is no html_biblio, don't clobber anything possibly extracted earlier
+            if 'html_biblio' in html_info and not html_info['html_biblio']:
+                html_info.pop('html_biblio')
+            return html_info
         else:
             raise NotImplementedError(f"process {ingest_type} hit")
 
@@ -559,6 +563,14 @@ class IngestFileWorker(SandcrawlerWorker):
                 or "application/xml" in file_meta['mimetype']
                 or "text/xml" in file_meta['mimetype']
             )
+            html_biblio = None
+            if html_ish_resource and resource.body:
+                html_doc = HTMLParser(resource.body)
+                html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
+                if html_biblio and html_biblio.title:
+                    result['html_biblio'] = json.loads(html_biblio.json(exclude_none=True))
+                    #print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
+
             if ingest_type == "pdf" and html_ish_resource:
                 # Got landing page or similar. Some XHTML detected as "application/xml"
                 fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
