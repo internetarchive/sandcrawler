@@ -19,6 +19,7 @@ def run_single_ingest(args):
         request['force_recrawl'] = True
     ingester = IngestFileWorker(
         try_spn2=not args.no_spn2,
+        html_quick_mode=args.html_quick_mode,
     )
     result = ingester.process(request)
     print(json.dumps(result, sort_keys=True))
@@ -59,6 +60,9 @@ def main():
     sub_single.add_argument('--ingest-type',
         default="pdf",
         help="type of ingest (pdf, html, etc)")
+    sub_single.add_argument('--html-quick-mode',
+        action='store_true',
+        help="don't fetch individual sub-resources, just use CDX")
     sub_single.add_argument('url',
         help="URL of paper to fetch")
 

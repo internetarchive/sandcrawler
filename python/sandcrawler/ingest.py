@@ -81,7 +81,7 @@ class IngestFileWorker(SandcrawlerWorker):
         self.try_existing_pdfextract = kwargs.get('try_existing_pdfextract', True)
         self.try_wayback = kwargs.get('try_wayback', True)
         self.try_spn2 = kwargs.get('try_spn2', True)
-        self.html_quick_mode = False
+        self.html_quick_mode = kwargs.get('html_quick_mode', False)
         self.adblock_rules = load_adblock_rules()
         self.max_html_resources = 200
 
@@ -374,6 +374,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         try:
             if self.html_quick_mode:
+                print("  WARN: running quick CDX-only fetches", file=sys.stderr)
                 full_resources = quick_fetch_html_resources(raw_resources, self.wayback_client.cdx_client, when)
             else:
                 full_resources = fetch_html_resources(raw_resources, self.wayback_client, when)
