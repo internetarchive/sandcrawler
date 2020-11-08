@@ -818,7 +818,7 @@ class SavePageNowClient:
         non-200 remote statuses, invalid hosts/URLs, timeouts, backoff, etc.
         """
         if capture_outlinks:
-            print("  capturing outlinks!", file=sys.stdout)
+            print("  capturing outlinks!", file=sys.stderr)
         if not (self.ia_access_key and self.ia_secret_key):
             raise Exception("SPN2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
         if request_url.startswith("ftp://"):
@@ -858,7 +858,7 @@ class SavePageNowClient:
                 "Didn't get expected 'job_id' field in SPN2 response: {}".format(resp_json))
 
         job_id = resp_json['job_id']
-        print(f"  SPNv2 running: job_id={job_id} url={request_url}", file=sys.stdout)
+        print(f"  SPNv2 running: job_id={job_id} url={request_url}", file=sys.stderr)
 
         # poll until complete
         final_json = None
