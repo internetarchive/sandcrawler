@@ -554,7 +554,7 @@ class IngestFileWorker(SandcrawlerWorker):
             # here we split based on ingest type to try and extract a next hop
             html_ish_resource = bool(
                 "html" in file_meta['mimetype']
-                or "xhtml" in file_meta['mimetype']
+                or "xhtml" in file_meta['mimetype'] # matches "application/xhtml+xml"
                 or "application/xml" in file_meta['mimetype']
                 or "text/xml" in file_meta['mimetype']
             )
@@ -653,7 +653,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 result['status'] = "wrong-mimetype"
                 return result
         elif ingest_type == "html":
-            if file_meta['mimetype'] not in ("text/html",):
+            if file_meta['mimetype'] not in ("text/html", "application/xhtml+xml"):
                 result['status'] = "wrong-mimetype"
                 return result
         else:
