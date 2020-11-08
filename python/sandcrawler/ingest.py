@@ -10,7 +10,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from collections import namedtuple
 from selectolax.parser import HTMLParser
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackContentError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult, fix_transfer_encoding
+from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackContentError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult, fix_transfer_encoding, NoCaptureError
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.pdfextract import process_pdf, PdfExtractResult
 from sandcrawler.misc import gen_file_metadata, clean_url, parse_cdx_datetime
@@ -391,6 +391,10 @@ class IngestFileWorker(SandcrawlerWorker):
             return partial_result
         except WaybackContentError as e:
             partial_result['status'] = 'wayback-content-error'
+            partial_result['error_message'] = str(e)[:1600]
+            return partial_result
+        except NoCaptureError as e:
+            partial_result['status'] = 'html-resource-no-capture'
             partial_result['error_message'] = str(e)[:1600]
             return partial_result
 

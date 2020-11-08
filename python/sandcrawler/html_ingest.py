@@ -11,7 +11,7 @@ import trafilatura
 import pydantic
 from selectolax.parser import HTMLParser
 
-from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding
+from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding, NoCaptureError
 from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 
@@ -124,11 +124,9 @@ def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, 
     for resource in resources:
         cdx_row = cdx_client.lookup_best(resource['url'], closest=closest)
         if not cdx_row:
-            raise Exception("CDX lookup failed")
+            raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         if cdx_row.url != resource['url']:
-            pass
-            #raise Exception(
-            #    f"CDX lookup URL mismatch: {cdx_row.url} != {resource['url']}")
+            print(f"  WARN: CDX fuzzy match: {cdx_row.url} != {resource['url']}", file=sys.stderr)
         full.append(WebResource(
             surt=cdx_row.surt,
             timestamp=cdx_row.datetime,
@@ -157,11 +155,10 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
     for resource in resources:
         wayback_resp = wayback_client.lookup_resource(resource['url'], closest=closest)
         if not wayback_resp or wayback_resp.status != 'success':
-            # TODO: raise a specific exception so we can catch it elsewhere?
-            raise Exception("wayback lookup failed")
+            raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         file_meta = gen_file_metadata(wayback_resp.body)
         if file_meta['sha1hex'] != wayback_resp.cdx.sha1hex:
-            raise Exception("wayback payload sha1hex mismatch")
+            raise WaybackError("wayback payload sha1hex mismatch: {wayback_resp.cdx.url}")
         full.append(WebResource(
             surt=wayback_resp.cdx.surt,
             timestamp=parse_cdx_datetime(wayback_resp.cdx.datetime),

@@ -310,6 +310,9 @@ class WaybackContentError(Exception):
 class PetaboxError(Exception):
     pass
 
+class NoCaptureError(Exception):
+    pass
+
 class WaybackClient:
 
     def __init__(self, cdx_client=None, **kwargs):
