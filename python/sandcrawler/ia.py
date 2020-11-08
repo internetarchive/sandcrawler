@@ -10,6 +10,7 @@ import gzip
 import json
 import requests
 import datetime
+import urllib.parse
 from typing import Tuple
 from collections import namedtuple
 
@@ -694,10 +695,8 @@ class WaybackClient:
                             cdx=cdx_row,
                             revisit_cdx=None,
                         )
-                    if resource.location.startswith('/'):
-                        # redirect location does not include hostname
-                        domain_prefix = '/'.join(next_url.split('/')[:3])
-                        next_url = domain_prefix + resource.location
+                    if not "://" in resource.location:
+                        next_url = urllib.parse.urljoin(next_url, resource.location)
                     else:
                         next_url = resource.location
                     if next_url:
