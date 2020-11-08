@@ -18,13 +18,15 @@ def clean_url(s: str) -> str:
         parsed.colon_before_port = b''
     return str(urlcanon.whatwg(parsed))
 
-def gen_file_metadata(blob: bytes) -> dict:
+def gen_file_metadata(blob: bytes, allow_empty: bool = False) -> dict:
     """
     Takes a file blob (bytestream) and returns hashes and other metadata.
 
     Returns a dict: size_bytes, md5hex, sha1hex, sha256hex, mimetype
     """
-    assert blob
+    assert blob is not None
+    if not allow_empty:
+        assert blob
     mimetype = magic.Magic(mime=True).from_buffer(blob)
     if mimetype in ("application/xml", "text/xml"):
         # crude check for JATS XML, using only first 1 kB of file
