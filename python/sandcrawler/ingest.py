@@ -531,6 +531,10 @@ class IngestFileWorker(SandcrawlerWorker):
                 result['status'] = 'blocked-cookie'
                 return result
 
+            if not resource.body:
+                result['status'] = 'null-body'
+                return result
+
             file_meta = gen_file_metadata(resource.body)
             try:
                 file_meta, resource = fix_transfer_encoding(file_meta, resource)

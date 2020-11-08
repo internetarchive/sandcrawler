@@ -1076,6 +1076,8 @@ def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> Tuple[di
     if resource.body and file_meta['mimetype'] == 'application/gzip' and resource.cdx and resource.cdx.mimetype != 'application/gzip':
         print("  transfer encoding not stripped: {}".format(resource.cdx.mimetype), file=sys.stderr)
         inner_body = gzip.decompress(resource.body)
+        if not inner_body:
+            raise Exception("null body inside transfer encoding")
         inner_resource = ResourceResult(
             body=inner_body,
             # copy all other fields
