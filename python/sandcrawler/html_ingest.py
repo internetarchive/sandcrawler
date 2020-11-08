@@ -11,7 +11,7 @@ import trafilatura
 import pydantic
 from selectolax.parser import HTMLParser
 
-from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding, NoCaptureError
+from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding, NoCaptureError, WaybackContentError
 from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 
@@ -158,7 +158,7 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         file_meta = gen_file_metadata(wayback_resp.body)
         if file_meta['sha1hex'] != wayback_resp.cdx.sha1hex:
-            raise WaybackError("wayback payload sha1hex mismatch: {wayback_resp.cdx.url}")
+            raise WaybackContentError("wayback payload sha1hex mismatch: {wayback_resp.cdx.url}")
         full.append(WebResource(
             surt=wayback_resp.cdx.surt,
             timestamp=parse_cdx_datetime(wayback_resp.cdx.datetime),
