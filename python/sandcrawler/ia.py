@@ -939,6 +939,8 @@ class SavePageNowClient:
                 status = "forbidden"
             elif status == "error:user-session-limit":
                 raise SavePageNowBackoffError("SPNv2 user-session-limit")
+            elif status == "error:internal-server-error":
+                status = "remote-server-error"
             elif status.startswith("error:"):
                 status = "spn2-" + status
             # despite other errors, call these a failure (so we don't retry)
