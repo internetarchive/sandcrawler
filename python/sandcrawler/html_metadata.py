@@ -195,6 +195,13 @@ XML_FULLTEXT_PATTERNS: List[dict] = [
         "attr": "href",
         "technique": "SciElo XML link",
     },
+    {
+        "in_doc_url": "/article/view/",
+        "in_fulltext_url": "viewXML",
+        "selector": "a[class='obj_galley_link']",
+        "attr": "href",
+        "technique": "OJS Gallery XML link",
+    },
 ]
 
 HTML_FULLTEXT_PATTERNS: List[dict] = [
@@ -202,6 +209,13 @@ HTML_FULLTEXT_PATTERNS: List[dict] = [
         "selector": "meta[name='citation_fulltext_html_url']",
         "attr": "content",
         "technique": "citation_fulltext_html_url",
+    },
+    {
+        "in_doc_url": "/article/view/",
+        "in_fulltext_url": "inline=1",
+        "selector": "iframe[name='htmlFrame']",
+        "attr": "src",
+        "technique": "OJS HTML iframe",
     },
 ]
 
@@ -393,6 +407,7 @@ def load_adblock_rules() -> braveblock.Adblocker:
 
             # badges, "share" buttons, etc
             "apis.google.com/js/plusone",
+            "www.google.com/recaptcha/",
 
             # PLOS images
             "/resource/img/icon.*.16.png^",

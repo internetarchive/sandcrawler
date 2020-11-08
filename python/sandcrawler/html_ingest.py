@@ -127,6 +127,10 @@ def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, 
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         if cdx_row.url != resource['url']:
             print(f"  WARN: CDX fuzzy match: {cdx_row.url} != {resource['url']}", file=sys.stderr)
+        if not cdx_row.status_code:
+            # TODO: fall back to a full fetch?
+            print(f"  WARN: skipping revisit record", file=sys.stderr)
+            continue
         full.append(WebResource(
             surt=cdx_row.surt,
             timestamp=cdx_row.datetime,
