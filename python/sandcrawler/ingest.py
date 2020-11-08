@@ -353,7 +353,7 @@ class IngestFileWorker(SandcrawlerWorker):
         if html_scope not in ('article-fulltext', 'unknown'):
             html_body.pop("tei_xml", None)
             return dict(
-                status="html-body-wrong-scope",
+                status="wrong-scope",
                 html_biblio=html_biblio_dict,
                 html_scope=html_scope,
             )

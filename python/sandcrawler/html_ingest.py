@@ -174,6 +174,28 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
     return full
 
 
+def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]) -> Optional[str]:
+    generator: Optional[str] = None
+    platform: Optional[str] = None
+    generator_elem = doc.css_first("meta[name='generator']")
+    if generator_elem:
+        generator = generator_elem.attrs['content']
+    else:
+        generator_elem = doc.css_first("a[id='developedBy']")
+        if generator_elem:
+            generator = generator_elem.text()
+    if generator and "open journal systems 3" in generator.lower():
+        platform = "ojs3"
+    elif generator and "open journal systems" in generator.lower():
+        platform = "ojs"
+    elif 'powered by <a target="blank" href="http://pkp.sfu.ca/ojs/">PKP OJS</a>' in doc.html:
+        platform = "ojs"
+    elif doc.css_first("body[id='pkp-common-openJournalSystems']"):
+        platform = "ojs"
+    print(f"  HTML platform: {platform} generator: {generator}", file=sys.stderr)
+    return platform
+
+
 def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata], word_count: Optional[int]) -> str:
     """
     This function tries to guess if an HTML document represents one of:
@@ -190,7 +212,11 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
     - blockpage
     - errorpage
     - stub
+    - other
     - unknown
+
+    Unknown implies the page could be anything. "other" implies it is not
+    fulltext or a landing page, but could be one of the other categories.
     """
 
     # basic paywall and loginwall detection based on URL
@@ -205,17 +231,35 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
         if "sci_arttext" in url:
             return "article-fulltext"
 
-    if biblio and biblio.html_fulltext_url == url:
-        return "article-fulltext"
+    platform = html_guess_platform(url, doc, biblio)
 
-    # fallback: guess based word count (arbitrary guesses here)
+    if biblio:
+        if biblio.html_fulltext_url == url:
+            return "article-fulltext"
+        elif biblio.html_fulltext_url:
+            return "landingpage"
+
+    # OJS-specific detection
+    if platform in ("ojs", "ojs3"):
+
+        if biblio and biblio.title:
+            if word_count and word_count > 1200:
+                return "fulltext"
+            else:
+                return "landingpage"
+        else:
+            if "/article/view/" in url and word_count and word_count > 600:
+                return "fulltext"
+        return "other"
+
+    # fallback: guess based on word count (arbitrary guesses here)
     if word_count == None:
         return "unknown"
     #print(f"  body text word count: {word_count}", file=sys.stderr)
     assert word_count is not None
     if word_count < 20:
         return "stub"
-    elif word_count > 800:
+    elif word_count > 1200:
         return "article-fulltext"
 
     return "unknown"
