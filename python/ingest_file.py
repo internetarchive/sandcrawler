@@ -10,7 +10,7 @@ from sandcrawler.ingest import IngestFileRequestHandler, IngestFileWorker
 
 def run_single_ingest(args):
     request = dict(
-        ingest_type=args.type,
+        ingest_type=args.ingest_type,
         base_url=args.url,
         ext_ids=dict(doi=args.doi),
         fatcat=dict(release_ident=args.release_id),
@@ -56,7 +56,7 @@ def main():
     sub_single.add_argument('--no-spn2',
         action='store_true',
         help="don't use live web (SPNv2)")
-    sub_single.add_argument('--type',
+    sub_single.add_argument('--ingest-type',
         default="pdf",
         help="type of ingest (pdf, html, etc)")
     sub_single.add_argument('url',
