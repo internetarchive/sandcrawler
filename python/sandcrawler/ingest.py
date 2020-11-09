@@ -17,10 +17,11 @@ from sandcrawler.misc import gen_file_metadata, clean_url, parse_cdx_datetime
 from sandcrawler.html import extract_fulltext_url
 from sandcrawler.html_ingest import fetch_html_resources, \
     quick_fetch_html_resources, html_guess_scope, html_extract_body_teixml, \
-    WebResource
+    WebResource, html_guess_platform
 from sandcrawler.html_metadata import html_extract_fulltext_url, \
-    XML_FULLTEXT_PATTERNS, HTML_FULLTEXT_PATTERNS, BiblioMetadata, \
-    html_extract_resources, html_extract_biblio, load_adblock_rules
+    XML_FULLTEXT_PATTERNS, HTML_FULLTEXT_PATTERNS, PDF_FULLTEXT_PATTERNS, \
+    BiblioMetadata, html_extract_resources, html_extract_biblio, \
+    load_adblock_rules
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.xml import xml_reserialize
@@ -353,6 +354,7 @@ class IngestFileWorker(SandcrawlerWorker):
         html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
         assert html_biblio
         html_body = html_extract_body_teixml(resource.body)
+        html_platform = html_guess_platform(resource.terminal_url, html_doc, html_biblio)
         html_scope = html_guess_scope(resource.terminal_url, html_doc, html_biblio, html_body.get('word_count'))
         html_biblio_dict = json.loads(html_biblio.json(exclude_none=True))
 
@@ -360,14 +362,16 @@ class IngestFileWorker(SandcrawlerWorker):
             return dict(
                 status=html_scope,
                 html_biblio=html_biblio_dict,
-                html_scope=html_scope,
+                scope=html_scope,
+                platform=html_platform,
             )
         elif html_scope == 'unknown':
             html_body.pop("tei_xml", None)
             return dict(
                 status="unknown-scope",
                 html_biblio=html_biblio_dict,
-                html_scope=html_scope,
+                scope=html_scope,
+                platform=html_platform,
                 html_body=html_body,
             )
         elif html_scope not in ('article-fulltext',):
@@ -375,7 +379,8 @@ class IngestFileWorker(SandcrawlerWorker):
             return dict(
                 status="wrong-scope",
                 html_biblio=html_biblio_dict,
-                html_scope=html_scope,
+                scope=html_scope,
+                platform=html_platform,
                 html_body=html_body,
             )
 
@@ -385,7 +390,8 @@ class IngestFileWorker(SandcrawlerWorker):
             return dict(
                 status="too-many-resources",
                 html_biblio=html_biblio_dict,
-                html_scope=html_scope,
+                scope=html_scope,
+                platform=html_platform,
                 html_body=html_body,
             )
 
@@ -396,7 +402,8 @@ class IngestFileWorker(SandcrawlerWorker):
 
         partial_result = dict(
             html_biblio=html_biblio_dict,
-            html_scope=html_scope,
+            scope=html_scope,
+            platform=html_platform,
             html_body=html_body,
         )
 
@@ -434,6 +441,7 @@ class IngestFileWorker(SandcrawlerWorker):
             html_body=html_body,
             html_biblio=html_biblio_dict,
             scope=html_scope,
+            platform=html_platform,
             html_resources=[json.loads(r.json(exclude_none=True)) for r in full_resources],
         )
 
@@ -586,18 +594,30 @@ class IngestFileWorker(SandcrawlerWorker):
                 or "text/xml" in file_meta['mimetype']
             )
             html_biblio = None
+            html_doc = None
             if html_ish_resource and resource.body:
-                html_doc = HTMLParser(resource.body)
-                html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
-                if html_biblio and html_biblio.title:
-                    result['html_biblio'] = json.loads(html_biblio.json(exclude_none=True))
-                    #print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
+                try:
+                    html_doc = HTMLParser(resource.body)
+                    html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
+                    if html_biblio:
+                        if not 'html_biblio' in result or html_biblio.title:
+                            result['html_biblio'] = json.loads(html_biblio.json(exclude_none=True))
+                            #print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
+                except ValueError:
+                    pass
 
             if ingest_type == "pdf" and html_ish_resource:
-                # Got landing page or similar. Some XHTML detected as "application/xml"
+                # Got landing page or similar
                 fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
-                result['extract_next_hop'] = fulltext_url
 
+                # this is the new style of URL extraction
+                if not fulltext_url and html_biblio and html_biblio.pdf_fulltext_url:
+                    fulltext_url = dict(
+                        pdf_url=html_biblio.pdf_fulltext_url,
+                        technique="html_biblio",
+                    )
+
+                result['extract_next_hop'] = fulltext_url
                 if not fulltext_url:
                     result['status'] = 'no-pdf-link'
                     return result
