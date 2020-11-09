@@ -18,10 +18,7 @@ from sandcrawler.html import extract_fulltext_url
 from sandcrawler.html_ingest import fetch_html_resources, \
     quick_fetch_html_resources, html_guess_scope, html_extract_body_teixml, \
     WebResource, html_guess_platform
-from sandcrawler.html_metadata import html_extract_fulltext_url, \
-    XML_FULLTEXT_PATTERNS, HTML_FULLTEXT_PATTERNS, PDF_FULLTEXT_PATTERNS, \
-    BiblioMetadata, html_extract_resources, html_extract_biblio, \
-    load_adblock_rules
+from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.xml import xml_reserialize
@@ -607,21 +604,23 @@ class IngestFileWorker(SandcrawlerWorker):
                     pass
 
             if ingest_type == "pdf" and html_ish_resource:
-                # Got landing page or similar
+
                 fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
 
-                # this is the new style of URL extraction
-                if not fulltext_url and html_biblio and html_biblio.pdf_fulltext_url:
-                    fulltext_url = dict(
-                        pdf_url=html_biblio.pdf_fulltext_url,
-                        technique="html_biblio",
-                    )
+                # the new style of URL extraction (already computed)
+                # we aren't quite ready to adopt this for the PDF path (which
+                # has more complex logic to avoid loops, etc)
+                #if not fulltext_url and html_biblio and html_biblio.pdf_fulltext_url:
+                #    fulltext_url = dict(
+                #        pdf_url=html_biblio.pdf_fulltext_url,
+                #        technique="html_biblio",
+                #    )
 
                 result['extract_next_hop'] = fulltext_url
                 if not fulltext_url:
                     result['status'] = 'no-pdf-link'
                     return result
-                next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url')
+                next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url') or ""
                 assert next_url
                 next_url = clean_url(next_url)
                 print("[PARSE  {:>6}] {}  {}".format(
@@ -637,12 +636,9 @@ class IngestFileWorker(SandcrawlerWorker):
                 hops.append(next_url)
                 continue
             elif ingest_type == "xml" and html_ish_resource:
-                # parse with selectolax, extract XML fulltext URL
-                html_doc = HTMLParser(resource.body)
-                extract_next_hop = html_extract_fulltext_url(resource.terminal_url, html_doc, XML_FULLTEXT_PATTERNS)
-                if extract_next_hop:
-                    next_url = extract_next_hop[0]
-                    technique = extract_next_hop[1]
+                if html_biblio and html_biblio.xml_fulltext_url:
+                    next_url = html_biblio.xml_fulltext_url
+                    technique = "html_biblio"
                     print("[PARSE  {:>6}] {}  {}".format(
                             ingest_type,
                             technique,
@@ -656,12 +652,9 @@ class IngestFileWorker(SandcrawlerWorker):
                     hops.append(next_url)
                     continue
             elif ingest_type == "html" and html_ish_resource:
-                # parse with selectolax, extract XML fulltext URL
-                html_doc = HTMLParser(resource.body)
-                extract_next_hop = html_extract_fulltext_url(resource.terminal_url, html_doc, HTML_FULLTEXT_PATTERNS)
-                if extract_next_hop:
-                    next_url = extract_next_hop[0]
-                    technique = extract_next_hop[1]
+                if html_biblio and html_biblio.html_fulltext_url:
+                    next_url = html_biblio.html_fulltext_url
+                    technique = "html_bibli"
                     if next_url in hops:
                         # for HTML ingest, we don't count this as a link-loop
                         break
