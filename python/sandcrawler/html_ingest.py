@@ -12,7 +12,7 @@ import pydantic
 from selectolax.parser import HTMLParser
 
 from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding, NoCaptureError, WaybackContentError
-from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx, clean_url
+from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx, clean_url, url_fuzzy_equal
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 
 
@@ -220,24 +220,6 @@ def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetada
         return "scielo"
 
     return None
-
-
-def url_fuzzy_equal(left: str, right: str) -> bool:
-    """
-    TODO: use proper surt library and canonicalization for this check
-    """
-    fuzzy_left = '://'.join(clean_url(left).replace('www.', '').replace(':80/', '/').split('://')[1:])
-    fuzzy_right = '://'.join(clean_url(right).replace('www.', '').replace(':80/', '/').split('://')[1:])
-    if fuzzy_left == fuzzy_right:
-        return True
-    elif fuzzy_left == fuzzy_right + "/" or fuzzy_right == fuzzy_left + "/":
-        return True
-    return False
-
-def test_url_fuzzy_equal() -> None:
-    assert True == url_fuzzy_equal(
-        "http://www.annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree",
-        "http://annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree")
 
 def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata], word_count: Optional[int]) -> str:
     """

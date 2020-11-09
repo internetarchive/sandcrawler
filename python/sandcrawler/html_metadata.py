@@ -9,6 +9,8 @@ from selectolax.parser import HTMLParser
 import pydantic
 import braveblock
 
+from sandcrawler.misc import url_fuzzy_equal
+
 
 # this is a map of metadata keys to CSS selectors
 # sources for this list include:

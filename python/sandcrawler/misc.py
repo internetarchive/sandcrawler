@@ -18,6 +18,23 @@ def clean_url(s: str) -> str:
         parsed.colon_before_port = b''
     return str(urlcanon.whatwg(parsed))
 
+def url_fuzzy_equal(left: str, right: str) -> bool:
+    """
+    TODO: use proper surt library and canonicalization for this check
+    """
+    fuzzy_left = '://'.join(clean_url(left).replace('www.', '').replace(':80/', '/').split('://')[1:])
+    fuzzy_right = '://'.join(clean_url(right).replace('www.', '').replace(':80/', '/').split('://')[1:])
+    if fuzzy_left == fuzzy_right:
+        return True
+    elif fuzzy_left == fuzzy_right + "/" or fuzzy_right == fuzzy_left + "/":
+        return True
+    return False
+
+def test_url_fuzzy_equal() -> None:
+    assert True == url_fuzzy_equal(
+        "http://www.annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree",
+        "http://annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree")
+
 def gen_file_metadata(blob: bytes, allow_empty: bool = False) -> dict:
     """
     Takes a file blob (bytestream) and returns hashes and other metadata.
