@@ -12,18 +12,24 @@ import pydantic
 from selectolax.parser import HTMLParser
 
 from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding, NoCaptureError, WaybackContentError
-from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx
+from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx, clean_url
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 
 
 TRAFILATURA_AGENT = f"trafilatura/{trafilatura.__version__}"
 
 def html_extract_body_teixml(doc: bytes) -> dict:
-    tei_xml = trafilatura.extract(doc,
-        tei_output=True,
-        include_comments=False,
-        include_formatting=True,
-    )
+    try:
+        tei_xml = trafilatura.extract(doc,
+            tei_output=True,
+            include_comments=False,
+            include_formatting=True,
+        )
+    except ValueError as ve:
+        return dict(
+            status="parse-error",
+            error_msg=str(ve)[:1000],
+        )
     if tei_xml:
         body_txt = teixml_body_text(tei_xml)
         word_count = len(body_txt.split())
@@ -125,7 +131,7 @@ def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, 
         cdx_row = cdx_client.lookup_best(resource['url'], closest=closest)
         if not cdx_row:
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
-        if cdx_row.url != resource['url']:
+        if cdx_row.url != resource['url'] and not url_fuzzy_equal(cdx_row.url, resource['url']):
             print(f"  WARN: CDX fuzzy match: {cdx_row.url} != {resource['url']}", file=sys.stderr)
         if not cdx_row.status_code:
             # TODO: fall back to a full fetch?
@@ -179,8 +185,8 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
 
 
 def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]) -> Optional[str]:
+
     generator: Optional[str] = None
-    platform: Optional[str] = None
     generator_elem = doc.css_first("meta[name='generator']")
     if generator_elem:
         generator = generator_elem.attrs['content']
@@ -189,16 +195,49 @@ def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetada
         if generator_elem:
             generator = generator_elem.text()
     if generator and "open journal systems 3" in generator.lower():
-        platform = "ojs3"
+        return "ojs3"
     elif generator and "open journal systems" in generator.lower():
-        platform = "ojs"
-    elif 'powered by <a target="blank" href="http://pkp.sfu.ca/ojs/">PKP OJS</a>' in doc.html:
-        platform = "ojs"
+        return "ojs"
+    elif generator and "plone" in generator.lower():
+        return "plone"
     elif doc.css_first("body[id='pkp-common-openJournalSystems']"):
-        platform = "ojs"
-    print(f"  HTML platform: {platform} generator: {generator}", file=sys.stderr)
-    return platform
+        return "ojs"
+    else:
+        try:
+            if 'powered by <a target="blank" href="http://pkp.sfu.ca/ojs/">PKP OJS</a>' in doc.html:
+                return "ojs"
+        except UnicodeDecodeError:
+            pass
 
+    icon_elem = doc.css_first("link[type='image/x-icon']")
+    if icon_elem and 'href' in icon_elem.attrs:
+        if 'journalssystem.com' in icon_elem.attrs['href']:
+            return "journalssystem.com"
+        elif 'indexcopernicus.com' in icon_elem.attrs['href']:
+            return "indexcopernicus"
+
+    if 'scielo' in url:
+        return "scielo"
+
+    return None
+
+
+def url_fuzzy_equal(left: str, right: str) -> bool:
+    """
+    TODO: use proper surt library and canonicalization for this check
+    """
+    fuzzy_left = '://'.join(clean_url(left).replace('www.', '').replace(':80/', '/').split('://')[1:])
+    fuzzy_right = '://'.join(clean_url(right).replace('www.', '').replace(':80/', '/').split('://')[1:])
+    if fuzzy_left == fuzzy_right:
+        return True
+    elif fuzzy_left == fuzzy_right + "/" or fuzzy_right == fuzzy_left + "/":
+        return True
+    return False
+
+def test_url_fuzzy_equal() -> None:
+    assert True == url_fuzzy_equal(
+        "http://www.annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree",
+        "http://annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree")
 
 def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata], word_count: Optional[int]) -> str:
     """
@@ -211,9 +250,10 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
     - component
     - issue-fulltext
     - landingpage
-    - paywall
-    - loginwall
-    - blockpage
+    - blocked-paywall
+    - blocked-login
+    - blocked-captcha
+    - blocked-cookie
     - errorpage
     - stub
     - other
@@ -221,11 +261,16 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
 
     Unknown implies the page could be anything. "other" implies it is not
     fulltext or a landing page, but could be one of the other categories.
+
+    TODO: known javascript-heavy single-page-app:
+    - https://riojournal.com/article/35913/
+    - https://phmd.pl/resources/html/article/details?id=175497&language=en
+    - https://dez.pensoft.net/articles.php?id=11704
     """
 
     # basic paywall and loginwall detection based on URL
     if url.endswith("/cookieAbsent"):
-        return "blockpage"
+        return "blocked-cookie"
     if "://page-one.live.cf.public.springer.com" in url:
         return "article-sample"
 
@@ -235,15 +280,19 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
         if "sci_arttext" in url:
             return "article-fulltext"
 
+    if "showcaptcha.asp" in url:
+        return "blocked-captcha"
+
     platform = html_guess_platform(url, doc, biblio)
 
     if biblio:
-        if biblio.html_fulltext_url == url:
-            return "article-fulltext"
-        elif biblio.html_fulltext_url:
-            return "landingpage"
+        if biblio.html_fulltext_url:
+            if url_fuzzy_equal(biblio.html_fulltext_url, url):
+                return "article-fulltext"
+            else:
+                return "landingpage"
 
-    # OJS-specific detection
+    # platform-specific detection
     if platform in ("ojs", "ojs3"):
 
         if biblio and biblio.title:
@@ -255,16 +304,31 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
             if "/article/view/" in url and word_count and word_count > 600:
                 return "fulltext"
         return "other"
+    elif platform == "journalssystem.com":
+        if biblio and biblio.pdf_fulltext_url and word_count and word_count < 1000:
+            return "landingpage"
+
+    # more platform/publisher specific checks
+    if "karger.com/Article/Abstract" in url:
+        return "landingpage"
+    if "dergipark.gov.tr" in url and not ("download/article-file" in url):
+        return "other"
+
+    try:
+        if isinstance(doc.html, str) and "<center><h1>403 Forbidden</h1></center>" in doc.html:
+            # cloudflare block pattern
+            return "blocked-forbidden"
+    except UnicodeDecodeError:
+        pass
+
+    print(f"  scope guessing: platform {platform} word count: {word_count}", file=sys.stderr)
 
     # fallback: guess based on word count (arbitrary guesses here)
-    if word_count == None:
-        return "unknown"
-    #print(f"  body text word count: {word_count}", file=sys.stderr)
-    assert word_count is not None
-    if word_count < 20:
-        return "stub"
-    elif word_count > 1200:
-        return "article-fulltext"
+    if word_count is not None:
+        if word_count < 20:
+            return "stub"
+        elif word_count > 1200:
+            return "article-fulltext"
 
     return "unknown"
 
