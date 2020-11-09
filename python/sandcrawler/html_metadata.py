@@ -184,7 +184,17 @@ XML_FULLTEXT_PATTERNS: List[dict] = [
         "technique": "citation_xml_url",
     },
     {
+        "selector": "meta[name='fulltext_xml']",
+        "attr": "content",
+        "technique": "fulltext_xml",
+    },
+    {
         "selector": "link[rel='alternate'][type='application/xml']",
+        "attr": "href",
+        "technique": "alternate link",
+    },
+    {
+        "selector": "link[rel='alternate'][type='text/xml']",
         "attr": "href",
         "technique": "alternate link",
     },
@@ -211,11 +221,23 @@ HTML_FULLTEXT_PATTERNS: List[dict] = [
         "technique": "citation_fulltext_html_url",
     },
     {
+        "selector": "link[rel='alternate'][type='text/html']",
+        "attr": "href",
+        "technique": "alternate link",
+    },
+    {
         "in_doc_url": "/article/view/",
         "in_fulltext_url": "inline=1",
         "selector": "iframe[name='htmlFrame']",
         "attr": "src",
         "technique": "OJS HTML iframe",
+    },
+    {
+        "in_doc_url": "dovepress.com",
+        "in_fulltext_url": "-fulltext-",
+        "selector": "a[id='view-full-text']",
+        "attr": "href",
+        "technique": "dovepress fulltext link",
     },
 ]
 
@@ -319,7 +341,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
         for pattern in patterns:
             val = head.css_first(pattern)
             #print((field, pattern, val))
-            if val and val.attrs['content']:
+            if val and val.attrs.get('content'):
                 meta[field] = val.attrs['content']
                 break
 
@@ -389,6 +411,7 @@ def load_adblock_rules() -> braveblock.Adblocker:
             "||fonts.googleapis.com^",
             "||widgets.figshare.com^",
             "||crossmark-cdn.crossref.org^",
+            "||crossmark.crossref.org^",
             "||platform.twitter.com^",
             "||verify.nature.com^",
             "||s7.addthis.com^",
