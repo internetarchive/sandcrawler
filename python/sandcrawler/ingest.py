@@ -652,7 +652,7 @@ class IngestFileWorker(SandcrawlerWorker):
             elif ingest_type == "html" and html_ish_resource:
                 if html_biblio and html_biblio.html_fulltext_url:
                     next_url = html_biblio.html_fulltext_url
-                    technique = "html_bibli"
+                    technique = "html_biblio"
                     if next_url in hops:
                         # for HTML ingest, we don't count this as a link-loop
                         break
