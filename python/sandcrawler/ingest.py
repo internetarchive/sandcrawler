@@ -343,19 +343,40 @@ class IngestFileWorker(SandcrawlerWorker):
 
     def process_html(self, resource: ResourceResult, file_meta: dict) -> dict:
 
-        html_doc = HTMLParser(resource.body)
+        assert resource.body
+        try:
+            html_doc = HTMLParser(resource.body)
+        except ValueError as ve:
+            return dict(
+                status="html-selectolax-error",
+            )
         html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
         assert html_biblio
         html_body = html_extract_body_teixml(resource.body)
         html_scope = html_guess_scope(resource.terminal_url, html_doc, html_biblio, html_body.get('word_count'))
         html_biblio_dict = json.loads(html_biblio.json(exclude_none=True))
 
-        if html_scope not in ('article-fulltext', 'unknown'):
+        if html_scope in ('blocked-captcha','blocked-cookie','blocked-forbidden'):
+            return dict(
+                status=html_scope,
+                html_biblio=html_biblio_dict,
+                html_scope=html_scope,
+            )
+        elif html_scope == 'unknown':
+            html_body.pop("tei_xml", None)
+            return dict(
+                status="unknown-scope",
+                html_biblio=html_biblio_dict,
+                html_scope=html_scope,
+                html_body=html_body,
+            )
+        elif html_scope not in ('article-fulltext',):
             html_body.pop("tei_xml", None)
             return dict(
                 status="wrong-scope",
                 html_biblio=html_biblio_dict,
                 html_scope=html_scope,
+                html_body=html_body,
             )
 
         raw_resources = html_extract_resources(resource.terminal_url, html_doc, self.adblock_rules)
@@ -365,16 +386,22 @@ class IngestFileWorker(SandcrawlerWorker):
                 status="too-many-resources",
                 html_biblio=html_biblio_dict,
                 html_scope=html_scope,
+                html_body=html_body,
             )
 
-        when = parse_cdx_datetime(resource.cdx.datetime)
+        if self.htmlteixml_sink and html_body['status'] == "success":
+            self.htmlteixml_sink.push_record(html_body, key=file_meta['sha1hex'])
 
-        full_resources: List[WebResource] = []
+        html_body.pop("tei_xml", None)
 
         partial_result = dict(
             html_biblio=html_biblio_dict,
             html_scope=html_scope,
+            html_body=html_body,
         )
+
+        when = parse_cdx_datetime(resource.cdx.datetime)
+        full_resources: List[WebResource] = []
 
         try:
             if self.html_quick_mode:
@@ -402,11 +429,6 @@ class IngestFileWorker(SandcrawlerWorker):
             partial_result['status'] = 'html-resource-no-capture'
             partial_result['error_message'] = str(e)[:1600]
             return partial_result
-
-        if self.htmlteixml_sink and html_body['status'] == "success":
-            self.htmlteixml_sink.push_record(html_body, key=file_meta['sha1hex'])
-
-        html_body.pop("tei_xml", None)
 
         return dict(
             html_body=html_body,
