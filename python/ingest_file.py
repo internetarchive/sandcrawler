@@ -27,7 +27,10 @@ def run_single_ingest(args):
 
 def run_requests(args):
     # TODO: switch to using JsonLinePusher
-    ingester = IngestFileWorker()
+    ingester = IngestFileWorker(
+        try_spn2=not args.no_spn2,
+        html_quick_mode=args.html_quick_mode,
+    )
     for l in args.json_file:
         request = json.loads(l.strip())
         result = ingester.process(request)
@@ -68,6 +71,12 @@ def main():
 
     sub_requests = subparsers.add_parser('requests',
         help="takes a series of ingest requests (JSON, per line) and runs each")
+    sub_requests.add_argument('--no-spn2',
+        action='store_true',
+        help="don't use live web (SPNv2)")
+    sub_requests.add_argument('--html-quick-mode',
+        action='store_true',
+        help="don't fetch individual sub-resources, just use CDX")
     sub_requests.set_defaults(func=run_requests)
     sub_requests.add_argument('json_file',
         help="JSON file (request per line) to import from (or stdin)",
