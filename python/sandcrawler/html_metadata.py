@@ -560,6 +560,7 @@ def load_adblock_rules() -> braveblock.Adblocker:
             "||www.mendeley.com^",
             "||pbs.twimg.com^",
             "||badge.dimensions.ai^",
+            "||recaptcha.net^",
 
             # not sure about these CC badges (usually via a redirect)
             #"||licensebuttons.net^",
@@ -570,9 +571,10 @@ def load_adblock_rules() -> braveblock.Adblocker:
             #"||ajax.googleapis.com^",
             #"||cdnjs.cloudflare.com^",
 
-            # badges, "share" buttons, etc
+            # badges, "share" buttons, tracking, etc
             "apis.google.com/js/plusone",
             "www.google.com/recaptcha/",
+            "js/_getUACode.js"
 
             # PLOS images
             "/resource/img/icon.*.16.png^",
