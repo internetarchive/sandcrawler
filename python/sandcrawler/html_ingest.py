@@ -25,10 +25,10 @@ def html_extract_body_teixml(doc: bytes) -> dict:
             include_comments=False,
             include_formatting=True,
         )
-    except ValueError as ve:
+    except (ValueError, TypeError) as e:
         return dict(
             status="parse-error",
-            error_msg=str(ve)[:1000],
+            error_msg=str(e)[:1000],
         )
     if tei_xml:
         body_txt = teixml_body_text(tei_xml)
