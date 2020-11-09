@@ -1,4 +1,5 @@
 
+import sys
 import datetime
 from typing import List, Optional, Any, Tuple, Dict
 import urllib.parse
@@ -212,6 +213,13 @@ XML_FULLTEXT_PATTERNS: List[dict] = [
         "attr": "href",
         "technique": "OJS Gallery XML link",
     },
+    {
+        "in_fulltext_url": "/download/xml/",
+        "selector": "a[title='XML']",
+        "attr": "href",
+        "technique": "ARPHA XML link",
+        "example_page": "https://zookeys.pensoft.net/article/26391",
+    },
 ]
 
 HTML_FULLTEXT_PATTERNS: List[dict] = [
@@ -241,17 +249,137 @@ HTML_FULLTEXT_PATTERNS: List[dict] = [
     },
 ]
 
+# This is a database of matching patterns. Most of these discovered by hand,
+# looking at OA journal content that failed to craw/ingest.
 PDF_FULLTEXT_PATTERNS: List[dict] = [
     {
-        "selector": "meta[name='citation_pdf_url']",
+        "selector": "head meta[name='citation_pdf_url']",
         "attr": "content",
         "technique": "citation_pdf_url",
     },
     {
-        "selector": "meta[name='bepress_citation_pdf_url']",
+        "selector": "head meta[name='bepress_citation_pdf_url']",
         "attr": "content",
         "technique": "citation_pdf_url",
     },
+    {
+        "in_doc_url": "journals.lww.com",
+        "selector": "head meta[name='wkhealth_pdf_url']",
+        "attr": "content",
+        "technique": "wkhealth_pdf_url",
+        "example_page": "https://journals.lww.com/otainternational/Fulltext/2019/03011/Trauma_systems_in_North_America.2.aspx",
+    },
+    {
+        "selector": "head meta[propery='citation_pdf_url']",
+        "attr": "content",
+        "technique": "citation_pdf_url",
+        # eg, researchgate
+    },
+    {
+        "selector": "head meta[name='eprints.document_url']",
+        "attr": "content",
+        "technique": "citation_pdf_url (property)",
+    },
+    {
+        "in_doc_url": "/doi/10.",
+        "in_fulltext_url": "/doi/pdf/",
+        "selector": "a.show-pdf",
+        "attr": "href",
+        "technique": "SAGE/UTP show-pdflink",
+        "example_page": "https://journals.sagepub.com/doi/10.1177/2309499019888836",
+        # also http://utpjournals.press/doi/10.3138/cjh.ach.54.1-2.05
+    },
+    {
+        "in_doc_url": "/doi/10.",
+        "in_fulltext_url": "/doi/pdf/",
+        "selector": "a[title='PDF']",
+        "attr": "href",
+        "technique": "title=PDF link",
+        "example_page": "https://pubs.acs.org/doi/10.1021/acs.estlett.9b00379",
+    },
+    {
+        "in_doc_url": "/article/view/",
+        "selector": "a#pdfDownloadLink",
+        "attr": "href",
+        "technique": "pdfDownloadLink link",
+        "example_page": "http://www.revistas.unam.mx/index.php/rep/article/view/35503/32336",
+    },
+    {
+        "in_fulltext_url": "/pdf/",
+        "selector": "a.show-pdf",
+        "attr": "href",
+        "technique": "SAGE PDF link",
+        "example_page": "http://journals.sagepub.com/doi/pdf/10.1177/2309499019888836",
+    },
+    {
+        "in_doc_url": "://elifesciences.org/articles/",
+        "in_fulltext_url": "/download/",
+        "selector": "a[data-download-type='pdf-article']",
+        "attr": "href",
+        "technique": "eLife PDF link",
+        "example_page": "https://elifesciences.org/articles/59841",
+    },
+    {
+        "in_doc_url": "://www.jcancer.org/",
+        "in_fulltext_url": ".pdf",
+        "selector": ".divboxright a.text-button",
+        "attr": "href",
+        "technique": "jcancer PDF link",
+        "example_page": "https://www.jcancer.org/v10p4038.htm",
+    },
+    {
+        "in_doc_url": "://www.tandfonline.com/doi/full/10.",
+        "in_fulltext_url": "/pdf/",
+        "selector": "a.show-pdf",
+        "attr": "href",
+        "technique": "t+f show-pdf link",
+        "example_page": "https://www.tandfonline.com/doi/full/10.1080/19491247.2019.1682234",
+    },
+    {
+        "in_doc_url": "article_id=",
+        "in_fulltext_url": "download.php",
+        "selector": "a.file.pdf",
+        "attr": "href",
+        "technique": "pdf file link",
+        "example_page": "http://journals.tsu.ru/psychology/&journal_page=archive&id=1815&article_id=40405",
+    },
+    {
+        "in_doc_url": "/content/10.",
+        "in_fulltext_url": "pdf",
+        "selector": "a.pdf[title='Download']",
+        "attr": "href",
+        "technique": "pdf file link",
+        "example_page": "https://www.eurosurveillance.org/content/10.2807/1560-7917.ES.2020.25.11.2000230",
+    },
+    {
+        "selector": "embed[type='application/pdf']",
+        "attr": "src",
+        "technique": "PDF embed",
+        "example_page": "http://www.jasstudies.com/DergiTamDetay.aspx?ID=3401",
+    },
+    {
+        "in_doc_url": "/html/",
+        "in_fulltext_url": "create_pdf",
+        "selector": ".AbsPdfFigTab img[src='images/pdf-icon.jpg'] + a",
+        "attr": "href",
+        "technique": "PDF URL link",
+        "example_page": "http://www.aed.org.cn/nyzyyhjxb/html/2018/4/20180408.htm",
+    },
+    {
+        "in_doc_url": "/archive-detail/",
+        "in_fulltext_url": ".pdf",
+        "selector": ".contact-list a.download-pdf",
+        "attr": "href",
+        "technique": "PDF URL link",
+        "example_page": "http://www.bezmialemscience.org/archives/archive-detail/article-preview/editorial/20439",
+    },
+]
+
+FULLTEXT_URL_PATTERNS_SKIP = [
+    # wiley has a weird almost-blank page we don't want to loop on
+    "://onlinelibrary.wiley.com/doi/pdf/"
+    "://doi.org/"
+    "://dx.doi.org/"
 ]
 
 RELEASE_TYPE_MAP = {
@@ -310,6 +438,7 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict
 
     Returns null or a tuple of (url, technique)
     """
+    self_doc_url: Optional[Tuple[str, str]] = None
     for pattern in patterns:
         if not 'selector' in pattern:
             continue
@@ -321,13 +450,24 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict
             continue
         if 'attr' in pattern:
             val = elem.attrs[pattern['attr']]
-            if val:
-                val = urllib.parse.urljoin(doc_url, val)
-                assert val
-                if 'in_fulltext_url' in pattern:
-                    if not pattern['in_fulltext_url'] in val:
-                        continue
-                return (val, pattern.get('technique', 'unknown'))
+            if not val:
+                continue
+            val = urllib.parse.urljoin(doc_url, val)
+            assert val
+            if 'in_fulltext_url' in pattern:
+                if not pattern['in_fulltext_url'] in val:
+                    continue
+            for skip_pattern in FULLTEXT_URL_PATTERNS_SKIP:
+                if skip_pattern in val.lower():
+                    continue
+            if url_fuzzy_equal(doc_url, val):
+                # don't link to self, unless no other options
+                self_doc_url = (val, pattern.get('technique', 'unknown'))
+                continue
+            return (val, pattern.get('technique', 'unknown'))
+    if self_doc_url:
+        print(f"  WARN: returning fulltext URL pointing to self", file=sys.stderr)
+        return self_doc_url
     return None
 
 def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadata]:

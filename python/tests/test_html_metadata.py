@@ -39,6 +39,7 @@ def test_html_metadata_plos() -> None:
     assert meta.publisher == "Public Library of Science"
     assert meta.raw_references and "citation_title=Reticuloendotheliosis virus sequences within the genomes of field strains of fowlpox virus display variability;citation_author=P Singh;citation_author=W. M. Schnitzlein;citation_author=D. N. Tripathy;citation_journal_title=J. Virol;citation_volume=77;citation_number=77;citation_first_page=5855;citation_last_page=5862;citation_publication_date=2003;" in meta.raw_references
     assert meta.release_type == "article-journal"
+    assert meta.pdf_fulltext_url == "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0213978&type=printable"
 
 
 def test_html_metadata_elife() -> None:
@@ -46,7 +47,7 @@ def test_html_metadata_elife() -> None:
     with open('tests/files/elife_article.html', 'r') as f:
         elife_html = f.read()
 
-    meta = html_extract_biblio("http://example.org", HTMLParser(elife_html))
+    meta = html_extract_biblio("https://elifesciences.org/articles/44753", HTMLParser(elife_html))
     assert meta is not None
     assert meta.title == "Parallel visual circuitry in a basal chordate"
     assert meta.doi == "10.7554/eLife.44753"
@@ -63,6 +64,7 @@ def test_html_metadata_elife() -> None:
     # 2019-04-18
     assert meta.release_date == datetime.date(year=2019, month=4, day=18)
     assert meta.publisher == "eLife Sciences Publications Limited"
+    assert meta.pdf_fulltext_url == "https://elifesciences.org/download/aHR0cHM6Ly9jZG4uZWxpZmVzY2llbmNlcy5vcmcvYXJ0aWNsZXMvNDQ3NTMvZWxpZmUtNDQ3NTMtdjIucGRm/elife-44753-v2.pdf?_hash=CfyqOqVryCR4OjcMTfcdpeIWAGZznmh9jXksYKYChCw%3D"
 
 
 def test_html_metadata_peerj() -> None:

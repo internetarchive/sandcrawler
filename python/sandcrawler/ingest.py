@@ -605,16 +605,14 @@ class IngestFileWorker(SandcrawlerWorker):
 
             if ingest_type == "pdf" and html_ish_resource:
 
-                fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
-
                 # the new style of URL extraction (already computed)
-                # we aren't quite ready to adopt this for the PDF path (which
-                # has more complex logic to avoid loops, etc)
-                #if not fulltext_url and html_biblio and html_biblio.pdf_fulltext_url:
-                #    fulltext_url = dict(
-                #        pdf_url=html_biblio.pdf_fulltext_url,
-                #        technique="html_biblio",
-                #    )
+                if html_biblio and html_biblio.pdf_fulltext_url:
+                    fulltext_url = dict(
+                        pdf_url=html_biblio.pdf_fulltext_url,
+                        technique="html_biblio",
+                    )
+                else:
+                    fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
 
                 result['extract_next_hop'] = fulltext_url
                 if not fulltext_url:

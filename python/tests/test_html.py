@@ -31,11 +31,3 @@ def test_extract_fulltext_url():
             f.read(),
         )
     assert resp['pdf_url'] == "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0213978&type=printable"
-
-    with open('tests/files/elife_article.html', 'rb') as f:
-        resp = extract_fulltext_url(
-            "https://elifesciences.org/articles/44753",
-            f.read(),
-        )
-    assert resp['pdf_url'] == "https://elifesciences.org/download/aHR0cHM6Ly9jZG4uZWxpZmVzY2llbmNlcy5vcmcvYXJ0aWNsZXMvNDQ3NTMvZWxpZmUtNDQ3NTMtdjIucGRm/elife-44753-v2.pdf?_hash=CfyqOqVryCR4OjcMTfcdpeIWAGZznmh9jXksYKYChCw%3D"
-

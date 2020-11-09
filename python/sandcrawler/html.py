@@ -11,24 +11,6 @@ IEEEXPLORE_REGEX = re.compile(r'"pdfPath":"(/.*?\.pdf)"')
 OVID_JOURNAL_URL_REGEX = re.compile(r'journalURL = "(http.*)";')
 SCIENCEDIRECT_BOUNCE_URL_REGEX = re.compile(r"window.location = '(http.*)';")
 
-def test_regex():
-    lines = """
-    blah
-    var journalURL = "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689";
-    asdf"""
-    m = OVID_JOURNAL_URL_REGEX.search(lines)
-    assert m.group(1) == "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689"
-
-    lines = """
-            window.onload = function () {
-                window.location = 'https://pdf.sciencedirectassets.com/320270/AIP/1-s2.0-S2590109519300424/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEH0aCXVzLWVhc3QtMSJGMEQCICBF0dnrtKfpcs3T1kOjMS9w9gedqiLBrcbp4aKQSP8fAiAT9G426t6FWXHO2zPSXRFLq2eiqgbew2vkNKbcn87teyq9Awj1%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAIaDDA1OTAwMzU0Njg2NSIMnZcTRhbvMwF%2F5PA5KpEDdN%2FDI4V%2BNMDWQDFeAdUc99Lyxak%2B6vhAsfCBCf8hhvrRpalz75e74%2FXMAQwMN9m6i98o0Ljv9od7cuQEy8t%2B0DLzjzX5n3%2FxmpttowhMUm1jc8tBniLKBjwhTyiSHwhdeaVZf6x2zCJ0EIOWMNJHp3iFEqpaFvkRZbC1KWK4XPNNKo72HCvXuG7xmGrdHByz91AP7UgIYCy4hT10fnM43gbOE4wW8fqpgnvwCId%2F2u8k4rQoCLBqLYZzqshCRm1DBbsXCQhTwDXiMC2Ek3f63yKgw7rRCAxvs0vqirG%2B4mJ6LADaztAFMtKDPfnd4e%2B7%2FvnKU2NeotrqrkRgOkIAoFumbQXf20ky6mKWyHBk%2FxirVp60vUcLQpUm2Pcp6ythYxUi9IJxRGX8EF6aV4UHuCpUDUE7o8N84KUXIedUpytUZx7Xoxfk9w%2BR3%2FgX4LEHfkrWgiFAS3bVxNGOeV7GTwcXdcAggbdCaiAe46dfv7DDedx0KhVKOPH7obfvShqd6TYc0BjrV4sx61594ZJ3%2FO0ws7Lj8AU67AF17%2B1NZ3Ugu%2BwG9Ys9s7OxG8E4kBJ58vEY1yuBOQK9y2we4%2FTGPuqSxCuezqA%2BseslXYP%2FRc%2FZL9xx%2FUYaSjZhk1p1mhojxgBrckJYU7d8c4ELMPmtVy6R1yd2VDUoawEU8SB7nbNnMKzqQ3RgGgqGJiELys6dt%2FIr%2BVhpqM%2FZT4zadvzs8P%2FLoGzUHJKNZt0f99wLvZilphV92E%2BOUnwC4wbg3i3af3zozULwgEr7T%2FX2VsyREgexlzk76qMALPn0lgnciUyyQXxyUWAilXYQ0mQdXefh9lFfycczvt0UEuarX9p1sMwl8Ve5aw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200110T210936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTY23CMDBNC%2F20200110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b43525576e1a0fdbab581481a3fe6db2862cbb2c69f2860b70cc8d444ccd73d5&hash=ccd128dfe597e704224bdfb4b3358de29b2be5d95887c71076bdab1236ba9e42&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S2590109519300424&tid=spdf-74468ebd-6be6-43ac-b294-ced86e8eea58&sid=f9676d658285a749c46b6d081d965bb12aa8gxrqa&type=client';
-                refreshOriginalWindow();
-            }
-    """
-    url = "https://pdf.sciencedirectassets.com/320270/AIP/1-s2.0-S2590109519300424/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEH0aCXVzLWVhc3QtMSJGMEQCICBF0dnrtKfpcs3T1kOjMS9w9gedqiLBrcbp4aKQSP8fAiAT9G426t6FWXHO2zPSXRFLq2eiqgbew2vkNKbcn87teyq9Awj1%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAIaDDA1OTAwMzU0Njg2NSIMnZcTRhbvMwF%2F5PA5KpEDdN%2FDI4V%2BNMDWQDFeAdUc99Lyxak%2B6vhAsfCBCf8hhvrRpalz75e74%2FXMAQwMN9m6i98o0Ljv9od7cuQEy8t%2B0DLzjzX5n3%2FxmpttowhMUm1jc8tBniLKBjwhTyiSHwhdeaVZf6x2zCJ0EIOWMNJHp3iFEqpaFvkRZbC1KWK4XPNNKo72HCvXuG7xmGrdHByz91AP7UgIYCy4hT10fnM43gbOE4wW8fqpgnvwCId%2F2u8k4rQoCLBqLYZzqshCRm1DBbsXCQhTwDXiMC2Ek3f63yKgw7rRCAxvs0vqirG%2B4mJ6LADaztAFMtKDPfnd4e%2B7%2FvnKU2NeotrqrkRgOkIAoFumbQXf20ky6mKWyHBk%2FxirVp60vUcLQpUm2Pcp6ythYxUi9IJxRGX8EF6aV4UHuCpUDUE7o8N84KUXIedUpytUZx7Xoxfk9w%2BR3%2FgX4LEHfkrWgiFAS3bVxNGOeV7GTwcXdcAggbdCaiAe46dfv7DDedx0KhVKOPH7obfvShqd6TYc0BjrV4sx61594ZJ3%2FO0ws7Lj8AU67AF17%2B1NZ3Ugu%2BwG9Ys9s7OxG8E4kBJ58vEY1yuBOQK9y2we4%2FTGPuqSxCuezqA%2BseslXYP%2FRc%2FZL9xx%2FUYaSjZhk1p1mhojxgBrckJYU7d8c4ELMPmtVy6R1yd2VDUoawEU8SB7nbNnMKzqQ3RgGgqGJiELys6dt%2FIr%2BVhpqM%2FZT4zadvzs8P%2FLoGzUHJKNZt0f99wLvZilphV92E%2BOUnwC4wbg3i3af3zozULwgEr7T%2FX2VsyREgexlzk76qMALPn0lgnciUyyQXxyUWAilXYQ0mQdXefh9lFfycczvt0UEuarX9p1sMwl8Ve5aw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200110T210936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTY23CMDBNC%2F20200110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b43525576e1a0fdbab581481a3fe6db2862cbb2c69f2860b70cc8d444ccd73d5&hash=ccd128dfe597e704224bdfb4b3358de29b2be5d95887c71076bdab1236ba9e42&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S2590109519300424&tid=spdf-74468ebd-6be6-43ac-b294-ced86e8eea58&sid=f9676d658285a749c46b6d081d965bb12aa8gxrqa&type=client"
-    m = SCIENCEDIRECT_BOUNCE_URL_REGEX.search(lines)
-    assert m.group(1) == url
-
 
 def extract_fulltext_url(html_url, html_body):
     """
@@ -87,55 +69,7 @@ def extract_fulltext_url(html_url, html_body):
     if meta and meta.get('content'):
         meta_generator = meta['content'].strip()
 
-    # sage, and also utpjournals (see below)
-    # https://journals.sagepub.com/doi/10.1177/2309499019888836
-    # <a href="http://journals.sagepub.com/doi/pdf/10.1177/2309499019888836" class="show-pdf" target="_self">
-    # <a href="http://utpjournals.press/doi/pdf/10.3138/cjh.ach.54.1-2.05" class="show-pdf" target="_blank">
-    href = soup.find('a', attrs={"class":"show-pdf"})
-    if href:
-        url = href['href'].strip()
-        if url.startswith('http'):
-            return dict(pdf_url=url, technique='href_show-pdf')
-
-    # ACS (and probably others) like:
-    #   https://pubs.acs.org/doi/10.1021/acs.estlett.9b00379
-    #   <a href="/doi/pdf/10.1021/acs.estlett.9b00379" title="PDF" target="_blank" class="button_primary"><i class="icon-file-pdf-o"></i><span>PDF (1 MB)</span></a>
-    href = soup.find('a', attrs={"title":"PDF"})
-    if href and href.get('href'):
-        url = href['href'].strip()
-        if url.startswith('http'):
-            return dict(pdf_url=url, technique='href_title')
-        elif url.startswith('/'):
-            return dict(pdf_url=host_prefix+url, technique='href_title')
-
-    # http://www.revistas.unam.mx/index.php/rep/article/view/35503/32336
-    href = soup.find('a', attrs={"id":"pdfDownloadLink"})
-    if href and href.get('href'):
-        url = href['href'].strip()
-        if url.startswith('http'):
-            return dict(pdf_url=url, technique='href_pdfDownloadLink')
-        elif url.startswith('/'):
-            return dict(pdf_url=host_prefix+url, technique='href_pdfDownloadLink')
-
-    # http://www.jasstudies.com/DergiTamDetay.aspx?ID=3401
-    # <embed src="/files/jass_makaleler/1359848334_33-Okt.%20Yasemin%20KARADEM%C4%B0R.pdf" type="application/pdf" />
-    embed = soup.find('embed', attrs={"type": "application/pdf"})
-    if embed and embed.get('src'):
-        url = embed['src'].strip()
-        if url.startswith('/'):
-            url = host_prefix+url
-        if url.startswith('http'):
-            return dict(pdf_url=url, technique='embed_type')
-
     ### Publisher/Platform Specific ###
-
-    # eLife (elifesciences.org)
-    if '://elifesciences.org/articles/' in html_url:
-        anchor = soup.find("a", attrs={"data-download-type": "pdf-article"})
-        if anchor:
-            url = anchor['href'].strip()
-            assert '.pdf' in url
-            return dict(pdf_url=url, technique='publisher')
 
     # research square (researchsquare.com)
     if 'researchsquare.com/article/' in html_url:
@@ -188,26 +122,6 @@ def extract_fulltext_url(html_url, html_body):
         if iframe and '.pdf' in iframe['src']:
             return dict(pdf_url=iframe['src'], technique="iframe")
 
-    # utpjournals.press
-    # https://utpjournals.press/doi/10.3138/cjh.ach.54.1-2.05
-    if '://utpjournals.press/doi/10.' in html_url:
-        # <a href="http://utpjournals.press/doi/pdf/10.3138/cjh.ach.54.1-2.05" class="show-pdf" target="_blank">
-        href = soup.find('a', attrs={"class":"show-pdf"})
-        if href:
-            url = href['href'].strip()
-            if url.startswith('http'):
-                return dict(pdf_url=url, technique='publisher-href')
-
-    # https://www.jcancer.org/v10p4038.htm
-    # simple journal-specific href
-    if '://www.jcancer.org/' in html_url and html_url.endswith(".htm"):
-        # <a href='v10p4038.pdf' class='textbutton'>PDF</a>
-        href = soup.find('a', attrs={"class":"textbutton"})
-        if href:
-            url = href['href'].strip()
-            if url.endswith(".pdf") and not "http" in url:
-                return dict(pdf_url=host_prefix+"/"+url, technique='journal-href')
-
     # https://insights.ovid.com/crossref?an=00042307-202001000-00013
     # Ovid is some kind of landing page bounce portal tracking run-around.
     # Can extract actual journal URL from javascript blob in the HTML
@@ -237,16 +151,6 @@ def extract_fulltext_url(html_url, html_body):
         if b"/doi/pdfdirect/" in html_body:
             next_url = html_url.replace('/doi/pdf/', '/doi/pdfdirect/')
             return dict(next_url=next_url, technique='wiley-pdfdirect')
-
-    # taylor and frances
-    # https://www.tandfonline.com/doi/full/10.1080/19491247.2019.1682234
-    # <a href="/doi/pdf/10.1080/19491247.2019.1682234?needAccess=true" class="show-pdf" target="_blank">
-    if "://www.tandfonline.com/doi/full/10." in html_url:
-        href = soup.find('a', attrs={"class":"show-pdf"})
-        if href:
-            url = href['href'].strip()
-            if "/pdf/" in url:
-                return dict(pdf_url=host_prefix+url, technique='publisher-href')
 
     # arxiv abstract pages
     if "://arxiv.org/abs/" in html_url:
@@ -313,15 +217,6 @@ def extract_fulltext_url(html_url, html_body):
             url = html_url.replace('/doi/full/10.', '/doi/pdf/10.').replace('/doi/10.', '/doi/pdf/10.')
             return dict(pdf_url=url, technique='ehp.niehs.nigh.gov-url')
 
-    # journals.tsu.ru (and maybe others)
-    # http://journals.tsu.ru/psychology/&journal_page=archive&id=1815&article_id=40405
-    # <a class='file pdf' href='http://journals.tsu.ru/engine/download.php?id=150921&area=files'>Скачать электронную версию публикации</a>
-    href = soup.find('a', attrs={"class":"file pdf"})
-    if href:
-        url = href['href'].strip()
-        if url.startswith('http'):
-            return dict(pdf_url=url, technique='href_file_pdf-pdf')
-
     # cogentoa.com
     # https://www.cogentoa.com/article/10.1080/23311975.2017.1412873
     if "://www.cogentoa.com/article/" in html_url and not ".pdf" in html_url:
@@ -341,17 +236,6 @@ def extract_fulltext_url(html_url, html_body):
             url = app_data.get('article', {}).get('exportPdfDownloadUrl')
             if url and url.startswith('http'):
                 return dict(pdf_url=url, technique='figshare-json')
-
-    # eurosurveillance
-    # https://www.eurosurveillance.org/content/10.2807/1560-7917.ES.2020.25.11.2000230
-    if "://www.eurosurveillance.org/content/" in html_url:
-        # <a href="/deliver/fulltext/eurosurveillance/25/11/eurosurv-25-11-3.pdf?itemId=/content/10.2807/1560-7917.ES.2020.25.11.2000230&mimeType=pdf&containerItemId=content/eurosurveillance" class="pdf " title="Download" rel="http://instance.metastore.ingenta.com/content/10.2807/1560-7917.ES.2020.25.11.2000230" target="/content/10.2807/1560-7917.ES.2020.25.11.2000230-pdf" >
-        href = soup.find('a', attrs={"class":"pdf", "title": "Download"})
-        if href:
-            url = href['href'].strip()
-            if not url.startswith('http'):
-                url = host_prefix + url
-            return dict(pdf_url=url, technique='eurosurveillance-href')
 
     # CNKI COVID-19 landing pages
     # http://en.gzbd.cnki.net/gzbt/detail/detail.aspx?FileName=HBGF202002003&DbName=GZBJ7920&DbCode=GZBJ
@@ -410,3 +294,21 @@ def extract_fulltext_url(html_url, html_body):
             return dict(pdf_url=url, technique='guess-url-plus-pdf')
 
     return dict()
+
+def test_regex():
+    lines = """
+    blah
+    var journalURL = "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689";
+    asdf"""
+    m = OVID_JOURNAL_URL_REGEX.search(lines)
+    assert m.group(1) == "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689"
+
+    lines = """
+            window.onload = function () {
+                window.location = 'https://pdf.sciencedirectassets.com/320270/AIP/1-s2.0-S2590109519300424/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEH0aCXVzLWVhc3QtMSJGMEQCICBF0dnrtKfpcs3T1kOjMS9w9gedqiLBrcbp4aKQSP8fAiAT9G426t6FWXHO2zPSXRFLq2eiqgbew2vkNKbcn87teyq9Awj1%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAIaDDA1OTAwMzU0Njg2NSIMnZcTRhbvMwF%2F5PA5KpEDdN%2FDI4V%2BNMDWQDFeAdUc99Lyxak%2B6vhAsfCBCf8hhvrRpalz75e74%2FXMAQwMN9m6i98o0Ljv9od7cuQEy8t%2B0DLzjzX5n3%2FxmpttowhMUm1jc8tBniLKBjwhTyiSHwhdeaVZf6x2zCJ0EIOWMNJHp3iFEqpaFvkRZbC1KWK4XPNNKo72HCvXuG7xmGrdHByz91AP7UgIYCy4hT10fnM43gbOE4wW8fqpgnvwCId%2F2u8k4rQoCLBqLYZzqshCRm1DBbsXCQhTwDXiMC2Ek3f63yKgw7rRCAxvs0vqirG%2B4mJ6LADaztAFMtKDPfnd4e%2B7%2FvnKU2NeotrqrkRgOkIAoFumbQXf20ky6mKWyHBk%2FxirVp60vUcLQpUm2Pcp6ythYxUi9IJxRGX8EF6aV4UHuCpUDUE7o8N84KUXIedUpytUZx7Xoxfk9w%2BR3%2FgX4LEHfkrWgiFAS3bVxNGOeV7GTwcXdcAggbdCaiAe46dfv7DDedx0KhVKOPH7obfvShqd6TYc0BjrV4sx61594ZJ3%2FO0ws7Lj8AU67AF17%2B1NZ3Ugu%2BwG9Ys9s7OxG8E4kBJ58vEY1yuBOQK9y2we4%2FTGPuqSxCuezqA%2BseslXYP%2FRc%2FZL9xx%2FUYaSjZhk1p1mhojxgBrckJYU7d8c4ELMPmtVy6R1yd2VDUoawEU8SB7nbNnMKzqQ3RgGgqGJiELys6dt%2FIr%2BVhpqM%2FZT4zadvzs8P%2FLoGzUHJKNZt0f99wLvZilphV92E%2BOUnwC4wbg3i3af3zozULwgEr7T%2FX2VsyREgexlzk76qMALPn0lgnciUyyQXxyUWAilXYQ0mQdXefh9lFfycczvt0UEuarX9p1sMwl8Ve5aw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200110T210936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTY23CMDBNC%2F20200110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b43525576e1a0fdbab581481a3fe6db2862cbb2c69f2860b70cc8d444ccd73d5&hash=ccd128dfe597e704224bdfb4b3358de29b2be5d95887c71076bdab1236ba9e42&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S2590109519300424&tid=spdf-74468ebd-6be6-43ac-b294-ced86e8eea58&sid=f9676d658285a749c46b6d081d965bb12aa8gxrqa&type=client';
+                refreshOriginalWindow();
+            }
+    """
+    url = "https://pdf.sciencedirectassets.com/320270/AIP/1-s2.0-S2590109519300424/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEH0aCXVzLWVhc3QtMSJGMEQCICBF0dnrtKfpcs3T1kOjMS9w9gedqiLBrcbp4aKQSP8fAiAT9G426t6FWXHO2zPSXRFLq2eiqgbew2vkNKbcn87teyq9Awj1%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAIaDDA1OTAwMzU0Njg2NSIMnZcTRhbvMwF%2F5PA5KpEDdN%2FDI4V%2BNMDWQDFeAdUc99Lyxak%2B6vhAsfCBCf8hhvrRpalz75e74%2FXMAQwMN9m6i98o0Ljv9od7cuQEy8t%2B0DLzjzX5n3%2FxmpttowhMUm1jc8tBniLKBjwhTyiSHwhdeaVZf6x2zCJ0EIOWMNJHp3iFEqpaFvkRZbC1KWK4XPNNKo72HCvXuG7xmGrdHByz91AP7UgIYCy4hT10fnM43gbOE4wW8fqpgnvwCId%2F2u8k4rQoCLBqLYZzqshCRm1DBbsXCQhTwDXiMC2Ek3f63yKgw7rRCAxvs0vqirG%2B4mJ6LADaztAFMtKDPfnd4e%2B7%2FvnKU2NeotrqrkRgOkIAoFumbQXf20ky6mKWyHBk%2FxirVp60vUcLQpUm2Pcp6ythYxUi9IJxRGX8EF6aV4UHuCpUDUE7o8N84KUXIedUpytUZx7Xoxfk9w%2BR3%2FgX4LEHfkrWgiFAS3bVxNGOeV7GTwcXdcAggbdCaiAe46dfv7DDedx0KhVKOPH7obfvShqd6TYc0BjrV4sx61594ZJ3%2FO0ws7Lj8AU67AF17%2B1NZ3Ugu%2BwG9Ys9s7OxG8E4kBJ58vEY1yuBOQK9y2we4%2FTGPuqSxCuezqA%2BseslXYP%2FRc%2FZL9xx%2FUYaSjZhk1p1mhojxgBrckJYU7d8c4ELMPmtVy6R1yd2VDUoawEU8SB7nbNnMKzqQ3RgGgqGJiELys6dt%2FIr%2BVhpqM%2FZT4zadvzs8P%2FLoGzUHJKNZt0f99wLvZilphV92E%2BOUnwC4wbg3i3af3zozULwgEr7T%2FX2VsyREgexlzk76qMALPn0lgnciUyyQXxyUWAilXYQ0mQdXefh9lFfycczvt0UEuarX9p1sMwl8Ve5aw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200110T210936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTY23CMDBNC%2F20200110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b43525576e1a0fdbab581481a3fe6db2862cbb2c69f2860b70cc8d444ccd73d5&hash=ccd128dfe597e704224bdfb4b3358de29b2be5d95887c71076bdab1236ba9e42&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S2590109519300424&tid=spdf-74468ebd-6be6-43ac-b294-ced86e8eea58&sid=f9676d658285a749c46b6d081d965bb12aa8gxrqa&type=client"
+    m = SCIENCEDIRECT_BOUNCE_URL_REGEX.search(lines)
+    assert m.group(1) == url
