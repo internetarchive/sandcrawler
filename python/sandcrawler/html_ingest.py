@@ -206,6 +206,10 @@ def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetada
         try:
             if 'powered by <a target="blank" href="http://pkp.sfu.ca/ojs/">PKP OJS</a>' in doc.html:
                 return "ojs"
+            if 'Powered by <a target="_blank" href="http://arphahub.com">' in doc.html:
+                return "arpha"
+            if "<meta property='og:image' content='http://cms.galenos.com.tr' />" in doc.html:
+                return "galenos"
         except UnicodeDecodeError:
             pass
 
@@ -243,11 +247,6 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
 
     Unknown implies the page could be anything. "other" implies it is not
     fulltext or a landing page, but could be one of the other categories.
-
-    TODO: known javascript-heavy single-page-app:
-    - https://riojournal.com/article/35913/
-    - https://phmd.pl/resources/html/article/details?id=175497&language=en
-    - https://dez.pensoft.net/articles.php?id=11704
     """
 
     # basic paywall and loginwall detection based on URL
