@@ -74,7 +74,7 @@ def transform(obj: dict) -> List[dict]:
 
     doi: Optional[str] = None
     for ident in (bibjson['identifier'] or []):
-        if ident['type'].lower() == "doi" and ident['id'].startswith('10.'):
+        if ident['type'].lower() == "doi" and ident.get('id') and ident['id'].startswith('10.'):
             doi = ident['id'].lower()
 
     for link in (bibjson['link'] or []):

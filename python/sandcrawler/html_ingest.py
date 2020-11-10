@@ -25,9 +25,9 @@ def html_extract_body_teixml(doc: bytes) -> dict:
             include_comments=False,
             include_formatting=True,
         )
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError, Exception) as e:
         return dict(
-            status="parse-error",
+            status="trafilatura-parse-error",
             error_msg=str(e)[:1000],
         )
     if tei_xml:
