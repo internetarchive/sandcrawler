@@ -3,10 +3,10 @@
 import sys
 import json
 
-with open('title_slug_blacklist.txt', 'r') as f:
-    TITLE_BLACKLIST = [l.strip() for l in f]
+with open('title_slug_denylist.txt', 'r') as f:
+    TITLE_DENYLIST = [l.strip() for l in f]
 
-TITLE_BLACKLIST.extend((
+TITLE_DENYLIST.extend((
     'editorial',
     'advertisement',
     'bookreviews',
@@ -19,7 +19,7 @@ TITLE_BLACKLIST.extend((
 ))
 
 # The full name can't *entirely* be one of these
-NAME_BLACKLIST = (
+NAME_DENYLIST = (
     'phd',
     'phdstudent',
 )
@@ -37,7 +37,7 @@ def tokenize(s, remove_whitespace=True):
     return s.encode('ascii', 'replace').decode('utf8').replace('?', '')
 
 assert tokenize("Impact Factor: 2.114") == "impactfactor"
-assert tokenize("Impact Factor: 2.114") in TITLE_BLACKLIST
+assert tokenize("Impact Factor: 2.114") in TITLE_DENYLIST
 
 def filter_title(title):
 
@@ -45,7 +45,7 @@ def filter_title(title):
     if len(title) > 500:
         return None
     title_slug = tokenize(title, remove_whitespace=True)
-    if len(title_slug) < 10 or title_slug in TITLE_BLACKLIST:
+    if len(title_slug) < 10 or title_slug in TITLE_DENYLIST:
         return None
     if title_slug.startswith('nr'):
         return None
@@ -85,7 +85,7 @@ def filter_title(title):
 
 def filter_author_name(name):
     name = name['name']
-    if name.strip().lower().replace(' ', '') in NAME_BLACKLIST:
+    if name.strip().lower().replace(' ', '') in NAME_DENYLIST:
         return None
     return ' '.join([t for t in name.split() if tokenize(t)])
 
@@ -97,12 +97,12 @@ def filter_refs(l):
     return l
 
 def filter_journal_name(name):
-    # same blacklist, for now
+    # same denylist, for now
     if not name:
         return None
     name = name.replace(' e-ISSN', '').replace(' p-ISSN', '')
     slug_name = tokenize(name)
-    if slug_name in TITLE_BLACKLIST or len(slug_name) < 4 or name == "N.º":
+    if slug_name in TITLE_DENYLIST or len(slug_name) < 4 or name == "N.º":
         return None
     for prefix in ("/ ", "~ ", "& ", "© ", "Original Research Article ", "Original Article ", "Research Article ", "Available online www.jocpr.com "):
         if name.startswith(prefix):
