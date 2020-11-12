@@ -451,7 +451,7 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict
         if not elem:
             continue
         if 'attr' in pattern:
-            val = elem.attrs[pattern['attr']]
+            val = elem.attrs.get(pattern['attr'])
             if not val:
                 continue
             val = urllib.parse.urljoin(doc_url, val)
@@ -492,7 +492,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
             val_list = head.css(pattern)
             if val_list:
                 for val in val_list:
-                    if val.attrs['content']:
+                    if val.attrs.get('content'):
                         if not field in meta:
                             meta[field] = []
                         meta[field].append(val.attrs['content'])
