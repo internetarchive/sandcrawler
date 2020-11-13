@@ -935,7 +935,7 @@ class SavePageNowClient:
             if status in ("error:invalid-url", "error:not-found",
                     "error:invalid-host-resolution", "error:gateway-timeout"):
                 status = status.replace("error:", "")
-            elif status == "error:no-access":
+            elif status in ("error:no-access", "error:forbidden"):
                 status = "forbidden"
             elif status == "error:user-session-limit":
                 raise SavePageNowBackoffError("SPNv2 user-session-limit")
