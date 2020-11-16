@@ -61,8 +61,34 @@ Summary of significant domains and status, past 7 days:
         WHERE t1.domain != ''
         GROUP BY CUBE (domain, status)
     ) t2
-    WHERE count > 500
+    WHERE count > 200
     ORDER BY domain ASC , count DESC;
+
+Summary of DOI prefix and status, past 7 days:
+
+    SELECT doi_prefix, status, count
+    FROM (
+        SELECT doi_prefix, status, COUNT((doi_prefix, status)) as count
+        FROM (
+            SELECT
+                ingest_file_result.ingest_type,
+                ingest_file_result.status,
+                substring(ingest_request.link_source_id FROM '(10\.[^/]*)/.*') AS doi_prefix
+            FROM ingest_file_result
+            LEFT JOIN ingest_request
+                ON ingest_file_result.ingest_type = ingest_request.ingest_type
+                AND ingest_file_result.base_url = ingest_request.base_url
+            WHERE
+                ingest_file_result.updated >= NOW() - '7 day'::INTERVAL
+                AND ingest_request.ingest_type = 'pdf'
+                AND ingest_request.ingest_request_source = 'fatcat-changelog'
+                AND ingest_request.link_source = 'doi'
+        ) t1
+        WHERE t1.doi_prefix != ''
+        GROUP BY CUBE (doi_prefix, status)
+    ) t2
+    WHERE count > 200
+    ORDER BY doi_prefix ASC , count DESC;
 
 
 Throughput per day, and success, for past 30 days:

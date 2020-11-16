@@ -1,0 +1,326 @@
+ doi_prefix |            status             | count  
+------------+-------------------------------+--------
+ 10.1001    |                               |    230
+ 10.1002    |                               |   3914
+ 10.1002    | terminal-bad-status           |   1540
+ 10.1002    | forbidden                     |   1072
+ 10.1002    | redirect-loop                 |    995
+ 10.1002    | no-pdf-link                   |    210
+ 10.1016    |                               |   7976
+ 10.1016    | no-pdf-link                   |   4648
+ 10.1016    | terminal-bad-status           |   1778
+ 10.1016    | forbidden                     |    622
+ 10.1016    | spn2-error:too-many-redirects |    344
+ 10.1016    | redirect-loop                 |    225
+ 10.1017    |                               |   2040
+ 10.1017    | no-pdf-link                   |    720
+ 10.1017    | success                       |    441
+ 10.1017    | link-loop                     |    371
+ 10.1017    | bad-redirect                  |    227
+ 10.1021    |                               |   1722
+ 10.1021    | blocked-cookie                |   1552
+ 10.1029    |                               |    248
+ 10.1039    |                               |   1160
+ 10.1039    | redirect-loop                 |    486
+ 10.1039    | spn2-error:too-many-redirects |    395
+ 10.1039    | spn2-wayback-error            |    213
+ 10.1051    |                               |    695
+ 10.1051    | success                       |    557
+ 10.1055    |                               |    541
+ 10.1055    | not-found                     |    295
+ 10.1055    | redirect-loop                 |    213
+ 10.1057    |                               |   2835
+ 10.1057    | redirect-loop                 |   2617
+ 10.1061    |                               |    550
+ 10.1061    | spn2-error:too-many-redirects |    425
+ 10.1063    |                               |    600
+ 10.1063    | spn2-error:too-many-redirects |    328
+ 10.1080    |                               |   3801
+ 10.1080    | blocked-cookie                |   2431
+ 10.1080    | terminal-bad-status           |    711
+ 10.1080    | forbidden                     |    341
+ 10.1081    |                               |    299
+ 10.1081    | link-loop                     |    222
+ 10.1089    |                               |    236
+ 10.1089    | blocked-cookie                |    228
+ 10.1093    |                               |  12805
+ 10.1093    | link-loop                     |   8627
+ 10.1093    | redirect-loop                 |   1659
+ 10.1093    | no-pdf-link                   |   1475
+ 10.1093    | bad-redirect                  |    428
+ 10.1093    | success                       |    391
+ 10.1097    |                               |   1497
+ 10.1097    | no-pdf-link                   |    503
+ 10.1097    | link-loop                     |    346
+ 10.1097    | spn2-error:too-many-redirects |    259
+ 10.1097    | terminal-bad-status           |    202
+ 10.1101    |                               |   1859
+ 10.1101    | redirect-loop                 |    993
+ 10.1101    | forbidden                     |    703
+ 10.1103    |                               |    597
+ 10.1103    | not-found                     |    534
+ 10.1108    |                               |   1055
+ 10.1108    | no-pdf-link                   |    945
+ 10.1109    |                               |   7067
+ 10.1109    | spn2-error:too-many-redirects |   6299
+ 10.1109    | success                       |    667
+ 10.1111    |                               |   2099
+ 10.1111    | redirect-loop                 |   1331
+ 10.1111    | terminal-bad-status           |    313
+ 10.1111    | forbidden                     |    226
+ 10.1115    |                               |   1278
+ 10.1115    | bad-redirect                  |    707
+ 10.1117    |                               |    561
+ 10.1117    | spn2-error:too-many-redirects |    501
+ 10.1126    |                               |    214
+ 10.1136    |                               |   1989
+ 10.1136    | success                       |   1463
+ 10.1136    | link-loop                     |    294
+ 10.1142    |                               |    300
+ 10.1142    | blocked-cookie                |    237
+ 10.1145    |                               |    440
+ 10.1145    | blocked-cookie                |    354
+ 10.1155    |                               |    480
+ 10.1155    | success                       |    474
+ 10.11588   |                               |    506
+ 10.11588   | no-pdf-link                   |    264
+ 10.11588   | success                       |    236
+ 10.1159    |                               |    226
+ 10.11606   |                               |    304
+ 10.1161    |                               |   1142
+ 10.1161    | blocked-cookie                |   1011
+ 10.1163    |                               |   2261
+ 10.1163    | link-loop                     |   1767
+ 10.1163    | success                       |    348
+ 10.11648   |                               |    405
+ 10.11648   | success                       |    404
+ 10.1182    |                               |   2125
+ 10.1182    | no-pdf-link                   |   2024
+ 10.1183    |                               |    987
+ 10.1183    | redirect-loop                 |    838
+ 10.1186    |                               |   1481
+ 10.1186    | success                       |   1412
+ 10.1201    |                               |   7649
+ 10.1201    | link-loop                     |   5383
+ 10.1201    | forbidden                     |   1504
+ 10.1201    | no-pdf-link                   |    312
+ 10.1299    |                               |    264
+ 10.1299    | no-pdf-link                   |    209
+ 10.13134   |                               |    201
+ 10.1353    |                               |    549
+ 10.1353    | terminal-bad-status           |    443
+ 10.1371    |                               |    552
+ 10.1371    | success                       |    542
+ 10.14201   |                               |    656
+ 10.14201   | success                       |    366
+ 10.14361   |                               |    647
+ 10.14361   | link-loop                     |    585
+ 10.14746   |                               |    260
+ 10.14746   | success                       |    232
+ 10.1504    |                               |    527
+ 10.1504    | no-pdf-link                   |    501
+ 10.15122   |                               |    246
+ 10.15122   | success                       |    243
+ 10.1515    |                               |  16240
+ 10.1515    | link-loop                     |  12589
+ 10.1515    | success                       |   1941
+ 10.1515    | no-pdf-link                   |   1008
+ 10.1515    | not-found                     |    283
+ 10.15405   |                               |    229
+ 10.15405   | success                       |    218
+ 10.1553    |                               |    418
+ 10.1553    | no-pdf-link                   |    396
+ 10.1590    |                               |    655
+ 10.1590    | success                       |    623
+ 10.17104   |                               |   1202
+ 10.17104   | no-pdf-link                   |    953
+ 10.17104   | bad-redirect                  |    249
+ 10.17605   |                               |    368
+ 10.17605   | not-found                     |    337
+ 10.17615   |                               |   9401
+ 10.17615   | redirect-loop                 |   5720
+ 10.17615   | spn2-wayback-error            |   3099
+ 10.17615   | spn2-cdx-lookup-failure       |    201
+ 10.17863   |                               |    438
+ 10.18148   |                               |    465
+ 10.18148   | success                       |    462
+ 10.18720   |                               |    210
+ 10.18821   |                               |    476
+ 10.18821   | redirect-loop                 |    366
+ 10.20345   |                               |    222
+ 10.20345   | terminal-bad-status           |    215
+ 10.20546   |                               |    244
+ 10.20546   | no-pdf-link                   |    241
+ 10.21037   |                               |    232
+ 10.2118    |                               |    903
+ 10.2118    | redirect-loop                 |    853
+ 10.21203   |                               |   1824
+ 10.21203   | success                       |   1545
+ 10.2139    |                               |   1493
+ 10.2139    | link-loop                     |   1145
+ 10.2147    |                               |    318
+ 10.2147    | success                       |    267
+ 10.2172    |                               |    282
+ 10.2174    |                               |    363
+ 10.2174    | no-pdf-link                   |    320
+ 10.2196    |                               |    265
+ 10.2208    |                               |    299
+ 10.22215   |                               |    218
+ 10.22215   | success                       |    217
+ 10.22323   |                               |    289
+ 10.22323   | success                       |    262
+ 10.22533   |                               |    395
+ 10.22533   | success                       |    393
+ 10.22541   |                               |    291
+ 10.22541   | success                       |    275
+ 10.23919   |                               |    426
+ 10.23919   | spn2-error:too-many-redirects |    403
+ 10.24034   |                               |    319
+ 10.24034   | spn2-error                    |    203
+ 10.24355   |                               |  15360
+ 10.24355   | no-pdf-link                   |  15228
+ 10.24411   |                               |   1506
+ 10.24411   | forbidden                     |    823
+ 10.24411   | redirect-loop                 |    647
+ 10.25335   |                               |    550
+ 10.25335   | no-pdf-link                   |    550
+ 10.25365   |                               |    429
+ 10.25365   | success                       |    424
+ 10.25384   |                               |    338
+ 10.25384   | success                       |    249
+ 10.25646   |                               |    239
+ 10.26197   | no-pdf-link                   |    303
+ 10.26197   |                               |    303
+ 10.26226   |                               |    272
+ 10.26278   |                               |   1291
+ 10.26278   | redirect-loop                 |    756
+ 10.26278   | spn2-error:too-many-redirects |    509
+ 10.29327   |                               |    232
+ 10.2991    |                               |    307
+ 10.2991    | spn2-wayback-error            |    227
+ 10.30965   |                               |    722
+ 10.30965   | link-loop                     |    709
+ 10.3109    |                               |    801
+ 10.3109    | link-loop                     |    572
+ 10.3109    | forbidden                     |    228
+ 10.31219   |                               |    951
+ 10.31219   | redirect-loop                 |    518
+ 10.31219   | spn2-wayback-error            |    356
+ 10.31274   |                               |    296
+ 10.31743   |                               |    403
+ 10.31743   | success                       |    294
+ 10.31857   |                               |    209
+ 10.3233    |                               |    471
+ 10.33448   |                               |    213
+ 10.33448   | success                       |    212
+ 10.3389    |                               |   1459
+ 10.3389    | success                       |   1417
+ 10.3390    |                               |   4511
+ 10.3390    | success                       |   3577
+ 10.3390    | terminal-bad-status           |    485
+ 10.3390    | forbidden                     |    379
+ 10.3406    |                               |    243
+ 10.3406    | terminal-bad-status           |    213
+ 10.34944   |                               |    527
+ 10.34944   | success                       |    459
+ 10.35016   |                               |    688
+ 10.35016   | no-pdf-link                   |    687
+ 10.36347   | success                       |    213
+ 10.36347   |                               |    213
+ 10.37747   |                               |    213
+ 10.37747   | no-pdf-link                   |    213
+ 10.37904   |                               |    227
+ 10.37904   | no-pdf-link                   |    226
+ 10.3917    |                               |    347
+ 10.3917    | redirect-loop                 |    208
+ 10.3923    |                               |    356
+ 10.3923    | redirect-loop                 |    254
+ 10.3929    |                               |    317
+ 10.3929    | terminal-bad-status           |    310
+ 10.3931    |                               |    279
+ 10.3931    | no-pdf-link                   |    279
+ 10.4000    |                               |   7828
+ 10.4000    | success                       |   3485
+ 10.4000    | spn2-wayback-error            |   2142
+ 10.4000    | redirect-loop                 |   2106
+ 10.4018    |                               |    249
+ 10.4018    | not-found                     |    240
+ 10.4103    |                               |    726
+ 10.4103    | remote-server-error           |    343
+ 10.4103    | redirect-loop                 |    324
+ 10.4159    |                               |    286
+ 10.4159    | link-loop                     |    238
+ 10.4324    |                               |  19398
+ 10.4324    | link-loop                     |  12471
+ 10.4324    | forbidden                     |   3632
+ 10.4324    | not-found                     |   2283
+ 10.4324    | terminal-bad-status           |    645
+ 10.4324    | success                       |    208
+ 10.47295   |                               |    456
+ 10.47295   | success                       |    449
+ 10.47513   |                               |    218
+ 10.47513   | no-pdf-link                   |    203
+ 10.48084   | success                       |    538
+ 10.48084   |                               |    538
+ 10.5040    |                               |    375
+ 10.5040    | no-pdf-link                   |    365
+ 10.5167    |                               |    290
+ 10.5167    | redirect-loop                 |    278
+ 10.5169    |                               |    360
+ 10.5169    | no-pdf-link                   |    355
+ 10.5194    |                               |    917
+ 10.5194    | success                       |    887
+ 10.5216    |                               |    213
+ 10.5220    | no-pdf-link                   |    397
+ 10.5220    |                               |    397
+ 10.5281    |                               |  22551
+ 10.5281    | terminal-bad-status           |  12158
+ 10.5281    | success                       |   4901
+ 10.5281    | no-pdf-link                   |   4754
+ 10.5281    | spn2-error:unknown            |    360
+ 10.5282    |                               |    228
+ 10.5451    |                               |   2068
+ 10.5451    | success                       |   1071
+ 10.5451    | terminal-bad-status           |    817
+ 10.5753    |                               |    268
+ 10.5753    | success                       |    264
+ 10.5771    |                               |    941
+ 10.5771    | no-pdf-link                   |    397
+ 10.5771    | bad-redirect                  |    269
+ 10.5771    | link-loop                     |    238
+ 10.6068    |                               |    441
+ 10.6068    | no-pdf-link                   |    384
+ 10.6084    |                               |    917
+ 10.6084    | no-pdf-link                   |    520
+ 10.6084    | success                       |    368
+ 10.7287    |                               |    234
+ 10.7287    | no-pdf-link                   |    212
+ 10.7312    |                               |    382
+ 10.7312    | link-loop                     |    291
+ 10.7554    |                               |    205
+ 10.7891    |                               |    380
+ 10.7891    | no-pdf-link                   |    376
+ 10.7916    |                               |    331
+ 10.7916    | no-pdf-link                   |    201
+ 10.7939    |                               |    535
+ 10.7939    | no-pdf-link                   |    527
+            |                               | 272831
+            | success                       |  62298
+            | no-pdf-link                   |  60737
+            | link-loop                     |  48558
+            | redirect-loop                 |  26842
+            | terminal-bad-status           |  22685
+            | spn2-error:too-many-redirects |  11174
+            | forbidden                     |  10900
+            | spn2-wayback-error            |   7796
+            | blocked-cookie                |   6961
+            | not-found                     |   5468
+            | bad-redirect                  |   2666
+            | spn2-error                    |   2398
+            | spn2-cdx-lookup-failure       |   1374
+            | petabox-error                 |    678
+            | remote-server-error           |    461
+            | wrong-mimetype                |    443
+            | spn2-error:proxy-error        |    420
+            | spn2-error:unknown            |    360
+(323 rows)
