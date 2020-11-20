@@ -483,7 +483,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
         for pattern in patterns:
             val = head.css_first(pattern)
             #print((field, pattern, val))
-            if val and val.attrs.get('content'):
+            if val and 'content' in val.attrs and val.attrs['content']:
                 meta[field] = val.attrs['content']
                 break
 
@@ -492,7 +492,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
             val_list = head.css(pattern)
             if val_list:
                 for val in val_list:
-                    if val.attrs.get('content'):
+                    if 'content' in val.attrs and val.attrs['content']:
                         if not field in meta:
                             meta[field] = []
                         meta[field].append(val.attrs['content'])
@@ -587,6 +587,8 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name
 
     for node in doc.css(selector):
         for attr in attrs:
+            if not attr in node.attrs:
+                continue
             url = node.attrs.get(attr)
             if url:
                 resources.append(dict(url=url, type=type_name))
