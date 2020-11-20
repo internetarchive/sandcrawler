@@ -11,6 +11,7 @@ import json
 import requests
 import datetime
 import urllib.parse
+import urllib3.exceptions
 from typing import Tuple
 from collections import namedtuple
 
@@ -373,6 +374,11 @@ class WaybackClient:
         except wayback.exception.ResourceUnavailable:
             print("  Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
             raise PetaboxError("failed to load file contents from wayback/petabox (ResourceUnavailable)")
+        except wayback.exception.InvalidResource:
+            print("  Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
+            raise WaybackContentError("failed to load file contents from wayback/petabox (InvalidResource)")
+        except urllib3.exceptions.ReadTimeoutError as rte:
+            raise PetaboxError("failed to load file contents from wayback/petabox (ReadTimeoutError: {})".format(rte))
         except ValueError as ve:
             raise PetaboxError("failed to load file contents from wayback/petabox (ValueError: {})".format(ve))
         except EOFError as eofe:
