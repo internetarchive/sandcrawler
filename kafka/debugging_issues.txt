@@ -1,4 +1,13 @@
 
+## 2020-11-12
+
+To reset a consumer group to the offsets from a specific date (or datetime),
+use:
+
+    ./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group persist-grobid-s3 --reset-offsets --all-topics --to-datetime 2020-11-09T00:00:00.000
+
+Add `--execute` to actually commit the change.
+
 ## 2018-12-02
 
 Had been having some troubles with consumer group partition assignments with
