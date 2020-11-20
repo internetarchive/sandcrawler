@@ -4,10 +4,12 @@ import json
 import gzip
 import time
 import base64
-import requests
+import xml.etree.ElementTree
+from collections import namedtuple
 from typing import Optional, Tuple, Any, Dict, List
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from collections import namedtuple
+
+import requests
 from selectolax.parser import HTMLParser
 
 from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackContentError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult, fix_transfer_encoding, NoCaptureError
@@ -330,7 +332,10 @@ class IngestFileWorker(SandcrawlerWorker):
         count), or attempting to fetch sub-resources.
         """
         if self.xmldoc_sink and file_meta['mimetype'] == "application/jats+xml":
-            jats_xml = xml_reserialize(resource.body)
+            try:
+                jats_xml = xml_reserialize(resource.body)
+            except xml.etree.ElementTree.ParseError:
+                return dict(status="xml-parse-error")
             msg = dict(
                 sha1hex=file_meta["sha1hex"],
                 status="success",
