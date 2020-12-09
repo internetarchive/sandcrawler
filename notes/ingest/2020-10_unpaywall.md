@@ -150,3 +150,137 @@ going to work better than both full and terminal.
 Finding a fraction of `no-capture` which have partial/stub URLs as terminal.
 
 TODO: investigate scale of partial/stub `terminal_url` (eg, not HTTP/S or FTP).
+
+
+## Bulk Ingest and Status
+
+Note, removing archive.org links:
+
+    cat /grande/snapshots/unpaywall_crawl_ingest_2020-11-02.json | rg -v www.archive.org | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+
+Overall status (checked 2020-12-08):
+
+    SELECT ingest_file_result.status, COUNT(*)
+        FROM ingest_request
+        LEFT JOIN ingest_file_result
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE
+            ingest_request.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+        GROUP BY status
+        ORDER BY COUNT DESC
+        LIMIT 20;
+
+             status          |  count   
+    -------------------------+----------
+     success                 | 25004559
+     no-pdf-link             |  2531841
+     redirect-loop           |  1671375
+     terminal-bad-status     |  1389463
+     no-capture              |   893880
+     wrong-mimetype          |   119332
+     link-loop               |    66508
+     wayback-content-error   |    30339
+     cdx-error               |    21790
+     null-body               |    20710
+     wayback-error           |    13976
+     gateway-timeout         |     3775
+     petabox-error           |     2420
+     spn2-cdx-lookup-failure |     1218
+     redirects-exceeded      |      889
+     invalid-host-resolution |      464
+     bad-redirect            |      147
+     spn2-error              |      112
+     spn2-error:job-failed   |       91
+     timeout                 |       21
+    (20 rows)
+
+Ingest stats broken down by publication stage:
+
+    SELECT ingest_request.release_stage, ingest_file_result.status, COUNT(*)
+        FROM ingest_request
+        LEFT JOIN ingest_file_result
+            ON ingest_file_result.ingest_type = ingest_request.ingest_type
+            AND ingest_file_result.base_url = ingest_request.base_url
+        WHERE
+            ingest_request.ingest_type = 'pdf'
+            AND ingest_request.link_source = 'unpaywall'
+        GROUP BY release_stage, status
+        ORDER BY release_stage, COUNT DESC
+        LIMIT 100;
+
+
+     release_stage |               status                |  count
+    ---------------+-------------------------------------+----------
+     accepted      | success                             |  1101090
+     accepted      | no-pdf-link                         |    28590
+     accepted      | redirect-loop                       |    10923
+     accepted      | no-capture                          |     9540
+     accepted      | terminal-bad-status                 |     6339
+     accepted      | cdx-error                           |      952
+     accepted      | wrong-mimetype                      |      447
+     accepted      | link-loop                           |      275
+     accepted      | wayback-error                       |      202
+     accepted      | petabox-error                       |      177
+     accepted      | redirects-exceeded                  |      122
+     accepted      | null-body                           |       27
+     accepted      | wayback-content-error               |       14
+     accepted      | spn2-cdx-lookup-failure             |        5
+     accepted      | gateway-timeout                     |        4
+     accepted      | bad-redirect                        |        1
+     published     | success                             | 18595278
+     published     | no-pdf-link                         |  2434935
+     published     | redirect-loop                       |  1364110
+     published     | terminal-bad-status                 |  1185328
+     published     | no-capture                          |   718792
+     published     | wrong-mimetype                      |   112923
+     published     | link-loop                           |    63874
+     published     | wayback-content-error               |    30268
+     published     | cdx-error                           |    17302
+     published     | null-body                           |    15209
+     published     | wayback-error                       |    10782
+     published     | gateway-timeout                     |     1966
+     published     | petabox-error                       |     1611
+     published     | spn2-cdx-lookup-failure             |      879
+     published     | redirects-exceeded                  |      760
+     published     | invalid-host-resolution             |      453
+     published     | bad-redirect                        |      115
+     published     | spn2-error:job-failed               |       77
+     published     | spn2-error                          |       75
+     published     | timeout                             |       21
+     published     | bad-gzip-encoding                   |        5
+     published     | spn2-error:soft-time-limit-exceeded |        4
+     published     | spn2-error:pending                  |        1
+     published     | blocked-cookie                      |        1
+     published     |                                     |        1
+     published     | pending                             |        1
+     submitted     | success                             |  5308166
+     submitted     | redirect-loop                       |   296322
+     submitted     | terminal-bad-status                 |   197785
+     submitted     | no-capture                          |   165545
+     submitted     | no-pdf-link                         |    68274
+     submitted     | wrong-mimetype                      |     5962
+     submitted     | null-body                           |     5474
+     submitted     | cdx-error                           |     3536
+     submitted     | wayback-error                       |     2992
+     submitted     | link-loop                           |     2359
+     submitted     | gateway-timeout                     |     1805
+     submitted     | petabox-error                       |      632
+     submitted     | spn2-cdx-lookup-failure             |      334
+     submitted     | wayback-content-error               |       57
+     submitted     | spn2-error                          |       37
+     submitted     | bad-redirect                        |       31
+     submitted     | spn2-error:job-failed               |       14
+     submitted     |                                     |       12
+     submitted     | invalid-host-resolution             |       11
+     submitted     | redirects-exceeded                  |        7
+     submitted     | spn2-error:soft-time-limit-exceeded |        5
+     submitted     | bad-gzip-encoding                   |        1
+     submitted     | skip-url-blocklist                  |        1
+                   | no-pdf-link                         |       42
+                   | success                             |       25
+                   | redirect-loop                       |       20
+                   | terminal-bad-status                 |       11
+                   | no-capture                          |        3
+    (70 rows)
