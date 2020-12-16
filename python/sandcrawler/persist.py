@@ -168,7 +168,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             sha1hex=file_meta["sha1hex"],
             status=record.get('status'),
             scope=record.get('scope'),
-            has_teixml=bool(html_body and html_body['status'] == 'success' and html_body.get('tei_xml')),
+            has_teixml=bool(html_body and html_body['status'] == 'success'),
             has_thumbnail=False,  # TODO
             word_count=(html_body and html_body.get('word_count')) or None,
             biblio=record.get('html_biblio'),
