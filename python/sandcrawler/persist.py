@@ -215,7 +215,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
 
         html_meta_batch = [self.result_to_html_meta(r) for r in batch if r.get('hit') and r.get('html_body')]
         if html_meta_batch:
-            resp = self.db.insert_html_meta(self.cur, html_meta_batch, on_conflict="nothing")
+            resp = self.db.insert_html_meta(self.cur, html_meta_batch, on_conflict="update")
             self.counts['insert-html_meta'] += resp[0]
             self.counts['update-html_meta'] += resp[1]
 
