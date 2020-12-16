@@ -18,7 +18,7 @@ x CDX lookup "closest" to capture datetime (or by month)
 x firstmonday no extracted fulltext/XML
 x apply URL base fixup to fulltext URLs
 x XML alternative detection
-- basic ingest worker, kafka topics, persist workers, sql table, etc
+x basic ingest worker, kafka topics, persist workers, sql table, etc
 - ingest worker: landing page to actual fulltext (eg, OJS)
 - broken? https://betterexplained.com/articles/colorized-math-equations/
 
@@ -246,3 +246,73 @@ Examples/bugs:
 
     generally, author detection not great.
     not, apparently, using detection of dc.authors etc
+
+
+## Prod Deployment Notes (2020-12-14)
+
+Created `html_meta` table in `sandcrawler-db`.
+
+Updated ansible roles to deploy persist and import workers. Then ran the roles
+and enabled:
+
+- sandcrawler database (aitio)
+    - sandcrawler-persist-ingest-file-worker@1: restarted
+- blobs (wbgrp-svc169)
+    - sandcrawler-persist-html-teixml-worker@1: started and enabled
+    - sandcrawler-persist-xml-doc-worker@1: started and enabled
+- fatcat prod worker (wbgrp-svc502)
+    - fatcat-import-ingest-web-worker: started and enabled
+
+Test some d-lib and first monday ingests:
+
+    # dlib
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org --ingest-type html --limit 50 container --container-id ugbiirfvufgcjkx33r3cmemcuu
+    => Counter({'estimate': 803, 'ingest_request': 50, 'elasticsearch_release': 50, 'kafka': 50})
+
+    # first monday
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org --ingest-type html --limit 50 container --container-id svz5ul6qozdjhjhk7d627avuja
+
+Starting:
+
+    d-lib: 253 / 1056 preserved (https://fatcat.wiki/container/ugbiirfvufgcjkx33r3cmemcuu/coverage)
+
+Initially, `fatcat-import-ingest-web-worker` is seeing these but doesn't seem
+to be importing.
+
+    # postgresql shell
+    select sha1hex, updated, status, scope, has_teixml, has_thumbnail, word_count from html_meta;
+    => initially has_teixml is false for all
+    => fixed in an update
+
+    # weed shell
+    > fs.ls /buckets/sandcrawler/html_body
+    [...]
+    > fs.cat /buckets/sandcrawler/html_body/77/75/7775adf8c7e19151bbe887bfa08a575483291d7c.tei.xml
+    [looks like fine TEI-XML]
+
+Going to debug ingest issue by dumping results to disk and importing manually
+(best way to see counts):
+
+    kafkacat -C -b wbgrp-svc284.us.archive.org:9092 -t sandcrawler-prod.ingest-file-results -o -10 | rg html | head -n10 | jq . -c > web_ingest_results.json
+
+    export FATCAT_AUTH_WORKER_CRAWL=[...]
+    ./fatcat_import.py ingest-web-results web_ingest_results.json
+    => Counter({'total': 10, 'skip-update-disabled': 9, 'skip': 1, 'skip-hit': 1, 'insert': 0, 'update': 0, 'exists': 0})
+
+    # did some patching (f7a75a01), then re-ran twice and got:
+    => Counter({'total': 10, 'insert': 9, 'skip': 1, 'skip-hit': 1, 'update': 0, 'exists': 0})
+    => Counter({'total': 10, 'exists': 9, 'skip': 1, 'skip-hit': 1, 'insert': 0, 'update': 0})
+
+    # looks good!
+
+Re-ingesting all of d-lib:
+
+    ./fatcat_ingest.py --env prod --enqueue-kafka --kafka-hosts wbgrp-svc263.us.archive.org --ingest-type html container --container-id ugbiirfvufgcjkx33r3cmemcuu
+    => Expecting 803 release objects in search queries
+    => Counter({'ingest_request': 803, 'elasticsearch_release': 803, 'estimate': 803, 'kafka': 803})
+
+TODO:
+
+- release ES transform isn't counting these as `in_ia` or preserved (code-only change)
+- no indication in search results (ES schema change)
+- ingest tool should probably look at `in_ia_html` or `in_ia_pdf` for PDF/XML queries (or a `types_in_ia` list?)
