@@ -939,7 +939,8 @@ class SavePageNowClient:
         if not spn_result.success:
             status = spn_result.status
             if status in ("error:invalid-url", "error:not-found",
-                    "error:invalid-host-resolution", "error:gateway-timeout"):
+                    "error:invalid-host-resolution", "error:gateway-timeout",
+                    "error:too-many-redirects", "error:read-timeout"):
                 status = status.replace("error:", "")
             elif status in ("error:no-access", "error:forbidden"):
                 status = "forbidden"
