@@ -1,5 +1,5 @@
 
-status: wip
+status: deployed
 
 HTML Ingest Pipeline
 ========================
@@ -83,6 +83,8 @@ Overall object (`IngestWebResult`):
     resources (JSON)
 
 Also writes to `ingest_file_result`, `file_meta`, and `cdx`, all only for the base HTML document.
+
+Note: needed to enable postgrest access to this table (for scholar worker).
 
 
 ## Fatcat API Wants
