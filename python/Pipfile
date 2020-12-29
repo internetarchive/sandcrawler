@@ -54,7 +54,7 @@ zstandard = "*"
 black = "==19.10b0"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
 
 [packages.globalwayback]
 version = ">=0.6.5"
