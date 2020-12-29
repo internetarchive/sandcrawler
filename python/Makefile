@@ -25,8 +25,6 @@ fmt: ## Run code formating on all source code
 
 .PHONY: test
 test: ## Run all tests and lints
-	pipenv run flake8 . --select=E9,F63,F7,F82 --exit-zero
-	pipenv run mypy *.py sandcrawler/ tests/ --ignore-missing-imports
 	pipenv run pytest
 
 .PHONY: coverage
