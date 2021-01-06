@@ -83,6 +83,7 @@ def transform(obj: dict) -> List[dict]:
         ingest_types = CONTENT_TYPE_MAP.get((link.get('content_type') or '').lower())
         if not ingest_types:
             continue
+
         skip = False
         for domain in DOMAIN_BLOCKLIST:
             if domain in link['url'].lower():
@@ -90,8 +91,11 @@ def transform(obj: dict) -> List[dict]:
         if skip:
             continue
         try:
-            base_url = canon(link['url'])
+            base_url = canon(link['url'].strip())
         except UnicodeEncodeError:
+            continue
+
+        if not base_url or len(base_url) > 1000:
             continue
 
         for ingest_type in ingest_types:
