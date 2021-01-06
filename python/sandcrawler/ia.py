@@ -167,8 +167,10 @@ class CdxApiClient:
             return None
         rows = []
         for raw in rj[1:]:
-            assert len(raw) == 11    # JSON is short
-            #print(raw, file=sys.stderr)
+            # check number of CDX fields; there is a bug with some rows having
+            # spaces in WARC filename resulting in extra bogus fields
+            if len(raw) != 11:
+                raise CdxApiError(f"CDX response had {len(raw)} fields, not 11 expected")
 
             # transform "-" ftp status code to a 226
             status_code = None
