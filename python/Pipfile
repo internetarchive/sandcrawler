@@ -30,7 +30,7 @@ raven = {extras = ['flask'],version = "*"}
 confluent-kafka = "*"
 python-snappy = "*"
 boto3 = "*"
-minio = "*"
+minio = "<7.0.0"
 psycopg2 = "*"
 bs4 = "*"
 python-magic = "*"
