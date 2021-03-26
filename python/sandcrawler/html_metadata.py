@@ -375,6 +375,14 @@ PDF_FULLTEXT_PATTERNS: List[dict] = [
         "technique": "PDF URL link",
         "example_page": "http://www.bezmialemscience.org/archives/archive-detail/article-preview/editorial/20439",
     },
+    {
+        "in_doc_url": "degruyter.com/document/",
+        "in_fulltext_url": "/pdf",
+        "selector": "a.downloadPdf",
+        "attr": "href",
+        "technique": "PDF URL link",
+        "example_page": "https://www.degruyter.com/document/doi/10.1515/zaw-2021-0001/html",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP = [
