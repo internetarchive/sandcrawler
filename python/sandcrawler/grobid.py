@@ -9,7 +9,7 @@ class GrobidClient(object):
 
     def __init__(self, host_url="http://grobid.qa.fatcat.wiki", **kwargs):
         self.host_url = host_url
-        self.consolidate_mode = int(kwargs.get('consolidate_mode', 2))
+        self.consolidate_mode = int(kwargs.get('consolidate_mode', 0))
 
     def process_fulltext(self, blob, consolidate_mode=None):
         """
@@ -83,7 +83,7 @@ class GrobidWorker(SandcrawlerFetchWorker):
         super().__init__(wayback_client=wayback_client)
         self.grobid_client = grobid_client
         self.sink = sink
-        self.consolidate_mode = 2
+        self.consolidate_mode = 0
 
     def timeout_response(self, task):
         default_key = task['sha1hex']
@@ -118,7 +118,7 @@ class GrobidBlobWorker(SandcrawlerWorker):
         super().__init__()
         self.grobid_client = grobid_client
         self.sink = sink
-        self.consolidate_mode = 2
+        self.consolidate_mode = 0
 
     def process(self, blob, key=None):
         if not blob:
