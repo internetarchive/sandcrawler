@@ -24,6 +24,7 @@ test_python:
     - make lint
 
 test_python_hadoop:
+  when: manual
   script:
     - cd python_hadoop
     - pipenv install --dev --deploy
