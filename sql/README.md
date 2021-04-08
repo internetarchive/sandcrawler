@@ -139,10 +139,13 @@ Questions we might want to answer
     http get :3030/cdx?url=eq.https://coleccionables.mercadolibre.com.ar/arduino-pdf_Installments_NoInterest_BestSellers_YES
     http get :3030/file_meta?sha1hex=eq.120582c855a7cc3c70a8527c560d7f27e6027278
 
-## Full Database Dumps
+
+## Full SQL Database Dumps
 
 Run a dump in compressed, postgres custom format:
 
     export DATESLUG="`date +%Y-%m-%d.%H%M%S`"
-    time sudo -u postgres pg_dump --verbose --format=custom sandcrawler > /sandcrawler-db/snapshots/sandcrawler_full_dbdump_${DATESLUG}.pgdump
+    time sudo -u postgres pg_dump --verbose --format=custom sandcrawler > sandcrawler_full_dbdump_${DATESLUG}.pgdump
 
+As of 2021-04-07, this process runs for about 4 hours and the compressed
+snapshot is 88 GBytes (compared with 551.34G database disk consumption).
