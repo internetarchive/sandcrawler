@@ -149,3 +149,12 @@ Run a dump in compressed, postgres custom format:
 
 As of 2021-04-07, this process runs for about 4 hours and the compressed
 snapshot is 88 GBytes (compared with 551.34G database disk consumption).
+
+To restore a dump (which will delete local database content, if any):
+
+    sudo su postgres
+    createuser --no-login web_anon
+    createuser -s sandcrawler
+    time pg_restore --jobs=4 --verbose --clean --if-exists --create --exit-on-error -d postgres sandcrawler_full_dbdump_2021-04-08.003952.pgdump
+
+Took about 2.5 hours.
