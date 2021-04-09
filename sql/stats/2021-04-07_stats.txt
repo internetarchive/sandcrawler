@@ -1,6 +1,8 @@
 
 ## SQL Table Sizes
 
+    Size:  551.34G
+
     SELECT
         table_name,
         pg_size_pretty(table_size) AS table_size,
@@ -20,7 +22,7 @@
           ORDER BY total_size DESC
       ) AS pretty_sizes;
 
-    table_size | indexes_size | total_size 
+              table_name           | table_size | indexes_size | total_size
     -------------------------------+------------+--------------+------------
      "public"."cdx"                | 49 GB      | 50 GB        | 100 GB
      "public"."ingest_file_result" | 33 GB      | 52 GB        | 85 GB

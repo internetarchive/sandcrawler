@@ -1,0 +1,40 @@
+
+## SQL Table Sizes
+
+    Size: 467.23G    
+
+    SELECT
+        table_name,
+        pg_size_pretty(table_size) AS table_size,
+        pg_size_pretty(indexes_size) AS indexes_size,
+        pg_size_pretty(total_size) AS total_size
+      FROM (
+          SELECT
+              table_name,
+              pg_table_size(table_name) AS table_size,
+              pg_indexes_size(table_name) AS indexes_size,
+              pg_total_relation_size(table_name) AS total_size
+          FROM (
+              SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
+              FROM information_schema.tables
+              WHERE table_schema = 'public'
+          ) AS all_tables
+          ORDER BY total_size DESC
+      ) AS pretty_sizes;
+
+              table_name           | table_size | indexes_size | total_size
+    -------------------------------+------------+--------------+------------
+     "public"."cdx"                | 49 GB      | 26 GB        | 76 GB
+     "public"."grobid"             | 69 GB      | 6834 MB      | 75 GB
+     "public"."grobid_shadow"      | 67 GB      | 5455 MB      | 73 GB
+     "public"."ingest_request"     | 39 GB      | 32 GB        | 70 GB
+     "public"."ingest_file_result" | 32 GB      | 29 GB        | 60 GB
+     "public"."file_meta"          | 32 GB      | 21 GB        | 53 GB
+     "public"."pdf_meta"           | 18 GB      | 3733 MB      | 22 GB
+     "public"."fatcat_file"        | 12 GB      | 6602 MB      | 18 GB
+     "public"."shadow"             | 9517 MB    | 8026 MB      | 17 GB
+     "public"."html_meta"          | 1196 MB    | 8072 kB      | 1204 MB
+     "public"."petabox"            | 403 MB     | 461 MB       | 864 MB
+     "public"."pdftrio"            | 550 MB     | 297 MB       | 847 MB
+    (12 rows)
+
