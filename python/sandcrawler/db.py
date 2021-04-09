@@ -9,7 +9,7 @@ import requests
 
 class SandcrawlerPostgrestClient:
 
-    def __init__(self, api_url="http://aitio.us.archive.org:3030", **kwargs):
+    def __init__(self, api_url="http://wbgrp-svc506.us.archive.org:3030", **kwargs):
         self.api_url = api_url
 
     def get_cdx(self, url):
