@@ -10,6 +10,10 @@ COPY (
         AND ingest_file_result.status like 'spn2-%'
         AND ingest_file_result.status != 'spn2-error:invalid-url-syntax'
         AND ingest_file_result.status != 'spn2-error:filesize-limit'
+        AND ingest_file_result.status != 'spn2-error:not-found'
+        AND ingest_file_result.status != 'spn2-error:blocked-url'
+        AND ingest_file_result.status != 'spn2-error:too-many-redirects'
+        AND ingest_file_result.status != 'spn2-error:network-authentication-required'
         AND ingest_file_result.status != 'spn2-wayback-error'
 ) TO '/grande/snapshots/reingest_quarterly_spn2-error_current.rows.json';
 
