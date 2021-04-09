@@ -6,7 +6,7 @@ COPY (
   FROM file_meta
   ORDER BY sha1hex ASC
 )
-TO '/grande/snapshots/file_meta_dump.tsv'
+TO '/srv/sandcrawler/tasks/file_meta_dump.tsv'
 WITH NULL '';
 
 ROLLBACK;

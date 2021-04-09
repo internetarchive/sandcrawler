@@ -12,7 +12,7 @@ COPY (
   AND grobid.fatcat_release IS NOT NULL
   LIMIT 1000
 )
-TO '/grande/snapshots/dump_unmatched_glutton_pdf.2020-06-30.json';
+TO '/srv/sandcrawler/tasks/dump_unmatched_glutton_pdf.2020-06-30.json';
 --TO STDOUT
 --WITH NULL '';
 

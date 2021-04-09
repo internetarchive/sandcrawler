@@ -12,7 +12,7 @@
             AND ingest_file_result.status like 'spn2-%'
             AND ingest_file_result.status != 'spn2-error:invalid-url-syntax'
             AND ingest_file_result.status != 'spn2-error:spn2-error:filesize-limit'
-    ) TO '/grande/snapshots/reingest_spn2-error_current.rows.json';
+    ) TO '/srv/sandcrawler/tasks/reingest_spn2-error_current.rows.json';
 
     COPY (
         SELECT row_to_json(ingest_request.*) FROM ingest_request
@@ -25,7 +25,7 @@
             AND ingest_file_result.updated > NOW() - '12 day'::INTERVAL
             AND (ingest_request.ingest_request_source = 'fatcat-changelog'
                  OR ingest_request.ingest_request_source = 'fatcat-ingest')
-    ) TO '/grande/snapshots/reingest_cdx-error_current.rows.json';
+    ) TO '/srv/sandcrawler/tasks/reingest_cdx-error_current.rows.json';
 
     COPY (
         SELECT row_to_json(ingest_request.*) FROM ingest_request
@@ -38,7 +38,7 @@
             AND ingest_file_result.updated > NOW() - '12 day'::INTERVAL
             AND (ingest_request.ingest_request_source != 'fatcat-changelog'
                  AND ingest_request.ingest_request_source != 'fatcat-ingest')
-    ) TO '/grande/snapshots/reingest_cdx-error_bulk_current.rows.json';
+    ) TO '/srv/sandcrawler/tasks/reingest_cdx-error_bulk_current.rows.json';
 
     COPY (
         SELECT row_to_json(ingest_request.*) FROM ingest_request
@@ -49,7 +49,7 @@
             AND ingest_file_result.status like 'wayback-error'
             AND ingest_file_result.updated < NOW() - '1 hour'::INTERVAL
             AND ingest_file_result.updated > NOW() - '12 day'::INTERVAL
-    ) TO '/grande/snapshots/reingest_wayback-error_current.rows.json';
+    ) TO '/srv/sandcrawler/tasks/reingest_wayback-error_current.rows.json';
 
     COPY (
         SELECT row_to_json(ingest_request.*) FROM ingest_request
@@ -62,7 +62,7 @@
             AND ingest_file_result.updated > NOW() - '12 day'::INTERVAL
             AND (ingest_request.ingest_request_source = 'fatcat-changelog'
                  OR ingest_request.ingest_request_source = 'fatcat-ingest')
-    ) TO '/grande/snapshots/reingest_gateway-timeout.rows.json';
+    ) TO '/srv/sandcrawler/tasks/reingest_gateway-timeout.rows.json';
 
     COPY (
         SELECT row_to_json(ingest_request.*) FROM ingest_request
@@ -75,16 +75,16 @@
             AND ingest_file_result.updated > NOW() - '12 day'::INTERVAL
             AND (ingest_request.ingest_request_source = 'fatcat-changelog'
                  OR ingest_request.ingest_request_source = 'fatcat-ingest')
-    ) TO '/grande/snapshots/reingest_petabox-error_current.rows.json';
+    ) TO '/srv/sandcrawler/tasks/reingest_petabox-error_current.rows.json';
 
 Transform:
 
-    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_spn2-error_current.rows.json | shuf > reingest_spn2-error_current.json
-    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_cdx-error_current.rows.json | shuf > reingest_cdx-error_current.json
-    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_cdx-error_bulk_current.rows.json | shuf > reingest_cdx-error_bulk_current.json
-    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_wayback-error_current.rows.json | shuf > reingest_wayback-error_current.json
-    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_gateway-timeout.rows.json | shuf > reingest_gateway-timeout.json
-    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_petabox-error_current.rows.json | shuf > reingest_petabox-error_current.json
+    ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/reingest_spn2-error_current.rows.json | shuf > reingest_spn2-error_current.json
+    ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/reingest_cdx-error_current.rows.json | shuf > reingest_cdx-error_current.json
+    ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/reingest_cdx-error_bulk_current.rows.json | shuf > reingest_cdx-error_bulk_current.json
+    ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/reingest_wayback-error_current.rows.json | shuf > reingest_wayback-error_current.json
+    ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/reingest_gateway-timeout.rows.json | shuf > reingest_gateway-timeout.json
+    ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/reingest_petabox-error_current.rows.json | shuf > reingest_petabox-error_current.json
 
 Push to kafka (shuffled):
 
@@ -122,10 +122,10 @@ Push to kafka (not shuffled):
             AND ingest_file_result.status != 'spn2-error:invalid-url-syntax'
             AND ingest_file_result.status != 'spn2-error:spn2-error:filesize-limit'
             AND ingest_request.ingest_request_source = 'fatcat-ingest'
-    ) TO '/grande/snapshots/reingest_fatcat_current.rows.json';
+    ) TO '/srv/sandcrawler/tasks/reingest_fatcat_current.rows.json';
 
     # note: shuf
-    ./scripts/ingestrequest_row2json.py /grande/snapshots/reingest_fatcat_current.rows.json | shuf > reingest_fatcat_current.json
+    ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/reingest_fatcat_current.rows.json | shuf > reingest_fatcat_current.json
 
     cat reingest_fatcat_current.json | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests -p -1
 

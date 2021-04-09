@@ -9,7 +9,7 @@ COPY (
     SELECT petabox.sha1hex, row_to_json(petabox) FROM petabox
     WHERE EXISTS (SELECT grobid.sha1hex FROM grobid WHERE petabox.sha1hex = grobid.sha1hex AND grobid.grobid_version IS NULL)
 )
-TO '/grande/snapshots/dump_regrobid_pdf_petabox.2020-02-03.json'
+TO '/srv/sandcrawler/tasks/dump_regrobid_pdf_petabox.2020-02-03.json'
 WITH NULL '';
 
 ROLLBACK;

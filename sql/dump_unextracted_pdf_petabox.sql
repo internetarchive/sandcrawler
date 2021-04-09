@@ -12,7 +12,7 @@ COPY (
   WHERE petabox.sha1hex IS NOT NULL
     AND pdf_meta.sha1hex IS NULL
 )
-TO '/grande/snapshots/dump_unextracted_pdf_petabox.2020-07-22.json'
+TO '/srv/sandcrawler/tasks/dump_unextracted_pdf_petabox.2020-07-22.json'
 WITH NULL '';
 
 ROLLBACK;

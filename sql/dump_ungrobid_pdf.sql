@@ -12,7 +12,7 @@ COPY (
   -- uncomment/comment this to control whether only fatcat files are included
   --AND EXISTS (SELECT fatcat_file.sha1hex FROM fatcat_file WHERE cdx.sha1hex = fatcat_file.sha1hex)
 )
-TO '/grande/snapshots/dump_ungrobided_pdf.fatcat.2020-08-04.json'
+TO '/srv/sandcrawler/tasks/dump_ungrobided_pdf.fatcat.2020-08-04.json'
 WITH NULL '';
 
 ROLLBACK;

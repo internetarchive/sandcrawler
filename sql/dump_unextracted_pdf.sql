@@ -16,7 +16,7 @@ COPY (
     AND ingest_file_result.terminal_sha1hex IS NOT NULL
     AND pdf_meta.sha1hex IS NULL
 )
-TO '/grande/snapshots/dump_unextracted_pdf.ingest.2020-10-21.json'
+TO '/srv/sandcrawler/tasks/dump_unextracted_pdf.ingest.2020-10-21.json'
 WITH NULL '';
 
 ROLLBACK;
