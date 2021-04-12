@@ -157,6 +157,10 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             if result['terminal_status_code']:
                 result['terminal_status_code'] = int(result['terminal_status_code'])
             result['terminal_sha1hex'] = terminal.get('terminal_sha1hex')
+            if len(result['terminal_url']) > 2048:
+                # postgresql13 doesn't like extremely large URLs in b-tree index
+                self.counts['skip-huge-url'] += 1
+                return None
         return result
 
     def result_to_html_meta(self, record: dict) -> Optional[HtmlMetaRow]:
