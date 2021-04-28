@@ -26,6 +26,8 @@ from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.xml import xml_reserialize
 
 
+MAX_BODY_SIZE_BYTES = 128*1024*1024
+
 class IngestFileWorker(SandcrawlerWorker):
     """
     High level flow is to look in history first, then go to live web if
@@ -574,6 +576,10 @@ class IngestFileWorker(SandcrawlerWorker):
 
             if not resource.body:
                 result['status'] = 'null-body'
+                return result
+
+            if len(resource.body) > MAX_BODY_SIZE_BYTES:
+                result['status'] = 'body-too-large'
                 return result
 
             file_meta = gen_file_metadata(resource.body)
