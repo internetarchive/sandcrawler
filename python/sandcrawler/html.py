@@ -138,12 +138,29 @@ def extract_fulltext_url(html_url, html_body):
     # https://osf.io/preprints/socarxiv/8phvx/
     # wow, they ship total javascript crud! going to just guess download URL
     # based on URL for now. Maybe content type header would help?
-    if '://osf.io/' in html_url and not '/download' in html_url:
-        if not html_url.endswith("/"):
-            next_url = html_url+"/download"
-        else:
-            next_url = html_url+"download"
-        return dict(next_url=next_url, technique='osf-by-url')
+    OSF_DOMAINS = [
+        '://osf.io/',
+        '://biohackrxiv.org/',
+        '://psyarxiv.com/',
+        '://arabixiv.org/',
+        '://engrxiv.org/',
+        '://edarxiv.org//',
+        '://ecsarxiv.org/',
+        '://ecoevorxiv.org/',
+        '://frenxiv.org/',
+        '://indiarxiv.org/',
+        '://mindrxiv.org/',
+        '://mediarxiv.org/',
+        '://paleorxiv.org/',
+        '://thesiscommons.org/',
+    ]
+    for domain in OSF_DOMAINS:
+        if domain in html_url and (len(html_url.split('/')) in [4,5] or '/preprints/' in html_url) and '/download' not in html_url:
+            if not html_url.endswith("/"):
+                next_url = html_url+"/download"
+            else:
+                next_url = html_url+"download"
+            return dict(next_url=next_url, technique='osf-by-url')
 
     # wiley
     # https://onlinelibrary.wiley.com/doi/pdf/10.1111/1467-923X.12787
