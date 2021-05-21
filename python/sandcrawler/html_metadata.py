@@ -599,7 +599,7 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name
                 continue
             url = node.attrs.get(attr)
             if url:
-                resources.append(dict(url=url, type=type_name))
+                resources.append(dict(url=url.strip(), type=type_name))
 
     return resources
 
