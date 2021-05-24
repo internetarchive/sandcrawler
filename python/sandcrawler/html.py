@@ -103,11 +103,10 @@ def extract_fulltext_url(html_url, html_body):
             json_text = json_tag.string
             json_meta = json.loads(json_text)
             pdf_meta = json_meta['article']['pdfDownload']['urlMetadata']
-            print(pdf_meta, file=sys.stderr)
             # https://www.sciencedirect.com/science/article/pii/S0169204621000670/pdfft?md5=c4a83d06b334b627ded74cf9423bfa56&pid=1-s2.0-S0169204621000670-main.pdf
             url = html_url + pdf_meta['pdfExtension'] + "?md5=" + pdf_meta['queryParams']['md5'] + "&pid=" + pdf_meta['queryParams']['pid']
-        except Exception as e:
-            raise e
+        except (KeyError, TypeError, json.JSONDecodeError):
+            pass
         if url:
             return dict(pdf_url=url, technique="sciencedirect-munge-json")
 
