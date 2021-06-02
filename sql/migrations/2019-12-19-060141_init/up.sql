@@ -175,3 +175,10 @@ CREATE TABLE IF NOT EXISTS shadow (
     PRIMARY KEY(shadow_corpus, shadow_id)
 );
 CREATE INDEX shadow_sha1hex_idx ON shadow(sha1hex);
+
+CREATE TABLE IF NOT EXISTS crossref (
+    doi                 TEXT NOT NULL CHECK (octet_length(doi) >= 4 AND doi = LOWER(doi)),
+    indexed             TIMESTAMP WITH TIME ZONE NOT NULL,
+    record              JSON NOT NULL,
+    PRIMARY KEY(doi)
+);
