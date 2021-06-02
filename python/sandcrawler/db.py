@@ -77,6 +77,15 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
+    def get_crossref(self, doi):
+        resp = requests.get(self.api_url + "/crossref", params=dict(doi='eq.'+doi))
+        resp.raise_for_status()
+        resp = resp.json()
+        if resp:
+            return resp[0]
+        else:
+            return None
+
 class SandcrawlerPostgresClient:
 
     def __init__(self, db_url, **kwargs):
