@@ -1084,17 +1084,31 @@ class SavePageNowClient:
             # warc_path etc will change, so strip them out
             cdx_row = cdx_partial_from_row(cdx_row)
 
-        return ResourceResult(
-            start_url=start_url,
-            hit=True,
-            status="success",
-            terminal_url=cdx_row.url,
-            terminal_dt=cdx_row.datetime,
-            terminal_status_code=cdx_row.status_code,
-            body=body,
-            cdx=cdx_row,
-            revisit_cdx=revisit_cdx,
-        )
+        assert cdx_row.status_code
+        if cdx_row.status_code in (200, 226):
+            return ResourceResult(
+                start_url=start_url,
+                hit=True,
+                status="success",
+                terminal_url=cdx_row.url,
+                terminal_dt=cdx_row.datetime,
+                terminal_status_code=cdx_row.status_code,
+                body=body,
+                cdx=cdx_row,
+                revisit_cdx=revisit_cdx,
+            )
+        else:
+            return ResourceResult(
+                start_url=start_url,
+                hit=False,
+                status="terminal-bad-status",
+                terminal_url=cdx_row.url,
+                terminal_dt=cdx_row.datetime,
+                terminal_status_code=cdx_row.status_code,
+                body=body,
+                cdx=cdx_row,
+                revisit_cdx=revisit_cdx,
+            )
 
 
 def fix_transfer_encoding(file_meta: dict, resource: ResourceResult) -> Tuple[dict, ResourceResult]:
