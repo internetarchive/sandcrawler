@@ -59,7 +59,7 @@ def parse_grobid_json(obj):
         release_date = datetime.datetime(year=obj['date'], month=1, day=1)
 
     if obj.get('doi'):
-        extra['doi'] = obj['doi']
+        extra['doi'] = obj['doi'].lower()
     if obj['journal'].get('name'):
         extra['container_name'] = obj['journal']['name']
 
