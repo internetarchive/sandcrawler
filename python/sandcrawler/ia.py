@@ -1025,6 +1025,15 @@ class SavePageNowClient:
                     filter_status_code=filter_status_code,
                     retry_sleep=9.0,
                 )
+                # sometimes there are fuzzy http/https self-redirects with the
+                # same SURT; try to work around that
+                if cdx_row.status_code >= 300 and cdx_row.status_code < 400:
+                    cdx_row = wayback_client.cdx_client.fetch(
+                        url=spn_result.terminal_url,
+                        datetime=spn_result.terminal_dt,
+                        filter_status_code=200,
+                        retry_sleep=9.0,
+                    )
             except KeyError as ke:
                 print("  CDX KeyError: {}".format(ke), file=sys.stderr)
                 return ResourceResult(
