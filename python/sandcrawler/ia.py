@@ -648,11 +648,12 @@ class WaybackClient:
                         status="success",
                         terminal_url=cdx_row.url,
                         terminal_dt=cdx_row.datetime,
-                        terminal_status_code=resource.revisit_cdx.status_code, # ?
+                        terminal_status_code=resource.revisit_cdx.status_code,
                         body=resource.body,
                         cdx=cdx_row,
                         revisit_cdx=resource.revisit_cdx,
                     )
+                # else, continue processing with revisit record
 
             if cdx_row.status_code in (200, 226):
                 revisit_cdx = None
@@ -927,9 +928,11 @@ class SavePageNowClient:
 
     def crawl_resource(self, start_url, wayback_client, force_simple_get=0):
         """
-        Runs a SPN2 crawl, then fetches body from wayback.
+        Runs a SPN2 crawl, then fetches body.
 
-        TODO: possible to fetch from petabox?
+        There is a delay between SPN2 crawls and WARC upload to petabox, so we
+        need to fetch the body via wayback replay instead of petabox
+        range-request.
         """
 
         # HACK: capture CNKI domains with outlinks (for COVID-19 crawling)
