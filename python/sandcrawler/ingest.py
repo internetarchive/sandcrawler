@@ -523,7 +523,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
             # check for popular cookie blocking URL patterns. On successful SPN
             # crawls, shouldn't see these redirect URLs
-            if '/cookieAbsent' in next_url or 'cookieSet=1' in next_url:
+            if '/cookieAbsent' in next_url or 'cookieSet=1' in next_url or 'error=cookies_not_supported' in next_url:
                 result['status'] = 'blocked-cookie'
                 return result
 
@@ -571,7 +571,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 result['status'] = resource.status
                 return result
 
-            if resource.terminal_url and ('/cookieAbsent' in next_url or 'cookieSet=1' in resource.terminal_url):
+            if resource.terminal_url and ('/cookieAbsent' in resource.terminal_url or 'cookieSet=1' in resource.terminal_url):
                 result['status'] = 'blocked-cookie'
                 return result
 
