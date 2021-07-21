@@ -14,6 +14,7 @@ COPY (
         AND ingest_file_result.status != 'spn2-error:blocked-url'
         AND ingest_file_result.status != 'spn2-error:too-many-redirects'
         AND ingest_file_result.status != 'spn2-error:network-authentication-required'
+        AND ingest_file_result.status != 'spn2-error:unknown'
 ) TO '/srv/sandcrawler/tasks/reingest_quarterly_spn2-error_current.rows.json';
 
 COPY (
