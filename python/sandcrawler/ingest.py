@@ -225,7 +225,7 @@ class IngestFileWorker(SandcrawlerWorker):
         """
         raise NotImplementedError("process_existing() not tested or safe yet")
         assert result_row['hit']
-        existing_file_meta = self.pgrest_client.get_grobid(result_row['terminal_sha1hex'])
+        existing_file_meta = self.pgrest_client.get_file_meta(result_row['terminal_sha1hex'])
         existing_grobid = self.pgrest_client.get_grobid(result_row['terminal_sha1hex'])
         existing_cdx = self.pgrest_client.get_cdx(result_row['terminal_url'], result_row['terminal_dt'])
         if not (existing_file_meta and existing_grobid and existing_cdx):
