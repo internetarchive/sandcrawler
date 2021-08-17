@@ -200,6 +200,10 @@ def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetada
         return "ojs"
     elif generator and "plone" in generator.lower():
         return "plone"
+    elif generator and "wordpress" in generator.lower():
+        return "wordpress"
+    elif generator and "blogger" in generator.lower():
+        return "blogger"
     elif doc.css_first("body[id='pkp-common-openJournalSystems']"):
         return "ojs"
     else:
@@ -316,6 +320,8 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
     if word_count is not None:
         if word_count < 20:
             return "stub"
+        elif word_count > 500 and platform in ['wordpress', 'blogger']:
+            return "article-fulltext"
         elif word_count > 1200:
             return "article-fulltext"
 
