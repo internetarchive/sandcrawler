@@ -236,6 +236,7 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
     - component
     - issue-fulltext
     - landingpage
+    - homepage-domain
     - blocked-paywall
     - blocked-login
     - blocked-captcha
@@ -248,6 +249,9 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
     Unknown implies the page could be anything. "other" implies it is not
     fulltext or a landing page, but could be one of the other categories.
     """
+
+    # assert that this is a real URL
+    assert url.count('/') >= 2
 
     # basic paywall and loginwall detection based on URL
     if url.endswith("/cookieAbsent"):
@@ -263,6 +267,10 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
 
     if "showcaptcha.asp" in url:
         return "blocked-captcha"
+
+    # is this the top-level URL of the domain? aka, no path?
+    if url.count('/') <= 2 or (url.count('/') == 3) and url.endswith('/'):
+        return "homepage-domain"
 
     platform = html_guess_platform(url, doc, biblio)
 
