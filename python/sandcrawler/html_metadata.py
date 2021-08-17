@@ -652,6 +652,9 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name
             if not attr in node.attrs:
                 continue
             url = node.attrs.get(attr)
+            # special-case a couple meta urls which don't match with adblock rules
+            if url in ['about:blank',]:
+                continue
             if url:
                 resources.append(dict(url=url.strip(), type=type_name))
 
