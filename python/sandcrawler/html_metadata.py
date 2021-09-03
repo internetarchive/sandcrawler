@@ -661,7 +661,7 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name
             if skip:
                 continue
             if url:
-                print(url, file=sys.stderr)
+                #print(url, file=sys.stderr)
                 resources.append(dict(url=url.strip(), type=type_name))
 
     return resources
