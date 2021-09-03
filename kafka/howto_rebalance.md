@@ -27,7 +27,8 @@ On a kafka broker, go to `/srv/kafka-broker/kafka-*/bin`, generate a plan, then
 inspect the output:
 
     ./kafka-reassign-partitions.sh --zookeeper localhost:2181 --broker-list "280,281,284,285,263" --topics-to-move-json-file /tmp/topics_to_move.json --generate > /tmp/reassignment-plan.json
-    cat /tmp/reassignment-plan.json | rg '^\{' | tail -n1 > /tmp/new-plan.json
+    cat /tmp/reassignment-plan.json | rg '^\{' | head -n1 | jq . > /tmp/old-plan.json
+    cat /tmp/reassignment-plan.json | rg '^\{' | tail -n1 | jq . > /tmp/new-plan.json
     cat /tmp/reassignment-plan.json | rg '^\{' | jq .
 
 If that looks good, start the rebalance:
