@@ -191,3 +191,17 @@ def test_ingest_wall_blocklist(ingest_worker):
     assert resp['status'] == "skip-wall"
     assert resp['request'] == request
 
+@responses.activate
+def test_ingest_cookie_blocklist(ingest_worker):
+
+    request = {
+        'ingest_type': 'pdf',
+        'base_url': "https://test.fatcat.wiki/cookieAbsent",
+    }
+
+    resp = ingest_worker.process(request)
+
+    assert resp['hit'] == False
+    assert resp['status'] == "blocked-cookie"
+    assert resp['request'] == request
+

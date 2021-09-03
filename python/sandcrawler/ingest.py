@@ -95,9 +95,13 @@ class IngestFileWorker(SandcrawlerWorker):
             "://archive.org/",
             "://www.archive.org/",
             "://web.archive.org/web/",
+
+            # out of scope
             "://openlibrary.org/",
             "://www.openlibrary.org/",
             "://fatcat.wiki/",
+            "://orcid.org/",
+            "://doaj.org/",
 
             # Domain squats
             "://bartandjones.com",
@@ -123,6 +127,9 @@ class IngestFileWorker(SandcrawlerWorker):
 
             # DOI prefixes
             "://doi.org/10.2307/",  # JSTOR; slow and many redirects
+
+            # deprecated domain (doesn't redirect correctly)
+            "://edoc.mpg.de/",
         ]
 
         self.wall_blocklist = [
@@ -131,6 +138,14 @@ class IngestFileWorker(SandcrawlerWorker):
             "://login.bepress.com/",
             "?SAMLRequest=",
             "://osapublishing.org/captcha/",
+            "/password-login",
+            "://gateway.isiknowledge.com/",
+        ]
+
+        self.cookie_blocklist = [
+            "/cookieAbsent",
+            "cookieSet=1",
+            "error=cookies_not_supported",
         ]
 
         # these are special-case web domains for which we want SPN2 to not run
@@ -518,14 +533,16 @@ class IngestFileWorker(SandcrawlerWorker):
             # check against known loginwall URLs
             for block in self.wall_blocklist:
                 if block in next_url:
+                    # TODO: blocked-wall instead of skip-wall
                     result['status'] = "skip-wall"
                     return result
 
             # check for popular cookie blocking URL patterns. On successful SPN
             # crawls, shouldn't see these redirect URLs
-            if '/cookieAbsent' in next_url or 'cookieSet=1' in next_url or 'error=cookies_not_supported' in next_url:
-                result['status'] = 'blocked-cookie'
-                return result
+            for pattern in self.cookie_blocklist:
+                if pattern in next_url:
+                    result['status'] = 'blocked-cookie'
+                    return result
 
             try:
                 resource = self.find_resource(next_url, best_mimetype, force_recrawl=force_recrawl)
@@ -571,9 +588,11 @@ class IngestFileWorker(SandcrawlerWorker):
                 result['status'] = resource.status
                 return result
 
-            if resource.terminal_url and ('/cookieAbsent' in resource.terminal_url or 'cookieSet=1' in resource.terminal_url):
-                result['status'] = 'blocked-cookie'
-                return result
+            if resource.terminal_url:
+                for pattern in self.cookie_blocklist:
+                    if pattern in resource.terminal_url:
+                        result['status'] = 'blocked-cookie'
+                        return result
 
             if not resource.body:
                 result['status'] = 'null-body'
