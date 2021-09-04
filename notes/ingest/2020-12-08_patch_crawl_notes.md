@@ -20,6 +20,7 @@ For all, re-attempt for these status codes:
      cdx-error
      wayback-error
      petabox-error
+     gateway-timeout (?)
 
 And at least do bulk re-ingest for these, if updated before 2020-11-20 or so:
 
