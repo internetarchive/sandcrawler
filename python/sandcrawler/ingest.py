@@ -140,6 +140,7 @@ class IngestFileWorker(SandcrawlerWorker):
             "://osapublishing.org/captcha/",
             "/password-login",
             "://gateway.isiknowledge.com/",
+            "/login?TARGET=",
         ]
 
         self.cookie_blocklist = [
@@ -587,6 +588,12 @@ class IngestFileWorker(SandcrawlerWorker):
             if not resource.hit:
                 result['status'] = resource.status
                 return result
+
+            if resource.terminal_url:
+                for pattern in self.base_url_blocklist:
+                    if pattern in resource.terminal_url:
+                        result['status'] = 'skip-url-blocklist'
+                        return result
 
             if resource.terminal_url:
                 for pattern in self.cookie_blocklist:
