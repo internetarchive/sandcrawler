@@ -222,6 +222,14 @@ XML_FULLTEXT_PATTERNS: List[dict] = [
         "technique": "ARPHA XML link",
         "example_page": "https://zookeys.pensoft.net/article/26391",
     },
+    {
+        "in_doc_url": "frontiersin.org/",
+        "in_fulltext_url": "xml",
+        "selector": "a.download-files-nlm",
+        "attr": "href",
+        "technique": "XML (NLM) download link (frontiersin.org)",
+        "example_page": "https://www.frontiersin.org/articles/10.3389/fnins.2021.722592/full",
+    },
 ]
 
 HTML_FULLTEXT_PATTERNS: List[dict] = [
@@ -523,6 +531,46 @@ PDF_FULLTEXT_PATTERNS: List[dict] = [
         "attr": "href",
         "technique": "Media link (Plone)",
         "example_page": "http://xjornadaslc.fahce.unlp.edu.ar/actas/Ramon_Esteban_Chaparro.pdf/view",
+    },
+    {
+        "in_doc_url": "isca-speech.org/",
+        "in_fulltext_url": "pdf",
+        "selector": ".w3-container a",
+        "attr": "href",
+        "technique": "PDF URL link (isca-speech.org)",
+        "example_page": "https://www.isca-speech.org/archive/interspeech_2006/chitturi06b_interspeech.html",
+    },
+    {
+        "in_doc_url": "://repository.dri.ie/",
+        "in_fulltext_url": "/download",
+        "selector": "#dri_download_assets > div > a",
+        "attr": "href",
+        "technique": "Download link (repository.dri.ie)",
+        "example_page": "https://repository.dri.ie/catalog/qf8621102",
+    },
+    {
+        "in_doc_url": "frontiersin.org/",
+        "in_fulltext_url": "pdf",
+        "selector": "a.download-files-pdf",
+        "attr": "href",
+        "technique": "PDF Download link (frontiersin.org)",
+        "example_page": "https://www.frontiersin.org/articles/10.3389/fnins.2021.722592/full",
+    },
+    {
+        "in_doc_url": "cureus.com/",
+        "in_fulltext_url": "pdf",
+        "selector": ".small-medium-pdf a.pdf-download-button",
+        "attr": "href",
+        "technique": "PDF Download link (cureus.com)",
+        "example_page": "https://www.cureus.com/articles/69542-tramadol-induced-jerks",
+    },
+    {
+        "in_doc_url": "e-manuscripta.ch/",
+        "in_fulltext_url": "pdf",
+        "selector": "#titleinfoPdfDownload a.resourceLink",
+        "attr": "href",
+        "technique": "PDF Download link (e-manuscripta.ch)",
+        "example_page": "https://www.e-manuscripta.ch/zut/doi/10.7891/e-manuscripta-112176",
     },
 ]
 
