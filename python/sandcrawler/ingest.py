@@ -120,13 +120,16 @@ class IngestFileWorker(SandcrawlerWorker):
             "www.plate-archive.org/",
             "://doi.org/10.25642/ipk/gbis/",
             "://apex.ipk-gatersleben.de/",
+            "fao.org/glis/",
 
             # Historical non-paper content:
             "dhz.uni-passau.de/",   # newspapers
             "digital.ucd.ie/",      # ireland national historical
 
             # DOI prefixes
-            "://doi.org/10.2307/",  # JSTOR; slow and many redirects
+            "doi.org/10.2307/",     # JSTOR; slow and many redirects
+            "doi.org/10.18730/",    # fao.org: database entry
+            "doi.org/10.15468/",    # gbif.org: database entry
 
             # deprecated domain (doesn't redirect correctly)
             "://edoc.mpg.de/",
