@@ -99,14 +99,15 @@ def extract_fulltext_url(html_url, html_body):
     if 'sciencedirect.com/science/article/pii/' in html_url and not html_url.endswith(".pdf"):
         json_tag = soup.find("script", attrs={"type": "application/json", "data-iso-key": "_0"})
         url = None
-        try:
-            json_text = json_tag.string
-            json_meta = json.loads(json_text)
-            pdf_meta = json_meta['article']['pdfDownload']['urlMetadata']
-            # https://www.sciencedirect.com/science/article/pii/S0169204621000670/pdfft?md5=c4a83d06b334b627ded74cf9423bfa56&pid=1-s2.0-S0169204621000670-main.pdf
-            url = html_url + pdf_meta['pdfExtension'] + "?md5=" + pdf_meta['queryParams']['md5'] + "&pid=" + pdf_meta['queryParams']['pid']
-        except (KeyError, TypeError, json.JSONDecodeError):
-            pass
+        if json_tag:
+            try:
+                json_text = json_tag.string
+                json_meta = json.loads(json_text)
+                pdf_meta = json_meta['article']['pdfDownload']['urlMetadata']
+                # https://www.sciencedirect.com/science/article/pii/S0169204621000670/pdfft?md5=c4a83d06b334b627ded74cf9423bfa56&pid=1-s2.0-S0169204621000670-main.pdf
+                url = html_url + pdf_meta['pdfExtension'] + "?md5=" + pdf_meta['queryParams']['md5'] + "&pid=" + pdf_meta['queryParams']['pid']
+            except (KeyError, TypeError, json.JSONDecodeError):
+                pass
         if url:
             return dict(pdf_url=url, technique="sciencedirect-munge-json")
 
