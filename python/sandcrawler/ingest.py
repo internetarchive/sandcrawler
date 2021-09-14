@@ -173,6 +173,44 @@ class IngestFileWorker(SandcrawlerWorker):
             "://s3-eu-west-1.amazonaws.com/",
         ]
 
+        self.src_valid_mimetypes = [
+            "text/x-tex",
+            "application/gzip",
+            "application/x-bzip",
+            "application/x-bzip2",
+            "application/zip",
+            "application/x-tar",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ]
+
+        self.component_valid_mimetypes = [
+            "image/jpeg",
+            "image/tiff",
+            "image/png",
+            "image/gif",
+            "audio/mpeg",
+            "video/mp4",
+            "video/mpeg",
+            "text/plain",
+            "text/csv",
+            "application/json",
+            "application/xml",
+            "application/pdf",
+            "application/gzip",
+            "application/x-bzip",
+            "application/x-bzip2",
+            "application/zip ",
+            "application/x-rar ",
+            "application/x-7z-compressed",
+            "application/x-tar",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.ms-excel",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ]
+
 
     def check_existing_ingest(self, ingest_type: str, base_url: str) -> Optional[dict]:
         """
@@ -284,6 +322,10 @@ class IngestFileWorker(SandcrawlerWorker):
             if 'html_biblio' in html_info and not html_info['html_biblio']:
                 html_info.pop('html_biblio')
             return html_info
+        elif ingest_type == "src":
+            return {}
+        elif ingest_type == "component":
+            return {}
         else:
             raise NotImplementedError(f"process {ingest_type} hit")
 
@@ -473,7 +515,7 @@ class IngestFileWorker(SandcrawlerWorker):
         )
 
     def want(self, request: dict) -> bool:
-        if not request.get('ingest_type') in ('file', 'pdf', 'xml', 'html'):
+        if not request.get('ingest_type') in ('file', 'pdf', 'xml', 'html', 'src', 'component'):
             return False
         return True
 
@@ -484,7 +526,7 @@ class IngestFileWorker(SandcrawlerWorker):
             request['ingest_type'] = 'pdf'
 
         ingest_type = request.get('ingest_type')
-        if ingest_type not in ("pdf", "xml", "html"):
+        if ingest_type not in ("pdf", "xml", "html", "src", "component"):
             raise NotImplementedError(f"can't handle ingest_type={ingest_type}")
 
         # parse/clean URL
@@ -508,6 +550,8 @@ class IngestFileWorker(SandcrawlerWorker):
             best_mimetype = "text/xml"
         elif ingest_type == "html":
             best_mimetype = "text/html"
+        elif ingest_type == "src":
+            best_mimetype = "application/gzip"
 
         existing = self.check_existing_ingest(ingest_type, base_url)
         if existing:
@@ -668,9 +712,18 @@ class IngestFileWorker(SandcrawlerWorker):
                     return result
                 hops.append(next_url)
                 continue
-            elif ingest_type == "xml" and html_ish_resource:
-                if html_biblio and html_biblio.xml_fulltext_url:
-                    next_url = html_biblio.xml_fulltext_url
+            elif ingest_type in ("xml", "html", "component") and html_ish_resource and html_biblio:
+                # NOTE: src_fulltext_url is not a thing
+                next_url_found = None
+                if ingest_type == "xml" and html_biblio.xml_fulltext_url:
+                    next_url_found = html_biblio.xml_fulltext_url
+                elif ingest_type == "html" and html_biblio.html_fulltext_url:
+                    next_url_found = html_biblio.html_fulltext_url
+                elif ingest_type == "component" and html_biblio.component_url:
+                    next_url_found = html_biblio.component_url
+
+                if next_url_found:
+                    next_url = next_url_found
                     technique = "html_biblio"
                     print("[PARSE  {:>6}] {}  {}".format(
                             ingest_type,
@@ -679,24 +732,12 @@ class IngestFileWorker(SandcrawlerWorker):
                         ),
                         file=sys.stderr)
                     if next_url in hops:
+                        if ingest_type == "html":
+                            # for HTML ingest, we don't count this as a link-loop
+                            break
                         result['status'] = 'link-loop'
                         result['error_message'] = "repeated: {}".format(next_url)
                         return result
-                    hops.append(next_url)
-                    continue
-            elif ingest_type == "html" and html_ish_resource:
-                if html_biblio and html_biblio.html_fulltext_url:
-                    next_url = html_biblio.html_fulltext_url
-                    technique = "html_biblio"
-                    if next_url in hops:
-                        # for HTML ingest, we don't count this as a link-loop
-                        break
-                    print("[PARSE  {:>6}] {}  {}".format(
-                            ingest_type,
-                            technique,
-                            next_url,
-                        ),
-                        file=sys.stderr)
                     hops.append(next_url)
                     continue
 
@@ -735,6 +776,14 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
         elif ingest_type == "html":
             if file_meta['mimetype'] not in ("text/html", "application/xhtml+xml"):
+                result['status'] = "wrong-mimetype"
+                return result
+        elif ingest_type == "src":
+            if file_meta['mimetype'] not in self.src_valid_mimetypes:
+                result['status'] = "wrong-mimetype"
+                return result
+        elif ingest_type == "component":
+            if file_meta['mimetype'] not in self.component_valid_mimetypes:
                 result['status'] = "wrong-mimetype"
                 return result
         else:

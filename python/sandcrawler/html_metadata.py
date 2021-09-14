@@ -259,6 +259,17 @@ HTML_FULLTEXT_PATTERNS: List[dict] = [
     },
 ]
 
+COMPONENT_FULLTEXT_PATTERNS: List[dict] = [
+    {
+        "in_doc_url": "pensoft.net/article/", # also /element/
+        "in_fulltext_url": "/download/fig/",
+        "selector": ".Main-Content .figure a.P-Article-Preview-Picture-Download-Small",
+        "attr": "href",
+        "technique": "Active figure download link (zookeys)",
+        "example_page": "https://zookeys.pensoft.net/article/38576/element/2/153/",
+    },
+]
+
 # This is a database of matching patterns. Most of these discovered by hand,
 # looking at OA journal content that failed to craw/ingest.
 PDF_FULLTEXT_PATTERNS: List[dict] = [
@@ -623,6 +634,7 @@ class BiblioMetadata(pydantic.BaseModel):
     pdf_fulltext_url: Optional[str]
     html_fulltext_url: Optional[str]
     xml_fulltext_url: Optional[str]
+    component_url: Optional[str]
 
     class Config:
         json_encoders = {
@@ -705,6 +717,9 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
     html_fulltext_url = html_extract_fulltext_url(doc_url, doc, HTML_FULLTEXT_PATTERNS)
     if html_fulltext_url:
         meta['html_fulltext_url'] = html_fulltext_url[0]
+    component_url = html_extract_fulltext_url(doc_url, doc, COMPONENT_FULLTEXT_PATTERNS)
+    if component_url:
+        meta['component_url'] = component_url[0]
 
     # TODO: replace with clean_doi() et al
     if meta.get('doi') and meta.get('doi').startswith('doi:'):
