@@ -37,7 +37,7 @@ def run():
         ia.search_items(
             query="collection:{} mediatype:web".format(collection)))
 
-    if len(item_list) is 0:
+    if len(item_list) == 0:
         print("No items found, bailing")
         sys.exit(-1)
 
