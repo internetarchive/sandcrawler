@@ -4,10 +4,9 @@ COPY (
     LEFT JOIN ingest_file_result ON ingest_file_result.base_url = ingest_request.base_url
     WHERE ingest_request.ingest_type = 'pdf'
         AND ingest_file_result.hit = false
-        AND ingest_request.created < NOW() - '8 hour'::INTERVAL
-        AND ingest_request.created > NOW() - '8 day'::INTERVAL
-        AND (ingest_request.ingest_request_source = 'fatcat-changelog'
-             OR ingest_request.ingest_request_source = 'fatcat-ingest')
+        AND ingest_request.created < NOW() - '2 hour'::INTERVAL
+        AND ingest_request.created > NOW() - '31 day'::INTERVAL
+        AND ingest_request.ingest_request_source = 'savepapernow-web'
         AND (
             ingest_file_result.status like 'spn2-%'
             -- OR ingest_file_result.status like 'cdx-error'
@@ -23,9 +22,4 @@ COPY (
         AND ingest_file_result.status != 'spn2-error:too-many-redirects'
         AND ingest_file_result.status != 'spn2-error:network-authentication-required'
         AND ingest_file_result.status != 'spn2-error:unknown'
-) TO '/srv/sandcrawler/tasks/reingest_weekly_current.rows.json';
-
--- bulk re-tries would be:
---      AND (ingest_request.ingest_request_source != 'fatcat-changelog'
---           AND ingest_request.ingest_request_source != 'fatcat-ingest')
-
+) TO '/srv/sandcrawler/tasks/reingest_spn.rows.json';
