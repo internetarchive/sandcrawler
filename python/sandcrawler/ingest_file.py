@@ -25,6 +25,8 @@ from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.xml import xml_reserialize
 
+from sandcrawler.platforms.generic import DirectFileHelper
+
 
 MAX_BODY_SIZE_BYTES = 128*1024*1024
 
@@ -520,6 +522,9 @@ class IngestFileWorker(SandcrawlerWorker):
         return True
 
     def process(self, request: dict, key: Any = None) -> dict:
+        return self.process_file(request, key=key)
+
+    def process_file(self, request: dict, key: Any = None) -> dict:
 
         # old backwards compatibility
         if request.get('ingest_type') == 'file':

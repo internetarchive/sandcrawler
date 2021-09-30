@@ -5,7 +5,8 @@ import json
 import argparse
 
 from http.server import HTTPServer
-from sandcrawler.ingest import IngestFileRequestHandler, IngestFileWorker
+from sandcrawler.ingest_file import IngestFileRequestHandler, IngestFileWorker
+from sandcrawler.ingest_fileset import IngestFilesetWorker
 
 
 def run_single_ingest(args):
@@ -17,23 +18,34 @@ def run_single_ingest(args):
     )
     if args.force_recrawl:
         request['force_recrawl'] = True
-    ingester = IngestFileWorker(
-        try_spn2=not args.no_spn2,
-        html_quick_mode=args.html_quick_mode,
-    )
+    if request['ingest_type'] in ['dataset',]:
+        ingester = IngestFilesetWorker(
+            try_spn2=not args.no_spn2,
+        )
+    else:
+        ingester = IngestFileWorker(
+            try_spn2=not args.no_spn2,
+            html_quick_mode=args.html_quick_mode,
+        )
     result = ingester.process(request)
     print(json.dumps(result, sort_keys=True))
     return result
 
 def run_requests(args):
     # TODO: switch to using JsonLinePusher
-    ingester = IngestFileWorker(
+    file_worker = IngestFileWorker(
         try_spn2=not args.no_spn2,
         html_quick_mode=args.html_quick_mode,
     )
+    fileset_worker = IngestFilesetWorker(
+        try_spn2=not args.no_spn2,
+    )
     for l in args.json_file:
         request = json.loads(l.strip())
-        result = ingester.process(request)
+        if request['ingest_type'] in ['dataset',]:
+            result = fileset_worker.process(request)
+        else:
+            result = file_worker.process(request)
         print(json.dumps(result, sort_keys=True))
 
 def run_api(args):
@@ -48,7 +60,7 @@ def main():
     subparsers = parser.add_subparsers()
 
     sub_single= subparsers.add_parser('single',
-        help="ingests a single file URL")
+        help="ingests a single base URL")
     sub_single.set_defaults(func=run_single_ingest)
     sub_single.add_argument('--release-id',
         help="(optional) existing release ident to match to")
