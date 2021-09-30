@@ -204,9 +204,12 @@ def run_ingest_file(args):
     if args.bulk:
         consume_group = "sandcrawler-{}-ingest-file-bulk".format(args.env)
         consume_topic = "sandcrawler-{}.ingest-file-requests-bulk".format(args.env)
+    elif args.priority:
+        consume_group = "sandcrawler-{}-ingest-file-priority".format(args.env)
+        consume_topic = "sandcrawler-{}.ingest-file-requests-priority".format(args.env)
     else:
         consume_group = "sandcrawler-{}-ingest-file".format(args.env)
-        consume_topic = "sandcrawler-{}.ingest-file-requests".format(args.env)
+        consume_topic = "sandcrawler-{}.ingest-file-requests-daily".format(args.env)
     produce_topic = "sandcrawler-{}.ingest-file-results".format(args.env)
     grobid_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
     pdftext_topic = "sandcrawler-{}.pdf-text".format(args.env)
@@ -353,6 +356,9 @@ def main():
     sub_ingest_file.add_argument('--bulk',
         action='store_true',
         help="consume from bulk kafka topic (eg, for ingest backfill)")
+    sub_ingest_file.add_argument('--priority',
+        action='store_true',
+        help="consume from priority kafka topic (eg, for SPN requests)")
     sub_ingest_file.set_defaults(func=run_ingest_file)
 
     sub_persist_ingest_file = subparsers.add_parser('persist-ingest-file',
