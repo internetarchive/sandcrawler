@@ -297,6 +297,7 @@ class CdxApiClient:
                 int(0 - (r.status_code or 999)),
                 int(r.mimetype == best_mimetype),
                 int(r.mimetype != "warc/revisit"),
+                int(r.datetime[:6]),
                 int('/' in r.warc_path),
                 int(r.datetime),
             )
