@@ -64,7 +64,7 @@ class IngestFileWorker(SandcrawlerWorker):
             self.wayback_client = WaybackClient()
         self.spn_client = kwargs.get('spn_client')
         if not self.spn_client:
-            self.spn_client = SavePageNowClient(kwargs.get('spn_cdx_retry_sec', 9.0))
+            self.spn_client = SavePageNowClient(spn_cdx_retry_sec=kwargs.get('spn_cdx_retry_sec', 9.0))
         self.grobid_client = kwargs.get('grobid_client')
         if not self.grobid_client:
             self.grobid_client = GrobidClient()
