@@ -201,13 +201,16 @@ def run_persist_pdftrio(args):
     pusher.run()
 
 def run_ingest_file(args):
+    spn_cdx_retry_sec = 9.0
     if args.bulk:
         consume_group = "sandcrawler-{}-ingest-file-bulk".format(args.env)
         consume_topic = "sandcrawler-{}.ingest-file-requests-bulk".format(args.env)
     elif args.priority:
+        spn_cdx_retry_sec = 45.0
         consume_group = "sandcrawler-{}-ingest-file-priority".format(args.env)
         consume_topic = "sandcrawler-{}.ingest-file-requests-priority".format(args.env)
     else:
+        spn_cdx_retry_sec = 1.0
         consume_group = "sandcrawler-{}-ingest-file".format(args.env)
         consume_topic = "sandcrawler-{}.ingest-file-requests-daily".format(args.env)
     produce_topic = "sandcrawler-{}.ingest-file-results".format(args.env)
@@ -253,6 +256,7 @@ def run_ingest_file(args):
         htmlteixml_sink=htmlteixml_sink,
         # don't SPNv2 for --bulk backfill
         try_spn2=not args.bulk,
+        spn_cdx_retry_sec=spn_cdx_retry_sec,
     )
     pusher = KafkaJsonPusher(
         worker=worker,

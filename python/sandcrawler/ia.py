@@ -805,6 +805,8 @@ class SavePageNowClient:
         self.poll_count = 60
         self.poll_seconds = 3.0
 
+        self.spn_cdx_retry_sec = kwargs.get('spn_cdx_retry_sec', 9.0)
+
     def save_url_now_v2(self, request_url, force_simple_get=0, capture_outlinks=0):
         """
         Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
@@ -1023,7 +1025,7 @@ class SavePageNowClient:
                     url=spn_result.terminal_url,
                     datetime=spn_result.terminal_dt,
                     filter_status_code=filter_status_code,
-                    retry_sleep=9.0,
+                    retry_sleep=self.spn_cdx_retry_sec,
                 )
                 # sometimes there are fuzzy http/https self-redirects with the
                 # same SURT; try to work around that
@@ -1032,7 +1034,7 @@ class SavePageNowClient:
                         url=spn_result.terminal_url,
                         datetime=spn_result.terminal_dt,
                         filter_status_code=200,
-                        retry_sleep=9.0,
+                        retry_sleep=self.spn_cdx_retry_sec,
                     )
             except KeyError as ke:
                 print("  CDX KeyError: {}".format(ke), file=sys.stderr)
