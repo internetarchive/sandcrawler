@@ -389,16 +389,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 scope=html_scope,
                 platform=html_platform,
             )
-        elif html_scope == 'unknown':
-            html_body.pop("tei_xml", None)
-            return dict(
-                status="unknown-scope",
-                html_biblio=html_biblio_dict,
-                scope=html_scope,
-                platform=html_platform,
-                html_body=html_body,
-            )
-        elif html_scope not in ('article-fulltext',):
+        elif html_scope not in ('article-fulltext','unknown',):
             html_body.pop("tei_xml", None)
             return dict(
                 status="wrong-scope",
@@ -461,13 +452,16 @@ class IngestFileWorker(SandcrawlerWorker):
             partial_result['error_message'] = str(e)[:1600]
             return partial_result
 
-        return dict(
+        info = dict(
             html_body=html_body,
             html_biblio=html_biblio_dict,
             scope=html_scope,
             platform=html_platform,
             html_resources=[json.loads(r.json(exclude_none=True)) for r in full_resources],
         )
+        if html_scope == 'unknown':
+            info['status'] = 'unknown-scope'
+        return info
 
     def timeout_response(self, task: dict) -> dict:
         print("[TIMEOUT]", file=sys.stderr)
