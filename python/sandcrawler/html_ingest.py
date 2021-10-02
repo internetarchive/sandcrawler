@@ -168,7 +168,7 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         file_meta = gen_file_metadata(wayback_resp.body, allow_empty=True)
         if file_meta['sha1hex'] != wayback_resp.cdx.sha1hex:
-            raise WaybackContentError("wayback payload sha1hex mismatch: {wayback_resp.cdx.url}")
+            raise WaybackContentError(f"wayback payload sha1hex mismatch: {wayback_resp.cdx.url}")
         full.append(WebResource(
             surt=wayback_resp.cdx.surt,
             timestamp=parse_cdx_datetime(wayback_resp.cdx.datetime),
