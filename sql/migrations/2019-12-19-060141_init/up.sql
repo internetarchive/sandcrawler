@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS ingest_file_result (
 
     updated                 TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     hit                     BOOLEAN NOT NULL,
-    status                  TEXT CHECK (octet_length(terminal_url) >= 1),
+    status                  TEXT CHECK (octet_length(status) >= 1),
     terminal_url            TEXT CHECK (octet_length(terminal_url) >= 1),
     terminal_dt             TEXT CHECK (octet_length(terminal_dt) = 14),
     terminal_status_code    INT,
