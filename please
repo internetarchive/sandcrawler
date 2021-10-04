@@ -487,6 +487,23 @@ def run_dumpungrobided(args):
             env=args.env)
     subprocess.call(cmd, shell=True)
 
+def run_sbackfill(args):
+    if args.rebuild:
+        rebuild_scalding()
+    print("Starting scalding backfill job...")
+    cmd = """hadoop jar \
+        scalding/target/scala-2.11/sandcrawler-assembly-0.2.0-SNAPSHOT.jar \
+        com.twitter.scalding.Tool sandcrawler.CdxBackfillJob \
+        --hdfs \
+        --app.conf.path scalding/ia_cluster.conf \
+        --hbase-table wbgrp-journal-extract-0-{env} \
+        --zookeeper-hosts {zookeeper_hosts} \
+        --cdx-input-path {input_cdx}""".format(
+            input_cdx=args.input_cdx,
+            zookeeper_hosts=ZOOKEEPER_HOSTS,
+            env=args.env)
+    subprocess.call(cmd, shell=True)
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -504,6 +521,11 @@ def main():
     sub_backfill = subparsers.add_parser('backfill')
     sub_backfill.set_defaults(func=run_backfill)
     sub_backfill.add_argument('input_cdx',
+        help="full HDFS path of CDX file to backfill")
+
+    sub_sbackfill = subparsers.add_parser('sbackfill')
+    sub_sbackfill.set_defaults(func=run_sbackfill)
+    sub_sbackfill.add_argument('input_cdx',
         help="full HDFS path of CDX file to backfill")
 
     sub_extract = subparsers.add_parser('extract')
