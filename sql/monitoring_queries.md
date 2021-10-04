@@ -168,3 +168,35 @@ Overall status, updated requests past 3 days:
     GROUP BY ingest_request.ingest_type, ingest_file_result.status
     ORDER BY COUNT(*) DESC;
 
+## savepapernow and fatcat-ingest recent status
+
+Specific recent ingests (for debugging):
+
+    -- for record layout: \x
+    SELECT
+        ingest_file_result.status as status,
+        ingest_request.ingest_type as ingest_type,
+        ingest_request.ingest_request_source as source,
+        ingest_request.link_source_id as source_id,
+        ingest_request.base_url as base_url,
+        ingest_file_result.terminal_dt as dt,
+        ingest_file_result.terminal_status_code as status_code,
+        ingest_file_result.terminal_sha1hex as sha1hex,
+        grobid.status as grobid_status
+    FROM ingest_file_result
+    LEFT JOIN ingest_request
+        ON ingest_file_result.ingest_type = ingest_request.ingest_type
+        AND ingest_file_result.base_url = ingest_request.base_url
+    LEFT JOIN grobid
+        ON ingest_file_result.terminal_sha1hex = grobid.sha1hex
+    WHERE
+        ingest_file_result.updated >= NOW() - '24 hour'::INTERVAL
+        -- AND ingest_request.ingest_type = 'pdf'
+        -- AND ingest_request.ingest_type = 'html'
+        AND (
+            ingest_request.ingest_request_source = 'savepapernow-web'
+            -- OR ingest_request.ingest_request_source = 'fatcat-ingest'
+        )
+    ORDER BY ingest_file_result.updated DESC
+    LIMIT 100;
+
