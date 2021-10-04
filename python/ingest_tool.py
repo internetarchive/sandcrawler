@@ -62,6 +62,9 @@ def main():
     sub_single= subparsers.add_parser('single',
         help="ingests a single base URL")
     sub_single.set_defaults(func=run_single_ingest)
+    sub_single.add_argument('ingest_type',
+        default="pdf",
+        help="type of ingest (pdf, html, etc)")
     sub_single.add_argument('--release-id',
         help="(optional) existing release ident to match to")
     sub_single.add_argument('--doi',
@@ -72,9 +75,6 @@ def main():
     sub_single.add_argument('--no-spn2',
         action='store_true',
         help="don't use live web (SPNv2)")
-    sub_single.add_argument('--ingest-type',
-        default="pdf",
-        help="type of ingest (pdf, html, etc)")
     sub_single.add_argument('--html-quick-mode',
         action='store_true',
         help="don't fetch individual sub-resources, just use CDX")
