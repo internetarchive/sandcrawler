@@ -12,13 +12,16 @@ from selectolax.parser import HTMLParser
 from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackContentError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult, fix_transfer_encoding, NoCaptureError
 from sandcrawler.misc import gen_file_metadata, clean_url, parse_cdx_datetime
 from sandcrawler.html import extract_fulltext_url
-from sandcrawler.html_ingest import fetch_html_resources, \
+from sandcrawler.ingest_html import fetch_html_resources, \
     quick_fetch_html_resources, html_guess_scope, html_extract_body_teixml, \
     WebResource, html_guess_platform
 
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
+from sandcrawler.ingest_file import IngestFileWorker
+from sandcrawler.fileset_platforms import DatasetPlatformHelper, DATASET_PLATFORM_HELPER_TABLE
+from sandcrawler.fileset_strategies import FilesetIngestStrategy, FILESET_STRATEGY_HELPER_TABLE
 
 
 MAX_BODY_SIZE_BYTES = 128*1024*1024
@@ -41,6 +44,8 @@ class IngestFilesetWorker(IngestFileWorker):
         super().__init__(sink=None, **kwargs)
 
         self.sink = sink
+        self.dataset_platform_helpers = DATASET_PLATFORM_HELPER_TABLE
+        self.dataset_strategy_archivers = FILESET_STRATEGY_HELPER_TABLE
 
 
     def check_existing_ingest(self, ingest_type: str, base_url: str) -> Optional[dict]:
@@ -84,20 +89,16 @@ class IngestFilesetWorker(IngestFileWorker):
 
         force_recrawl = bool(request.get('force_recrawl', False))
 
-        for block in self.base_url_blocklist:
-            if block in base_url:
-                print("[SKIP {:>6}] {}".format(ingest_type, base_url), file=sys.stderr)
-                return dict(request=request, hit=False, status="skip-url-blocklist")
-
         print("[INGEST {:>6}] {}".format(ingest_type, base_url), file=sys.stderr)
 
-        # TODO
+        # TODO: "existing" check for new fileset ingest result table
         #existing = self.check_existing_ingest(ingest_type, base_url)
         #if existing:
         #    return self.process_existing(request, existing)
 
         result: Dict[str, Any] = dict(request=request, hit=False)
-        hops = [base_url]
+        result['hops'] = [base_url]
+        next_url = base_url
 
         # 1. Determine `platform`, which may involve resolving redirects and crawling a landing page.
 
@@ -105,12 +106,15 @@ class IngestFilesetWorker(IngestFileWorker):
 
         # check against blocklist
         for block in self.base_url_blocklist:
+            # XXX: hack to not skip archive.org content
+            if 'archive.org' in block:
+                continue
             if block in next_url:
                 result['status'] = "skip-url-blocklist"
                 return result
 
         try:
-            resource = self.find_resource(next_url, best_mimetype, force_recrawl=force_recrawl)
+            resource = self.find_resource(next_url, force_recrawl=force_recrawl)
         except SavePageNowError as e:
             result['status'] = 'spn2-error'
             result['error_message'] = str(e)[:1600]
@@ -134,109 +138,111 @@ class IngestFilesetWorker(IngestFileWorker):
             result['error_message'] = str(e)[:1600]
             return result
         except NotImplementedError as e:
-            result['status'] = 'not-implemented'
-            result['error_message'] = str(e)[:1600]
-            return result
+            #result['status'] = 'not-implemented'
+            #result['error_message'] = str(e)[:1600]
+            #return result
+            resource = None
 
-        assert resource
-
-        if resource.terminal_url:
-            result['terminal'] = {
-                "terminal_url": resource.terminal_url,
-                "terminal_dt": resource.terminal_dt,
-                "terminal_status_code": resource.terminal_status_code,
-            }
-            if resource.terminal_url not in result['hops']:
-                result['hops'].append(resource.terminal_url)
-
-        if not resource.hit:
-            result['status'] = resource.status
-            return result
-
-        if resource.terminal_url:
-            for pattern in self.base_url_blocklist:
-                if pattern in resource.terminal_url:
-                    result['status'] = 'skip-url-blocklist'
-                    return result
-
-        if resource.terminal_url:
-            for pattern in self.cookie_blocklist:
-                if pattern in resource.terminal_url:
-                    result['status'] = 'blocked-cookie'
-                    return result
-
-        if not resource.body:
-            result['status'] = 'null-body'
-            return result
-
-        if len(resource.body) > MAX_BODY_SIZE_BYTES:
-            result['status'] = 'body-too-large'
-            return result
-
-        file_meta = gen_file_metadata(resource.body)
-        try:
-            file_meta, resource = fix_transfer_encoding(file_meta, resource)
-        except Exception as e:
-            result['status'] = 'bad-gzip-encoding'
-            result['error_message'] = str(e)
-            return result
-
-        if not resource.body or file_meta['size_bytes'] == 0:
-            result['status'] = 'null-body'
-            return result
-
-        # here we split based on ingest type to try and extract a next hop
-        html_ish_resource = bool(
-            "html" in file_meta['mimetype']
-            or "xhtml" in file_meta['mimetype'] # matches "application/xhtml+xml"
-            or "application/xml" in file_meta['mimetype']
-            or "text/xml" in file_meta['mimetype']
-        )
         html_biblio = None
-        html_doc = None
-        if html_ish_resource and resource.body:
+        if resource:
+            if resource.terminal_url:
+                result['terminal'] = {
+                    "terminal_url": resource.terminal_url,
+                    "terminal_dt": resource.terminal_dt,
+                    "terminal_status_code": resource.terminal_status_code,
+                }
+                if resource.terminal_url not in result['hops']:
+                    result['hops'].append(resource.terminal_url)
+
+            if not resource.hit:
+                result['status'] = resource.status
+                return result
+
+            if resource.terminal_url:
+                for pattern in self.base_url_blocklist:
+                    if pattern in resource.terminal_url:
+                        result['status'] = 'skip-url-blocklist'
+                        return result
+
+            if resource.terminal_url:
+                for pattern in self.cookie_blocklist:
+                    if pattern in resource.terminal_url:
+                        result['status'] = 'blocked-cookie'
+                        return result
+
+            if not resource.body:
+                result['status'] = 'null-body'
+                return result
+
+            if len(resource.body) > MAX_BODY_SIZE_BYTES:
+                result['status'] = 'body-too-large'
+                return result
+
+            file_meta = gen_file_metadata(resource.body)
             try:
-                html_doc = HTMLParser(resource.body)
-                html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
-                if html_biblio:
-                    if not 'html_biblio' in result or html_biblio.title:
-                        result['html_biblio'] = json.loads(html_biblio.json(exclude_none=True))
-                        #print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
-            except ValueError:
+                file_meta, resource = fix_transfer_encoding(file_meta, resource)
+            except Exception as e:
+                result['status'] = 'bad-gzip-encoding'
+                result['error_message'] = str(e)
+                return result
+
+            if not resource.body or file_meta['size_bytes'] == 0:
+                result['status'] = 'null-body'
+                return result
+
+            # here we split based on ingest type to try and extract a next hop
+            html_ish_resource = bool(
+                "html" in file_meta['mimetype']
+                or "xhtml" in file_meta['mimetype'] # matches "application/xhtml+xml"
+                or "application/xml" in file_meta['mimetype']
+                or "text/xml" in file_meta['mimetype']
+            )
+            html_biblio = None
+            html_doc = None
+            if html_ish_resource and resource.body:
+                try:
+                    html_doc = HTMLParser(resource.body)
+                    html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
+                    if html_biblio:
+                        if not 'html_biblio' in result or html_biblio.title:
+                            result['html_biblio'] = json.loads(html_biblio.json(exclude_none=True))
+                            #print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
+                except ValueError:
+                    pass
+
+            # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
+            assert resource
+            assert resource.hit == True
+            assert resource.terminal_status_code in (200, 226)
+
+            if resource.terminal_url:
+                result['terminal'] = {
+                    "terminal_url": resource.terminal_url,
+                    "terminal_dt": resource.terminal_dt,
+                    "terminal_status_code": resource.terminal_status_code,
+                    "terminal_sha1hex": file_meta['sha1hex'],
+                }
+
+            result['file_meta'] = file_meta
+            result['cdx'] = cdx_to_dict(resource.cdx)
+            if resource.revisit_cdx:
+                result['revisit_cdx'] = cdx_to_dict(resource.revisit_cdx)
+
+            if ingest_type == "pdf":
+                if file_meta['mimetype'] != "application/pdf":
+                    result['status'] = "wrong-mimetype"  # formerly: "other-mimetype"
+                    return result
+            elif ingest_type == "xml":
+                if file_meta['mimetype'] not in ("application/xml", "text/xml", "application/jats+xml"):
+                    result['status'] = "wrong-mimetype"
+                    return result
+            elif ingest_type == "html":
+                if file_meta['mimetype'] not in ("text/html", "application/xhtml+xml"):
+                    result['status'] = "wrong-mimetype"
+                    return result
+            else:
+                #raise NotImplementedError()
                 pass
-
-        # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
-        assert resource
-        assert resource.hit == True
-        assert resource.terminal_status_code in (200, 226)
-
-        if resource.terminal_url:
-            result['terminal'] = {
-                "terminal_url": resource.terminal_url,
-                "terminal_dt": resource.terminal_dt,
-                "terminal_status_code": resource.terminal_status_code,
-                "terminal_sha1hex": file_meta['sha1hex'],
-            }
-
-        result['file_meta'] = file_meta
-        result['cdx'] = cdx_to_dict(resource.cdx)
-        if resource.revisit_cdx:
-            result['revisit_cdx'] = cdx_to_dict(resource.revisit_cdx)
-
-        if ingest_type == "pdf":
-            if file_meta['mimetype'] != "application/pdf":
-                result['status'] = "wrong-mimetype"  # formerly: "other-mimetype"
-                return result
-        elif ingest_type == "xml":
-            if file_meta['mimetype'] not in ("application/xml", "text/xml", "application/jats+xml"):
-                result['status'] = "wrong-mimetype"
-                return result
-        elif ingest_type == "html":
-            if file_meta['mimetype'] not in ("text/html", "application/xhtml+xml"):
-                result['status'] = "wrong-mimetype"
-                return result
-        else:
-            raise NotImplementedError()
 
         ### END COPYPASTA ###
 
@@ -252,11 +258,15 @@ class IngestFilesetWorker(IngestFileWorker):
             return result
 
         # 2. Use platform-specific methods to fetch manifest metadata and decide on an `ingest_strategy`.
-        dataset_meta = platform_helper.process_request(request, resource.terminal_url, html_biblio)
+        terminal_url = base_url
+        if resource:
+            terminal_url = resource.terminal_url
+        dataset_meta = platform_helper.process_request(request, terminal_url, html_biblio)
+        print(dataset_meta, file=sys.stderr)
         platform = dataset_meta.platform_name
-        result['platform'] = dataset_meta.platform
+        result['platform'] = dataset_meta.platform_name
         result['platform_id'] = dataset_meta.platform_id
-        result['item_name'] = dataset_meta.item_name
+        result['item_name'] = dataset_meta.archiveorg_item_name
         if not dataset_meta.manifest:
             result['status'] = 'no-manifest'
             return result
@@ -278,11 +288,11 @@ class IngestFilesetWorker(IngestFileWorker):
 
         # 4. Summarize status and return structured result metadata.
         result['status'] = archive_result.status
-        result['manifest'] = archive_result.manifest
+        result['manifest'] = [m.dict() for m in archive_result.manifest]
         result['file_count'] = len(archive_result.manifest) or None
         result['total_size'] = sum([m.size for m in archive_result.manifest if m.size]) or None
 
-        if result['status'] == 'success':
+        if result['status'].startswith('success'):
             result['hit'] = True
             print("[SUCCESS {:>5}] file_count={} total_size={}".format(
                     ingest_type,
