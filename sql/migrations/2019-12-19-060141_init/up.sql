@@ -165,6 +165,44 @@ CREATE TABLE IF NOT EXISTS ingest_file_result (
 CREATE INDEX ingest_file_result_terminal_url_idx ON ingest_file_result(terminal_url);
 CREATE INDEX ingest_file_result_terminal_sha1hex_idx ON ingest_file_result(terminal_sha1hex);
 
+CREATE TABLE IF NOT EXISTS ingest_fileset_result (
+    ingest_type             TEXT NOT NULL CHECK (octet_length(ingest_type) >= 1),
+    base_url                TEXT NOT NULL CHECK (octet_length(base_url) >= 1),
+    updated                 TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    hit                     BOOLEAN NOT NULL,
+    status                  TEXT CHECK (octet_length(status) >= 1),
+
+    terminal_url            TEXT CHECK (octet_length(terminal_url) >= 1),
+    terminal_dt             TEXT CHECK (octet_length(terminal_dt) = 14),
+    terminal_status_code    INT,
+    terminal_sha1hex        TEXT CHECK (octet_length(terminal_sha1hex) = 40),
+
+    platform                TEXT CHECK (octet_length(platform) >= 1),
+    platform_id             TEXT CHECK (octet_length(platform_id) >= 1),
+    ingest_strategy         TEXT CHECK (octet_length(ingest_strategy) >= 1),
+    total_size              BIGINT,
+    file_count              INT,
+    item_name               TEXT CHECK (octet_length(item_name) >= 1),
+    item_bundle_path        TEXT CHECK (octet_length(item_path_bundle) >= 1),
+
+    manifest                JSONB,
+    -- list, similar to fatcat fileset manifest, plus extra:
+    --   status (str)
+    --   path (str)
+    --   size (int)
+    --   md5 (str)
+    --   sha1 (str)
+    --   sha256 (str)
+    --   mimetype (str)
+    --   platform_url (str)
+    --   terminal_url (str)
+    --   terminal_dt (str)
+    --   extra (dict)
+
+    PRIMARY KEY (ingest_type, base_url)
+);
+CREATE INDEX ingest_fileset_result_terminal_url_idx ON ingest_fileset_result(terminal_url);
+
 CREATE TABLE IF NOT EXISTS shadow (
     shadow_corpus       TEXT NOT NULL CHECK (octet_length(shadow_corpus) >= 1),
     shadow_id           TEXT NOT NULL CHECK (octet_length(shadow_id) >= 1),
