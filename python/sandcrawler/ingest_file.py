@@ -17,15 +17,13 @@ from sandcrawler.grobid import GrobidClient
 from sandcrawler.pdfextract import process_pdf, PdfExtractResult
 from sandcrawler.misc import gen_file_metadata, clean_url, parse_cdx_datetime
 from sandcrawler.html import extract_fulltext_url
-from sandcrawler.html_ingest import fetch_html_resources, \
+from sandcrawler.ingest_html import fetch_html_resources, \
     quick_fetch_html_resources, html_guess_scope, html_extract_body_teixml, \
     WebResource, html_guess_platform
 from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
 from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.xml import xml_reserialize
-
-from sandcrawler.platforms.generic import DirectFileHelper
 
 
 MAX_BODY_SIZE_BYTES = 128*1024*1024

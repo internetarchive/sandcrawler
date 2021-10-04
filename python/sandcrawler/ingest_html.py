@@ -396,7 +396,7 @@ def main() -> None:
     """
     Run this command like:
 
-        python -m sandcrawler.html_ingest
+        python -m sandcrawler.ingest_html
     """
 
     parser = argparse.ArgumentParser(

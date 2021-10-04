@@ -2,7 +2,7 @@
 import datetime
 import pytest
 
-from sandcrawler.html_ingest import *
+from sandcrawler.ingest_html import *
 
 
 def test_html_extract_ojs3() -> None:

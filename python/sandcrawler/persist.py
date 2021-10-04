@@ -28,7 +28,7 @@ from sandcrawler.db import SandcrawlerPostgresClient
 from sandcrawler.minio import SandcrawlerMinioClient
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.pdfextract import PdfExtractResult
-from sandcrawler.html_ingest import HtmlMetaRow
+from sandcrawler.ingest_html import HtmlMetaRow
 
 
 class PersistCdxWorker(SandcrawlerWorker):
