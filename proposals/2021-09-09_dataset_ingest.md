@@ -183,3 +183,37 @@ Second implement fatcat importer and test locally and/or in QA.
 
 Lastly implement infrastructure, automation, and other "glue".
 
+
+## Example Entities
+
+### ArchiveOrg: CAT dataset
+
+<https://archive.org/details/CAT_DATASET>
+
+`release_36vy7s5gtba67fmyxlmijpsaui`
+
+###
+
+<https://archive.org/details/academictorrents_70e0794e2292fc051a13f05ea6f5b6c16f3d3635>
+
+doi:10.1371/journal.pone.0120448
+
+Single .rar file
+
+### Dataverse
+
+<https://dataverse.rsu.lv/dataset.xhtml?persistentId=doi:10.48510/FK2/IJO02B>
+
+Single excel file
+
+### Dataverse
+
+<https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/CLSFKX&version=1.1>
+
+doi:10.7910/DVN/CLSFKX
+
+Mulitple files; multiple versions?
+
+Single file inside:
+
+<https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/CLSFKX/XWEHBB>
