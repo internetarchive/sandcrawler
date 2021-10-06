@@ -44,7 +44,10 @@ def gen_file_metadata(blob: bytes, allow_empty: bool = False) -> dict:
     assert blob is not None
     if not allow_empty:
         assert blob
-    mimetype = magic.Magic(mime=True).from_buffer(blob)
+    if len(blob) < 1024*1024:
+        mimetype = magic.Magic(mime=True).from_buffer(blob)
+    else:
+        mimetype = magic.Magic(mime=True).from_buffer(blob[:(1024*1024)])
     if mimetype in ("application/xml", "text/xml"):
         # crude checks for XHTML or JATS XML, using only first 1 kB of file
         if b"<htm" in blob[:1024] and b'xmlns="http://www.w3.org/1999/xhtml"' in blob[:1024]:
@@ -60,6 +63,44 @@ def gen_file_metadata(blob: bytes, allow_empty: bool = False) -> dict:
         h.update(blob)
     return dict(
         size_bytes=len(blob),
+        sha1hex=hashes[0].hexdigest(),
+        sha256hex=hashes[1].hexdigest(),
+        md5hex=hashes[2].hexdigest(),
+        mimetype=mimetype,
+    )
+
+def gen_file_metadata_path(path: str, allow_empty: bool = False) -> dict:
+    """
+    Variant of gen_file_metadata() which works with files on local disk
+    """
+    assert path is not None
+    mimetype = magic.Magic(mime=True).from_file(path)
+    if mimetype in ("application/xml", "text/xml"):
+        with open(path, 'rb') as f:
+            blob = f.read(1024)
+            # crude checks for XHTML or JATS XML, using only first 1 kB of file
+            if b"<htm" in blob[:1024] and b'xmlns="http://www.w3.org/1999/xhtml"' in blob[:1024]:
+                mimetype = "application/xhtml+xml"
+            elif b"<article " in blob[:1024] and not b"<html" in blob[:1024]:
+                mimetype = "application/jats+xml"
+    hashes = [
+        hashlib.sha1(),
+        hashlib.sha256(),
+        hashlib.md5(),
+    ]
+    size_bytes = 0
+    with open(path, 'rb') as f:
+        while True:
+            chunk = f.read(1024*1024)
+            if not chunk:
+                break
+            size_bytes += len(chunk)
+            for h in hashes:
+                h.update(chunk)
+    if not allow_empty:
+        assert size_bytes > 0
+    return dict(
+        size_bytes=size_bytes,
         sha1hex=hashes[0].hexdigest(),
         sha256hex=hashes[1].hexdigest(),
         md5hex=hashes[2].hexdigest(),

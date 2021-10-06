@@ -1,7 +1,7 @@
 
 import pytest
 
-from sandcrawler import gen_file_metadata, b32_hex, parse_cdx_line, clean_url
+from sandcrawler import gen_file_metadata, gen_file_metadata_path,  b32_hex, parse_cdx_line, clean_url
 
 def test_gen_file_metadata():
     
@@ -25,6 +25,18 @@ def test_gen_file_metadata():
     fm = gen_file_metadata(b"asdf1234")
     assert fm['mimetype'] == 'text/plain'
     assert fm['size_bytes'] == 8
+
+def test_gen_file_metadata_path():
+    
+    # valid (but very small) PDF file
+    file_meta = gen_file_metadata_path('tests/files/dummy.pdf')
+    assert file_meta == {
+        'mimetype': 'application/pdf',
+        'md5hex': '2942bfabb3d05332b66eb128e0842cff',
+        'sha1hex': '90ffd2359008d82298821d16b21778c5c39aec36',
+        'sha256hex': '3df79d34abbca99308e79cb94461c1893582604d68329a41fd4bec1885e6adb4',
+        'size_bytes': 13264,
+    }
 
 def test_b32_hex():
 
