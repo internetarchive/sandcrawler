@@ -3,9 +3,11 @@ import sys
 import json
 import gzip
 import time
+import urllib.parse
 from collections import namedtuple
 from typing import Optional, Tuple, Any, Dict, List
 
+import requests
 import internetarchive
 
 from sandcrawler.html_metadata import BiblioMetadata
@@ -30,20 +32,159 @@ class DatasetPlatformHelper():
         """
         raise NotImplementedError()
 
-    def chose_strategy(self, DatasetPlatformItem) -> IngestStrategy:
-        raise NotImplementedError()
+    def chose_strategy(self, item: DatasetPlatformItem) -> IngestStrategy:
+        assert item.manifest
+        total_size = sum([m.size for m in item.manifest])
+        largest_size = max([m.size for m in item.manifest])
+        print(f"  total_size={total_size} largest_size={largest_size}", file=sys.stderr)
+        # XXX: while developing ArchiveorgFileset path
+        return IngestStrategy.ArchiveorgFileset
+        if len(item.manifest) == 1:
+            if total_size < 128*1024*1024: 
+                return IngestStrategy.WebFile
+            else:
+                return IngestStrategy.ArchiveorgFile
+        else:
+            if largest_size < 128*1024*1024 and total_size < 1*1024*1024*1024:
+                return IngestStrategy.WebFileset
+            else:
+                return IngestStrategy.ArchiveorgFileset
 
 
 class DataverseHelper(DatasetPlatformHelper):
 
     def __init__(self):
         self.platform_name = 'dataverse'
+        self.session = requests.Session()
+        self.dataverse_domain_allowlist = [
+            'dataverse.harvard.edu',
+            'data.lipi.go.id',
+        ]
 
     def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+        """
+        XXX: should match process_request() logic better
+        """
+
+        components = urllib.parse.urlparse(request['base_url'])
+        platform_domain = components.netloc.split(':')[0].lower()
+        params = urllib.parse.parse_qs(components.query)
+        platform_id = params.get('persistentId')
+
+        if not platform_domain in self.dataverse_domain_allowlist:
+            return False
+        if not platform_id:
+            return False
+
+        if html_biblio and 'dataverse' in html_biblio.publisher.lower():
+            return True
         return False
 
-    def chose_strategy(self, DatasetPlatformItem) -> IngestStrategy:
-        raise NotImplementedError()
+    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> DatasetPlatformItem:
+        """
+        Fetch platform-specific metadata for this request (eg, via API calls)
+
+
+        HTTP GET https://demo.dataverse.org/api/datasets/export?exporter=dataverse_json&persistentId=doi:10.5072/FK2/J8SJZB
+
+        """
+        # 1. extract domain, PID, and version from URL
+        components = urllib.parse.urlparse(request['base_url'])
+        platform_domain = components.netloc.split(':')[0].lower()
+        params = urllib.parse.parse_qs(components.query)
+        dataset_version = params.get('version')
+        platform_id = params.get('persistentId')
+        if not (platform_id and platform_id[0]):
+            raise ValueError("Expected a Dataverse persistentId in URL")
+        else:
+            platform_id = platform_id[0]
+
+        if not platform_domain in self.dataverse_domain_allowlist:
+            raise ValueError(f"unexpected dataverse domain: {platform_domain}")
+
+        # for both handle (hdl:) and DOI (doi:) identifiers, the norm is for
+        # dataverse persistetId is to be structured like:
+        # <prefix> / <shoulder> / <dataset-id> / <file-id>
+        if not (platform_id.startswith('doi:10.') or platform_id.startswith('hdl:')):
+            raise NotImplementedError(f"unsupported dataverse persistentId format: {platform_id}")
+        dataverse_type = None
+        if platform_id.count('/') == 2:
+            dataverse_type = 'dataset'
+        elif platform_id.count('/') == 3:
+            dataverse_type = 'file'
+        else:
+            raise NotImplementedError(f"unsupported dataverse persistentId format: {platform_id}")
+
+        if dataverse_type != 'dataset':
+            # XXX
+            raise NotImplementedError(f"only entire dataverse datasets can be archived with this tool")
+
+        # 1b. if we didn't get a version number from URL, fetch it from API
+        if not dataset_version:
+            obj = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}").json()
+            obj_latest = obj['data']['latestVersion']
+            dataset_version = f"{obj_latest['versionNumber']}.{obj_latest['versionMinorNumber']}"
+
+        # 2. API fetch
+        obj = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}&version={dataset_version}").json()
+
+        obj_latest= obj['data']['latestVersion']
+        assert dataset_version == f"{obj_latest['versionNumber']}.{obj_latest['versionMinorNumber']}"
+        assert platform_id == obj_latest['datasetPersistentId']
+
+        manifest = []
+        for row in obj_latest['files']:
+            df = row['dataFile']
+            df_persistent_id = df['persistentId']
+            platform_url = f"https://{platform_domain}/api/access/datafile/:persistentId/?persistentId={df_persistent_id}"
+            if df.get('originalFileName'):
+                platform_url += '&format=original'
+            manifest.append(FilesetManifestFile(
+                path=df.get('originalFileName') or df['filename'],
+                size=df.get('originalFileSize') or df['filesize'],
+                md5=df['md5'],
+                # NOTE: don't get: sha1, sha256
+                mimetype=df['contentType'],
+                platform_url=platform_url,
+                extra=dict(
+                    # file-level
+                    description=df.get('description'),
+                    version=df.get('version'),
+                ),
+            ))
+
+        platform_sub_id = platform_id.split('/')[-1]
+        archiveorg_item_name = f"{platform_domain}-{platform_sub_id}-v{dataset_version}"
+        archiveorg_item_meta = dict(
+            # XXX: collection=platform_domain,
+            collection="datasets",
+            date=obj_latest['releaseTime'].split('T')[0],
+            source=f"https://{platform_domain}/dataset.xhtml?persistentId={platform_id}&version={dataset_version}",
+        )
+        if platform_id.startswith('doi:10.'):
+            archiveorg_item_meta['doi'] = platform_id.replace('doi:', '')
+        for block in obj_latest['metadataBlocks']['citation']['fields']:
+            if block['typeName'] == 'title':
+                archiveorg_item_meta['title'] = block['value']
+            elif block['typeName'] == 'depositor':
+                archiveorg_item_meta['creator'] = block['value']
+            elif block['typeName'] == 'dsDescription':
+                archiveorg_item_meta['description'] = block['value'][0]['dsDescriptionValue']['value']
+
+        archiveorg_item_meta['description'] = archiveorg_item_meta.get('description', '') + '\n<br>\n' + obj_latest['termsOfUse']
+
+        return DatasetPlatformItem(
+            platform_name=self.platform_name,
+            platform_status='success',
+            manifest=manifest,
+            platform_domain=platform_domain,
+            platform_id=platform_id,
+            archiveorg_item_name=archiveorg_item_name,
+            archiveorg_item_meta=archiveorg_item_meta,
+            web_bundle_url=f"https://{platform_domain}/api/access/dataset/:persistentId/?persistentId={platform_id}&format=original",
+            # TODO: web_base_url= (for GWB downloading, in lieu of platform_url on individual files)
+            extra=dict(version=dataset_version),
+        )
 
 
 class ArchiveOrgHelper(DatasetPlatformHelper):
@@ -174,7 +315,7 @@ class ArchiveOrgHelper(DatasetPlatformHelper):
             platform_domain='archive.org',
             platform_id=item_name,
             archiveorg_item_name=item_name,
-            archiveorg_collection=item_collection,
+            archiveorg_meta=dict(collection=item_collection),
         )
 
     def chose_strategy(self, item: DatasetPlatformItem) -> IngestStrategy:
@@ -185,7 +326,7 @@ class ArchiveOrgHelper(DatasetPlatformHelper):
         elif len(item.manifest) >= 1:
             return IngestStrategy.ArchiveorgFileset
         else:
-            raise NotImplementedError()
+            raise NotImplementedError("empty dataset")
 
 
 DATASET_PLATFORM_HELPER_TABLE = {

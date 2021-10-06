@@ -34,7 +34,7 @@ class DatasetPlatformItem(BaseModel):
     platform_domain: Optional[str]
     platform_id: Optional[str]
     archiveorg_item_name: Optional[str]
-    archiveorg_collection: Optional[str]
+    archiveorg_item_meta: Optional[dict]
     web_base_url: Optional[str]
     web_bundle_url: Optional[str]
 

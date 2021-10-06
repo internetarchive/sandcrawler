@@ -262,18 +262,20 @@ class IngestFilesetWorker(IngestFileWorker):
         if resource:
             terminal_url = resource.terminal_url
         dataset_meta = platform_helper.process_request(request, terminal_url, html_biblio)
-        print(dataset_meta, file=sys.stderr)
+        #print(dataset_meta, file=sys.stderr)
         platform = dataset_meta.platform_name
         result['platform'] = dataset_meta.platform_name
         result['platform_id'] = dataset_meta.platform_id
         result['item_name'] = dataset_meta.archiveorg_item_name
-        if not dataset_meta.manifest:
+        result['item_meta'] = dataset_meta.archiveorg_item_meta
+
+        if dataset_meta.manifest:
+            result['manifest'] = [m.dict() for m in dataset_meta.manifest]
+            result['file_count'] = len(dataset_meta.manifest)
+            result['total_size'] = sum([m.size for m in dataset_meta.manifest if m.size])
+        else:
             result['status'] = 'no-manifest'
             return result
-
-        result['manifest'] = dataset_meta.manifest or None
-        result['file_count'] = len(dataset_meta.manifest) or None
-        result['total_size'] = sum([m.size for m in dataset_meta.manifest if m.size]) or None
 
         ingest_strategy = platform_helper.chose_strategy(dataset_meta)
         result['ingest_strategy'] = ingest_strategy
