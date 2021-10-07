@@ -268,6 +268,14 @@ COMPONENT_FULLTEXT_PATTERNS: List[dict] = [
         "technique": "Active figure download link (zookeys)",
         "example_page": "https://zookeys.pensoft.net/article/38576/element/2/153/",
     },
+    {
+        "in_doc_url": "/file.xhtml?persistentId",
+        "in_fulltext_url": "/access/datafile/",
+        "selector": "div.form-group code",
+        "use_body": True,
+        "technique": "Dataverse 'download URL'",
+        "example_page": "https://data.lipi.go.id/file.xhtml?persistentId=hdl:20.500.12690/RIN/IDDOAH/BTNH25&version=1.0",
+    },
 ]
 
 # This is a database of matching patterns. Most of these discovered by hand,
@@ -667,23 +675,28 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict
         elem = doc.css_first(pattern['selector'])
         if not elem:
             continue
+        val = None
         if 'attr' in pattern:
             val = elem.attrs.get(pattern['attr'])
-            if not val:
+        elif pattern.get('use_body'):
+            val = elem.text()
+            if not '://' in val:
                 continue
-            val = urllib.parse.urljoin(doc_url, val)
-            assert val
-            if 'in_fulltext_url' in pattern:
-                if not pattern['in_fulltext_url'] in val:
-                    continue
-            for skip_pattern in FULLTEXT_URL_PATTERNS_SKIP:
-                if skip_pattern in val.lower():
-                    continue
-            if url_fuzzy_equal(doc_url, val):
-                # don't link to self, unless no other options
-                self_doc_url = (val, pattern.get('technique', 'unknown'))
+        if not val:
+            continue
+        val = urllib.parse.urljoin(doc_url, val)
+        assert val
+        if 'in_fulltext_url' in pattern:
+            if not pattern['in_fulltext_url'] in val:
                 continue
-            return (val, pattern.get('technique', 'unknown'))
+        for skip_pattern in FULLTEXT_URL_PATTERNS_SKIP:
+            if skip_pattern in val.lower():
+                continue
+        if url_fuzzy_equal(doc_url, val):
+            # don't link to self, unless no other options
+            self_doc_url = (val, pattern.get('technique', 'unknown'))
+            continue
+        return (val, pattern.get('technique', 'unknown'))
     if self_doc_url:
         print(f"  WARN: returning fulltext URL pointing to self", file=sys.stderr)
         return self_doc_url
@@ -694,6 +707,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
     meta: Any = dict()
     head = doc.css_first("head")
     if not head:
+        print(f"WARN: empty <head>? {doc_url}", file=sys.stderr)
         return None
 
     for field, patterns in HEAD_META_PATTERNS.items():

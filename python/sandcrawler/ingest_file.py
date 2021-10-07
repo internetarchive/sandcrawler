@@ -194,6 +194,10 @@ class IngestFileWorker(SandcrawlerWorker):
             "video/mpeg",
             "text/plain",
             "text/csv",
+            "text/x-r-source",              # dataverse
+            "text/tab-separated-values",    # dataverse
+            "text/x-rst",                   # dataverse
+            "application/x-rlang-transport", # dataverse
             "application/json",
             "application/xml",
             "application/pdf",
