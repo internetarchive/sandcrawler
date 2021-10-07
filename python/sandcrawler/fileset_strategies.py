@@ -82,6 +82,9 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
         if existing:
             return existing
 
+        if item.platform_name == 'archiveorg':
+            raise ValueError("should't download archive.org into itself")
+
         local_dir = self.working_dir + item.archiveorg_item_name
         assert local_dir.startswith('/')
         assert local_dir.count('/') > 2
@@ -193,7 +196,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
         self.try_spn2 = True
         self.spn_client = SavePageNowClient(spn_cdx_retry_sec=kwargs.get('spn_cdx_retry_sec', 9.0))
 
-        # XXX: this is copypasta
+        # XXX: this is copypasta, and also should be part of SPN client, not here
         self.spn2_simple_get_domains = [
             # direct PDF links
             "://arxiv.org/pdf/",

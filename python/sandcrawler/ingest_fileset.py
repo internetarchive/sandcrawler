@@ -263,7 +263,7 @@ class IngestFilesetWorker(IngestFileWorker):
         terminal_url = base_url
         if resource:
             terminal_url = resource.terminal_url
-        dataset_meta = platform_helper.process_request(request, terminal_url, html_biblio)
+        dataset_meta = platform_helper.process_request(request, resource, html_biblio)
         #print(dataset_meta, file=sys.stderr)
         platform = dataset_meta.platform_name
         result['platform'] = dataset_meta.platform_name

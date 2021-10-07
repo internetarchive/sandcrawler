@@ -62,11 +62,12 @@ class DataverseHelper(DatasetPlatformHelper):
         ]
 
     def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
-        """
-        XXX: should match process_request() logic better
-        """
+        if resource and resource.terminal_url:
+            url = resource.terminal_url
+        else:
+            url = request['base_url']
 
-        components = urllib.parse.urlparse(request['base_url'])
+        components = urllib.parse.urlparse(url)
         platform_domain = components.netloc.split(':')[0].lower()
         params = urllib.parse.parse_qs(components.query)
         platform_id = params.get('persistentId')
@@ -86,10 +87,15 @@ class DataverseHelper(DatasetPlatformHelper):
 
 
         HTTP GET https://demo.dataverse.org/api/datasets/export?exporter=dataverse_json&persistentId=doi:10.5072/FK2/J8SJZB
-
         """
+
+        if resource and resource.terminal_url:
+            url = resource.terminal_url
+        else:
+            url = request['base_url']
+
         # 1. extract domain, PID, and version from URL
-        components = urllib.parse.urlparse(request['base_url'])
+        components = urllib.parse.urlparse(url)
         platform_domain = components.netloc.split(':')[0].lower()
         params = urllib.parse.parse_qs(components.query)
         dataset_version = params.get('version')
@@ -256,52 +262,37 @@ class ArchiveOrgHelper(DatasetPlatformHelper):
                     return False
         return True
 
-    def parse_item_file(self, f: dict) -> FilesetManifestFile:
-        """
-        Takes an IA API file and turns it in to a fatcat fileset manifest file
-        """
-        assert f.name and f.sha1 and f.md5
-        assert f.name is not None
-        mf = {
-            'path': f.name,
-            'size': int(f.size),
-            'sha1': f.sha1,
-            'md5': f.md5,
-        }
-        # TODO: will disable this hard check eventually and replace with:
-        #mimetype = FORMAT_TO_MIMETYPE.get(f.format)
-        mimetype = self.FORMAT_TO_MIMETYPE[f.format]
-        if mimetype:
-            mf['extra'] = dict(mimetype=mimetype)
-        return mf
-
-
     def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+
+        if resource and resource.terminal_url:
+            url = resource.terminal_url
+        else:
+            url = request['base_url']
         patterns = [
             '://archive.org/details/',
             '://archive.org/download/',
         ]
         for p in patterns:
-            if p in request['base_url']:
+            if p in url:
                 return True
         return False
 
     def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> DatasetPlatformItem:
         """
         Fetch platform-specific metadata for this request (eg, via API calls)
-
-        XXX: add platform_url (for direct download)
         """
 
         base_url_split = request['base_url'].split('/')
         #print(base_url_split, file=sys.stderr)
-        assert len(base_url_split) == 5
+        assert len(base_url_split) in [5,6]
         assert base_url_split[0] in ['http:', 'https:']
         assert base_url_split[2] == 'archive.org'
         assert base_url_split[3] in ['details', 'download']
         item_name = base_url_split[4]
+        if len(base_url_split) == 6:
+            assert not base_url_split[5]
 
-        print(f"  archiveorg processing item={item_name}", file=sys.stderr)
+        #print(f"  archiveorg processing item={item_name}", file=sys.stderr)
         item = self.session.get_item(item_name)
         item_name = item.identifier
         item_collection = item.metadata['collection']
@@ -309,7 +300,20 @@ class ArchiveOrgHelper(DatasetPlatformHelper):
             item_collection = item_collection[0]
         assert item.metadata['mediatype'] not in ['collection', 'web']
         item_files = item.get_files(on_the_fly=False)
-        manifest = [self.parse_item_file(f) for f in item_files if self.want_item_file(f, item_name)]
+        item_files = [f for f in item_files if self.want_item_file(f, item_name)]
+        manifest = []
+        for f in item_files:
+            assert f.name and f.sha1 and f.md5
+            assert f.name is not None
+            mf = FilesetManifestFile(
+                path=f.name,
+                size=int(f.size),
+                sha1=f.sha1,
+                md5=f.md5,
+                mimetype=self.FORMAT_TO_MIMETYPE[f.format],
+                platform_url=f"https://archive.org/download/{item_name}/{f.name}",
+            )
+            manifest.append(mf)
 
         return DatasetPlatformItem(
             platform_name=self.platform_name,
@@ -322,6 +326,9 @@ class ArchiveOrgHelper(DatasetPlatformHelper):
         )
 
     def chose_strategy(self, item: DatasetPlatformItem) -> IngestStrategy:
+        """
+        Don't use default strategy picker; we are always doing an 'existing' in this case.
+        """
         if len(item.manifest) == 1:
             # NOTE: code flow does not support ArchiveorgFilesetBundle for the
             # case of, eg, a single zipfile in an archive.org item
