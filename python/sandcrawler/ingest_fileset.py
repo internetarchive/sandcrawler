@@ -246,6 +246,8 @@ class IngestFilesetWorker(IngestFileWorker):
 
         ### END COPYPASTA ###
 
+        # XXX: html_guess_platform()
+
         # determine platform
         platform_helper = None
         for (helper_name, helper) in self.dataset_platform_helpers.items():
@@ -279,6 +281,7 @@ class IngestFilesetWorker(IngestFileWorker):
 
         ingest_strategy = platform_helper.chose_strategy(dataset_meta)
         result['ingest_strategy'] = ingest_strategy
+        print(f"[PLATFORM {platform}] id={dataset_meta.platform_id} file_count={result['file_count']} total_size={result['total_size']} strategy={ingest_strategy}", file=sys.stderr)
 
         strategy_helper = self.dataset_strategy_archivers.get(ingest_strategy)
         if not strategy_helper:
@@ -296,16 +299,18 @@ class IngestFilesetWorker(IngestFileWorker):
 
         if result['status'].startswith('success'):
             result['hit'] = True
-            print("[SUCCESS {:>5}] file_count={} total_size={}".format(
+            print("[SUCCESS {:>5}] file_count={} total_size={} strategy={}".format(
                     ingest_type,
                     result['file_count'],
                     result['total_size'],
+                    ingest_strategy,
                 ), file=sys.stderr)
         else:
-            print("[FAIL    {:>5}] status={} file_count={} total_size={}".format(
+            print("[FAIL    {:>5}] status={} file_count={} total_size={} strategy={}".format(
                     ingest_type,
                     result['status'],
                     result['file_count'],
                     result['total_size'],
+                    ingest_strategy,
                 ), file=sys.stderr)
         return result

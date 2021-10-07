@@ -36,16 +36,16 @@ class DatasetPlatformHelper():
         assert item.manifest
         total_size = sum([m.size for m in item.manifest])
         largest_size = max([m.size for m in item.manifest])
-        print(f"  total_size={total_size} largest_size={largest_size}", file=sys.stderr)
+        #print(f"  total_size={total_size} largest_size={largest_size}", file=sys.stderr)
         # XXX: while developing ArchiveorgFileset path
-        return IngestStrategy.ArchiveorgFileset
+        #return IngestStrategy.ArchiveorgFileset
         if len(item.manifest) == 1:
-            if total_size < 128*1024*1024: 
+            if total_size < 64*1024*1024: 
                 return IngestStrategy.WebFile
             else:
                 return IngestStrategy.ArchiveorgFile
         else:
-            if largest_size < 128*1024*1024 and total_size < 1*1024*1024*1024:
+            if largest_size < 64*1024*1024 and total_size < 128*1024*1024*1024:
                 return IngestStrategy.WebFileset
             else:
                 return IngestStrategy.ArchiveorgFileset
@@ -139,6 +139,13 @@ class DataverseHelper(DatasetPlatformHelper):
             platform_url = f"https://{platform_domain}/api/access/datafile/:persistentId/?persistentId={df_persistent_id}"
             if df.get('originalFileName'):
                 platform_url += '&format=original'
+
+            extra = dict()
+            # TODO: always save the version field?
+            if row.get('version') != 1:
+                extra['version'] = row['version']
+            if 'description' in df:
+                extra['description'] = df['description']
             manifest.append(FilesetManifestFile(
                 path=df.get('originalFileName') or df['filename'],
                 size=df.get('originalFileSize') or df['filesize'],
@@ -146,11 +153,7 @@ class DataverseHelper(DatasetPlatformHelper):
                 # NOTE: don't get: sha1, sha256
                 mimetype=df['contentType'],
                 platform_url=platform_url,
-                extra=dict(
-                    # file-level
-                    description=df.get('description'),
-                    version=df.get('version'),
-                ),
+                extra=extra or None,
             ))
 
         platform_sub_id = platform_id.split('/')[-1]

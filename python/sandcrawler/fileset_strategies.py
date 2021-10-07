@@ -11,7 +11,7 @@ from typing import Optional, Tuple, Any, Dict, List
 import internetarchive
 
 from sandcrawler.html_metadata import BiblioMetadata
-from sandcrawler.ia import ResourceResult
+from sandcrawler.ia import ResourceResult, WaybackClient, SavePageNowClient, fix_transfer_encoding
 from sandcrawler.fileset_types import IngestStrategy, FilesetManifestFile, DatasetPlatformItem, ArchiveStrategyResult
 from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path
 
@@ -185,8 +185,109 @@ class ArchiveorgFileStrategy(ArchiveorgFilesetStrategy):
         super().__init__()
         self.ingest_strategy = IngestStrategy.ArchiveorgFileset
 
+class WebFilesetStrategy(FilesetIngestStrategy):
+
+    def __init__(self, **kwargs):
+        self.ingest_strategy = IngestStrategy.WebFileset
+        self.wayback_client = WaybackClient()
+        self.try_spn2 = True
+        self.spn_client = SavePageNowClient(spn_cdx_retry_sec=kwargs.get('spn_cdx_retry_sec', 9.0))
+
+        # XXX: this is copypasta
+        self.spn2_simple_get_domains = [
+            # direct PDF links
+            "://arxiv.org/pdf/",
+            "://europepmc.org/backend/ptpmcrender.fcgi",
+            "://pdfs.semanticscholar.org/",
+            "://res.mdpi.com/",
+
+            # platform sites
+            "://zenodo.org/",
+            "://figshare.org/",
+            "://springernature.figshare.com/",
+
+            # popular simple cloud storage or direct links
+            "://s3-eu-west-1.amazonaws.com/",
+        ]
+
+    def process(self, item: DatasetPlatformItem) -> ArchiveStrategyResult:
+        """
+        For each manifest item individually, run 'fetch_resource' and record stats, terminal_url, terminal_dt
+
+        TODO:
+        - full fetch_resource() method which can do SPN requests
+        """
+
+        for m in item.manifest:
+            fetch_url = m.platform_url
+            if not fetch_url:
+                raise NotImplementedError("require 'platform_url' for each file when doing Web fetching")
+
+            via = "wayback"
+            resource = self.wayback_client.lookup_resource(fetch_url, m.mimetype)
+
+
+            if self.try_spn2 and (resource == None or (resource and resource.status == 'no-capture')):
+                via = "spn2"
+                force_simple_get = 0
+                for domain in self.spn2_simple_get_domains:
+                    if domain in fetch_url:
+                        force_simple_get = 1
+                        break
+                resource = self.spn_client.crawl_resource(fetch_url, self.wayback_client, force_simple_get=force_simple_get)
+
+            print("[FETCH {:>6}] {}  {}".format(
+                    via,
+                    (resource and resource.status),
+                    (resource and resource.terminal_url) or url),
+                file=sys.stderr)
+
+            m.terminal_url = resource.terminal_url
+            m.terminal_dt = resource.terminal_dt
+            m.status = resource.status
+
+            if resource.status != 'success':
+                continue
+            else:
+                assert resource.terminal_status_code == 200
+
+            file_meta = gen_file_metadata(resource.body)
+            file_meta, html_resource = fix_transfer_encoding(file_meta, resource)
+
+            if file_meta['size_bytes'] != m.size or (m.md5 and m.md5 != file_meta['md5hex']) or (m.sha1 and m.sha1 != file_meta['sha1hex']):
+                m.status = 'mismatch'
+                continue
+
+            m.md5 = m.md5 or file_meta['md5hex']
+            m.sha1 = m.sha1 or file_meta['md5hex']
+            m.sha256 = m.sha256 or file_meta['sha256hex']
+            m.mimetype = m.mimetype or file_meta['mimetype']
+
+        overall_status = "success"
+        for m in item.manifest:
+            if m.status != 'success':
+                overall_status = m.status
+                break
+        if not item.manifest:
+            overall_status = 'empty-manifest'
+
+        result = ArchiveStrategyResult(
+            ingest_strategy=self.ingest_strategy,
+            status=overall_status,
+            manifest=item.manifest,
+        )
+        return result
+
+class WebFileStrategy(WebFilesetStrategy):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.ingest_strategy = IngestStrategy.WebFile
+
 
 FILESET_STRATEGY_HELPER_TABLE = {
     IngestStrategy.ArchiveorgFileset: ArchiveorgFilesetStrategy(),
     IngestStrategy.ArchiveorgFile: ArchiveorgFileStrategy(),
+    IngestStrategy.WebFileset: WebFilesetStrategy(),
+    IngestStrategy.WebFile: WebFileStrategy(),
 }
