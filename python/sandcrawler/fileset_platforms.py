@@ -195,6 +195,100 @@ class DataverseHelper(DatasetPlatformHelper):
             extra=dict(version=dataset_version),
         )
 
+class FigshareHelper(DatasetPlatformHelper):
+
+    def __init__(self):
+        self.platform_name = 'figshare'
+        self.session = requests.Session()
+
+    def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+
+        if resource and resource.terminal_url:
+            url = resource.terminal_url
+        else:
+            url = request['base_url']
+
+        components = urllib.parse.urlparse(url)
+        platform_domain = components.netloc.split(':')[0].lower()
+        # only work with full, versioned figshare URLs
+        if 'figshare.com' in platform_domain and '/articles/' in components.path and len(components.path.split('/')) >= 6:
+            return True
+        return False
+
+    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> DatasetPlatformItem:
+        """
+        Fetch platform-specific metadata for this request (eg, via API calls)
+        """
+
+        if resource and resource.terminal_url:
+            url = resource.terminal_url
+        else:
+            url = request['base_url']
+
+        # 1. extract domain, PID, and version from URL
+        components = urllib.parse.urlparse(url)
+        platform_domain = components.netloc.split(':')[0].lower()
+        if len(components.path.split('/')) < 6:
+            raise ValueError("Expected a complete, versioned figshare URL")
+
+        platform_id = components.path.split('/')[4]
+        dataset_version = components.path.split('/')[5]
+        assert platform_id.isdigit(), f"expected numeric: {platform_id}"
+        assert dataset_version.isdigit(), f"expected numeric: {dataset_version}"
+
+        if not 'figshare' in platform_domain:
+            raise ValueError(f"unexpected figshare domain: {platform_domain}")
+
+        # 1b. if we didn't get a version number from URL, fetch it from API
+        # XXX
+
+        # 2. API fetch
+        obj = self.session.get(f"https://api.figshare.com/v2/articles/{platform_id}/versions/{dataset_version}").json()
+
+        figshare_type = obj['defined_type_name']
+
+        manifest = []
+        for row in obj['files']:
+            manifest.append(FilesetManifestFile(
+                path=row['name'],
+                size=row['size'],
+                md5=row['computed_md5'],
+                # NOTE: don't get: sha1, sha256, mimetype
+                platform_url=row['download_url'],
+                #extra=dict(),
+            ))
+            assert not row.get('is_link_only')
+
+        authors = []
+        for author in obj['authors']:
+            authors.append(author['full_name'])
+        archiveorg_item_name = f"{platform_domain}-{platform_id}-v{dataset_version}"
+        archiveorg_item_meta = dict(
+            # XXX: collection=platform_domain,
+            collection="datasets",
+            creator=authors,
+            doi=obj['doi'],
+            title=obj['title'],
+            date=obj['published_date'],
+            source=obj['url_public_html'],
+            description=obj['description'],
+            license=obj['license']['url'],
+            version=obj['version'],
+        )
+
+        return DatasetPlatformItem(
+            platform_name=self.platform_name,
+            platform_status='success',
+            manifest=manifest,
+            platform_domain=platform_domain,
+            platform_id=platform_id,
+            archiveorg_item_name=archiveorg_item_name,
+            archiveorg_item_meta=archiveorg_item_meta,
+            web_bundle_url=f"https://ndownloader.figshare.com/articles/{platform_id}/versions/{dataset_version}",
+            # TODO: web_base_url= (for GWB downloading, in lieu of platform_url on individual files)
+            extra=dict(version=dataset_version),
+        )
+
 
 class ArchiveOrgHelper(DatasetPlatformHelper):
 
@@ -341,5 +435,6 @@ class ArchiveOrgHelper(DatasetPlatformHelper):
 
 DATASET_PLATFORM_HELPER_TABLE = {
     'dataverse': DataverseHelper(),
+    'figshare': FigshareHelper(),
     'archiveorg': ArchiveOrgHelper(),
 }
