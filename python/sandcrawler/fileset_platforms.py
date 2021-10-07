@@ -289,6 +289,105 @@ class FigshareHelper(DatasetPlatformHelper):
             extra=dict(version=dataset_version),
         )
 
+class ZenodoHelper(DatasetPlatformHelper):
+
+    def __init__(self):
+        self.platform_name = 'zenodo'
+        self.session = requests.Session()
+
+    def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+
+        if resource and resource.terminal_url:
+            url = resource.terminal_url
+        else:
+            url = request['base_url']
+
+        components = urllib.parse.urlparse(url)
+        platform_domain = components.netloc.split(':')[0].lower()
+        if platform_domain == 'zenodo.org' and '/record/' in components.path:
+            return True
+        return False
+
+    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> DatasetPlatformItem:
+        """
+        Fetch platform-specific metadata for this request (eg, via API calls)
+        """
+
+        if resource and resource.terminal_url:
+            url = resource.terminal_url
+        else:
+            url = request['base_url']
+
+        # 1. extract identifier from URL
+        # eg: https://zenodo.org/record/5230255
+        components = urllib.parse.urlparse(url)
+        platform_domain = components.netloc.split(':')[0].lower()
+        if len(components.path.split('/')) < 2:
+            raise ValueError("Expected a complete, versioned figshare URL")
+
+        platform_id = components.path.split('/')[2]
+        assert platform_id.isdigit(), f"expected numeric: {platform_id}"
+
+        if not 'zenodo.org' in platform_domain:
+            raise ValueError(f"unexpected zenodo.org domain: {platform_domain}")
+
+        # 2. API fetch
+        obj = self.session.get(f"https://zenodo.org/api/records/{platform_id}").json()
+
+        assert obj['id'] == int(platform_id)
+        work_id = obj['conceptdoi']
+        if work_id == obj['id']:
+            raise ValueError("got a work-level zenodo record, not a versioned record: {work_id}")
+
+        zenodo_type = obj['metadata']['resource_type']['type']
+
+        manifest = []
+        for row in obj['files']:
+            mf = FilesetManifestFile(
+                path=row['key'],
+                size=row['size'],
+                platform_url=row['links']['self'],
+                #extra=dict(),
+            )
+            checksum = row['checksum']
+            # eg: md5:35ffcab905f8224556dba76648cb7dad
+            if checksum.startswith('md5:'):
+                mf.md5 = checksum[4:]
+            elif checksum.startswith('sha1:'):
+                mf.sha1 = checksum[45]
+            manifest.append(mf)
+
+        authors = []
+        for author in obj['metadata']['creators']:
+            authors.append(author['name'])
+        archiveorg_item_name = f"{platform_domain}-{platform_id}"
+        archiveorg_item_meta = dict(
+            # XXX: collection=platform_domain,
+            collection="datasets",
+            creator=authors,
+            doi=obj['doi'],
+            title=obj['metadata']['title'],
+            date=obj['metadata']['publication_date'],
+            source=obj['links']['html'],
+            description=obj['metadata']['description'],
+            license=obj['metadata']['license']['id'],
+            version=obj['revision'],
+            # obj['metadata']['version'] is, eg, git version tag
+        )
+
+        return DatasetPlatformItem(
+            platform_name=self.platform_name,
+            platform_status='success',
+            manifest=manifest,
+            platform_domain=platform_domain,
+            platform_id=platform_id,
+            archiveorg_item_name=archiveorg_item_name,
+            archiveorg_item_meta=archiveorg_item_meta,
+            #web_bundle_url=f"https://ndownloader.figshare.com/articles/{platform_id}/versions/{dataset_version}",
+            # TODO: web_base_url= (for GWB downloading, in lieu of platform_url on individual files)
+            extra=dict(version=obj['revision']),
+        )
+
 
 class ArchiveOrgHelper(DatasetPlatformHelper):
 
@@ -436,5 +535,6 @@ class ArchiveOrgHelper(DatasetPlatformHelper):
 DATASET_PLATFORM_HELPER_TABLE = {
     'dataverse': DataverseHelper(),
     'figshare': FigshareHelper(),
+    'zenodo': ZenodoHelper(),
     'archiveorg': ArchiveOrgHelper(),
 }
