@@ -214,6 +214,26 @@ doi:10.7910/DVN/CLSFKX
 
 Mulitple files; multiple versions?
 
-Single file inside:
+API fetch: <https://dataverse.harvard.edu/api/datasets/:persistentId/?persistentId=doi:10.7910/DVN/CLSFKX&version=1.1>
 
-<https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/CLSFKX/XWEHBB>
+    .data.id
+    .data.latestVersion.datasetPersistentId
+    .data.latestVersion.versionNumber, .versionMinorNumber
+    .data.latestVersion.files[]
+        .dataFile
+            .contentType (mimetype)
+            .filename
+            .filesize (int, bytes)
+            .md5
+            .persistendId
+            .description
+        .label (filename?)
+        .version
+
+Single file inside: <https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/CLSFKX/XWEHBB>
+
+Download single file: <https://dataverse.harvard.edu/api/access/datafile/:persistentId/?persistentId=doi:10.7910/DVN/CLSFKX/XWEHBB> (redirects to AWS S3)
+
+Dataverse refs:
+- 'doi' and 'hdl' are the two persistentId styles
+- file-level persistentIds are optional, on a per-instance basis: https://guides.dataverse.org/en/latest/installation/config.html#filepidsenabled
