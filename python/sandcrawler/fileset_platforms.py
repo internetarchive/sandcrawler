@@ -56,10 +56,71 @@ class DataverseHelper(DatasetPlatformHelper):
     def __init__(self):
         self.platform_name = 'dataverse'
         self.session = requests.Session()
-        self.dataverse_domain_allowlist = [
-            'dataverse.harvard.edu',
-            'data.lipi.go.id',
-        ]
+
+    @staticmethod
+    def parse_dataverse_persistentid(pid: str) -> dict:
+        """
+        Parses a persistentId into 5 sections:
+
+        - type (doi or hdl)
+        - authority (eg, DOI prefix)
+        - shoulder (optional, eg 'DVN')
+        - dataset_id (6-digit)
+        - file_id
+
+        The returned dict always has all components, which may be 'None' if optional.
+
+        This is possible because the dataverse software only supports a handful
+        of configurations and persistend identifier types.
+
+        If there is an error parsing, raises a ValueError
+        """
+        id_type = None
+        if pid.startswith('doi:10.'):
+            id_type = 'doi'
+            pid = pid[4:]
+        elif pid.startswith('hdl:'):
+            id_type = 'hdl'
+            pid = pid[4:]
+        else:
+            raise ValueError(f"unknown dataverse persistentId format: {pid}")
+
+        comp = pid.split('/')
+        if len(comp) < 2:
+            raise ValueError(f"unknown dataverse persistentId format: {pid}")
+
+        authority = comp[0]
+        shoulder = None
+        dataset_id = None
+        file_id = None
+        if len(comp[1]) != 6 and len(comp) == 3:
+            shoulder = comp[1]
+            dataset_id = comp[2]
+        elif len(comp[1]) != 6 and len(comp) == 4:
+            shoulder = comp[1]
+            dataset_id = comp[2]
+            file_id = comp[3]
+        elif len(comp[1]) == 6 and len(comp) == 2:
+            dataset_id = comp[1]
+        elif len(comp[1]) == 6 and len(comp) == 3:
+            dataset_id = comp[1]
+            file_id = comp[2]
+        else:
+            raise ValueError(f"unknown dataverse persistentId format: {pid}")
+
+        if len(dataset_id) != 6:
+            raise ValueError(f"expected a 6-digit dataverse dataset id: {dataset_id}")
+        if file_id and len(file_id) != 6:
+            raise ValueError(f"expected a 6-digit dataverse file id: {file_id}")
+
+        return {
+            "type": id_type,
+            "authority": authority,
+            "shoulder": shoulder,
+            "dataset_id": dataset_id,
+            "file_id": file_id,
+        }
+
 
     def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
         if resource and resource.terminal_url:
@@ -67,19 +128,22 @@ class DataverseHelper(DatasetPlatformHelper):
         else:
             url = request['base_url']
 
+        # TODO: could also do HTML platform detection or something?
+
         components = urllib.parse.urlparse(url)
         platform_domain = components.netloc.split(':')[0].lower()
         params = urllib.parse.parse_qs(components.query)
         platform_id = params.get('persistentId')
-
-        if not platform_domain in self.dataverse_domain_allowlist:
-            return False
         if not platform_id:
             return False
+        platform_id = platform_id[0]
 
-        if html_biblio and 'dataverse' in html_biblio.publisher.lower():
-            return True
-        return False
+        try:
+            parsed = self.parse_dataverse_persistentid(platform_id)
+        except ValueError:
+            return False
+
+        return True
 
     def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> DatasetPlatformItem:
         """
@@ -192,11 +256,98 @@ class DataverseHelper(DatasetPlatformHelper):
             extra=dict(version=dataset_version),
         )
 
+def test_parse_dataverse_persistentid():
+
+    valid = {
+        "doi:10.25625/LL6WXZ": {
+            "type": "doi",
+            "authority": "10.25625",
+            "shoulder": None,
+            "dataset_id": "LL6WXZ",
+            "file_id": None,
+        },
+        "doi:10.25625/LL6WXZ": {
+            "type": "doi",
+            "authority": "10.25625",
+            "shoulder": None,
+            "dataset_id": "LL6WXZ",
+            "file_id": None,
+        },
+        "doi:10.5072/FK2/J8SJZB": {
+            "type": "doi",
+            "authority": "10.5072",
+            "shoulder": "FK2",
+            "dataset_id": "J8SJZB",
+            "file_id": None,
+        },
+        "doi:10.5072/FK2/J8SJZB/LL6WXZ": {
+            "type": "doi",
+            "authority": "10.5072",
+            "shoulder": "FK2",
+            "dataset_id": "J8SJZB",
+            "file_id": "LL6WXZ",
+        },
+        "hdl:20.500.12690/RIN/IDDOAH/BTNH25": {
+            "type": "hdl",
+            "authority": "20.500.12690",
+            "shoulder": "RIN",
+            "dataset_id": "IDDOAH",
+            "file_id": "BTNH25",
+        },
+        "doi:10.7910/DVN/6HPRIG": {
+            "type": "doi",
+            "authority": "10.7910",
+            "shoulder": "DVN",
+            "dataset_id": "6HPRIG",
+            "file_id": None,
+        },
+    }
+
+    invalid = [
+        #"doi:10.5072/FK2/J8SJZB/LL6WXZ",
+        "doi:10.25625/abcd",
+        "other:10.25625/LL6WXZ",
+        "10.25625/LL6WXZ",
+        "doi:10.5072/FK2/J8SJZB/LL6WXZv123",
+    ]
+
+    for pid, val in valid.items():
+        assert DataverseHelper.parse_dataverse_persistentid(pid) == val
+
+    for pid in invalid:
+        try:
+            DataverseHelper.parse_dataverse_persistentid(pid)
+            assert False, "should not get here"
+        except ValueError:
+            pass
+
 class FigshareHelper(DatasetPlatformHelper):
 
     def __init__(self):
         self.platform_name = 'figshare'
         self.session = requests.Session()
+
+    @staticmethod
+    def parse_figshare_url_path(path: str) -> List[str]:
+        """
+        Tries to parse a figshare URL into ID number and (optional) version number.
+
+        Returns a two-element list; version number will be None if not found
+
+        Raises a ValueError if not a figshare URL
+        """
+        # eg: /articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858/1
+
+        comp = path.split('/')
+        if len(comp) < 4 or comp[1] != 'articles':
+            raise ValueError
+
+        if len(comp) == 5 and comp[3].isdigit() and comp[4].isdigit():
+            return (comp[3], comp[4])
+        elif len(comp) == 4 and comp[3].isdigit():
+            return (comp[3], None)
+        else:
+            raise ValueError
 
     def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
 
@@ -207,9 +358,20 @@ class FigshareHelper(DatasetPlatformHelper):
 
         components = urllib.parse.urlparse(url)
         platform_domain = components.netloc.split(':')[0].lower()
-        # only work with full, versioned figshare URLs
-        if 'figshare.com' in platform_domain and '/articles/' in components.path and len(components.path.split('/')) >= 6:
+
+        # only work with full, versioned figshare.com URLs
+        if not 'figshare.com' in platform_domain:
+            return False
+
+        try:
+            parsed = self.parse_figshare_url_path(components.path)
+        except ValueError:
+            return False
+
+        # has file component
+        if parsed[0] and parsed[1]:
             return True
+
         return False
 
     def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> DatasetPlatformItem:
@@ -286,6 +448,28 @@ class FigshareHelper(DatasetPlatformHelper):
             # TODO: web_base_url= (for GWB downloading, in lieu of platform_url on individual files)
             extra=dict(version=dataset_version),
         )
+
+def test_parse_figshare_url_path():
+
+    valid = {
+        "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858/1": ("8987858", "1"),
+        "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858": ("8987858", None),
+        "/articles/CIBERSORT_p-value_0_05/8217188/1": ("8217188", "1"),
+    }
+
+    invalid = [
+        "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species",
+    ]
+
+    for path, val in valid.items():
+        assert FigshareHelper.parse_figshare_url_path(path) == val
+
+    for path in invalid:
+        try:
+            FigshareHelper.parse_figshare_url_path(path)
+            assert False, "should not get here"
+        except ValueError:
+            pass
 
 class ZenodoHelper(DatasetPlatformHelper):
 
