@@ -864,7 +864,7 @@ class SavePageNowClient:
 
         if resp_json and 'message' in resp_json and 'You have already reached the limit of active sessions' in resp_json['message']:
             raise SavePageNowBackoffError(resp_json['message'])
-        elif not resp_json or 'job_id' not in resp_json:
+        elif not resp_json or 'job_id' not in resp_json or not resp_json['job_id']:
             raise SavePageNowError(
                 "Didn't get expected 'job_id' field in SPN2 response: {}".format(resp_json))
 
@@ -874,7 +874,7 @@ class SavePageNowClient:
         # poll until complete
         final_json = None
         for i in range(self.poll_count):
-            resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, resp_json['job_id']))
+            resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, job_id))
             try:
                 resp.raise_for_status()
             except:
