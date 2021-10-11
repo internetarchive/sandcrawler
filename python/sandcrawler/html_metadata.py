@@ -583,6 +583,14 @@ PDF_FULLTEXT_PATTERNS: List[dict] = [
         "technique": "PDF Download link (e-manuscripta.ch)",
         "example_page": "https://www.e-manuscripta.ch/zut/doi/10.7891/e-manuscripta-112176",
     },
+    {
+        "in_doc_url": "journals.uchicago.edu",
+        "in_fulltext_url": "pdf",
+        "selector": "nav.article__navbar a.ctrl--pdf",
+        "attr": "href",
+        "technique": "PDF Download link (journals.uchicago.edu)",
+        "example_page": "https://www.journals.uchicago.edu/doi/10.14318/hau1.1.008",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP = [
