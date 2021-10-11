@@ -22,6 +22,7 @@ from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.ingest_file import IngestFileWorker
 from sandcrawler.fileset_platforms import DatasetPlatformHelper, DATASET_PLATFORM_HELPER_TABLE
 from sandcrawler.fileset_strategies import FilesetIngestStrategy, FILESET_STRATEGY_HELPER_TABLE
+from sandcrawler.fileset_types import PlatformScopeError, PlatformRestrictedError
 
 
 MAX_BODY_SIZE_BYTES = 128*1024*1024
@@ -46,6 +47,8 @@ class IngestFilesetWorker(IngestFileWorker):
         self.sink = sink
         self.dataset_platform_helpers = DATASET_PLATFORM_HELPER_TABLE
         self.dataset_strategy_archivers = FILESET_STRATEGY_HELPER_TABLE
+        self.max_total_size = 100*1024*1024*1024
+        self.max_file_count = 500
 
 
     def check_existing_ingest(self, ingest_type: str, base_url: str) -> Optional[dict]:
@@ -263,7 +266,29 @@ class IngestFilesetWorker(IngestFileWorker):
         terminal_url = base_url
         if resource:
             terminal_url = resource.terminal_url
-        dataset_meta = platform_helper.process_request(request, resource, html_biblio)
+
+        try:
+            dataset_meta = platform_helper.process_request(request, resource, html_biblio)
+        except PlatformScopeError as e:
+            result['status'] = 'platform-scope'
+            result['error_message'] = str(e)[:1600]
+            return result
+        except PlatformRestrictedError as e:
+            result['status'] = 'platform-restricted'
+            result['error_message'] = str(e)[:1600]
+            return result
+        except NotImplementedError as e:
+            result['status'] = 'not-implemented'
+            result['error_message'] = str(e)[:1600]
+            return result
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                result['status'] = 'platform-404'
+                result['error_message'] = str(e)[:1600]
+                return result
+            else:
+                raise e
+
         #print(dataset_meta, file=sys.stderr)
         platform = dataset_meta.platform_name
         result['platform'] = dataset_meta.platform_name
@@ -271,12 +296,20 @@ class IngestFilesetWorker(IngestFileWorker):
         result['item_name'] = dataset_meta.archiveorg_item_name
         result['item_meta'] = dataset_meta.archiveorg_item_meta
 
-        if dataset_meta.manifest:
-            result['manifest'] = [m.dict() for m in dataset_meta.manifest]
-            result['file_count'] = len(dataset_meta.manifest)
-            result['total_size'] = sum([m.size for m in dataset_meta.manifest if m.size])
-        else:
-            result['status'] = 'no-manifest'
+        if not dataset_meta.manifest:
+            result['status'] = 'empty-manifest'
+            return result
+
+        # these will get confirmed/updated after ingest
+        result['manifest'] = [m.dict() for m in dataset_meta.manifest]
+        result['file_count'] = len(dataset_meta.manifest)
+        result['total_size'] = sum([m.size for m in dataset_meta.manifest if m.size])
+
+        if result['total_size'] > self.max_total_size:
+            result['status'] = 'too-large-size'
+            return result
+        if result['file_count'] > self.max_file_count:
+            result['status'] = 'too-many-files'
             return result
 
         ingest_strategy = platform_helper.chose_strategy(dataset_meta)

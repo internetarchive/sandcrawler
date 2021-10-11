@@ -40,7 +40,7 @@ class DatasetPlatformHelper():
         # XXX: while developing ArchiveorgFileset path
         #return IngestStrategy.ArchiveorgFileset
         if len(item.manifest) == 1:
-            if total_size < 64*1024*1024: 
+            if total_size < 64*1024*1024:
                 return IngestStrategy.WebFile
             else:
                 return IngestStrategy.ArchiveorgFile
@@ -101,38 +101,33 @@ class DataverseHelper(DatasetPlatformHelper):
         dataset_version = params.get('version')
         platform_id = params.get('persistentId')
         if not (platform_id and platform_id[0]):
-            raise ValueError("Expected a Dataverse persistentId in URL")
+            raise PlatformScopeError("Expected a Dataverse persistentId in URL")
         else:
             platform_id = platform_id[0]
+        if type(dataset_version) == list:
+            dataset_version = dataset_version[0]
 
-        if not platform_domain in self.dataverse_domain_allowlist:
-            raise ValueError(f"unexpected dataverse domain: {platform_domain}")
+        try:
+            parsed_id = self.parse_dataverse_persistentid(platform_id)
+        except ValueError:
+            raise PlatformScopeError(f"not actually in scope")
 
-        # for both handle (hdl:) and DOI (doi:) identifiers, the norm is for
-        # dataverse persistetId is to be structured like:
-        # <prefix> / <shoulder> / <dataset-id> / <file-id>
-        if not (platform_id.startswith('doi:10.') or platform_id.startswith('hdl:')):
-            raise NotImplementedError(f"unsupported dataverse persistentId format: {platform_id}")
-        dataverse_type = None
-        if platform_id.count('/') == 2:
-            dataverse_type = 'dataset'
-        elif platform_id.count('/') == 3:
-            dataverse_type = 'file'
-        else:
-            raise NotImplementedError(f"unsupported dataverse persistentId format: {platform_id}")
-
-        if dataverse_type != 'dataset':
-            # XXX
-            raise NotImplementedError(f"only entire dataverse datasets can be archived with this tool")
+        if parsed_id['file_id']:
+            # XXX: maybe we could support this?
+            raise PlatformScopeError(f"only entire dataverse datasets can be archived with this tool")
 
         # 1b. if we didn't get a version number from URL, fetch it from API
         if not dataset_version:
-            obj = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}").json()
+            resp = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}")
+            resp.raise_for_status()
+            obj = resp.json()
             obj_latest = obj['data']['latestVersion']
             dataset_version = f"{obj_latest['versionNumber']}.{obj_latest['versionMinorNumber']}"
 
         # 2. API fetch
-        obj = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}&version={dataset_version}").json()
+        resp = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}&version={dataset_version}")
+        resp.raise_for_status()
+        obj = resp.json()
 
         obj_latest= obj['data']['latestVersion']
         assert dataset_version == f"{obj_latest['versionNumber']}.{obj_latest['versionMinorNumber']}"
@@ -180,7 +175,9 @@ class DataverseHelper(DatasetPlatformHelper):
             elif block['typeName'] == 'dsDescription':
                 archiveorg_item_meta['description'] = block['value'][0]['dsDescriptionValue']['value']
 
-        archiveorg_item_meta['description'] = archiveorg_item_meta.get('description', '') + '\n<br>\n' + obj_latest['termsOfUse']
+        archiveorg_item_meta['description'] = archiveorg_item_meta.get('description', '')
+        if obj_latest.get('termsOfUse'):
+            archiveorg_item_meta['description'] += '\n<br>\n' + obj_latest['termsOfUse']
 
         return DatasetPlatformItem(
             platform_name=self.platform_name,
@@ -228,24 +225,25 @@ class FigshareHelper(DatasetPlatformHelper):
         # 1. extract domain, PID, and version from URL
         components = urllib.parse.urlparse(url)
         platform_domain = components.netloc.split(':')[0].lower()
-        if len(components.path.split('/')) < 6:
-            raise ValueError("Expected a complete, versioned figshare URL")
 
-        platform_id = components.path.split('/')[4]
-        dataset_version = components.path.split('/')[5]
+        (platform_id, dataset_version) = self.parse_figshare_url_path(components.path)
         assert platform_id.isdigit(), f"expected numeric: {platform_id}"
         assert dataset_version.isdigit(), f"expected numeric: {dataset_version}"
 
-        if not 'figshare' in platform_domain:
-            raise ValueError(f"unexpected figshare domain: {platform_domain}")
-
         # 1b. if we didn't get a version number from URL, fetch it from API
-        # XXX
+        # TODO: implement this code path
 
         # 2. API fetch
-        obj = self.session.get(f"https://api.figshare.com/v2/articles/{platform_id}/versions/{dataset_version}").json()
+        resp = self.session.get(f"https://api.figshare.com/v2/articles/{platform_id}/versions/{dataset_version}")
+        resp.raise_for_status()
+        obj = resp.json()
 
         figshare_type = obj['defined_type_name']
+
+        if not obj['is_public']:
+            raise PlatformRestrictedError(f'record not public: {platform_id} {dataset_version}')
+        if obj['is_embargoed']:
+            raise PlatformRestrictedError(f'record is embargoed: {obj.get("embargo_title")} ({platform_id} {dataset_version})')
 
         manifest = []
         for row in obj['files']:
@@ -318,28 +316,38 @@ class ZenodoHelper(DatasetPlatformHelper):
         else:
             url = request['base_url']
 
+        # XXX: also look in base_url and resource-non-terminal for ident? to
+        # check for work-level redirects
+
         # 1. extract identifier from URL
         # eg: https://zenodo.org/record/5230255
         components = urllib.parse.urlparse(url)
         platform_domain = components.netloc.split(':')[0].lower()
         if len(components.path.split('/')) < 2:
-            raise ValueError("Expected a complete, versioned figshare URL")
+            raise PlatformScopeError("Expected a complete, versioned figshare URL")
 
         platform_id = components.path.split('/')[2]
         assert platform_id.isdigit(), f"expected numeric: {platform_id}"
 
         if not 'zenodo.org' in platform_domain:
-            raise ValueError(f"unexpected zenodo.org domain: {platform_domain}")
+            raise PlatformScopeError(f"unexpected zenodo.org domain: {platform_domain}")
 
         # 2. API fetch
-        obj = self.session.get(f"https://zenodo.org/api/records/{platform_id}").json()
+        resp = self.session.get(f"https://zenodo.org/api/records/{platform_id}")
+        if resp.status_code == 410:
+            raise PlatformRestrictedError('record deleted')
+        resp.raise_for_status()
+        obj = resp.json()
 
         assert obj['id'] == int(platform_id)
-        work_id = obj['conceptdoi']
+        work_id = obj['conceptrecid']
         if work_id == obj['id']:
-            raise ValueError("got a work-level zenodo record, not a versioned record: {work_id}")
+            raise PlatformScopeError("got a work-level zenodo record, not a versioned record: {work_id}")
 
         zenodo_type = obj['metadata']['resource_type']['type']
+
+        if obj['metadata']['access_right'] != 'open':
+            raise PlatformRestrictedError("not publicly available ({obj['metadata']['access_right']}): {platform_domain} {platform_id}")
 
         manifest = []
         for row in obj['files']:

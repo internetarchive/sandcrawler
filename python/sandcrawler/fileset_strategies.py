@@ -12,7 +12,7 @@ import internetarchive
 
 from sandcrawler.html_metadata import BiblioMetadata
 from sandcrawler.ia import ResourceResult, WaybackClient, SavePageNowClient, fix_transfer_encoding
-from sandcrawler.fileset_types import IngestStrategy, FilesetManifestFile, DatasetPlatformItem, ArchiveStrategyResult
+from sandcrawler.fileset_types import IngestStrategy, FilesetManifestFile, DatasetPlatformItem, ArchiveStrategyResult, PlatformScopeError
 from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path
 
 
@@ -83,7 +83,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             return existing
 
         if item.platform_name == 'archiveorg':
-            raise ValueError("should't download archive.org into itself")
+            raise PlatformScopeError("should't download archive.org into itself")
 
         local_dir = self.working_dir + item.archiveorg_item_name
         assert local_dir.startswith('/')
@@ -142,9 +142,8 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
                 m.mimetype = file_meta['mimetype']
             m.status = 'verified-local'
 
-        # 2. setup archive.org item metadata
+        # 2. upload all files, with metadata
         assert item.archiveorg_item_meta['collection']
-        # 3. upload all files
         item_files = []
         for m in item.manifest:
             local_path = local_dir + '/' + m.path
