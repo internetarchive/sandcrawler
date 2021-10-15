@@ -152,27 +152,6 @@ class IngestFileWorker(SandcrawlerWorker):
             "error=cookies_not_supported",
         ]
 
-        # these are special-case web domains for which we want SPN2 to not run
-        # a headless browser (brozzler), but instead simply run wget.
-        # the motivation could be to work around browser issues, or in the
-        # future possibly to increase download efficiency (wget/fetch being
-        # faster than browser fetch)
-        self.spn2_simple_get_domains = [
-            # direct PDF links
-            "://arxiv.org/pdf/",
-            "://europepmc.org/backend/ptpmcrender.fcgi",
-            "://pdfs.semanticscholar.org/",
-            "://res.mdpi.com/",
-
-            # platform sites
-            "://zenodo.org/",
-            "://figshare.org/",
-            "://springernature.figshare.com/",
-
-            # popular simple cloud storage or direct links
-            "://s3-eu-west-1.amazonaws.com/",
-        ]
-
         self.src_valid_mimetypes = [
             "text/x-tex",
             "application/gzip",
@@ -266,12 +245,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         if self.try_spn2 and (resource == None or (resource and resource.status == 'no-capture') or soft404 or old_failure):
             via = "spn2"
-            force_simple_get = 0
-            for domain in self.spn2_simple_get_domains:
-                if domain in url:
-                    force_simple_get = 1
-                    break
-            resource = self.spn_client.crawl_resource(url, self.wayback_client, force_simple_get=force_simple_get)
+            resource = self.spn_client.crawl_resource(url, self.wayback_client)
         print("[FETCH {:>6}] {}  {}".format(
                 via,
                 (resource and resource.status),

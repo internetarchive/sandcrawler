@@ -197,23 +197,6 @@ class WebFilesetStrategy(FilesetIngestStrategy):
         self.try_spn2 = True
         self.spn_client = SavePageNowClient(spn_cdx_retry_sec=kwargs.get('spn_cdx_retry_sec', 9.0))
 
-        # XXX: this is copypasta, and also should be part of SPN client, not here
-        self.spn2_simple_get_domains = [
-            # direct PDF links
-            "://arxiv.org/pdf/",
-            "://europepmc.org/backend/ptpmcrender.fcgi",
-            "://pdfs.semanticscholar.org/",
-            "://res.mdpi.com/",
-
-            # platform sites
-            "://zenodo.org/",
-            "://figshare.org/",
-            "://springernature.figshare.com/",
-
-            # popular simple cloud storage or direct links
-            "://s3-eu-west-1.amazonaws.com/",
-        ]
-
     def process(self, item: FilesetPlatformItem) -> ArchiveStrategyResult:
         """
         For each manifest item individually, run 'fetch_resource' and record stats, terminal_url, terminal_dt
@@ -234,12 +217,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
 
             if self.try_spn2 and (resource == None or (resource and resource.status == 'no-capture')):
                 via = "spn2"
-                force_simple_get = 0
-                for domain in self.spn2_simple_get_domains:
-                    if domain in fetch_url:
-                        force_simple_get = 1
-                        break
-                resource = self.spn_client.crawl_resource(fetch_url, self.wayback_client, force_simple_get=force_simple_get)
+                resource = self.spn_client.crawl_resource(fetch_url, self.wayback_client)
 
             print("[FETCH {:>6}] {}  {}".format(
                     via,

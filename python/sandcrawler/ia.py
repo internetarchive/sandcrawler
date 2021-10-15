@@ -808,7 +808,28 @@ class SavePageNowClient:
 
         self.spn_cdx_retry_sec = kwargs.get('spn_cdx_retry_sec', 9.0)
 
-    def save_url_now_v2(self, request_url, force_simple_get=0, capture_outlinks=0):
+        # these are special-case web domains for which we want SPN2 to not run
+        # a headless browser (brozzler), but instead simply run wget.
+        # the motivation could be to work around browser issues, or in the
+        # future possibly to increase download efficiency (wget/fetch being
+        # faster than browser fetch)
+        self.simple_get_domains = [
+            # direct PDF links
+            "://arxiv.org/pdf/",
+            "://europepmc.org/backend/ptpmcrender.fcgi",
+            "://pdfs.semanticscholar.org/",
+            "://res.mdpi.com/",
+
+            # platform sites
+            "://zenodo.org/",
+            "://figshare.org/",
+            "://springernature.figshare.com/",
+
+            # popular simple cloud storage or direct links
+            "://s3-eu-west-1.amazonaws.com/",
+        ]
+
+    def save_url_now_v2(self, request_url, force_simple_get=None, capture_outlinks=0):
         """
         Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
         at all, or raises an exception if there was an error with SPN itself.
@@ -842,6 +863,12 @@ class SavePageNowClient:
                 None,
                 None,
             )
+        if force_simple_get is None:
+            force_simple_get = 0
+            for domain in self.simple_get_domains:
+                if domain in request_url:
+                    force_simple_get = 1
+                    break
         resp = self.v2_session.post(
             self.v2endpoint,
             data={
@@ -929,7 +956,7 @@ class SavePageNowClient:
                 None,
             )
 
-    def crawl_resource(self, start_url, wayback_client, force_simple_get=0):
+    def crawl_resource(self, start_url, wayback_client, force_simple_get=None):
         """
         Runs a SPN2 crawl, then fetches body.
 
