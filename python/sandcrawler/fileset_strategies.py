@@ -12,7 +12,7 @@ import internetarchive
 
 from sandcrawler.html_metadata import BiblioMetadata
 from sandcrawler.ia import ResourceResult, WaybackClient, SavePageNowClient, fix_transfer_encoding
-from sandcrawler.fileset_types import IngestStrategy, FilesetManifestFile, DatasetPlatformItem, ArchiveStrategyResult, PlatformScopeError
+from sandcrawler.fileset_types import IngestStrategy, FilesetManifestFile, FilesetPlatformItem, ArchiveStrategyResult, PlatformScopeError
 from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path
 
 
@@ -22,10 +22,10 @@ class FilesetIngestStrategy():
         #self.ingest_strategy = 'unknown'
         pass
 
-    def check_existing(self, item: DatasetPlatformItem) -> Optional[ArchiveStrategyResult]:
+    def check_existing(self, item: FilesetPlatformItem) -> Optional[ArchiveStrategyResult]:
         raise NotImplementedError()
 
-    def process(self, item: DatasetPlatformItem) -> ArchiveStrategyResult:
+    def process(self, item: FilesetPlatformItem) -> ArchiveStrategyResult:
         raise NotImplementedError()
 
 
@@ -44,7 +44,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
 
         self.ia_session = internetarchive.get_session()
 
-    def check_existing(self, item: DatasetPlatformItem) -> Optional[ArchiveStrategyResult]:
+    def check_existing(self, item: FilesetPlatformItem) -> Optional[ArchiveStrategyResult]:
         """
         use API to check for item with all the files in the manifest
 
@@ -52,8 +52,9 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
         """
         ia_item = self.ia_session.get_item(item.archiveorg_item_name)
         if not ia_item.exists:
-            return False
+            return None
         item_files = ia_item.get_files(on_the_fly=False)
+        assert item.manifest
         for wanted in item.manifest:
             found = False
             for existing in item_files:
@@ -74,7 +75,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             manifest=item.manifest,
         )
 
-    def process(self, item: DatasetPlatformItem) -> ArchiveStrategyResult:
+    def process(self, item: FilesetPlatformItem) -> ArchiveStrategyResult:
         """
         May require extra context to pass along to archive.org item creation.
         """
@@ -94,6 +95,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             pass
 
         # 1. download all files locally
+        assert item.manifest
         for m in item.manifest:
             # XXX: enforce safe/sane filename
 
@@ -143,7 +145,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             m.status = 'verified-local'
 
         # 2. upload all files, with metadata
-        assert item.archiveorg_item_meta['collection']
+        assert item.archiveorg_item_meta and item.archiveorg_item_meta['collection']
         item_files = []
         for m in item.manifest:
             local_path = local_dir + '/' + m.path
@@ -212,7 +214,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             "://s3-eu-west-1.amazonaws.com/",
         ]
 
-    def process(self, item: DatasetPlatformItem) -> ArchiveStrategyResult:
+    def process(self, item: FilesetPlatformItem) -> ArchiveStrategyResult:
         """
         For each manifest item individually, run 'fetch_resource' and record stats, terminal_url, terminal_dt
 
@@ -220,6 +222,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
         - full fetch_resource() method which can do SPN requests
         """
 
+        assert item.manifest
         for m in item.manifest:
             fetch_url = m.platform_url
             if not fetch_url:
@@ -241,7 +244,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             print("[FETCH {:>6}] {}  {}".format(
                     via,
                     (resource and resource.status),
-                    (resource and resource.terminal_url) or url),
+                    (resource and resource.terminal_url) or fetch_url),
                 file=sys.stderr)
 
             m.terminal_url = resource.terminal_url
@@ -268,7 +271,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
         overall_status = "success"
         for m in item.manifest:
             if m.status != 'success':
-                overall_status = m.status
+                overall_status = m.status or 'not-processed'
                 break
         if not item.manifest:
             overall_status = 'empty-manifest'

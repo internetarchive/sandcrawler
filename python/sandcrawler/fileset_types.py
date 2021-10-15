@@ -19,20 +19,20 @@ class FilesetManifestFile(BaseModel):
     sha1: Optional[str]
     sha256: Optional[str]
     mimetype: Optional[str]
+    extra: Optional[Dict[str, Any]]
 
     status: Optional[str]
     platform_url: Optional[str]
     terminal_url: Optional[str]
     terminal_dt: Optional[str]
-    extra: Optional[Dict[str, Any]]
 
-class DatasetPlatformItem(BaseModel):
+class FilesetPlatformItem(BaseModel):
     platform_name: str
     platform_status: str
-    manifest: Optional[List[FilesetManifestFile]]
-
     platform_domain: Optional[str]
     platform_id: Optional[str]
+    manifest: Optional[List[FilesetManifestFile]]
+
     archiveorg_item_name: Optional[str]
     archiveorg_item_meta: Optional[dict]
     web_base_url: Optional[str]
@@ -42,6 +42,13 @@ class ArchiveStrategyResult(BaseModel):
     ingest_strategy: str
     status: str
     manifest: List[FilesetManifestFile]
+    file_file_meta: Optional[Dict[str, Any]]
+    file_terminal: Optional[Dict[str, Any]]
+    file_cdx: Optional[Dict[str, Any]]
+    bundle_file_meta: Optional[Dict[str, Any]]
+    bundle_terminal: Optional[Any]
+    bundle_cdx: Optional[Any]
+    bundle_archiveorg_path: Optional[str]
 
 class PlatformScopeError(Exception):
     """

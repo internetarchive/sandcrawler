@@ -121,14 +121,9 @@ New python types:
         ingest_strategy: str
         status: str
         manifest: List[FilesetManifestFile]
-
-    FilesetIngestResult
-        ingest_strategy: str
-        status: str
-        manifest: List[FilesetManifestFile]
-        single_file_meta: Optional[dict]
-        single_terminal: Optional[dict]
-        single_cdx: Optional[dict]
+        file_file_meta: Optional[dict]
+        file_terminal: Optional[dict]
+        file_cdx: Optional[dict]
         bundle_file_meta: Optional[dict]
         bundle_terminal: Optional[dict]
         bundle_cdx: Optional[dict]
@@ -160,6 +155,9 @@ New python APIs/classes:
   valid platform, which could be found via API or parsing, but has the wrong
   scope. Eg, tried to fetch a dataset, but got a DOI which represents all
   versions of the dataset, not a specific version.
+- `platform-restricted`/`PlatformRestrictedError`: for, eg, embargos
+- `platform-404`: got to a landing page, and seemed like in-scope, but no
+  platform record found anyways
 
 
 ## New Sandcrawler Code and Worker
@@ -216,11 +214,14 @@ Additional fileset-specific fields:
     platform_id: str
     ingest_strategy: str
     archiveorg_item_name: str (optional, only for `archiveorg-*` strategies)
+    file_count: int
+    total_size: int
     fileset_bundle (optional, only for `*-fileset-bundle` strategy)
-        archiveorg_bundle_path
         file_meta
         cdx
+        revisit_cdx
         terminal
+        archiveorg_bundle_path
     fileset_file (optional, only for `*-file` strategy)
         file_meta
         terminal
@@ -247,6 +248,9 @@ condition.
 
 ## New SQL Tables
 
+Note that this table *complements* `ingest_file_result`, doesn't replace it.
+`ingest_file_result` could more accurately be called `ingest_result`.
+
     CREATE TABLE IF NOT EXISTS ingest_fileset_platform (
         ingest_type             TEXT NOT NULL CHECK (octet_length(ingest_type) >= 1),
         base_url                TEXT NOT NULL CHECK (octet_length(base_url) >= 1),
@@ -254,9 +258,9 @@ condition.
         hit                     BOOLEAN NOT NULL,
         status                  TEXT CHECK (octet_length(status) >= 1),
 
-        platform_name           TEXT CHECK (octet_length(platform) >= 1),
-        platform_domain         TEXT CHECK (octet_length(platform_domain) >= 1),
-        platform_id             TEXT CHECK (octet_length(platform_id) >= 1),
+        platform_name           TEXT NOT NULL CHECK (octet_length(platform) >= 1),
+        platform_domain         TEXT NOT NULL CHECK (octet_length(platform_domain) >= 1),
+        platform_id             TEXT NOT NULL CHECK (octet_length(platform_id) >= 1),
         ingest_strategy         TEXT CHECK (octet_length(ingest_strategy) >= 1),
         total_size              BIGINT,
         file_count              INT,
@@ -282,9 +286,10 @@ condition.
 
         PRIMARY KEY (ingest_type, base_url)
     );
-    CREATE INDEX ingest_fileset_result_terminal_url_idx ON ingest_fileset_result(terminal_url);
-    # TODO: index on (platform_name,platform_domain,platform_id) ?
+    CREATE INDEX ingest_fileset_platform_name_domain_id_idx ON ingest_fileset_platform(platform_name, platform_domain, platform_id);
 
+Persist worker should only insert in to this table if `platform_name`,
+`platform_domain`, and `platform_id` are extracted successfully.
 
 ## New Kafka Topic
 
