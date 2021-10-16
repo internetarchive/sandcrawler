@@ -289,8 +289,8 @@ Note that this table *complements* `ingest_file_result`, doesn't replace it.
     );
     CREATE INDEX ingest_fileset_platform_name_domain_id_idx ON ingest_fileset_platform(platform_name, platform_domain, platform_id);
 
-Persist worker should only insert in to this table if `platform_name`,
-`platform_domain`, and `platform_id` are extracted successfully.
+Persist worker should only insert in to this table if `platform_name` is
+identified.
 
 ## New Kafka Topic
 
