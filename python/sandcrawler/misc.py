@@ -1,4 +1,5 @@
 
+import os
 import base64
 import magic
 import hashlib
@@ -261,3 +262,17 @@ def requests_retry_session(retries=10, backoff_factor=3,
     session.mount('https://', adapter)
     return session
 
+def sanitize_fs_path(path: str) -> str:
+    """
+    From: https://stackoverflow.com/questions/13939120/sanitizing-a-file-path-in-python/66950540#66950540
+    """
+    # - pretending to chroot to the current directory
+    # - cancelling all redundant paths (/.. = /)
+    # - making the path relative
+    return os.path.relpath(os.path.normpath(os.path.join("/", path)), "/")
+
+def test_sanitize_fs_path() -> None:
+    assert sanitize_fs_path("/thing.png") == "thing.png"
+    assert sanitize_fs_path("../../thing.png") == "thing.png"
+    assert sanitize_fs_path("thing.png") == "thing.png"
+    assert sanitize_fs_path("subdir/thing.png") == "subdir/thing.png"

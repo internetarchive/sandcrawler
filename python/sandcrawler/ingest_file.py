@@ -43,7 +43,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         check_existing_ingest(base_url) -> ingest_file_result or none
         process_existing(result) -> response
-            try fetching all the rows we want. if any don't exist, fetch the resource itself and call process_hit()
+            try fetching all the rows we want. if any don't exist, fetch the resource itself and call process_file_hit()
 
     Fetch resource:
 
@@ -51,7 +51,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
     Process resource:
 
-        process_hit(ResourceResult) -> response
+        process_file_hit(ResourceResult) -> response
         process_grobid(ResourceResult)
     """
 
@@ -281,10 +281,12 @@ class IngestFileWorker(SandcrawlerWorker):
         }
         return result
 
-    def process_hit(self, ingest_type: str, resource: ResourceResult, file_meta: dict) -> dict:
+    def process_file_hit(self, ingest_type: str, resource: ResourceResult, file_meta: dict) -> dict:
         """
         Run all the necessary processing for a new/fresh ingest hit.
         """
+        if ingest_type in ["dataset-file", "component"] and file_meta['mimetype'] == "application/pdf":
+            ingest_type = "pdf"
         if ingest_type == "pdf":
             return {
                 'grobid': self.process_grobid(resource, file_meta),
@@ -303,6 +305,8 @@ class IngestFileWorker(SandcrawlerWorker):
         elif ingest_type == "src":
             return {}
         elif ingest_type == "component":
+            return {}
+        elif ingest_type == "dataset-file":
             return {}
         else:
             raise NotImplementedError(f"process {ingest_type} hit")
@@ -770,7 +774,7 @@ class IngestFileWorker(SandcrawlerWorker):
         else:
             raise NotImplementedError()
 
-        info = self.process_hit(ingest_type, resource, file_meta)
+        info = self.process_file_hit(ingest_type, resource, file_meta)
         result.update(info)
 
         # check if processing turned up an error

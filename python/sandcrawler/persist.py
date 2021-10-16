@@ -189,7 +189,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         results = [r for r in results if r]
 
         requests = [self.request_to_row(raw['request']) for raw in batch if raw.get('request')]
-        requests = [r for r in requests if r]
+        requests = [r for r in requests if r and r['ingest_type'] != 'dataset-file']
 
         if requests:
             resp = self.db.insert_ingest_request(self.cur, requests)
