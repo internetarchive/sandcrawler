@@ -3,6 +3,9 @@
 *.gz
 htmlcov/
 samples/
+*.json
+TODO*
+*.tsv
 
 !.flake8
 !.gitlab-ci.yml
