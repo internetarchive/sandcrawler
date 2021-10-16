@@ -212,6 +212,7 @@ Additional fileset-specific fields:
     platform_name: str
     platform_domain: str
     platform_id: str
+    platform_base_url: str
     ingest_strategy: str
     archiveorg_item_name: str (optional, only for `archiveorg-*` strategies)
     file_count: int
