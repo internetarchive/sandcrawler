@@ -674,8 +674,8 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
         assert base_url_split[2] == 'archive.org'
         assert base_url_split[3] in ['details', 'download']
         item_name = base_url_split[4]
-        if len(base_url_split) == 6:
-            assert not base_url_split[5]
+        if len(base_url_split) == 6 and base_url_split[5]:
+            raise PlatformScopeError("got an archive.org file path, not download/details page; individual files not handled yet")
 
         #print(f"  archiveorg processing item={item_name}", file=sys.stderr)
         item = self.session.get_item(item_name)

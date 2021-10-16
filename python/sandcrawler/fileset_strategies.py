@@ -13,14 +13,14 @@ import internetarchive
 from sandcrawler.html_metadata import BiblioMetadata
 from sandcrawler.ia import ResourceResult, WaybackClient, SavePageNowClient, fix_transfer_encoding
 from sandcrawler.fileset_types import IngestStrategy, FilesetManifestFile, FilesetPlatformItem, ArchiveStrategyResult, PlatformScopeError
-from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path
+from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path, sanitize_fs_path
 
 
 class FilesetIngestStrategy():
 
     def __init__(self):
         #self.ingest_strategy = 'unknown'
-        pass
+        self.success_status = "success"
 
     def check_existing(self, item: FilesetPlatformItem) -> Optional[ArchiveStrategyResult]:
         raise NotImplementedError()
@@ -34,7 +34,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
     def __init__(self, **kwargs):
         self.ingest_strategy = IngestStrategy.ArchiveorgFileset
 
-        # XXX: enable cleanup when confident (eg, safe path parsing)
+        # TODO: enable cleanup when confident (eg, safe path parsing)
         self.skip_cleanup_local_files = kwargs.get('skip_cleanup_local_files', True)
         self.working_dir = os.environ.get('SANDCRAWLER_WORKING_DIR', '/tmp/sandcrawler/')
         try:
@@ -97,7 +97,9 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
         # 1. download all files locally
         assert item.manifest
         for m in item.manifest:
-            # XXX: enforce safe/sane filename
+            if m.path != sanitize_fs_path(m.path):
+                m.status = 'unsafe-path'
+                continue
 
             local_path = local_dir + '/' + m.path
             assert m.platform_url
@@ -173,7 +175,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
 
         result = ArchiveStrategyResult(
             ingest_strategy=self.ingest_strategy,
-            status='success',
+            status=self.success_status,
             manifest=item.manifest,
         )
 
@@ -188,6 +190,7 @@ class ArchiveorgFileStrategy(ArchiveorgFilesetStrategy):
     def __init__(self):
         super().__init__()
         self.ingest_strategy = IngestStrategy.ArchiveorgFileset
+        self.success_status = "success-file"
 
 class WebFilesetStrategy(FilesetIngestStrategy):
 
@@ -206,6 +209,8 @@ class WebFilesetStrategy(FilesetIngestStrategy):
         """
 
         assert item.manifest
+        file_file_meta = None
+        file_resource = None
         for m in item.manifest:
             fetch_url = m.platform_url
             if not fetch_url:
@@ -228,6 +233,8 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             m.terminal_url = resource.terminal_url
             m.terminal_dt = resource.terminal_dt
             m.status = resource.status
+            if self.ingest_strategy == "web-file":
+                file_resource = resource
 
             if resource.status != 'success':
                 continue
@@ -236,6 +243,9 @@ class WebFilesetStrategy(FilesetIngestStrategy):
 
             file_meta = gen_file_metadata(resource.body)
             file_meta, html_resource = fix_transfer_encoding(file_meta, resource)
+
+            if self.ingest_strategy == "web-file":
+                file_file_meta = file_meta 
 
             if file_meta['size_bytes'] != m.size or (m.md5 and m.md5 != file_meta['md5hex']) or (m.sha1 and m.sha1 != file_meta['sha1hex']):
                 m.status = 'mismatch'
@@ -246,7 +256,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             m.sha256 = m.sha256 or file_meta['sha256hex']
             m.mimetype = m.mimetype or file_meta['mimetype']
 
-        overall_status = "success"
+        overall_status = self.success_status
         for m in item.manifest:
             if m.status != 'success':
                 overall_status = m.status or 'not-processed'
@@ -259,6 +269,9 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             status=overall_status,
             manifest=item.manifest,
         )
+        if self.ingest_strategy == "web-file":
+            result.file_file_meta = file_file_meta
+            result.file_resource = file_resource
         return result
 
 class WebFileStrategy(WebFilesetStrategy):
@@ -266,6 +279,7 @@ class WebFileStrategy(WebFilesetStrategy):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.ingest_strategy = IngestStrategy.WebFile
+        self.success_status = "success-file"
 
 
 FILESET_STRATEGY_HELPER_TABLE = {

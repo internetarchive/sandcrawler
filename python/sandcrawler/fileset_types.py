@@ -43,11 +43,9 @@ class ArchiveStrategyResult(BaseModel):
     status: str
     manifest: List[FilesetManifestFile]
     file_file_meta: Optional[Dict[str, Any]]
-    file_terminal: Optional[Dict[str, Any]]
-    file_cdx: Optional[Dict[str, Any]]
+    file_resource: Optional[Any]
     bundle_file_meta: Optional[Dict[str, Any]]
-    bundle_terminal: Optional[Any]
-    bundle_cdx: Optional[Any]
+    bundle_resource: Optional[Any]
     bundle_archiveorg_path: Optional[str]
 
 class PlatformScopeError(Exception):

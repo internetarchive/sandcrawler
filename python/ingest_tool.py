@@ -21,6 +21,7 @@ def run_single_ingest(args):
     if request['ingest_type'] in ['dataset',]:
         ingester = IngestFilesetWorker(
             try_spn2=not args.no_spn2,
+            ingest_file_result_stdout=True,
         )
     else:
         ingester = IngestFileWorker(
