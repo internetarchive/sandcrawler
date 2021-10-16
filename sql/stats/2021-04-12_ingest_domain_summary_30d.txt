@@ -1,0 +1,345 @@
+                domain                 |         status          | count  
+---------------------------------------+-------------------------+--------
+ academic.oup.com                      |                         |   4105
+ academic.oup.com                      | spn2-wayback-error      |   1393
+ academic.oup.com                      | link-loop               |   1025
+ academic.oup.com                      | no-pdf-link             |   1020
+ academic.oup.com                      | spn2-cdx-lookup-failure |    512
+ acervus.unicamp.br                    |                         |   1967
+ acervus.unicamp.br                    | no-pdf-link             |   1853
+ acp.copernicus.org                    |                         |    620
+ acp.copernicus.org                    | success                 |    537
+ aip.scitation.org                     |                         |   1310
+ aip.scitation.org                     | blocked-cookie          |   1192
+ alustath.uobaghdad.edu.iq             |                         |    697
+ alustath.uobaghdad.edu.iq             | success                 |    550
+ apex.ipk-gatersleben.de               |                         |   1253
+ apex.ipk-gatersleben.de               | no-pdf-link             |   1132
+ apps.crossref.org                     |                         |   4693
+ apps.crossref.org                     | no-pdf-link             |   4075
+ arxiv.org                             |                         |  14990
+ arxiv.org                             | success                 |  12899
+ arxiv.org                             | spn2-wayback-error      |   1592
+ ashpublications.org                   |                         |    563
+ asmedigitalcollection.asme.org        |                         |   3990
+ asmedigitalcollection.asme.org        | spn2-cdx-lookup-failure |   1570
+ asmedigitalcollection.asme.org        | no-pdf-link             |   1449
+ asmedigitalcollection.asme.org        | link-loop               |    734
+ assets.researchsquare.com             |                         |   8217
+ assets.researchsquare.com             | success                 |   7116
+ assets.researchsquare.com             | spn2-wayback-error      |    946
+ av.tib.eu                             |                         |    526
+ bioone.org                            |                         |    588
+ books.openedition.org                 |                         |   1784
+ books.openedition.org                 | no-pdf-link             |   1466
+ boris.unibe.ch                        |                         |   1420
+ boris.unibe.ch                        | success                 |    743
+ brill.com                             |                         |   1773
+ brill.com                             | link-loop               |    879
+ chemrxiv.org                          |                         |    857
+ chemrxiv.org                          | no-pdf-link             |    519
+ classiques-garnier.com                |                         |   1072
+ classiques-garnier.com                | success                 |    807
+ content.iospress.com                  |                         |    793
+ content.iospress.com                  | link-loop               |    568
+ cyberdoi.ru                           |                         |    775
+ cyberdoi.ru                           | redirect-loop           |    775
+ cyberleninka.ru                       |                         |   1453
+ cyberleninka.ru                       | success                 |   1092
+ d197for5662m48.cloudfront.net         |                         |    632
+ d197for5662m48.cloudfront.net         | success                 |    544
+ dergipark.org.tr                      |                         |   3070
+ dergipark.org.tr                      | success                 |   1251
+ dergipark.org.tr                      | no-pdf-link             |    843
+ dergipark.org.tr                      | spn2-wayback-error      |    677
+ digi.ub.uni-heidelberg.de             |                         |    502
+ dione.lib.unipi.gr                    |                         |    783
+ direct.mit.edu                        |                         |    996
+ direct.mit.edu                        | no-pdf-link             |    869
+ dl.acm.org                            |                         |   1692
+ dl.acm.org                            | blocked-cookie          |   1558
+ dlc.library.columbia.edu              |                         |   4225
+ dlc.library.columbia.edu              | no-pdf-link             |   2395
+ dlc.library.columbia.edu              | spn2-wayback-error      |   1568
+ doi.ala.org.au                        |                         |   2570
+ doi.ala.org.au                        | no-pdf-link             |   2153
+ doi.nrct.go.th                        |                         |    566
+ doi.org                               |                         |  10408
+ doi.org                               | spn2-cdx-lookup-failure |   9593
+ doi.org                               | terminal-bad-status     |    741
+ downloads.hindawi.com                 |                         |   2137
+ downloads.hindawi.com                 | success                 |   1787
+ dram.journals.ekb.eg                  |                         |    541
+ elib.spbstu.ru                        |                         |   1243
+ elib.spbstu.ru                        | redirect-loop           |   1214
+ elibrary.vdi-verlag.de                |                         |   1542
+ elibrary.vdi-verlag.de                | spn2-wayback-error      |    721
+ elifesciences.org                     |                         |    689
+ elifesciences.org                     | success                 |    521
+ epos.myesr.org                        |                         |    705
+ epos.myesr.org                        | spn2-wayback-error      |    604
+ europepmc.org                         |                         |   6996
+ europepmc.org                         | success                 |   6031
+ europepmc.org                         | spn2-wayback-error      |    756
+ figshare.com                          |                         |   1168
+ figshare.com                          | no-pdf-link             |    726
+ files.osf.io                          |                         |   1526
+ files.osf.io                          | success                 |   1078
+ fjfsdata01prod.blob.core.windows.net  |                         |   5410
+ fjfsdata01prod.blob.core.windows.net  | success                 |   4581
+ fjfsdata01prod.blob.core.windows.net  | spn2-wayback-error      |    587
+ fldeploc.dep.state.fl.us              |                         |    774
+ fldeploc.dep.state.fl.us              | no-pdf-link             |    718
+ geoscan.nrcan.gc.ca                   |                         |   2056
+ geoscan.nrcan.gc.ca                   | no-pdf-link             |   2019
+ hcommons.org                          |                         |   1593
+ hcommons.org                          | success                 |   1333
+ hkvalidate.perfdrive.com              |                         |   1322
+ hkvalidate.perfdrive.com              | no-pdf-link             |   1083
+ ieeexplore.ieee.org                   |                         |  20997
+ ieeexplore.ieee.org                   | too-many-redirects      |  15383
+ ieeexplore.ieee.org                   | spn2-wayback-error      |   2555
+ ieeexplore.ieee.org                   | success                 |   2165
+ ieeexplore.ieee.org                   | spn2-cdx-lookup-failure |    747
+ jamanetwork.com                       |                         |    712
+ journals.aps.org                      |                         |   1698
+ journals.aps.org                      | not-found               |   1469
+ journals.library.ualberta.ca          |                         |    733
+ journals.library.ualberta.ca          | success                 |    594
+ journals.lww.com                      |                         |   6606
+ journals.lww.com                      | link-loop               |   3102
+ journals.lww.com                      | spn2-wayback-error      |   1645
+ journals.lww.com                      | terminal-bad-status     |    965
+ journals.lww.com                      | spn2-cdx-lookup-failure |    552
+ journals.openedition.org              |                         |   4594
+ journals.openedition.org              | success                 |   1441
+ journals.openedition.org              | redirect-loop           |   1316
+ journals.openedition.org              | spn2-wayback-error      |   1197
+ journals.ub.uni-heidelberg.de         |                         |   1039
+ journals.ub.uni-heidelberg.de         | success                 |    728
+ kiss.kstudy.com                       |                         |    747
+ kiss.kstudy.com                       | no-pdf-link             |    686
+ library.iated.org                     |                         |   1560
+ library.iated.org                     | redirect-loop           |   1148
+ linkinghub.elsevier.com               |                         |   5079
+ linkinghub.elsevier.com               | forbidden               |   2226
+ linkinghub.elsevier.com               | spn2-wayback-error      |   1625
+ linkinghub.elsevier.com               | spn2-cdx-lookup-failure |    758
+ mr.crossref.org                       |                         |    542
+ nsuworks.nova.edu                     |                         |    843
+ nsuworks.nova.edu                     | success                 |    746
+ ojs.cvut.cz                           |                         |    805
+ ojs.cvut.cz                           | success                 |    764
+ ojs.ugent.be                          |                         |    867
+ ojs.ugent.be                          | success                 |    643
+ onepetro.org                          |                         |    603
+ onlinelibrary.wiley.com               |                         |   1203
+ onlinelibrary.wiley.com               | blocked-cookie          |    758
+ open.library.ubc.ca                   |                         |    559
+ osf.io                                |                         |   3139
+ osf.io                                | not-found               |   2288
+ osf.io                                | spn2-wayback-error      |    582
+ oxford.universitypressscholarship.com |                         |   3556
+ oxford.universitypressscholarship.com | link-loop               |   2373
+ oxford.universitypressscholarship.com | spn2-wayback-error      |    562
+ painphysicianjournal.com              |                         |    804
+ painphysicianjournal.com              | success                 |    668
+ papers.ssrn.com                       |                         |   6367
+ papers.ssrn.com                       | link-loop               |   3865
+ papers.ssrn.com                       | spn2-wayback-error      |   1106
+ papers.ssrn.com                       | spn2-cdx-lookup-failure |   1015
+ peerj.com                             |                         |    785
+ peerj.com                             | no-pdf-link             |    552
+ pos.sissa.it                          |                         |   1455
+ pos.sissa.it                          | success                 |   1153
+ preprints.jmir.org                    |                         |    763
+ preprints.jmir.org                    | no-pdf-link             |    611
+ psyarxiv.com                          |                         |    641
+ psyarxiv.com                          | no-pdf-link             |    546
+ publikationen.uni-tuebingen.de        |                         |    659
+ publons.com                           |                         |   6998
+ publons.com                           | no-pdf-link             |   6982
+ pubs.acs.org                          |                         |   5860
+ pubs.acs.org                          | blocked-cookie          |   5185
+ pubs.rsc.org                          |                         |   2269
+ pubs.rsc.org                          | link-loop               |   1384
+ res.mdpi.com                          |                         |  15776
+ res.mdpi.com                          | success                 |  13710
+ res.mdpi.com                          | spn2-wayback-error      |   1424
+ res.mdpi.com                          | spn2-cdx-lookup-failure |    641
+ rrs.scholasticahq.com                 |                         |   1078
+ rrs.scholasticahq.com                 | success                 |    803
+ rsdjournal.org                        |                         |    755
+ rsdjournal.org                        | success                 |    524
+ s3-eu-west-1.amazonaws.com            |                         |   3343
+ s3-eu-west-1.amazonaws.com            | success                 |   2893
+ saemobilus.sae.org                    |                         |    795
+ saemobilus.sae.org                    | no-pdf-link             |    669
+ sage.figshare.com                     |                         |    725
+ scholar.dkyobobook.co.kr              |                         |   1043
+ scholar.dkyobobook.co.kr              | no-pdf-link             |    915
+ scholarworks.umass.edu                |                         |   1196
+ scholarworks.umass.edu                | success                 |    713
+ secure.jbs.elsevierhealth.com         |                         |   4202
+ secure.jbs.elsevierhealth.com         | blocked-cookie          |   4169
+ storage.googleapis.com                |                         |   1720
+ storage.googleapis.com                | success                 |   1466
+ tandf.figshare.com                    |                         |    789
+ tandf.figshare.com                    | no-pdf-link             |    640
+ tind-customer-agecon.s3.amazonaws.com |                         |    584
+ turcomat.org                          |                         |   1196
+ turcomat.org                          | spn2-wayback-error      |    997
+ unreserved.rba.gov.au                 |                         |    823
+ unreserved.rba.gov.au                 | no-pdf-link             |    821
+ utpjournals.press                     |                         |    669
+ utpjournals.press                     | blocked-cookie          |    616
+ watermark.silverchair.com             |                         |   3560
+ watermark.silverchair.com             | success                 |   2788
+ watermark.silverchair.com             | spn2-wayback-error      |    685
+ wayf.switch.ch                        |                         |   1169
+ wayf.switch.ch                        | no-pdf-link             |    809
+ www.ahajournals.org                   |                         |    802
+ www.ahajournals.org                   | blocked-cookie          |    597
+ www.ajol.info                         |                         |    830
+ www.ajol.info                         | success                 |    575
+ www.ams.org                           |                         |    868
+ www.ams.org                           | terminal-bad-status     |    666
+ www.atlantis-press.com                |                         |   1579
+ www.atlantis-press.com                | success                 |   1071
+ www.bloomsburycollections.com         |                         |   1745
+ www.bloomsburycollections.com         | no-pdf-link             |   1571
+ www.brazilianjournals.com             |                         |   1385
+ www.brazilianjournals.com             | success                 |   1107
+ www.cairn.info                        |                         |   2479
+ www.cairn.info                        | no-pdf-link             |    818
+ www.cairn.info                        | link-loop               |    790
+ www.cambridge.org                     |                         |   6801
+ www.cambridge.org                     | no-pdf-link             |   2990
+ www.cambridge.org                     | spn2-wayback-error      |   1475
+ www.cambridge.org                     | link-loop               |    940
+ www.cambridge.org                     | success                 |    863
+ www.cureus.com                        |                         |    538
+ www.dbpia.co.kr                       |                         |   2958
+ www.dbpia.co.kr                       | redirect-loop           |   2953
+ www.degruyter.com                     |                         |  58612
+ www.degruyter.com                     | no-pdf-link             |  41065
+ www.degruyter.com                     | spn2-wayback-error      |   7426
+ www.degruyter.com                     | success                 |   6628
+ www.degruyter.com                     | spn2-cdx-lookup-failure |   1624
+ www.degruyter.com                     | terminal-bad-status     |   1565
+ www.dovepress.com                     |                         |    869
+ www.dovepress.com                     | success                 |    597
+ www.e-manuscripta.ch                  |                         |   1047
+ www.e3s-conferences.org               |                         |    817
+ www.e3s-conferences.org               | success                 |    606
+ www.elgaronline.com                   |                         |    535
+ www.elibrary.ru                       |                         |   1244
+ www.elibrary.ru                       | no-pdf-link             |   1159
+ www.emc2020.eu                        |                         |    791
+ www.emc2020.eu                        | no-pdf-link             |    748
+ www.emerald.com                       |                         |   2420
+ www.emerald.com                       | no-pdf-link             |   1986
+ www.eurekaselect.com                  |                         |    540
+ www.eurosurveillance.org              |                         |    786
+ www.eurosurveillance.org              | success                 |    710
+ www.finersistemas.com                 |                         |   1220
+ www.finersistemas.com                 | success                 |   1214
+ www.frontiersin.org                   |                         |    915
+ www.frontiersin.org                   | spn2-wayback-error      |    602
+ www.hanspub.org                       |                         |    618
+ www.humankineticslibrary.com          |                         |   1122
+ www.humankineticslibrary.com          | no-pdf-link             |    985
+ www.ijcmas.com                        |                         |    513
+ www.inderscience.com                  |                         |   1532
+ www.inderscience.com                  | no-pdf-link             |   1217
+ www.indianjournals.com                |                         |    904
+ www.ingentaconnect.com                |                         |    885
+ www.ingentaconnect.com                | no-pdf-link             |    783
+ www.journals.uchicago.edu             |                         |   6055
+ www.journals.uchicago.edu             | blocked-cookie          |   5927
+ www.journals.vu.lt                    |                         |    791
+ www.journals.vu.lt                    | success                 |    545
+ www.jstage.jst.go.jp                  |                         |   1490
+ www.jstage.jst.go.jp                  | remote-server-error     |   1023
+ www.jstor.org                         |                         |   1103
+ www.jstor.org                         | redirect-loop           |    553
+ www.karger.com                        |                         |    733
+ www.liebertpub.com                    |                         |    804
+ www.liebertpub.com                    | blocked-cookie          |    714
+ www.liverpooluniversitypress.co.uk    |                         |    620
+ www.liverpooluniversitypress.co.uk    | too-many-redirects      |    529
+ www.mdpi.com                          |                         |   3880
+ www.mdpi.com                          | spn2-wayback-error      |   1651
+ www.mdpi.com                          | forbidden               |   1282
+ www.mdpi.com                          | spn2-cdx-lookup-failure |    714
+ www.nepjol.info                       |                         |    596
+ www.nomos-elibrary.de                 |                         |   2235
+ www.nomos-elibrary.de                 | no-pdf-link             |   1128
+ www.nomos-elibrary.de                 | spn2-wayback-error      |    559
+ www.oecd-ilibrary.org                 |                         |   3046
+ www.oecd-ilibrary.org                 | no-pdf-link             |   2869
+ www.osapublishing.org                 |                         |    821
+ www.osapublishing.org                 | no-pdf-link             |    615
+ www.osti.gov                          |                         |   1147
+ www.osti.gov                          | link-loop               |    902
+ www.oxfordscholarlyeditions.com       |                         |    759
+ www.oxfordscholarlyeditions.com       | no-pdf-link             |    719
+ www.preprints.org                     |                         |    783
+ www.preprints.org                     | success                 |    595
+ www.repository.cam.ac.uk              |                         |   1146
+ www.research-collection.ethz.ch       |                         |    704
+ www.research-collection.ethz.ch       | terminal-bad-status     |    684
+ www.researchsquare.com                |                         |    853
+ www.researchsquare.com                | spn2-wayback-error      |    515
+ www.schweizerbart.de                  |                         |    730
+ www.schweizerbart.de                  | no-pdf-link             |    653
+ www.scielo.br                         |                         |   1777
+ www.scielo.br                         | success                 |   1167
+ www.sciencedirect.com                 |                         |  14757
+ www.sciencedirect.com                 | no-pdf-link             |  12733
+ www.sciencedirect.com                 | spn2-wayback-error      |   1503
+ www.sciendo.com                       |                         |   1955
+ www.sciendo.com                       | no-pdf-link             |   1176
+ www.scilook.eu                        |                         |    812
+ www.scilook.eu                        | success                 |    563
+ www.scirp.org                         |                         |    749
+ www.tandfonline.com                   |                         |  11038
+ www.tandfonline.com                   | blocked-cookie          |   9994
+ www.tandfonline.com                   | no-pdf-link             |    663
+ www.taylorfrancis.com                 |                         |  71514
+ www.taylorfrancis.com                 | spn2-wayback-error      |  36663
+ www.taylorfrancis.com                 | no-pdf-link             |  15098
+ www.taylorfrancis.com                 | forbidden               |   8699
+ www.taylorfrancis.com                 | spn2-cdx-lookup-failure |   6894
+ www.taylorfrancis.com                 | link-loop               |   3661
+ www.thieme-connect.de                 |                         |   3687
+ www.thieme-connect.de                 | redirect-loop           |   1187
+ www.thieme-connect.de                 | not-found               |    945
+ www.thieme-connect.de                 | no-pdf-link             |    941
+ www.worldscientific.com               |                         |   1476
+ www.worldscientific.com               | blocked-cookie          |   1323
+ www.zora.uzh.ch                       |                         |   1118
+ zenodo.org                            |                         |  43010
+ zenodo.org                            | no-pdf-link             |  22015
+ zenodo.org                            | success                 |  12747
+ zenodo.org                            | spn2-wayback-error      |   4608
+ zenodo.org                            | spn2-cdx-lookup-failure |   3215
+                                       |                         | 725990
+                                       | no-pdf-link             | 209933
+                                       | success                 | 206134
+                                       | spn2-wayback-error      | 127015
+                                       | spn2-cdx-lookup-failure |  53384
+                                       | blocked-cookie          |  35867
+                                       | link-loop               |  25834
+                                       | too-many-redirects      |  16430
+                                       | redirect-loop           |  14648
+                                       | forbidden               |  13794
+                                       | terminal-bad-status     |   8055
+                                       | not-found               |   6399
+                                       | remote-server-error     |   2402
+                                       | wrong-mimetype          |   2011
+                                       | spn2-error:unauthorized |    912
+                                       | bad-redirect            |    555
+                                       | read-timeout            |    530
+(341 rows)
+
