@@ -266,7 +266,8 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             self.result_to_html_meta(r) for r in batch if r.get('hit') and r.get('html_body')
         ]
         if html_meta_batch:
-            resp = self.db.insert_html_meta(self.cur, html_meta_batch, on_conflict="update")
+            rows = [d.to_sql_tuple() for d in html_meta_batch]
+            resp = self.db.insert_html_meta(self.cur, rows, on_conflict="update")
             self.counts['insert-html_meta'] += resp[0]
             self.counts['update-html_meta'] += resp[1]
 
@@ -534,7 +535,8 @@ class PersistPdfTextWorker(SandcrawlerWorker):
                 self.counts['s3-put'] += 1
 
         if not self.s3_only:
-            resp = self.db.insert_pdf_meta(self.cur, parsed_batch, on_conflict="update")
+            rows = [r.to_sql_tuple() for r in parsed_batch]
+            resp = self.db.insert_pdf_meta(self.cur, rows, on_conflict="update")
             self.counts['insert-pdf-meta'] += resp[0]
             self.counts['update-pdf-meta'] += resp[1]
 
