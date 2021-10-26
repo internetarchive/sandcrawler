@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "841959cff7513dcc07a9946a4d0e83d9833860d35a13ee4125de5f53aaa3cfcd"
+            "sha256": "ca9b01c621a8ab8779e1f3d8297e6151c6bf7900c1de28abcfd25fe8d9565389"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1584,6 +1584,22 @@
                 "sha256:2d313cc50a42cd6c277e7d7dc8d4d7fedd06a2c215f78766ae7b1a66277e0033"
             ],
             "version": "==5.1.1"
+        },
+        "types-dateparser": {
+            "hashes": [
+                "sha256:175f33965829f8393f0235799a71b2d102643c85e9cc704afe37b820b7062e96",
+                "sha256:9169705a0d05286cc9f2c5b3bea9ef5c541f898199f30707657d4749df40ad3c"
+            ],
+            "index": "ia",
+            "version": "==1.0.7"
+        },
+        "types-requests": {
+            "hashes": [
+                "sha256:b279284e51f668e38ee12d9665e4d789089f532dc2a0be4a1508ca0efd98ba9e",
+                "sha256:ba1d108d512e294b6080c37f6ae7cb2a2abf527560e2b671d1786c1fc46b541a"
+            ],
+            "index": "ia",
+            "version": "==2.25.11"
         },
         "typing-extensions": {
             "hashes": [

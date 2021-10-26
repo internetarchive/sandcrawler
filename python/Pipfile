@@ -22,6 +22,8 @@ flake8 = "*"
 flake8-annotations = "*"
 isort = "*"
 yapf = "*"
+types-requests = "*"
+types-dateparser = "*"
 
 [packages]
 requests = ">=2"
