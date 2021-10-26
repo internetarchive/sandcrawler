@@ -683,11 +683,10 @@ class WaybackClient:
         urls_seen = [start_url]
         for i in range(self.max_redirects + 1):
             print("  URL: {}".format(next_url), file=sys.stderr)
-            cdx_row = self.cdx_client.lookup_best(next_url,
-                                                  best_mimetype=best_mimetype,
-                                                  closest=closest)
-            #print(cdx_row, file=sys.stderr)
-            if not cdx_row:
+            next_row: Optional[CdxRow] = self.cdx_client.lookup_best(
+                next_url, best_mimetype=best_mimetype, closest=closest)
+            #print(next_row, file=sys.stderr)
+            if not next_row:
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,
@@ -699,6 +698,8 @@ class WaybackClient:
                     cdx=None,
                     revisit_cdx=None,
                 )
+
+            cdx_row: CdxRow = next_row
 
             # first try straight-forward redirect situation
             if cdx_row.mimetype == "warc/revisit" and '/' in cdx_row.warc_path:
@@ -778,14 +779,15 @@ class WaybackClient:
                     if next_url:
                         next_url = clean_url(next_url)
                 else:
-                    next_url = self.fetch_replay_redirect(
+                    redirect_url = self.fetch_replay_redirect(
                         url=cdx_row.url,
                         datetime=cdx_row.datetime,
                     )
-                    if next_url:
-                        next_url = clean_url(next_url)
-                    cdx_row = cdx_partial_from_row(cdx_row)
-                    if not next_url:
+                    if redirect_url:
+                        redirect_url = clean_url(redirect_url)
+                    if redirect_url:
+                        next_url = redirect_url
+                    else:
                         print("  bad redirect record: {}".format(cdx_row), file=sys.stderr)
                         return ResourceResult(
                             start_url=start_url,
