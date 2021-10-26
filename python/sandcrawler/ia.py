@@ -681,7 +681,7 @@ class WaybackClient:
         """
         next_url = start_url
         urls_seen = [start_url]
-        for i in range(self.max_redirects):
+        for i in range(self.max_redirects + 1):
             print("  URL: {}".format(next_url), file=sys.stderr)
             cdx_row = self.cdx_client.lookup_best(next_url,
                                                   best_mimetype=best_mimetype,
