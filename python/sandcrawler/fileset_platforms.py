@@ -54,6 +54,7 @@ class FilesetPlatformHelper():
 class DataverseHelper(FilesetPlatformHelper):
 
     def __init__(self):
+        super().__init__()
         self.platform_name = 'dataverse'
         self.session = requests.Session()
 
@@ -324,6 +325,7 @@ def test_parse_dataverse_persistentid():
 class FigshareHelper(FilesetPlatformHelper):
 
     def __init__(self):
+        super().__init__()
         self.platform_name = 'figshare'
         self.session = requests.Session()
 
@@ -337,15 +339,20 @@ class FigshareHelper(FilesetPlatformHelper):
         Raises a ValueError if not a figshare URL
         """
         # eg: /articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858/1
+        #     /articles/dataset/STable_1_U-Pb_geochronologic_analyses_on_samples_xls/12127176/4
 
         comp = path.split('/')
         if len(comp) < 4 or comp[1] != 'articles':
             raise ValueError(f"not a figshare URL: {path}")
 
-        if len(comp) == 5 and comp[3].isdigit() and comp[4].isdigit():
-            return (comp[3], comp[4])
-        elif len(comp) == 4 and comp[3].isdigit():
-            return (comp[3], None)
+        comp = comp[2:]
+        if comp[0] in ['dataset',]:
+            comp = comp[1:]
+
+        if len(comp) == 3 and comp[1].isdigit() and comp[2].isdigit():
+            return (comp[1], comp[2])
+        elif len(comp) == 2 and comp[1].isdigit():
+            return (comp[1], None)
         else:
             raise ValueError(f"couldn't find figshare identiier: {path}")
 
@@ -455,6 +462,7 @@ def test_parse_figshare_url_path():
         "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858/1": ("8987858", "1"),
         "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858": ("8987858", None),
         "/articles/CIBERSORT_p-value_0_05/8217188/1": ("8217188", "1"),
+        "/articles/dataset/STable_1_U-Pb_geochronologic_analyses_on_samples_xls/12127176/4": ("12127176", "4"),
     }
 
     invalid = [
@@ -474,6 +482,7 @@ def test_parse_figshare_url_path():
 class ZenodoHelper(FilesetPlatformHelper):
 
     def __init__(self):
+        super().__init__()
         self.platform_name = 'zenodo'
         self.session = requests.Session()
 
@@ -619,6 +628,7 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
     }
 
     def __init__(self):
+        super().__init__()
         self.platform_name = 'archiveorg'
         self.session = internetarchive.get_session()
 

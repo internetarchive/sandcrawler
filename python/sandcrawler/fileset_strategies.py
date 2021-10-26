@@ -32,6 +32,7 @@ class FilesetIngestStrategy():
 class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
 
     def __init__(self, **kwargs):
+        super().__init__()
         self.ingest_strategy = IngestStrategy.ArchiveorgFileset
 
         # TODO: enable cleanup when confident (eg, safe path parsing)
@@ -195,10 +196,12 @@ class ArchiveorgFileStrategy(ArchiveorgFilesetStrategy):
 class WebFilesetStrategy(FilesetIngestStrategy):
 
     def __init__(self, **kwargs):
+        super().__init__()
         self.ingest_strategy = IngestStrategy.WebFileset
         self.wayback_client = WaybackClient()
         self.try_spn2 = True
         self.spn_client = SavePageNowClient(spn_cdx_retry_sec=kwargs.get('spn_cdx_retry_sec', 9.0))
+        self.max_spn_manifest = 20
 
     def process(self, item: FilesetPlatformItem) -> ArchiveStrategyResult:
         """
@@ -219,10 +222,12 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             via = "wayback"
             resource = self.wayback_client.lookup_resource(fetch_url, m.mimetype)
 
-
             if self.try_spn2 and (resource == None or (resource and resource.status == 'no-capture')):
+                if len(item.manifest) > self.max_spn_manifest:
+                    m.status = 'too-much-spn'
+                    continue
                 via = "spn2"
-                resource = self.spn_client.crawl_resource(fetch_url, self.wayback_client)
+                resource = self.spn_client.crawl_resource(fetch_url, self.wayback_client, force_simple_get=True)
 
             print("[FETCH {:>6}] {}  {}".format(
                     via,
