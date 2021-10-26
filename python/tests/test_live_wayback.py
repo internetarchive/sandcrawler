@@ -139,7 +139,7 @@ def test_lookup_ftp(wayback_client):
     assert resp.hit is True
     assert resp.status == "success"
     assert resp.terminal_url == url
-    assert resp.terminal_status_code == 226
+    assert resp.terminal_status_code in (226, 200)
     assert resp.cdx.url == url
     assert resp.revisit_cdx
     assert resp.revisit_cdx.url != url
@@ -154,7 +154,7 @@ def test_lookup_ftp(wayback_client):
     assert resp.hit is True
     assert resp.status == "success"
     assert resp.terminal_url == url
-    assert resp.terminal_status_code == 226
+    assert resp.terminal_status_code in (226, 200)
     assert resp.cdx.url == url
 
     file_meta = gen_file_metadata(resp.body)
