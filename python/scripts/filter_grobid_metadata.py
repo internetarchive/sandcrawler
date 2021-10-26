@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import json
+import sys
 
 with open('title_slug_denylist.txt', 'r') as f:
     TITLE_DENYLIST = [l.strip() for l in f]

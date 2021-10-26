@@ -1,30 +1,30 @@
 
-import sys
-import json
-import gzip
-import time
 import base64
+import gzip
+import json
+import sys
+import time
 import xml.etree.ElementTree
 from collections import namedtuple
-from typing import Optional, Tuple, Any, Dict, List
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from selectolax.parser import HTMLParser
 
-from sandcrawler.ia import SavePageNowClient, CdxApiClient, WaybackClient, WaybackError, WaybackContentError, SavePageNowError, CdxApiError, PetaboxError, cdx_to_dict, ResourceResult, fix_transfer_encoding, NoCaptureError
-from sandcrawler.grobid import GrobidClient
-from sandcrawler.pdfextract import process_pdf, PdfExtractResult
-from sandcrawler.misc import gen_file_metadata, clean_url, parse_cdx_datetime
-from sandcrawler.html import extract_fulltext_url
-from sandcrawler.ingest_html import fetch_html_resources, \
-    quick_fetch_html_resources, html_guess_scope, html_extract_body_teixml, \
-    WebResource, html_guess_platform
-from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
-from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgrestClient
+from sandcrawler.grobid import GrobidClient
+from sandcrawler.html import extract_fulltext_url
+from sandcrawler.html_metadata import BiblioMetadata, html_extract_biblio, html_extract_resources, load_adblock_rules
+from sandcrawler.ia import (CdxApiClient, CdxApiError, NoCaptureError, PetaboxError, ResourceResult, SavePageNowClient,
+                            SavePageNowError, WaybackClient, WaybackContentError, WaybackError, cdx_to_dict,
+                            fix_transfer_encoding)
+from sandcrawler.ingest_html import (WebResource, fetch_html_resources, html_extract_body_teixml, html_guess_platform,
+                                     html_guess_scope, quick_fetch_html_resources)
+from sandcrawler.misc import clean_url, gen_file_metadata, parse_cdx_datetime
+from sandcrawler.pdfextract import PdfExtractResult, process_pdf
+from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.xml import xml_reserialize
-
 
 MAX_BODY_SIZE_BYTES = 128*1024*1024
 

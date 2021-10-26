@@ -2,8 +2,10 @@
 import requests
 
 from grobid2json import teixml2json
-from .workers import SandcrawlerWorker, SandcrawlerFetchWorker
+
 from .misc import gen_file_metadata
+from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
+
 
 class GrobidClient(object):
 

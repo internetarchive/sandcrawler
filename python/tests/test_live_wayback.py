@@ -8,9 +8,11 @@ Simply uncomment lines to run.
 """
 
 import json
+
 import pytest
 
-from sandcrawler import CdxApiClient, CdxApiError, WaybackClient, WaybackError, PetaboxError, SavePageNowClient, SavePageNowError, CdxPartial, gen_file_metadata
+from sandcrawler import (CdxApiClient, CdxApiError, CdxPartial, PetaboxError, SavePageNowClient, SavePageNowError,
+                         WaybackClient, WaybackError, gen_file_metadata)
 
 
 @pytest.fixture

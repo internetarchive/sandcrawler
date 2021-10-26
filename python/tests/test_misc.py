@@ -1,7 +1,8 @@
 
 import pytest
 
-from sandcrawler import gen_file_metadata, gen_file_metadata_path,  b32_hex, parse_cdx_line, clean_url
+from sandcrawler import b32_hex, clean_url, gen_file_metadata, gen_file_metadata_path, parse_cdx_line
+
 
 def test_gen_file_metadata():
     

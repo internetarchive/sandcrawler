@@ -23,12 +23,12 @@ Requires:
 - boto3 (AWS S3 client library)
 """
 
-import os
-import sys
-import json
+import argparse
 import base64
 import hashlib
-import argparse
+import json
+import os
+import sys
 from collections import Counter
 
 import boto3

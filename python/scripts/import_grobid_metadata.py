@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import sys
-import json
 import datetime
+import json
+import sys
 
 MAX_ABSTRACT_BYTES=4096
 

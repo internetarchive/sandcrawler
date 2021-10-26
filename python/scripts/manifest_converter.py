@@ -10,9 +10,9 @@ This was used to convert this manifest:
 to JSON format for fast fatcat importing.
 """
 
-import sys
 import json
 import sqlite3
+import sys
 
 # iterate over rows in files metadata...
 # 1. select all identified DOIs

@@ -22,8 +22,9 @@ When invoking import matched, be sure to:
     --default-mimetype application/pdf
 """
 
-import sys
 import json
+import sys
+
 
 def parse(obj):
     if obj['metadata']['identifier'].endswith('-test') or obj['metadata'].get('test'):

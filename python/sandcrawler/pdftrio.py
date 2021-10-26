@@ -1,9 +1,10 @@
 
 import time
+
 import requests
 
-from .workers import SandcrawlerWorker, SandcrawlerFetchWorker
 from .misc import gen_file_metadata, requests_retry_session
+from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 
 class PdfTrioClient(object):

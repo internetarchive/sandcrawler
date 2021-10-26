@@ -7,9 +7,9 @@ format) back in to regular ingest request JSON.
 The only difference is the name and location of some optional keys.
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 
 
 def transform(row):

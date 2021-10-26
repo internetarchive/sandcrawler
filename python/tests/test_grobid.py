@@ -1,11 +1,11 @@
 
-import pytest
 import struct
+
+import pytest
 import responses
+from test_wayback import cdx_client, wayback_client
 
-from sandcrawler import GrobidClient, GrobidWorker, CdxLinePusher, BlackholeSink, WaybackClient
-from test_wayback import wayback_client, cdx_client
-
+from sandcrawler import BlackholeSink, CdxLinePusher, GrobidClient, GrobidWorker, WaybackClient
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
 

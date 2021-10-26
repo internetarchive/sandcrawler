@@ -4,10 +4,10 @@
 KNOWN ISSUE: thumbnails are not published to kafka in multi-processing mode
 """
 
-import sys
-import json
 import argparse
 import datetime
+import json
+import sys
 
 from grobid2json import teixml2json
 from sandcrawler import *

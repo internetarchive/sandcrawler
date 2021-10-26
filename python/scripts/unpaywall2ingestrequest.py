@@ -4,9 +4,10 @@
 Transform an unpaywall dump (JSON) into ingest requests.
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
+
 import urlcanon
 
 DOMAIN_BLOCKLIST = [

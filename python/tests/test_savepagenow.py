@@ -1,11 +1,11 @@
 
 import json
+
 import pytest
 import responses
-
-from sandcrawler import SavePageNowClient, SavePageNowError, CdxPartial
 from test_wayback import *
 
+from sandcrawler import CdxPartial, SavePageNowClient, SavePageNowError
 
 TARGET = "http://dummy-target.dummy"
 JOB_ID = "e70f33c7-9eca-4c88-826d-26930564d7c8"

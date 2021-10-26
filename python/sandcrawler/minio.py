@@ -1,7 +1,7 @@
 
+import hashlib
 import io
 import os
-import hashlib
 
 import minio
 

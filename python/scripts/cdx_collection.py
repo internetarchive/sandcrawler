@@ -11,12 +11,14 @@ Call with a collection name:
 """
 
 import os
-import sys
 import shutil
-import tempfile
-import requests
 import subprocess
+import sys
+import tempfile
+
 import internetarchive as ia
+import requests
+
 
 def run():
 

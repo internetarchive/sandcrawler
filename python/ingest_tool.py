@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
-import json
 import argparse
-
+import json
+import sys
 from http.server import HTTPServer
+
 from sandcrawler.ingest_file import IngestFileRequestHandler, IngestFileWorker
 from sandcrawler.ingest_fileset import IngestFilesetWorker
 

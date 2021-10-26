@@ -7,19 +7,19 @@ Tool for bulk copying of PDFs (or other files) from GWB to local disk.
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
-import os
-import sys
-import json
+import argparse
 import base64
 import hashlib
-import argparse
+import json
+import os
+import sys
 from collections import Counter
+from http.client import IncompleteRead
 
 import raven
 import wayback.exception
-from http.client import IncompleteRead
-from wayback.resourcestore import ResourceStore
 from gwb.loader import CDXLoaderFactory
+from wayback.resourcestore import ResourceStore
 
 # Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
 sentry_client = raven.Client()

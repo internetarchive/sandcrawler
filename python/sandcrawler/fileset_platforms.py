@@ -1,18 +1,18 @@
 
-import sys
-import json
 import gzip
+import json
+import sys
 import time
 import urllib.parse
 from collections import namedtuple
-from typing import Optional, Tuple, Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
-import requests
 import internetarchive
+import requests
 
+from sandcrawler.fileset_types import *
 from sandcrawler.html_metadata import BiblioMetadata
 from sandcrawler.ia import ResourceResult
-from sandcrawler.fileset_types import *
 
 
 class FilesetPlatformHelper():

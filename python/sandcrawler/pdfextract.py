@@ -1,17 +1,16 @@
 
-import sys
-import json
 import datetime
-from io import BytesIO
+import json
+import sys
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from io import BytesIO
+from typing import Any, Dict, Optional
 
 import poppler
 from PIL import Image
 
-from .workers import SandcrawlerWorker, SandcrawlerFetchWorker
 from .misc import gen_file_metadata
-
+from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 # This is a hack to work around timeouts when processing certain PDFs with
 # poppler. For some reason, the usual Kafka timeout catcher isn't working on

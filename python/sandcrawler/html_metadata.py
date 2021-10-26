@@ -1,16 +1,15 @@
 
-import sys
 import datetime
-from typing import List, Optional, Any, Tuple, Dict
+import sys
 import urllib.parse
+from typing import Any, Dict, List, Optional, Tuple
 
-import dateparser
-from selectolax.parser import HTMLParser
-import pydantic
 import braveblock
+import dateparser
+import pydantic
+from selectolax.parser import HTMLParser
 
 from sandcrawler.misc import url_fuzzy_equal
-
 
 # this is a map of metadata keys to CSS selectors
 # sources for this list include:

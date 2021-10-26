@@ -1,13 +1,13 @@
 
-import pytest
 import struct
-import responses
+
 import poppler
+import pytest
+import responses
+from test_wayback import cdx_client, wayback_client
 
-from sandcrawler import PdfExtractWorker, PdfExtractBlobWorker, CdxLinePusher, BlackholeSink, WaybackClient
+from sandcrawler import BlackholeSink, CdxLinePusher, PdfExtractBlobWorker, PdfExtractWorker, WaybackClient
 from sandcrawler.pdfextract import process_pdf
-from test_wayback import wayback_client, cdx_client
-
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
 

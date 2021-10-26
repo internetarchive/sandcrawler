@@ -1,15 +1,15 @@
 
-import os
 import base64
-import magic
-import hashlib
 import datetime
+import hashlib
+import os
 from typing import Optional
 
+import magic
 import requests
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry # pylint: disable=import-error
 import urlcanon
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry  # pylint: disable=import-error
 
 
 def clean_url(s: str) -> str:

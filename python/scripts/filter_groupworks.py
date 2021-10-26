@@ -18,8 +18,8 @@ Note: the actual importer/merger should filter the following patterns out:
 - dates differ (not just year)
 """
 
-import sys
 import json
+import sys
 
 # out of 1000
 SCORE_THRESHOLD = 900

@@ -6,9 +6,10 @@ Transform an OAI-PMH bulk dump (JSON) into ingest requests.
 Eg: https://archive.org/details/oai_harvest_20200215
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
+
 import urlcanon
 
 DOMAIN_BLOCKLIST = [

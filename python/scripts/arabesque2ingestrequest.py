@@ -12,9 +12,9 @@ Run like:
 Can then run through requests using that tool, or dump into kafka queue.
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 
 
 def run(args):

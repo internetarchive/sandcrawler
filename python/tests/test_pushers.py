@@ -1,7 +1,7 @@
 
 import pytest
 
-from sandcrawler.workers import CdxLinePusher, BlackholeSink
+from sandcrawler.workers import BlackholeSink, CdxLinePusher
 
 
 def test_cdx_line_pusher():

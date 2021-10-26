@@ -23,11 +23,11 @@ A flag can be specified to disable copyright encumbered bits (--no-emcumbered):
 Prints JSON to stdout, errors to stderr
 """
 
+import argparse
 import io
 import json
-import argparse
 import xml.etree.ElementTree as ET
-from typing import List, Any, Dict, AnyStr, Optional
+from typing import Any, AnyStr, Dict, List, Optional
 
 xml_ns = "http://www.w3.org/XML/1998/namespace"
 ns = "http://www.tei-c.org/ns/1.0"

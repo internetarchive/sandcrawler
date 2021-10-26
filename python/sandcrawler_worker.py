@@ -6,14 +6,15 @@ Outputs might either be pushed back into Kafka, or directly into sandcrawler-db
 or S3 (SeaweedFS).
 """
 
-import os
-import sys
 import argparse
 import datetime
+import os
+import sys
+
 import raven
 
 from sandcrawler import *
-from sandcrawler.persist import PersistXmlDocWorker, PersistHtmlTeiXmlWorker
+from sandcrawler.persist import PersistHtmlTeiXmlWorker, PersistXmlDocWorker
 
 # Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
 try:

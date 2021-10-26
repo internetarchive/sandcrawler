@@ -1,18 +1,19 @@
 
-import os
-import sys
-import json
 import gzip
-import time
+import json
+import os
 import shutil
+import sys
+import time
 from collections import namedtuple
-from typing import Optional, Tuple, Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import internetarchive
 
+from sandcrawler.fileset_types import (ArchiveStrategyResult, FilesetManifestFile, FilesetPlatformItem, IngestStrategy,
+                                       PlatformScopeError)
 from sandcrawler.html_metadata import BiblioMetadata
-from sandcrawler.ia import ResourceResult, WaybackClient, SavePageNowClient, fix_transfer_encoding
-from sandcrawler.fileset_types import IngestStrategy, FilesetManifestFile, FilesetPlatformItem, ArchiveStrategyResult, PlatformScopeError
+from sandcrawler.ia import ResourceResult, SavePageNowClient, WaybackClient, fix_transfer_encoding
 from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path, sanitize_fs_path
 
 

@@ -3,29 +3,31 @@
 # in `wayback` library. Means we can't run pylint.
 # pylint: skip-file
 
+import datetime
+import gzip
+import http.client
+import json
 import os
 import sys
 import time
-import gzip
-import json
-import requests
-import datetime
 import urllib.parse
-import urllib3.exceptions
-from typing import Tuple
 from collections import namedtuple
+from typing import Tuple
 
-import http.client
+import requests
+import urllib3.exceptions
 
 # not sure this will really work. Should go before wayback imports.
 http.client._MAXHEADERS = 1000  # type: ignore
 
-import wayback.exception
 from http.client import IncompleteRead
-from wayback.resourcestore import ResourceStore
-from gwb.loader import CDXLoaderFactory3
 
-from .misc import b32_hex, requests_retry_session, gen_file_metadata, clean_url
+import wayback.exception
+from gwb.loader import CDXLoaderFactory3
+from wayback.resourcestore import ResourceStore
+
+from .misc import b32_hex, clean_url, gen_file_metadata, requests_retry_session
+
 
 class SandcrawlerBackoffError(Exception):
     """

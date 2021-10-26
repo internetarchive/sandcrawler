@@ -1,20 +1,20 @@
 
-import io
-import sys
-import json
-import datetime
 import argparse
+import datetime
+import io
+import json
+import sys
 import xml.etree.ElementTree as ET
-from typing import List, Optional, Any, Tuple
+from typing import Any, List, Optional, Tuple
 
-import trafilatura
 import pydantic
+import trafilatura
 from selectolax.parser import HTMLParser
 
-from sandcrawler.ia import WaybackClient, CdxApiClient, ResourceResult, cdx_to_dict, fix_transfer_encoding, NoCaptureError, WaybackContentError
-from sandcrawler.misc import gen_file_metadata, parse_cdx_datetime, datetime_to_cdx, clean_url, url_fuzzy_equal
-from sandcrawler.html_metadata import BiblioMetadata, html_extract_resources, html_extract_biblio, load_adblock_rules
-
+from sandcrawler.html_metadata import BiblioMetadata, html_extract_biblio, html_extract_resources, load_adblock_rules
+from sandcrawler.ia import (CdxApiClient, NoCaptureError, ResourceResult, WaybackClient, WaybackContentError,
+                            cdx_to_dict, fix_transfer_encoding)
+from sandcrawler.misc import clean_url, datetime_to_cdx, gen_file_metadata, parse_cdx_datetime, url_fuzzy_equal
 
 TRAFILATURA_AGENT = f"trafilatura/{trafilatura.__version__}"
 

@@ -1,16 +1,17 @@
 
-import sys
 import json
-import time
-import signal
-import zipfile
-import requests
 import multiprocessing.pool
+import signal
+import sys
+import time
+import zipfile
 from collections import Counter
-from confluent_kafka import Consumer, Producer, KafkaException
 
+import requests
+from confluent_kafka import Consumer, KafkaException, Producer
+
+from .ia import PetaboxError, SandcrawlerBackoffError, WaybackContentError, WaybackError
 from .misc import parse_cdx_line
-from .ia import SandcrawlerBackoffError, WaybackError, WaybackContentError, PetaboxError
 
 
 class SandcrawlerWorker(object):

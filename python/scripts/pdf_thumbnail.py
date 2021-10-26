@@ -7,6 +7,7 @@ Originally used to benchmark and compare file size/quality.
 """
 
 import sys
+
 import poppler
 from PIL import Image
 

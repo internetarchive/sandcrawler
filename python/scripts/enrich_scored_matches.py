@@ -17,9 +17,10 @@ And outputs JSON objects that are can be imported into fatcat with the
 No dependencies (only python3 stdlib)
 """
 
-import sys
-import json
 import base64
+import json
+import sys
+
 
 def run():
     for line in sys.stdin:

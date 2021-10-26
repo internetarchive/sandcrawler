@@ -9,11 +9,12 @@ in the HTML headers and adds an ingest request on that basis. Or even just run
 the re-ingest in-process and publish a second result.
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
+from typing import List, Optional
+
 import urlcanon
-from typing import Optional, List
 
 DOMAIN_BLOCKLIST = [
     # large OA publishers (we get via DOI)

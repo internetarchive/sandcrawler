@@ -7,9 +7,9 @@ Normally this is done by workers (in sandcrawler_worker.py) consuming from
 Kafka feeds, but sometimes we have bulk processing output we want to backfill.
 """
 
+import argparse
 import os
 import sys
-import argparse
 
 from sandcrawler import *
 from sandcrawler.persist import *

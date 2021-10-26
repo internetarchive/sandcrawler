@@ -1,7 +1,7 @@
 
+import json
 import re
 import sys
-import json
 import urllib.parse
 
 from bs4 import BeautifulSoup

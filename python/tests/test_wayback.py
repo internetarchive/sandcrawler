@@ -1,10 +1,10 @@
 
 import json
+
 import pytest
 import responses
 
-from sandcrawler import CdxApiClient, CdxApiError, WaybackClient, WaybackError, PetaboxError
-
+from sandcrawler import CdxApiClient, CdxApiError, PetaboxError, WaybackClient, WaybackError
 
 CDX_TARGET = "http://fatcat.wiki/"
 CDX_DT = "20180812220054"

@@ -1,8 +1,9 @@
 
 from enum import Enum
-from typing import Optional, Tuple, Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel
+
 
 class IngestStrategy(str, Enum):
     WebFile = "web-file"

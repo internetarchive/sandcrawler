@@ -10,10 +10,11 @@ Run in bulk like:
     ls /bigger/unpaywall-transfer/2019-07-17-1741.30-dumpgrobidxml/part*gz | parallel --progress -j8 'zcat {} | ./grobid_affiliations.py > {}.affiliations'
 """
 
-import sys
 import json
+import sys
 
 from grobid2json import teixml2json
+
 
 def parse_hbase(line):
     line = line.split('\t')

@@ -9,12 +9,11 @@ TODO:
 - should this check the item type?
 """
 
-import sys
 import json
+import sys
 from typing import Any
 
 import internetarchive
-
 
 FORMAT_TO_MIMETYPE = {
     'BZIP': 'application/x-bzip',

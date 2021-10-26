@@ -1,12 +1,13 @@
 
 import json
+
 import pytest
 import responses
+from test_grobid import REAL_TEI_XML
+from test_savepagenow import *
+from test_wayback import *
 
 from sandcrawler import *
-from test_wayback import *
-from test_savepagenow import *
-from test_grobid import REAL_TEI_XML
 
 
 @pytest.fixture

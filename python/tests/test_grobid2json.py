@@ -1,7 +1,9 @@
 
-import xml
 import json
+import xml
+
 import pytest
+
 from grobid2json import *
 
 

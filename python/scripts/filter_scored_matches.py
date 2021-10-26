@@ -10,8 +10,8 @@ matches, and outputs one-line-per-sha1 (aka, file).
 No dependencies (only python3 stdlib)
 """
 
-import sys
 import json
+import sys
 
 # out of 1000
 score_threshold = 900

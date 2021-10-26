@@ -20,15 +20,15 @@ grobid
 """
 
 import os
-from typing import Optional, AnyStr
 import xml.etree.ElementTree
+from typing import AnyStr, Optional
 
-from sandcrawler.workers import SandcrawlerWorker
 from sandcrawler.db import SandcrawlerPostgresClient
-from sandcrawler.minio import SandcrawlerMinioClient
 from sandcrawler.grobid import GrobidClient
-from sandcrawler.pdfextract import PdfExtractResult
 from sandcrawler.ingest_html import HtmlMetaRow
+from sandcrawler.minio import SandcrawlerMinioClient
+from sandcrawler.pdfextract import PdfExtractResult
+from sandcrawler.workers import SandcrawlerWorker
 
 
 class PersistCdxWorker(SandcrawlerWorker):
