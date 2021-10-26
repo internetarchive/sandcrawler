@@ -1,6 +1,15 @@
 [flake8]
 select = C,E,F,W,ANN
-ignore = F405,F403,W503,E231,E203,E501,E226,E711,E713,ANN101,ANN204,ANN102
-max-complexity = 20
+# TODO: C901 is complexity, should be re-enabled at some point
+# TODO: ANN201,ANN001,ANN202,ANN206,ANN205 are core annotations, should be enabled
+# TODO: E251,W504,E126,E125 are unfortunate yapf behaviors; could try to work around them?
+# ANN003 is just type annotation on, eg, **kwargs
+# E266 disallows multiple #, eg in section dividers
+ignore = E266,F405,F403,W503,E231,E203,E501,E226,E711,E713,E265,ANN101,ANN204,ANN102,C901,ANN201,ANN001,ANN202,ANN206,ANN003,ANN205,E251,W504,E126,E125
+per-file-ignores =
+    sandcrawler/__init__.py: F401
+    tests/*.py: ANN201,ANN001
+    sandcrawler/ia.py: E402
 exclude = .git,__pycache__,.venv,scripts/
 max-line-length = 96
+max-complexity = 30
