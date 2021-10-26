@@ -1,4 +1,3 @@
-
 import datetime
 import json
 from typing import Optional
@@ -9,17 +8,16 @@ import requests
 
 
 class SandcrawlerPostgrestClient:
-
     def __init__(self, api_url="http://wbgrp-svc506.us.archive.org:3030", **kwargs):
         self.api_url = api_url
 
     def get_cdx(self, url):
-        resp = requests.get(self.api_url + "/cdx", params=dict(url='eq.'+url))
+        resp = requests.get(self.api_url + "/cdx", params=dict(url='eq.' + url))
         resp.raise_for_status()
         return resp.json() or None
 
     def get_grobid(self, sha1):
-        resp = requests.get(self.api_url + "/grobid", params=dict(sha1hex='eq.'+sha1))
+        resp = requests.get(self.api_url + "/grobid", params=dict(sha1hex='eq.' + sha1))
         resp.raise_for_status()
         resp = resp.json()
         if resp:
@@ -28,7 +26,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_pdftrio(self, sha1):
-        resp = requests.get(self.api_url + "/pdftrio", params=dict(sha1hex='eq.'+sha1))
+        resp = requests.get(self.api_url + "/pdftrio", params=dict(sha1hex='eq.' + sha1))
         resp.raise_for_status()
         resp = resp.json()
         if resp:
@@ -37,7 +35,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_pdf_meta(self, sha1):
-        resp = requests.get(self.api_url + "/pdf_meta", params=dict(sha1hex='eq.'+sha1))
+        resp = requests.get(self.api_url + "/pdf_meta", params=dict(sha1hex='eq.' + sha1))
         resp.raise_for_status()
         resp = resp.json()
         if resp:
@@ -58,7 +56,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_file_meta(self, sha1):
-        resp = requests.get(self.api_url + "/file_meta", params=dict(sha1hex='eq.'+sha1))
+        resp = requests.get(self.api_url + "/file_meta", params=dict(sha1hex='eq.' + sha1))
         resp.raise_for_status()
         resp = resp.json()
         if resp:
@@ -91,7 +89,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_crossref(self, doi):
-        resp = requests.get(self.api_url + "/crossref", params=dict(doi='eq.'+doi))
+        resp = requests.get(self.api_url + "/crossref", params=dict(doi='eq.' + doi))
         resp.raise_for_status()
         resp = resp.json()
         if resp:
@@ -99,8 +97,8 @@ class SandcrawlerPostgrestClient:
         else:
             return None
 
-class SandcrawlerPostgresClient:
 
+class SandcrawlerPostgresClient:
     def __init__(self, db_url, **kwargs):
         self.conn = psycopg2.connect(db_url)
 
@@ -135,14 +133,8 @@ class SandcrawlerPostgresClient:
         batch = [d for d in batch if d.get('warc_path')]
         if not batch:
             return (0, 0)
-        batch = [(d['url'],
-                  d['datetime'],
-                  d['sha1hex'],
-                  d['mimetype'],
-                  d['warc_path'],
-                  int(d['warc_csize']),
-                  int(d['warc_offset']))
-                 for d in batch]
+        batch = [(d['url'], d['datetime'], d['sha1hex'], d['mimetype'], d['warc_path'],
+                  int(d['warc_csize']), int(d['warc_offset'])) for d in batch]
         # filter out duplicate rows by key (url, datetime)
         batch_dict = dict()
         for b in batch:
@@ -170,12 +162,8 @@ class SandcrawlerPostgresClient:
         else:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))
         sql += " RETURNING xmax;"
-        batch = [(d['sha1hex'],
-                  d['sha256hex'],
-                  d['md5hex'],
-                  int(d['size_bytes']),
-                  d['mimetype'])
-                 for d in batch]
+        batch = [(d['sha1hex'], d['sha256hex'], d['md5hex'], int(d['size_bytes']),
+                  d['mimetype']) for d in batch]
         # filter out duplicate rows by key (sha1hex)
         batch_dict = dict()
         for b in batch:
@@ -215,15 +203,15 @@ class SandcrawlerPostgresClient:
                         r[k] = r['metadata'].get(k)
                     r['metadata'].pop(k, None)
                 r['metadata'] = json.dumps(r['metadata'], sort_keys=True)
-        batch = [(d['key'],
-                  d.get('grobid_version') or None,
-                  d['status_code'],
-                  d['status'],
-                  d.get('fatcat_release') or None,
-                  d.get('updated') or datetime.datetime.now(),
-                  d.get('metadata') or None ,
-                 )
-                 for d in batch]
+        batch = [(
+            d['key'],
+            d.get('grobid_version') or None,
+            d['status_code'],
+            d['status'],
+            d.get('fatcat_release') or None,
+            d.get('updated') or datetime.datetime.now(),
+            d.get('metadata') or None,
+        ) for d in batch]
         # filter out duplicate rows by key (sha1hex)
         batch_dict = dict()
         for b in batch:
@@ -331,20 +319,18 @@ class SandcrawlerPostgresClient:
         else:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))
         sql += " RETURNING xmax;"
-        batch = [
-            (
-                d['key'],
-                d.get('updated') or datetime.datetime.now(),
-                d['status_code'],
-                d['status'],
-                d.get('versions', {}).get('pdftrio_version') or None,
-                d.get('versions', {}).get('models_date') or None,
-                d.get('ensemble_score'),
-                d.get('bert_score'),
-                d.get('linear_score'),
-                d.get('image_score'),
-            )
-            for d in batch]
+        batch = [(
+            d['key'],
+            d.get('updated') or datetime.datetime.now(),
+            d['status_code'],
+            d['status'],
+            d.get('versions', {}).get('pdftrio_version') or None,
+            d.get('versions', {}).get('models_date') or None,
+            d.get('ensemble_score'),
+            d.get('bert_score'),
+            d.get('linear_score'),
+            d.get('image_score'),
+        ) for d in batch]
         # filter out duplicate rows by key (sha1hex)
         batch_dict = dict()
         for b in batch:
@@ -373,15 +359,15 @@ class SandcrawlerPostgresClient:
                     extra[k] = r[k]
             if extra:
                 r['extra'] = json.dumps(extra, sort_keys=True)
-        batch = [(d['link_source'],
-                  d['link_source_id'],
-                  d['ingest_type'],
-                  d['base_url'],
-                  d.get('ingest_request_source'),
-                  d.get('release_stage') or None,
-                  d.get('extra') or None,
-                 )
-                 for d in batch]
+        batch = [(
+            d['link_source'],
+            d['link_source_id'],
+            d['ingest_type'],
+            d['base_url'],
+            d.get('ingest_request_source'),
+            d.get('release_stage') or None,
+            d.get('extra') or None,
+        ) for d in batch]
         # filter out duplicate rows by key (link_source, link_source_id, ingest_type, base_url)
         batch_dict = dict()
         for b in batch:
@@ -412,16 +398,16 @@ class SandcrawlerPostgresClient:
         else:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))
         sql += " RETURNING xmax;"
-        batch = [(d['ingest_type'],
-                  d['base_url'],
-                  bool(d['hit']),
-                  d['status'],
-                  d.get('terminal_url'),
-                  d.get('terminal_dt'),
-                  d.get('terminal_status_code'),
-                  d.get('terminal_sha1hex'),
-                 )
-                 for d in batch]
+        batch = [(
+            d['ingest_type'],
+            d['base_url'],
+            bool(d['hit']),
+            d['status'],
+            d.get('terminal_url'),
+            d.get('terminal_dt'),
+            d.get('terminal_status_code'),
+            d.get('terminal_sha1hex'),
+        ) for d in batch]
         # filter out duplicate rows by key (ingest_type, base_url)
         batch_dict = dict()
         for b in batch:
@@ -459,23 +445,23 @@ class SandcrawlerPostgresClient:
         else:
             raise NotImplementedError("on_conflict: {}".format(on_conflict))
         sql += " RETURNING xmax;"
-        batch = [(d['ingest_type'],
-                  d['base_url'],
-                  bool(d['hit']),
-                  d['status'],
-                  d.get('platform_name'),
-                  d.get('platform_domain'),
-                  d.get('platform_id'),
-                  d.get('ingest_strategy'),
-                  d.get('total_size'),
-                  d.get('file_count'),
-                  d.get('archiveorg_item_name'),
-                  d.get('archiveorg_item_bundle_path'),
-                  d.get('web_bundle_url'),
-                  d.get('web_bundle_dt'),
-                  d.get('manifest'),
-                 )
-                 for d in batch]
+        batch = [(
+            d['ingest_type'],
+            d['base_url'],
+            bool(d['hit']),
+            d['status'],
+            d.get('platform_name'),
+            d.get('platform_domain'),
+            d.get('platform_id'),
+            d.get('ingest_strategy'),
+            d.get('total_size'),
+            d.get('file_count'),
+            d.get('archiveorg_item_name'),
+            d.get('archiveorg_item_bundle_path'),
+            d.get('web_bundle_url'),
+            d.get('web_bundle_dt'),
+            d.get('manifest'),
+        ) for d in batch]
         # filter out duplicate rows by key (ingest_type, base_url)
         batch_dict = dict()
         for b in batch:

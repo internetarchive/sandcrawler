@@ -1,4 +1,3 @@
-
 import json
 
 import pytest
@@ -12,9 +11,7 @@ from sandcrawler import *
 
 @pytest.fixture
 def ingest_worker(wayback_client, spn_client):
-    grobid_client = GrobidClient(
-        host_url="http://dummy-grobid",
-    )
+    grobid_client = GrobidClient(host_url="http://dummy-grobid", )
     worker = IngestFileWorker(
         wayback_client=wayback_client,
         spn_client=spn_client,
@@ -22,14 +19,11 @@ def ingest_worker(wayback_client, spn_client):
     )
     return worker
 
+
 @pytest.fixture
 def ingest_worker_pdf(wayback_client_pdf, spn_client):
-    grobid_client = GrobidClient(
-        host_url="http://dummy-grobid",
-    )
-    pgrest_client = SandcrawlerPostgrestClient(
-        api_url="http://dummy-postgrest",
-    )
+    grobid_client = GrobidClient(host_url="http://dummy-grobid", )
+    pgrest_client = SandcrawlerPostgrestClient(api_url="http://dummy-postgrest", )
     worker = IngestFileWorker(
         wayback_client=wayback_client_pdf,
         spn_client=spn_client,
@@ -50,37 +44,45 @@ def test_ingest_success(ingest_worker_pdf):
         'base_url': "http://dummy-host/",
     }
     responses.add(responses.POST,
-        'http://dummy-spnv2/save',
-        status=200,
-        body=json.dumps({"url": TARGET, "job_id": JOB_ID}))
+                  'http://dummy-spnv2/save',
+                  status=200,
+                  body=json.dumps({
+                      "url": TARGET,
+                      "job_id": JOB_ID
+                  }))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(PENDING_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(PENDING_BODY))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(SUCCESS_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(SUCCESS_BODY))
     responses.add(responses.GET,
-        'http://dummy-cdx/cdx',
-        status=200,
-        body=json.dumps(CDX_SPN_HIT))
+                  'http://dummy-cdx/cdx',
+                  status=200,
+                  body=json.dumps(CDX_SPN_HIT))
     responses.add(responses.GET,
-        'https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"),
-        status=200,
-        headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
-        body=pdf_bytes)
+                  'https://web.archive.org/web/{}id_/{}'.format("20180326070330",
+                                                                TARGET + "/redirect"),
+                  status=200,
+                  headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
+                  body=pdf_bytes)
     responses.add(responses.GET,
-        'http://dummy-postgrest/grobid?sha1hex=eq.{}'.format("90ffd2359008d82298821d16b21778c5c39aec36"),
-        status=200,
-        body=json.dumps([]))
+                  'http://dummy-postgrest/grobid?sha1hex=eq.{}'.format(
+                      "90ffd2359008d82298821d16b21778c5c39aec36"),
+                  status=200,
+                  body=json.dumps([]))
     responses.add(responses.GET,
-        'http://dummy-postgrest/pdf_meta?sha1hex=eq.{}'.format("90ffd2359008d82298821d16b21778c5c39aec36"),
-        status=200,
-        body=json.dumps([]))
+                  'http://dummy-postgrest/pdf_meta?sha1hex=eq.{}'.format(
+                      "90ffd2359008d82298821d16b21778c5c39aec36"),
+                  status=200,
+                  body=json.dumps([]))
     responses.add(responses.POST,
-        'http://dummy-grobid/api/processFulltextDocument', status=200,
-        body=REAL_TEI_XML, content_type='text/xml')
+                  'http://dummy-grobid/api/processFulltextDocument',
+                  status=200,
+                  body=REAL_TEI_XML,
+                  content_type='text/xml')
 
     resp = ingest_worker_pdf.process(request)
 
@@ -108,6 +110,7 @@ def test_ingest_success(ingest_worker_pdf):
     assert resp['pdf_meta']['pdf_extra']['page_count'] == 1
     assert resp['pdf_meta'].get('text') is None
 
+
 @responses.activate
 def test_ingest_landing(ingest_worker):
 
@@ -116,34 +119,39 @@ def test_ingest_landing(ingest_worker):
         'base_url': "http://dummy-host/",
     }
     responses.add(responses.POST,
-        'http://dummy-spnv2/save',
-        status=200,
-        body=json.dumps({"url": TARGET, "job_id": JOB_ID}))
+                  'http://dummy-spnv2/save',
+                  status=200,
+                  body=json.dumps({
+                      "url": TARGET,
+                      "job_id": JOB_ID
+                  }))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(PENDING_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(PENDING_BODY))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(SUCCESS_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(SUCCESS_BODY))
     responses.add(responses.GET,
-        'http://dummy-cdx/cdx',
-        status=200,
-        body=json.dumps(CDX_SPN_HIT))
+                  'http://dummy-cdx/cdx',
+                  status=200,
+                  body=json.dumps(CDX_SPN_HIT))
     responses.add(responses.GET,
-        'https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"),
-        status=200,
-        headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
-        body=WARC_BODY)
+                  'https://web.archive.org/web/{}id_/{}'.format("20180326070330",
+                                                                TARGET + "/redirect"),
+                  status=200,
+                  headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
+                  body=WARC_BODY)
 
     # this is for second time around; don't want to fetch same landing page
     # HTML again and result in a loop
     responses.add(responses.GET,
-        'https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"),
-        status=200,
-        headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
-        body="<html></html>")
+                  'https://web.archive.org/web/{}id_/{}'.format("20180326070330",
+                                                                TARGET + "/redirect"),
+                  status=200,
+                  headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
+                  body="<html></html>")
 
     resp = ingest_worker.process(request)
 
@@ -156,6 +164,7 @@ def test_ingest_landing(ingest_worker):
     assert 'cdx' not in resp
     assert 'revisit_cdx' not in resp
     assert 'grobid' not in resp
+
 
 @responses.activate
 def test_ingest_blocklist(ingest_worker):
@@ -192,6 +201,7 @@ def test_ingest_wall_blocklist(ingest_worker):
     assert resp['status'] == "skip-wall"
     assert resp['request'] == request
 
+
 @responses.activate
 def test_ingest_cookie_blocklist(ingest_worker):
 
@@ -205,4 +215,3 @@ def test_ingest_cookie_blocklist(ingest_worker):
     assert resp['hit'] == False
     assert resp['status'] == "blocked-cookie"
     assert resp['request'] == request
-

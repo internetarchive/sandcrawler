@@ -49,7 +49,6 @@ def b32_hex(s):
 
 
 class DeliverDumpGrobidS3():
-
     def __init__(self, s3_bucket, **kwargs):
         self.rstore = None
         self.count = Counter()
@@ -80,17 +79,14 @@ class DeliverDumpGrobidS3():
             tei_xml = tei_xml.encode('utf-8')
             # upload to AWS S3
             obj = self.bucket.put_object(
-                Key="{}{}/{}{}".format(
-                    self.s3_prefix,
-                    sha1_hex[0:4],
-                    sha1_hex,
-                    self.s3_suffix),
+                Key="{}{}/{}{}".format(self.s3_prefix, sha1_hex[0:4], sha1_hex, self.s3_suffix),
                 Body=tei_xml,
                 StorageClass=self.s3_storage_class,
             )
             print("{}\tsuccess\t{}\t{}".format(sha1_hex, obj.key, len(tei_xml)))
             self.count['success-s3'] += 1
         sys.stderr.write("{}\n".format(self.count))
+
 
 @sentry_client.capture_exceptions
 def main():
@@ -121,5 +117,6 @@ def main():
     worker = DeliverDumpGrobidS3(**args.__dict__)
     worker.run(args.dump_file)
 
-if __name__ == '__main__': # pragma: no cover
+
+if __name__ == '__main__':  # pragma: no cover
     main()

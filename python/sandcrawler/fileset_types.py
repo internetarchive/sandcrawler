@@ -1,4 +1,3 @@
-
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -12,6 +11,7 @@ class IngestStrategy(str, Enum):
     ArchiveorgFile = "archiveorg-file"
     ArchiveorgFileset = "archiveorg-fileset"
     ArchiveorgFilesetBundled = "archiveorg-fileset-bundled"
+
 
 class FilesetManifestFile(BaseModel):
     path: str
@@ -27,6 +27,7 @@ class FilesetManifestFile(BaseModel):
     terminal_url: Optional[str]
     terminal_dt: Optional[str]
 
+
 class FilesetPlatformItem(BaseModel):
     platform_name: str
     platform_status: str
@@ -39,6 +40,7 @@ class FilesetPlatformItem(BaseModel):
     web_base_url: Optional[str]
     web_bundle_url: Optional[str]
 
+
 class ArchiveStrategyResult(BaseModel):
     ingest_strategy: str
     status: str
@@ -48,6 +50,7 @@ class ArchiveStrategyResult(BaseModel):
     bundle_file_meta: Optional[Dict[str, Any]]
     bundle_resource: Optional[Any]
     bundle_archiveorg_path: Optional[str]
+
 
 class PlatformScopeError(Exception):
     """
@@ -60,6 +63,7 @@ class PlatformScopeError(Exception):
     - a single file within a dataset for a platform which has file-level identifiers
     """
     pass
+
 
 class PlatformRestrictedError(Exception):
     """

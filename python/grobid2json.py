@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 NB: adapted to work as a library for PDF extraction. Will probably be
 re-written eventually to be correct, complete, and robust; this is just a
@@ -76,9 +75,7 @@ def all_authors(elem: Optional[ET.Element]) -> List[Dict[str, Any]]:
 def journal_info(elem: ET.Element) -> Dict[str, Any]:
     journal = dict()
     journal["name"] = elem.findtext(".//{%s}monogr/{%s}title" % (ns, ns))
-    journal["publisher"] = elem.findtext(
-        ".//{%s}publicationStmt/{%s}publisher" % (ns, ns)
-    )
+    journal["publisher"] = elem.findtext(".//{%s}publicationStmt/{%s}publisher" % (ns, ns))
     if journal["publisher"] == "":
         journal["publisher"] = None
     journal["issn"] = elem.findtext('.//{%s}idno[@type="ISSN"]' % ns)
@@ -145,9 +142,7 @@ def teixml2json(content: AnyStr, encumbered: bool = True) -> Dict[str, Any]:
     info["grobid_version"] = application_tag.attrib["version"].strip()
     info["grobid_timestamp"] = application_tag.attrib["when"].strip()
     info["title"] = header.findtext(".//{%s}analytic/{%s}title" % (ns, ns))
-    info["authors"] = all_authors(
-        header.find(".//{%s}sourceDesc/{%s}biblStruct" % (ns, ns))
-    )
+    info["authors"] = all_authors(header.find(".//{%s}sourceDesc/{%s}biblStruct" % (ns, ns)))
     info["journal"] = journal_info(header)
     date = header.find('.//{%s}date[@type="published"]' % ns)
     info["date"] = (date is not None) and date.attrib.get("when")
@@ -207,8 +202,7 @@ def main() -> None:  # pragma no cover
             json.dumps(
                 teixml2json(content, encumbered=(not args.no_encumbered)),
                 sort_keys=True,
-            )
-        )
+            ))
 
 
 if __name__ == "__main__":  # pragma no cover

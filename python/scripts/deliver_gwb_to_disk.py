@@ -26,7 +26,6 @@ sentry_client = raven.Client()
 
 
 class DeliverGwbDisk:
-
     def __init__(self, disk_dir, **kwargs):
         self.warc_uri_prefix = kwargs.get('warc_uri_prefix')
         self.rstore = None
@@ -34,7 +33,8 @@ class DeliverGwbDisk:
         # /serve/ instead of /download/ doesn't record view count
         self.petabox_base_url = kwargs.get('petabox_base_url', 'http://archive.org/serve/')
         # gwb library will fall back to reading from /opt/.petabox/webdata.secret
-        self.petabox_webdata_secret = kwargs.get('petabox_webdata_secret', os.environ.get('PETABOX_WEBDATA_SECRET'))
+        self.petabox_webdata_secret = kwargs.get('petabox_webdata_secret',
+                                                 os.environ.get('PETABOX_WEBDATA_SECRET'))
         self.disk_dir = disk_dir
         self.disk_prefix = kwargs.get('disk_prefix', 'pdf/')
         self.disk_suffix = kwargs.get('disk_suffix', '.pdf')
@@ -42,48 +42,56 @@ class DeliverGwbDisk:
     def fetch_warc_content(self, warc_path, offset, c_size):
         warc_uri = self.warc_uri_prefix + warc_path
         if not self.rstore:
-            self.rstore = ResourceStore(loaderfactory=CDXLoaderFactory(
-                webdata_secret=self.petabox_webdata_secret,
-                download_base_url=self.petabox_base_url))
+            self.rstore = ResourceStore(
+                loaderfactory=CDXLoaderFactory(webdata_secret=self.petabox_webdata_secret,
+                                               download_base_url=self.petabox_base_url))
         try:
             gwb_record = self.rstore.load_resource(warc_uri, offset, c_size)
         except wayback.exception.ResourceUnavailable:
-            return None, dict(status="error",
-                reason="failed to load file contents from wayback/petabox (ResourceUnavailable)")
+            return None, dict(
+                status="error",
+                reason="failed to load file contents from wayback/petabox (ResourceUnavailable)"
+            )
         except ValueError as ve:
-            return None, dict(status="error",
-                reason="failed to load file contents from wayback/petabox (ValueError: {})".format(ve))
+            return None, dict(
+                status="error",
+                reason="failed to load file contents from wayback/petabox (ValueError: {})".
+                format(ve))
         except EOFError as eofe:
-            return None, dict(status="error",
-                reason="failed to load file contents from wayback/petabox (EOFError: {})".format(eofe))
+            return None, dict(
+                status="error",
+                reason="failed to load file contents from wayback/petabox (EOFError: {})".
+                format(eofe))
         except TypeError as te:
-            return None, dict(status="error",
-                reason="failed to load file contents from wayback/petabox (TypeError: {}; likely a bug in wayback python code)".format(te))
+            return None, dict(
+                status="error",
+                reason=
+                "failed to load file contents from wayback/petabox (TypeError: {}; likely a bug in wayback python code)"
+                .format(te))
         # Note: could consider a generic "except Exception" here, as we get so
         # many petabox errors. Do want jobs to fail loud and clear when the
         # whole cluster is down though.
 
         if gwb_record.get_status()[0] != 200:
             return None, dict(status="error",
-                reason="archived HTTP response (WARC) was not 200",
-                warc_status=gwb_record.get_status()[0])
+                              reason="archived HTTP response (WARC) was not 200",
+                              warc_status=gwb_record.get_status()[0])
 
         try:
             raw_content = gwb_record.open_raw_content().read()
         except IncompleteRead as ire:
-            return None, dict(status="error",
-                reason="failed to read actual file contents from wayback/petabox (IncompleteRead: {})".format(ire))
+            return None, dict(
+                status="error",
+                reason=
+                "failed to read actual file contents from wayback/petabox (IncompleteRead: {})".
+                format(ire))
         return raw_content, None
 
     def run(self, manifest_file):
         sys.stderr.write("Ensuring all 65536 base directories exist...\n")
         for i in range(256):
             for j in range(256):
-                fpath = "{}/{}{:02x}/{:02x}".format(
-                        self.disk_dir,
-                        self.disk_prefix,
-                        i,
-                        j)
+                fpath = "{}/{}{:02x}/{:02x}".format(self.disk_dir, self.disk_prefix, i, j)
                 os.makedirs(fpath, exist_ok=True)
         sys.stderr.write("Starting...\n")
         for line in manifest_file:
@@ -102,9 +110,11 @@ class DeliverGwbDisk:
                 self.count['skip-warc'] += 1
                 continue
             # fetch from GWB/petabox via HTTP range-request
-            blob, status = self.fetch_warc_content(file_cdx['warc'], file_cdx['offset'], file_cdx['c_size'])
+            blob, status = self.fetch_warc_content(file_cdx['warc'], file_cdx['offset'],
+                                                   file_cdx['c_size'])
             if blob is None and status:
-                print("{}\terror petabox\t{}\t{}".format(sha1_hex, file_cdx['warc'], status['reason']))
+                print("{}\terror petabox\t{}\t{}".format(sha1_hex, file_cdx['warc'],
+                                                         status['reason']))
                 self.count['err-petabox-fetch'] += 1
                 continue
             elif not blob:
@@ -120,18 +130,14 @@ class DeliverGwbDisk:
 
             self.count['petabox-ok'] += 1
             # save to disk
-            fpath = "{}/{}{}/{}/{}{}".format(
-                    self.disk_dir,
-                    self.disk_prefix,
-                    sha1_hex[0:2],
-                    sha1_hex[2:4],
-                    sha1_hex,
-                    self.disk_suffix)
+            fpath = "{}/{}{}/{}/{}{}".format(self.disk_dir, self.disk_prefix, sha1_hex[0:2],
+                                             sha1_hex[2:4], sha1_hex, self.disk_suffix)
             with open(fpath, 'wb') as f:
                 f.write(blob)
             print("{}\tsuccess\t{}\t{}".format(sha1_hex, fpath, len(blob)))
             self.count['success-disk'] += 1
         sys.stderr.write("{}\n".format(self.count))
+
 
 @sentry_client.capture_exceptions
 def main():
@@ -162,5 +168,6 @@ def main():
     worker = DeliverGwbDisk(**args.__dict__)
     worker.run(args.manifest_file)
 
-if __name__ == '__main__': # pragma: no cover
+
+if __name__ == '__main__':  # pragma: no cover
     main()

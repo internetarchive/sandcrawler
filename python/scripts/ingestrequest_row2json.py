@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 This script is used to turn ingest request postgres rows (in JSON export
 format) back in to regular ingest request JSON.
@@ -25,6 +24,7 @@ def transform(row):
         row['fatcat'] = dict(release_ident=extra['release_ident'])
     return row
 
+
 def run(args):
     for l in args.json_file:
         if not l.strip():
@@ -35,17 +35,18 @@ def run(args):
             print(l, file=sys.stderr)
         print(json.dumps(req, sort_keys=True))
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('json_file',
-        help="arabesque output file to use",
-        type=argparse.FileType('r'))
+                        help="arabesque output file to use",
+                        type=argparse.FileType('r'))
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
 
     run(args)
+
 
 if __name__ == '__main__':
     main()

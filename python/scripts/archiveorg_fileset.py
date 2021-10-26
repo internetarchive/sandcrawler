@@ -23,11 +23,9 @@ FORMAT_TO_MIMETYPE = {
     'RAR': 'application/vnd.rar',
     'TAR': 'application/x-tar',
     '7z': 'application/x-7z-compressed',
-
     'HTML': 'text/html',
     'Text': 'text/plain',
     'PDF': 'application/pdf',
-
     'CSV': 'text/csv',
     'XML': 'application/xml',
     'JSON': 'application/json',
@@ -36,19 +34,16 @@ FORMAT_TO_MIMETYPE = {
     #'application/vnd.openxmlformats-officedocument.wordprocessingml.document', # .docx
     #'application/vnd.ms-excel', # .xls
     #'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', # .xlsx
-
-    'MP3': 'audio/mpeg', # .mp3
-
-    'MP4': 'video/mp4', # .mp4
-    'MPEG': 'video/mpeg', # .mpeg
-
+    'MP3': 'audio/mpeg',  # .mp3
+    'MP4': 'video/mp4',  # .mp4
+    'MPEG': 'video/mpeg',  # .mpeg
     'JPEG': 'image/jpeg',
     'GIF': 'image/gif',
     'PNG': 'image/png',
     'TIFF': 'image/tiff',
-
     'Unknown': None,
 }
+
 
 def want_file(f: dict, item_name: str) -> bool:
     """
@@ -57,12 +52,12 @@ def want_file(f: dict, item_name: str) -> bool:
     if f.source != 'original':
         return False
     for suffix in [
-        '_meta.sqlite',
-        '_archive.torrent',
-        '_itemimage.jpg',
-        '_meta.xml',
-        '_thumb.png',
-        '_files.xml',
+            '_meta.sqlite',
+            '_archive.torrent',
+            '_itemimage.jpg',
+            '_meta.xml',
+            '_thumb.png',
+            '_files.xml',
     ]:
         if f.name == item_name + suffix or f.name == item_name.lower() + suffix:
             return False
@@ -73,6 +68,7 @@ def want_file(f: dict, item_name: str) -> bool:
             if f.name == item_name + suffix:
                 return False
     return True
+
 
 def parse_file(f: dict) -> dict:
     """
@@ -93,6 +89,7 @@ def parse_file(f: dict) -> dict:
         mf['extra'] = dict(mimetype=mimetype)
     return mf
 
+
 def item_to_fileset(item_name: str, release_id: str, session: internetarchive.ArchiveSession):
     print(f"processing item={item_name} release_id={release_id}", file=sys.stderr)
     if release_id.startswith('release_'):
@@ -104,17 +101,16 @@ def item_to_fileset(item_name: str, release_id: str, session: internetarchive.Ar
     manifest = [parse_file(f) for f in item_files if want_file(f, item_name)]
     fileset = {
         'manifest': manifest,
-        'urls': [
-            {
-                'rel': 'archive',
-                'url': f'https://archive.org/download/{item_name}/',
-            },
-        ],
+        'urls': [{
+            'rel': 'archive',
+            'url': f'https://archive.org/download/{item_name}/',
+        }, ],
         'release_ids': [release_id],
         #extra={},
     }
     print(json.dumps(fileset))
     return fileset
+
 
 def main():
     session = internetarchive.get_session()
@@ -132,6 +128,7 @@ def main():
             item_name = fields[0]
             release_id = fields[1]
             item_to_fileset(item_name, release_id=release_id, session=session)
+
 
 if __name__ == '__main__':
     main()

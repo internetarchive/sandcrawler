@@ -28,6 +28,7 @@ MAX_SLUG_LINES = 50
 
 REQUIRE_AUTHORS = False
 
+
 def tokenize(s, remove_whitespace=False):
 
     s.replace('&apos;', "'")
@@ -39,6 +40,7 @@ def tokenize(s, remove_whitespace=False):
 
     # Encode as dumb ASCII (TODO: this is horrible)
     return s.encode('ascii', 'replace').replace(b'?', b'')
+
 
 def check_authors(left, right):
     """
@@ -63,6 +65,7 @@ def check_authors(left, right):
             return False
     return True
 
+
 def test_check_authors():
     assert check_authors([], []) == bool(not REQUIRE_AUTHORS)
     assert not check_authors([], ['one'])
@@ -73,6 +76,7 @@ def test_check_authors():
     assert check_authors(['mago'], ['Mr. Magoo'])
     assert check_authors(['Mr. Magoo'], ['Mr Magoo'])
     assert check_authors(['one', 'tw', 'thr'], ['one', 'two', 'three'])
+
 
 # Rows are (score, left, right)
 def process_group(rows):
@@ -119,6 +123,7 @@ def process_group(rows):
 
     print(json.dumps([releases[ident] for ident in group_ids]))
 
+
 def run():
 
     last_slug = None
@@ -140,5 +145,6 @@ def run():
     if lines:
         process_group(lines)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     run()

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 This script is intended to be used for backfill ingest of old crawls. It can
 also be used as a fast path for getting freshly crawled content into fatcat if
@@ -36,37 +35,35 @@ def run(args):
             },
         }
         if args.release_stage:
-            assert args.release_stage in ('published', 'submitted', 'accepted', 'draft', 'update')
+            assert args.release_stage in ('published', 'submitted', 'accepted', 'draft',
+                                          'update')
             request['release_stage'] = args.release_stage
 
         print("{}".format(json.dumps(request, sort_keys=True)))
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--link-source',
-        required=True,
-        help="link_source to include in request")
-    parser.add_argument('--extid-type',
-        required=True,
-        help="extid to encode identifier as")
+                        required=True,
+                        help="link_source to include in request")
+    parser.add_argument('--extid-type', required=True, help="extid to encode identifier as")
     parser.add_argument('--ingest-type',
-        default="pdf",
-        help="ingest type (pdf, html, xml, etc)")
+                        default="pdf",
+                        help="ingest type (pdf, html, xml, etc)")
     parser.add_argument('--ingest-request-source',
-        default="arabesque",
-        help="to include in request")
-    parser.add_argument('--release-stage',
-        default=None,
-        help="to include in request")
+                        default="arabesque",
+                        help="to include in request")
+    parser.add_argument('--release-stage', default=None, help="to include in request")
     parser.add_argument('json_file',
-        help="arabesque output file to use",
-        type=argparse.FileType('r'))
+                        help="arabesque output file to use",
+                        type=argparse.FileType('r'))
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
 
     run(args)
+
 
 if __name__ == '__main__':
     main()

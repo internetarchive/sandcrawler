@@ -1,4 +1,3 @@
-
 import json
 import re
 import sys
@@ -6,7 +5,8 @@ import urllib.parse
 
 from bs4 import BeautifulSoup
 
-RESEARCHSQUARE_REGEX = re.compile(r'"url":"(https://assets.researchsquare.com/files/.{1,50}/v\d+/Manuscript.pdf)"')
+RESEARCHSQUARE_REGEX = re.compile(
+    r'"url":"(https://assets.researchsquare.com/files/.{1,50}/v\d+/Manuscript.pdf)"')
 IEEEXPLORE_REGEX = re.compile(r'"pdfPath":"(/.*?\.pdf)"')
 OVID_JOURNAL_URL_REGEX = re.compile(r'journalURL = "(http.*)";')
 SCIENCEDIRECT_BOUNCE_URL_REGEX = re.compile(r"window.location = '(http.*)';")
@@ -33,16 +33,16 @@ def extract_fulltext_url(html_url, html_body):
     ### General Tricks ###
 
     # highwire-style meta tag
-    meta = soup.find('meta', attrs={"name":"citation_pdf_url"})
+    meta = soup.find('meta', attrs={"name": "citation_pdf_url"})
     if not meta:
-        meta = soup.find('meta', attrs={"name":"bepress_citation_pdf_url"})
+        meta = soup.find('meta', attrs={"name": "bepress_citation_pdf_url"})
     if not meta:
-        meta = soup.find('meta', attrs={"name":"wkhealth_pdf_url"})
+        meta = soup.find('meta', attrs={"name": "wkhealth_pdf_url"})
     if not meta:
         # researchgate does this; maybe others also?
-        meta = soup.find('meta', attrs={"property":"citation_pdf_url"})
+        meta = soup.find('meta', attrs={"property": "citation_pdf_url"})
     if not meta:
-        meta = soup.find('meta', attrs={"name":"eprints.document_url"})
+        meta = soup.find('meta', attrs={"name": "eprints.document_url"})
     # if tag is only partially populated
     if meta and not meta.get('content'):
         meta = None
@@ -52,10 +52,10 @@ def extract_fulltext_url(html_url, html_body):
         if '://doi.org/' in url:
             print(f"\tdoi.org in citation_pdf_url (loop?): {url}", file=sys.stderr)
         elif url.startswith('/'):
-            if host_prefix+url == html_url:
+            if host_prefix + url == html_url:
                 print(f"\tavoiding citation_pdf_url link-loop", file=sys.stderr)
             else:
-                return dict(pdf_url=host_prefix+url, technique='citation_pdf_url')
+                return dict(pdf_url=host_prefix + url, technique='citation_pdf_url')
         elif url.startswith('http'):
             if url == html_url:
                 print(f"\tavoiding citation_pdf_url link-loop", file=sys.stderr)
@@ -64,7 +64,7 @@ def extract_fulltext_url(html_url, html_body):
         else:
             print("\tmalformed citation_pdf_url? {}".format(url), file=sys.stderr)
 
-    meta = soup.find('meta', attrs={"name":"generator"})
+    meta = soup.find('meta', attrs={"name": "generator"})
     meta_generator = None
     if meta and meta.get('content'):
         meta_generator = meta['content'].strip()
@@ -105,7 +105,8 @@ def extract_fulltext_url(html_url, html_body):
                 json_meta = json.loads(json_text)
                 pdf_meta = json_meta['article']['pdfDownload']['urlMetadata']
                 # https://www.sciencedirect.com/science/article/pii/S0169204621000670/pdfft?md5=c4a83d06b334b627ded74cf9423bfa56&pid=1-s2.0-S0169204621000670-main.pdf
-                url = html_url + pdf_meta['pdfExtension'] + "?md5=" + pdf_meta['queryParams']['md5'] + "&pid=" + pdf_meta['queryParams']['pid']
+                url = html_url + pdf_meta['pdfExtension'] + "?md5=" + pdf_meta['queryParams'][
+                    'md5'] + "&pid=" + pdf_meta['queryParams']['pid']
             except (KeyError, TypeError, json.JSONDecodeError):
                 pass
         if url:
@@ -130,7 +131,9 @@ def extract_fulltext_url(html_url, html_body):
         if m:
             url = m.group(1)
             assert len(url) < 4096
-            return dict(release_stage="published", pdf_url=host_prefix+url, technique="ieeexplore")
+            return dict(release_stage="published",
+                        pdf_url=host_prefix + url,
+                        technique="ieeexplore")
     # https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8730313
     if '://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber' in html_url:
         # HTML iframe like:
@@ -172,11 +175,12 @@ def extract_fulltext_url(html_url, html_body):
         '://thesiscommons.org/',
     ]
     for domain in OSF_DOMAINS:
-        if domain in html_url and (len(html_url.split('/')) in [4,5] or '/preprints/' in html_url) and '/download' not in html_url:
+        if domain in html_url and (len(html_url.split('/')) in [4, 5] or '/preprints/'
+                                   in html_url) and '/download' not in html_url:
             if not html_url.endswith("/"):
-                next_url = html_url+"/download"
+                next_url = html_url + "/download"
             else:
-                next_url = html_url+"download"
+                next_url = html_url + "download"
             return dict(next_url=next_url, technique='osf-by-url')
 
     # wiley
@@ -199,14 +203,14 @@ def extract_fulltext_url(html_url, html_body):
             url = html_url.replace("/doi/10.", "/doi/pdf/10.")
             return dict(pdf_url=url, technique='archivist-url')
         # <a href="/doi/pdf/10.17723/aarc.62.2.j475270470145630" target="_blank">
-        hrefs = soup.find_all('a', attrs={"target":"_blank"})
+        hrefs = soup.find_all('a', attrs={"target": "_blank"})
         for href in hrefs:
             url = href['href'].strip()
             if "/doi/pdf/" in url:
                 if url.startswith('http'):
                     return dict(pdf_url=url, technique='publisher-href')
                 elif url.startswith('/'):
-                    return dict(pdf_url=host_prefix+url, technique='publisher-href')
+                    return dict(pdf_url=host_prefix + url, technique='publisher-href')
 
     # protocols.io
     # https://www.protocols.io/view/flow-cytometry-protocol-mgdc3s6
@@ -248,7 +252,8 @@ def extract_fulltext_url(html_url, html_body):
     if "://ehp.niehs.nih.gov/doi/" in html_url:
         # <a href="/doi/pdf/10.1289/EHP4709" target="_blank">
         if b'/doi/pdf/10.' in html_body:
-            url = html_url.replace('/doi/full/10.', '/doi/pdf/10.').replace('/doi/10.', '/doi/pdf/10.')
+            url = html_url.replace('/doi/full/10.',
+                                   '/doi/pdf/10.').replace('/doi/10.', '/doi/pdf/10.')
             return dict(pdf_url=url, technique='ehp.niehs.nigh.gov-url')
 
     # cogentoa.com
@@ -275,7 +280,7 @@ def extract_fulltext_url(html_url, html_body):
     # http://en.gzbd.cnki.net/gzbt/detail/detail.aspx?FileName=HBGF202002003&DbName=GZBJ7920&DbCode=GZBJ
     if '://en.gzbd.cnki.net/KCMS/detail/detail.aspx' in html_url:
         # <a onclick="WriteKrsDownLog()" target="_blank" id="pdfDown" name="pdfDown" href="/gzbt/download.aspx?filename=4Q1ZYpFdKFUZ6FDR1QkRrolayRXV2ZzattyQ3QFa2JXTyZXUSV3QRFkbndzaGV2KyJXWZVEbFdVYnZndD9EOxg1Tj5Eeys2SMFzLZ5kcuFkM3dEbsR2ZjxEaShVdJhFdp90KhlVVzcjVVlXUVNHWBtWS5Rlb5cnc&amp;tablename=GZBJLAST2020&amp;dflag=pdfdown&#xA;                      "><i></i>PDF Download</a>
-        href = soup.find('a', attrs={"id":"pdfDown"})
+        href = soup.find('a', attrs={"id": "pdfDown"})
         if href:
             url = href['href'].strip().replace('&#xA;', '')
             if not url.startswith('http'):
@@ -300,7 +305,7 @@ def extract_fulltext_url(html_url, html_body):
 
     # OJS 3 (some)
     if meta_generator and meta_generator.startswith("Open Journal Systems"):
-        href = soup.find('a', attrs={"class":"obj_galley_link file"})
+        href = soup.find('a', attrs={"class": "obj_galley_link file"})
         if href and href.text and "pdf" in href.text.lower():
             url = href['href'].strip()
             if url.startswith('/'):
@@ -329,13 +334,15 @@ def extract_fulltext_url(html_url, html_body):
 
     return dict()
 
+
 def test_regex():
     lines = """
     blah
     var journalURL = "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689";
     asdf"""
     m = OVID_JOURNAL_URL_REGEX.search(lines)
-    assert m.group(1) == "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689"
+    assert m.group(
+        1) == "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689"
 
     lines = """
             window.onload = function () {

@@ -1,4 +1,3 @@
-
 import datetime
 
 import pytest
@@ -44,11 +43,12 @@ def test_html_metadata_plos() -> None:
 
 
 def test_html_metadata_elife() -> None:
-    
+
     with open('tests/files/elife_article.html', 'r') as f:
         elife_html = f.read()
 
-    meta = html_extract_biblio("https://elifesciences.org/articles/44753", HTMLParser(elife_html))
+    meta = html_extract_biblio("https://elifesciences.org/articles/44753",
+                               HTMLParser(elife_html))
     assert meta is not None
     assert meta.title == "Parallel visual circuitry in a basal chordate"
     assert meta.doi == "10.7554/eLife.44753"
@@ -69,7 +69,7 @@ def test_html_metadata_elife() -> None:
 
 
 def test_html_metadata_peerj() -> None:
- 
+
     with open('tests/files/peerj_oa_article.html', 'r') as f:
         peerj_html = f.read()
 
@@ -78,15 +78,15 @@ def test_html_metadata_peerj() -> None:
     assert meta.title == "The state of OA: a large-scale analysis of the prevalence and impact of Open Access articles"
     assert meta.doi == "10.7717/peerj.4375"
     assert meta.contrib_names == [
-            "Heather Piwowar",
-      "Jason Priem",
-      "Vincent Larivière",
-      "Juan Pablo Alperin",
-      "Lisa Matthias",
-      "Bree Norlander",
-      "Ashley Farley",
-      "Jevin West",
-      "Stefanie Haustein",
+        "Heather Piwowar",
+        "Jason Priem",
+        "Vincent Larivière",
+        "Juan Pablo Alperin",
+        "Lisa Matthias",
+        "Bree Norlander",
+        "Ashley Farley",
+        "Jevin West",
+        "Stefanie Haustein",
     ]
     assert meta.container_name == "PeerJ"
     # "2018-02-13"
@@ -129,7 +129,7 @@ def test_html_metadata_ojs3() -> None:
         "Os Keyes",
     ]
     assert meta.container_name == "First Monday"
-    assert meta.container_abbrev == "1" # NOTE: bad source metadata
+    assert meta.container_abbrev == "1"  # NOTE: bad source metadata
     assert meta.container_issn == "1396-0466"
     # "2020/09/10"
     assert meta.release_date == datetime.date(year=2020, month=9, day=10)
@@ -150,6 +150,7 @@ def test_html_metadata_dlib() -> None:
     # "2017-05-15"
     assert meta.release_date == datetime.date(year=2017, month=5, day=15)
 
+
 def test_html_metadata_dc_case() -> None:
     """
     This tests that CSS selector <meta name=""> attribute lookups are not case-sensitive.
@@ -167,9 +168,11 @@ def test_html_metadata_dc_case() -> None:
     assert meta is not None
     assert meta.issue == "123"
 
+
 @pytest.fixture
 def adblock() -> Any:
     return load_adblock_rules()
+
 
 def test_html_resources(adblock) -> None:
 
@@ -227,4 +230,3 @@ def test_html_resources(adblock) -> None:
         HTMLParser(nature_html),
         adblock,
     )
-

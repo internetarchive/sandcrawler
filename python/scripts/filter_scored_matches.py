@@ -33,6 +33,7 @@ def tokenize(s, remove_whitespace=False):
     # Encode as dumb ASCII (TODO: this is horrible)
     return s.encode('ascii', 'replace').replace(b'?', b'')
 
+
 def check_authors(left, right):
     """
     Intended to check GROBID extracted authors (right) against "known good"
@@ -56,6 +57,7 @@ def check_authors(left, right):
             return False
     return True
 
+
 def test_check_authors():
     assert not check_authors([], [])
     assert not check_authors([], ['one'])
@@ -66,6 +68,7 @@ def test_check_authors():
     assert check_authors(['mago'], ['Mr. Magoo'])
     assert check_authors(['Mr. Magoo'], ['Mr Magoo'])
     assert check_authors(['one', 'tw', 'thr'], ['one', 'two', 'three'])
+
 
 # Rows are (score, grobid, crossref)
 def process_group(rows):
@@ -92,6 +95,7 @@ def process_group(rows):
     for sha1, doi_list in keepers.items():
         print("{}\t{}".format(sha1, json.dumps(doi_list)))
 
+
 def run():
 
     last_slug = None
@@ -112,5 +116,6 @@ def run():
     if lines:
         process_group(lines)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     run()

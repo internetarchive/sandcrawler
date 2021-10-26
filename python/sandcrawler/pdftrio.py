@@ -1,4 +1,3 @@
-
 import time
 
 import requests
@@ -8,7 +7,6 @@ from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 
 class PdfTrioClient(object):
-
     def __init__(self, host_url="http://pdftrio.qa.fatcat.wiki", **kwargs):
         self.host_url = host_url
         self.http_session = requests_retry_session(retries=3, backoff_factor=3)
@@ -51,9 +49,7 @@ class PdfTrioClient(object):
                 'error_msg': 'pdftrio request connection timout',
             }
 
-        info = dict(
-            status_code=pdftrio_response.status_code,
-        )
+        info = dict(status_code=pdftrio_response.status_code, )
         if pdftrio_response.status_code == 200:
             resp_json = pdftrio_response.json()
             assert 'ensemble_score' in resp_json
@@ -72,7 +68,6 @@ class PdfTrioWorker(SandcrawlerFetchWorker):
     """
     This class is basically copied directly from GrobidWorker
     """
-
     def __init__(self, pdftrio_client, wayback_client=None, sink=None, **kwargs):
         super().__init__(wayback_client=wayback_client)
         self.pdftrio_client = pdftrio_client
@@ -103,12 +98,12 @@ class PdfTrioWorker(SandcrawlerFetchWorker):
             result['timing']['fetch_sec'] = fetch_sec
         return result
 
+
 class PdfTrioBlobWorker(SandcrawlerWorker):
     """
     This is sort of like PdfTrioWorker, except it receives blobs directly,
     instead of fetching blobs from some remote store.
     """
-
     def __init__(self, pdftrio_client, sink=None, mode="auto", **kwargs):
         super().__init__()
         self.pdftrio_client = pdftrio_client
@@ -128,4 +123,3 @@ class PdfTrioBlobWorker(SandcrawlerWorker):
             total_sec=time.time() - start_process,
         )
         return result
-

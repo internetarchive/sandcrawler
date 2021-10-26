@@ -1,4 +1,3 @@
-
 import struct
 
 import poppler
@@ -6,10 +5,12 @@ import pytest
 import responses
 from test_wayback import cdx_client, wayback_client
 
-from sandcrawler import BlackholeSink, CdxLinePusher, PdfExtractBlobWorker, PdfExtractWorker, WaybackClient
+from sandcrawler import (BlackholeSink, CdxLinePusher, PdfExtractBlobWorker, PdfExtractWorker,
+                         WaybackClient)
 from sandcrawler.pdfextract import process_pdf
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
+
 
 def test_process_fake_pdf():
     resp = process_pdf(FAKE_PDF_BYTES)
@@ -21,7 +22,9 @@ def test_process_fake_pdf():
     resp = process_pdf(pdf_bytes)
     assert resp.status == 'not-pdf'
 
-@pytest.mark.skipif(poppler.version_string() == '0.71.0', reason="unsupported version of poppler")
+
+@pytest.mark.skipif(poppler.version_string() == '0.71.0',
+                    reason="unsupported version of poppler")
 def test_process_dummy_pdf():
     with open('tests/files/dummy.pdf', 'rb') as f:
         pdf_bytes = f.read()
@@ -38,6 +41,7 @@ def test_process_dummy_pdf():
     assert resp.pdf_extra['page0_height'] == 842
     assert resp.pdf_extra['page0_width'] == 595
     assert resp.pdf_extra['page_count'] == 1
+
 
 def test_pdfextract_worker_cdx(wayback_client):
 
@@ -56,6 +60,7 @@ def test_pdfextract_worker_cdx(wayback_client):
         assert pusher_counts['pushed'] == 7
         assert pusher_counts['pushed'] == worker.counts['total']
 
+
 def test_pdfextract_blob_worker():
 
     sink = BlackholeSink()
@@ -65,4 +70,3 @@ def test_pdfextract_blob_worker():
         pdf_bytes = f.read()
 
     worker.process(pdf_bytes)
-

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Transform an unpaywall dump (JSON) into ingest requests.
 """
@@ -21,7 +20,6 @@ def transform_cnki(obj):
     requests = []
     assert obj['cnki_id']
 
-
     requests = []
     requests.append({
         'base_url': canon(obj['info_url']),
@@ -40,6 +38,7 @@ def transform_cnki(obj):
         })
 
     return requests
+
 
 def transform_wanfang(obj):
 
@@ -68,17 +67,18 @@ def run(args):
         for r in requests:
             print("{}".format(json.dumps(r, sort_keys=True)))
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('json_file',
-        help="COVID-19 metadata file to use",
-        type=argparse.FileType('r'))
+                        help="COVID-19 metadata file to use",
+                        type=argparse.FileType('r'))
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
 
     run(args)
+
 
 if __name__ == '__main__':
     main()

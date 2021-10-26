@@ -1,11 +1,11 @@
-
 import pytest
 
-from sandcrawler import b32_hex, clean_url, gen_file_metadata, gen_file_metadata_path, parse_cdx_line
+from sandcrawler import (b32_hex, clean_url, gen_file_metadata, gen_file_metadata_path,
+                         parse_cdx_line)
 
 
 def test_gen_file_metadata():
-    
+
     # valid (but very small) PDF file
     with open('tests/files/dummy.pdf', 'rb') as f:
         file_meta = gen_file_metadata(f.read())
@@ -27,8 +27,9 @@ def test_gen_file_metadata():
     assert fm['mimetype'] == 'text/plain'
     assert fm['size_bytes'] == 8
 
+
 def test_gen_file_metadata_path():
-    
+
     # valid (but very small) PDF file
     file_meta = gen_file_metadata_path('tests/files/dummy.pdf')
     assert file_meta == {
@@ -39,11 +40,14 @@ def test_gen_file_metadata_path():
         'size_bytes': 13264,
     }
 
+
 def test_b32_hex():
 
     # valid b32
-    assert b32_hex('sha1:TZCYZ2ULEHYGESS4L3RNH75I23KKFSMC') == '9e458cea8b21f0624a5c5ee2d3ffa8d6d4a2c982'
-    assert b32_hex('TZCYZ2ULEHYGESS4L3RNH75I23KKFSMC') == '9e458cea8b21f0624a5c5ee2d3ffa8d6d4a2c982'
+    assert b32_hex(
+        'sha1:TZCYZ2ULEHYGESS4L3RNH75I23KKFSMC') == '9e458cea8b21f0624a5c5ee2d3ffa8d6d4a2c982'
+    assert b32_hex(
+        'TZCYZ2ULEHYGESS4L3RNH75I23KKFSMC') == '9e458cea8b21f0624a5c5ee2d3ffa8d6d4a2c982'
 
     # sha1hex pass-through
     s = 'bda3c1017d52e826bbd1da51efad877272d300f9'
@@ -52,6 +56,7 @@ def test_b32_hex():
     # invalid
     with pytest.raises(ValueError):
         assert b32_hex('blah') == 'blah'
+
 
 def test_parse_cdx_line():
 
@@ -73,6 +78,7 @@ def test_parse_cdx_line():
     assert parse_cdx_line(raw + "\n") == correct
     assert parse_cdx_line(raw + " extra_field") == correct
 
+
 def test_invalid_cdx():
 
     print("missing warc")
@@ -80,11 +86,11 @@ def test_invalid_cdx():
     assert parse_cdx_line(raw) == None
 
     print("bad datetime")
-    raw = "edu,upenn,ldc)/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf 2070828233154 https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf application/pdf 200 WL3FEA62TEU4F52Y5DOVQ62VET4QJW7G - - 210251 931661233i SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828231135742-00000-00009-wbgrp-svc284/SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz" 
+    raw = "edu,upenn,ldc)/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf 2070828233154 https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/medar2009-large-arabic-broadcast-collection.pdf application/pdf 200 WL3FEA62TEU4F52Y5DOVQ62VET4QJW7G - - 210251 931661233i SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828231135742-00000-00009-wbgrp-svc284/SEMSCHOLAR-PDF-CRAWL-2017-08-04-20170828232253025-00005-3480~wbgrp-svc284.us.archive.org~8443.warc.gz"
     assert parse_cdx_line(raw) == None
+
 
 def test_clean_url():
     assert clean_url("http://BLAH.COM/file.pdf") == "http://blah.com/file.pdf"
     assert clean_url("https://opensky.ucar.edu:/islandora/object/articles%3A10809/datastream/PDF/view") == \
         "https://opensky.ucar.edu/islandora/object/articles%3A10809/datastream/PDF/view"
-

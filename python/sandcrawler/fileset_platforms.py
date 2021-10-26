@@ -1,4 +1,3 @@
-
 import gzip
 import json
 import sys
@@ -16,17 +15,18 @@ from sandcrawler.ia import ResourceResult
 
 
 class FilesetPlatformHelper():
-
     def __init__(self):
         self.platform_name = 'unknown'
 
-    def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+    def match_request(self, request: dict, resource: Optional[ResourceResult],
+                      html_biblio: Optional[BiblioMetadata]) -> bool:
         """
         Does this request look like it matches this platform?
         """
         raise NotImplementedError()
 
-    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
+    def process_request(self, request: dict, resource: Optional[ResourceResult],
+                        html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
         """
         Fetch platform-specific metadata for this request (eg, via API calls)
         """
@@ -40,19 +40,18 @@ class FilesetPlatformHelper():
         # XXX: while developing ArchiveorgFileset path
         #return IngestStrategy.ArchiveorgFileset
         if len(item.manifest) == 1:
-            if total_size < 64*1024*1024:
+            if total_size < 64 * 1024 * 1024:
                 return IngestStrategy.WebFile
             else:
                 return IngestStrategy.ArchiveorgFile
         else:
-            if largest_size < 64*1024*1024 and total_size < 128*1024*1024*1024:
+            if largest_size < 64 * 1024 * 1024 and total_size < 128 * 1024 * 1024 * 1024:
                 return IngestStrategy.WebFileset
             else:
                 return IngestStrategy.ArchiveorgFileset
 
 
 class DataverseHelper(FilesetPlatformHelper):
-
     def __init__(self):
         super().__init__()
         self.platform_name = 'dataverse'
@@ -122,8 +121,8 @@ class DataverseHelper(FilesetPlatformHelper):
             "file_id": file_id,
         }
 
-
-    def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+    def match_request(self, request: dict, resource: Optional[ResourceResult],
+                      html_biblio: Optional[BiblioMetadata]) -> bool:
         if resource and resource.terminal_url:
             url = resource.terminal_url
         else:
@@ -146,7 +145,8 @@ class DataverseHelper(FilesetPlatformHelper):
 
         return True
 
-    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
+    def process_request(self, request: dict, resource: Optional[ResourceResult],
+                        html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
         """
         Fetch platform-specific metadata for this request (eg, via API calls)
 
@@ -179,22 +179,27 @@ class DataverseHelper(FilesetPlatformHelper):
 
         if parsed_id['file_id']:
             # XXX: maybe we could support this?
-            raise PlatformScopeError(f"only entire dataverse datasets can be archived with this tool")
+            raise PlatformScopeError(
+                f"only entire dataverse datasets can be archived with this tool")
 
         # 1b. if we didn't get a version number from URL, fetch it from API
         if not dataset_version:
-            resp = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}")
+            resp = self.session.get(
+                f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}"
+            )
             resp.raise_for_status()
             obj = resp.json()
             obj_latest = obj['data']['latestVersion']
             dataset_version = f"{obj_latest['versionNumber']}.{obj_latest['versionMinorNumber']}"
 
         # 2. API fetch
-        resp = self.session.get(f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}&version={dataset_version}")
+        resp = self.session.get(
+            f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}&version={dataset_version}"
+        )
         resp.raise_for_status()
         obj = resp.json()
 
-        obj_latest= obj['data']['latestVersion']
+        obj_latest = obj['data']['latestVersion']
         assert dataset_version == f"{obj_latest['versionNumber']}.{obj_latest['versionMinorNumber']}"
         assert platform_id == obj_latest['datasetPersistentId']
 
@@ -212,15 +217,16 @@ class DataverseHelper(FilesetPlatformHelper):
                 extra['version'] = row['version']
             if 'description' in df:
                 extra['description'] = df['description']
-            manifest.append(FilesetManifestFile(
-                path=df.get('originalFileName') or df['filename'],
-                size=df.get('originalFileSize') or df['filesize'],
-                md5=df['md5'],
-                # NOTE: don't get: sha1, sha256
-                mimetype=df['contentType'],
-                platform_url=platform_url,
-                extra=extra or None,
-            ))
+            manifest.append(
+                FilesetManifestFile(
+                    path=df.get('originalFileName') or df['filename'],
+                    size=df.get('originalFileSize') or df['filesize'],
+                    md5=df['md5'],
+                    # NOTE: don't get: sha1, sha256
+                    mimetype=df['contentType'],
+                    platform_url=platform_url,
+                    extra=extra or None,
+                ))
 
         platform_sub_id = platform_id.split('/')[-1]
         archiveorg_item_name = f"{platform_domain}-{platform_sub_id}-v{dataset_version}"
@@ -228,7 +234,8 @@ class DataverseHelper(FilesetPlatformHelper):
             # XXX: collection=platform_domain,
             collection="datasets",
             date=obj_latest['releaseTime'].split('T')[0],
-            source=f"https://{platform_domain}/dataset.xhtml?persistentId={platform_id}&version={dataset_version}",
+            source=
+            f"https://{platform_domain}/dataset.xhtml?persistentId={platform_id}&version={dataset_version}",
         )
         if platform_id.startswith('doi:10.'):
             archiveorg_item_meta['doi'] = platform_id.replace('doi:', '')
@@ -238,7 +245,8 @@ class DataverseHelper(FilesetPlatformHelper):
             elif block['typeName'] == 'depositor':
                 archiveorg_item_meta['creator'] = block['value']
             elif block['typeName'] == 'dsDescription':
-                archiveorg_item_meta['description'] = block['value'][0]['dsDescriptionValue']['value']
+                archiveorg_item_meta['description'] = block['value'][0]['dsDescriptionValue'][
+                    'value']
 
         archiveorg_item_meta['description'] = archiveorg_item_meta.get('description', '')
         if obj_latest.get('termsOfUse'):
@@ -252,10 +260,12 @@ class DataverseHelper(FilesetPlatformHelper):
             platform_id=platform_id,
             archiveorg_item_name=archiveorg_item_name,
             archiveorg_item_meta=archiveorg_item_meta,
-            web_bundle_url=f"https://{platform_domain}/api/access/dataset/:persistentId/?persistentId={platform_id}&format=original",
+            web_bundle_url=
+            f"https://{platform_domain}/api/access/dataset/:persistentId/?persistentId={platform_id}&format=original",
             # TODO: web_base_url= (for GWB downloading, in lieu of platform_url on individual files)
             extra=dict(version=dataset_version),
         )
+
 
 def test_parse_dataverse_persistentid():
 
@@ -322,8 +332,8 @@ def test_parse_dataverse_persistentid():
         except ValueError:
             pass
 
-class FigshareHelper(FilesetPlatformHelper):
 
+class FigshareHelper(FilesetPlatformHelper):
     def __init__(self):
         super().__init__()
         self.platform_name = 'figshare'
@@ -346,7 +356,9 @@ class FigshareHelper(FilesetPlatformHelper):
             raise ValueError(f"not a figshare URL: {path}")
 
         comp = comp[2:]
-        if comp[0] in ['dataset',]:
+        if comp[0] in [
+                'dataset',
+        ]:
             comp = comp[1:]
 
         if len(comp) == 3 and comp[1].isdigit() and comp[2].isdigit():
@@ -356,7 +368,8 @@ class FigshareHelper(FilesetPlatformHelper):
         else:
             raise ValueError(f"couldn't find figshare identiier: {path}")
 
-    def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+    def match_request(self, request: dict, resource: Optional[ResourceResult],
+                      html_biblio: Optional[BiblioMetadata]) -> bool:
 
         if resource and resource.terminal_url:
             url = resource.terminal_url
@@ -381,7 +394,8 @@ class FigshareHelper(FilesetPlatformHelper):
 
         return False
 
-    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
+    def process_request(self, request: dict, resource: Optional[ResourceResult],
+                        html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
         """
         Fetch platform-specific metadata for this request (eg, via API calls)
         """
@@ -397,13 +411,15 @@ class FigshareHelper(FilesetPlatformHelper):
 
         (platform_id, dataset_version) = self.parse_figshare_url_path(components.path)
         assert platform_id.isdigit(), f"expected numeric: {platform_id}"
-        assert dataset_version and dataset_version.isdigit(), f"expected numeric: {dataset_version}"
+        assert dataset_version and dataset_version.isdigit(
+        ), f"expected numeric: {dataset_version}"
 
         # 1b. if we didn't get a version number from URL, fetch it from API
         # TODO: implement this code path
 
         # 2. API fetch
-        resp = self.session.get(f"https://api.figshare.com/v2/articles/{platform_id}/versions/{dataset_version}")
+        resp = self.session.get(
+            f"https://api.figshare.com/v2/articles/{platform_id}/versions/{dataset_version}")
         resp.raise_for_status()
         obj = resp.json()
 
@@ -412,18 +428,21 @@ class FigshareHelper(FilesetPlatformHelper):
         if not obj['is_public']:
             raise PlatformRestrictedError(f'record not public: {platform_id} {dataset_version}')
         if obj['is_embargoed']:
-            raise PlatformRestrictedError(f'record is embargoed: {obj.get("embargo_title")} ({platform_id} {dataset_version})')
+            raise PlatformRestrictedError(
+                f'record is embargoed: {obj.get("embargo_title")} ({platform_id} {dataset_version})'
+            )
 
         manifest = []
         for row in obj['files']:
-            manifest.append(FilesetManifestFile(
-                path=row['name'],
-                size=row['size'],
-                md5=row['computed_md5'],
-                # NOTE: don't get: sha1, sha256, mimetype
-                platform_url=row['download_url'],
-                #extra=dict(),
-            ))
+            manifest.append(
+                FilesetManifestFile(
+                    path=row['name'],
+                    size=row['size'],
+                    md5=row['computed_md5'],
+                    # NOTE: don't get: sha1, sha256, mimetype
+                    platform_url=row['download_url'],
+                    #extra=dict(),
+                ))
             assert not row.get('is_link_only')
 
         authors = []
@@ -451,18 +470,23 @@ class FigshareHelper(FilesetPlatformHelper):
             platform_id=platform_id,
             archiveorg_item_name=archiveorg_item_name,
             archiveorg_item_meta=archiveorg_item_meta,
-            web_bundle_url=f"https://ndownloader.figshare.com/articles/{platform_id}/versions/{dataset_version}",
+            web_bundle_url=
+            f"https://ndownloader.figshare.com/articles/{platform_id}/versions/{dataset_version}",
             # TODO: web_base_url= (for GWB downloading, in lieu of platform_url on individual files)
             extra=dict(version=dataset_version),
         )
 
+
 def test_parse_figshare_url_path():
 
     valid = {
-        "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858/1": ("8987858", "1"),
-        "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858": ("8987858", None),
+        "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858/1":
+            ("8987858", "1"),
+        "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858":
+            ("8987858", None),
         "/articles/CIBERSORT_p-value_0_05/8217188/1": ("8217188", "1"),
-        "/articles/dataset/STable_1_U-Pb_geochronologic_analyses_on_samples_xls/12127176/4": ("12127176", "4"),
+        "/articles/dataset/STable_1_U-Pb_geochronologic_analyses_on_samples_xls/12127176/4":
+            ("12127176", "4"),
     }
 
     invalid = [
@@ -479,14 +503,15 @@ def test_parse_figshare_url_path():
         except ValueError:
             pass
 
-class ZenodoHelper(FilesetPlatformHelper):
 
+class ZenodoHelper(FilesetPlatformHelper):
     def __init__(self):
         super().__init__()
         self.platform_name = 'zenodo'
         self.session = requests.Session()
 
-    def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+    def match_request(self, request: dict, resource: Optional[ResourceResult],
+                      html_biblio: Optional[BiblioMetadata]) -> bool:
 
         if resource and resource.terminal_url:
             url = resource.terminal_url
@@ -499,7 +524,8 @@ class ZenodoHelper(FilesetPlatformHelper):
             return True
         return False
 
-    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
+    def process_request(self, request: dict, resource: Optional[ResourceResult],
+                        html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
         """
         Fetch platform-specific metadata for this request (eg, via API calls)
         """
@@ -535,12 +561,15 @@ class ZenodoHelper(FilesetPlatformHelper):
         assert obj['id'] == int(platform_id)
         work_id = obj['conceptrecid']
         if work_id == obj['id']:
-            raise PlatformScopeError("got a work-level zenodo record, not a versioned record: {work_id}")
+            raise PlatformScopeError(
+                "got a work-level zenodo record, not a versioned record: {work_id}")
 
         zenodo_type = obj['metadata']['resource_type']['type']
 
         if obj['metadata']['access_right'] != 'open':
-            raise PlatformRestrictedError("not publicly available ({obj['metadata']['access_right']}): {platform_domain} {platform_id}")
+            raise PlatformRestrictedError(
+                "not publicly available ({obj['metadata']['access_right']}): {platform_domain} {platform_id}"
+            )
 
         manifest = []
         for row in obj['files']:
@@ -600,11 +629,9 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
         'RAR': 'application/vnd.rar',
         'TAR': 'application/x-tar',
         '7z': 'application/x-7z-compressed',
-
         'HTML': 'text/html',
         'Text': 'text/plain',
         'PDF': 'application/pdf',
-
         'CSV': 'text/csv',
         'XML': 'application/xml',
         'JSON': 'application/json',
@@ -613,17 +640,13 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
         #'application/vnd.openxmlformats-officedocument.wordprocessingml.document', # .docx
         #'application/vnd.ms-excel', # .xls
         #'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', # .xlsx
-
-        'MP3': 'audio/mpeg', # .mp3
-
-        'MP4': 'video/mp4', # .mp4
-        'MPEG': 'video/mpeg', # .mpeg
-
+        'MP3': 'audio/mpeg',  # .mp3
+        'MP4': 'video/mp4',  # .mp4
+        'MPEG': 'video/mpeg',  # .mpeg
         'JPEG': 'image/jpeg',
         'GIF': 'image/gif',
         'PNG': 'image/png',
         'TIFF': 'image/tiff',
-
         'Unknown': None,
     }
 
@@ -640,24 +663,27 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
         if f.source != 'original':
             return False
         for suffix in [
-            '_meta.sqlite',
-            '_archive.torrent',
-            '_itemimage.jpg',
-            '_meta.xml',
-            '_thumb.png',
-            '_files.xml',
+                '_meta.sqlite',
+                '_archive.torrent',
+                '_itemimage.jpg',
+                '_meta.xml',
+                '_thumb.png',
+                '_files.xml',
         ]:
             if f.name == item_name + suffix or f.name == item_name.lower() + suffix:
                 return False
         if f.name.startswith('_'):
             return False
         if item_name.startswith('academictorrents_'):
-            for suffix in ['_academictorrents.torrent', '_academictorrents_torrent.txt', '.bib']:
+            for suffix in [
+                    '_academictorrents.torrent', '_academictorrents_torrent.txt', '.bib'
+            ]:
                 if f.name == item_name + suffix:
                     return False
         return True
 
-    def match_request(self, request: dict , resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> bool:
+    def match_request(self, request: dict, resource: Optional[ResourceResult],
+                      html_biblio: Optional[BiblioMetadata]) -> bool:
 
         if resource and resource.terminal_url:
             url = resource.terminal_url
@@ -672,20 +698,23 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
                 return True
         return False
 
-    def process_request(self, request: dict, resource: Optional[ResourceResult], html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
+    def process_request(self, request: dict, resource: Optional[ResourceResult],
+                        html_biblio: Optional[BiblioMetadata]) -> FilesetPlatformItem:
         """
         Fetch platform-specific metadata for this request (eg, via API calls)
         """
 
         base_url_split = request['base_url'].split('/')
         #print(base_url_split, file=sys.stderr)
-        assert len(base_url_split) in [5,6]
+        assert len(base_url_split) in [5, 6]
         assert base_url_split[0] in ['http:', 'https:']
         assert base_url_split[2] == 'archive.org'
         assert base_url_split[3] in ['details', 'download']
         item_name = base_url_split[4]
         if len(base_url_split) == 6 and base_url_split[5]:
-            raise PlatformScopeError("got an archive.org file path, not download/details page; individual files not handled yet")
+            raise PlatformScopeError(
+                "got an archive.org file path, not download/details page; individual files not handled yet"
+            )
 
         #print(f"  archiveorg processing item={item_name}", file=sys.stderr)
         item = self.session.get_item(item_name)

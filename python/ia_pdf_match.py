@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Input is IA item metadata JSON.
 Ouput is insertable fatcat "match" JSON
@@ -81,20 +80,22 @@ def parse(obj):
         'size': int(pdf_file['size']),
         'mimetype': 'application/pdf',
         'urls': [
-            "https://archive.org/download/{}/{}".format(
-                obj['metadata']['identifier'],
-                pdf_file['name']),
+            "https://archive.org/download/{}/{}".format(obj['metadata']['identifier'],
+                                                        pdf_file['name']),
         ],
         'cdx': [],
         'dois': [],
     }
 
     if extid_type == 'doi':
-        match['dois'] = [extid,]
+        match['dois'] = [
+            extid,
+        ]
     else:
         match[extid_type] = extid
 
     return match
+
 
 def run():
     for line in sys.stdin:
@@ -104,6 +105,7 @@ def run():
         match = parse(obj)
         if match:
             print(json.dumps(match, sort_keys=True))
+
 
 if __name__ == '__main__':
     run()

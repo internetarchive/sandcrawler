@@ -1,4 +1,3 @@
-
 import hashlib
 import io
 import os
@@ -7,7 +6,6 @@ import minio
 
 
 class SandcrawlerMinioClient(object):
-
     def __init__(self, host_url, access_key, secret_key, default_bucket=None):
         """
         host is minio connection string (host:port)

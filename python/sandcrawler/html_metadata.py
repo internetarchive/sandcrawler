@@ -1,4 +1,3 @@
-
 import datetime
 import sys
 import urllib.parse
@@ -31,9 +30,7 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='dcterms.title']",
         "meta[name='dc.title']",
     ],
-    "subtitle": [
-        "meta[name='prism.subtitle']",
-    ],
+    "subtitle": ["meta[name='prism.subtitle']", ],
     "doi": [
         "meta[name='citation_doi']",
         "meta[name='DOI']",
@@ -43,9 +40,7 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='dc.identifier.doi']",
         "meta[name='dc.identifier'][scheme='doi']",
     ],
-    "pmid": [
-        "meta[name='citation_pmid']",
-    ],
+    "pmid": ["meta[name='citation_pmid']", ],
     "abstract": [
         "meta[name='citation_abstract']",
         "meta[name='bepress_citation_abstract']",
@@ -66,9 +61,7 @@ HEAD_META_PATTERNS: Any = {
         "meta[name='dc.source']",
         "meta[property='og:site_name']",
     ],
-    "container_abbrev": [
-        "meta[name='citation_journal_abbrev']",
-    ],
+    "container_abbrev": ["meta[name='citation_journal_abbrev']", ],
     "raw_date": [
         "meta[name='citation_publication_date']",
         "meta[name='bepress_citation_publication_date']",
@@ -169,9 +162,7 @@ HEAD_META_LIST_PATTERNS: Any = {
         "meta[name='dc.contributor']",
     ],
     # TODO: citation_author_institution
-    "raw_references": [
-        "meta[name='citation_reference']",
-    ],
+    "raw_references": ["meta[name='citation_reference']", ],
     "raw_identifiers": [
         "meta[name='eprints.id_number']",
         "meta[name='dcterms.identifier']",
@@ -260,7 +251,7 @@ HTML_FULLTEXT_PATTERNS: List[dict] = [
 
 COMPONENT_FULLTEXT_PATTERNS: List[dict] = [
     {
-        "in_doc_url": "pensoft.net/article/", # also /element/
+        "in_doc_url": "pensoft.net/article/",  # also /element/
         "in_fulltext_url": "/download/fig/",
         "selector": ".Main-Content .figure a.P-Article-Preview-Picture-Download-Small",
         "attr": "href",
@@ -652,12 +643,11 @@ class BiblioMetadata(pydantic.BaseModel):
     component_url: Optional[str]
 
     class Config:
-        json_encoders = {
-            datetime.date: lambda dt: dt.isoformat()
-        }
+        json_encoders = {datetime.date: lambda dt: dt.isoformat()}
 
 
-def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict]) -> Optional[Tuple[str, str]]:
+def html_extract_fulltext_url(doc_url: str, doc: HTMLParser,
+                              patterns: List[dict]) -> Optional[Tuple[str, str]]:
     """
     Tries to quickly extract fulltext URLs using a set of patterns. This
     function is intendend to be generic across various extraction techniques.
@@ -700,6 +690,7 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser, patterns: List[dict
         print(f"  WARN: returning fulltext URL pointing to self", file=sys.stderr)
         return self_doc_url
     return None
+
 
 def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadata]:
 
@@ -772,6 +763,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
 
     return BiblioMetadata(**meta)
 
+
 def load_adblock_rules() -> braveblock.Adblocker:
     """
     TODO: consider blocking very generic assets:
@@ -838,7 +830,8 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name
     return resources
 
 
-def html_extract_resources(doc_url: str, doc: HTMLParser, adblock: braveblock.Adblocker) -> list:
+def html_extract_resources(doc_url: str, doc: HTMLParser,
+                           adblock: braveblock.Adblocker) -> list:
     """
     This function tries to find all the important resources in a page. The
     presumption is that the HTML document is article fulltext, and we want the
@@ -869,10 +862,12 @@ def html_extract_resources(doc_url: str, doc: HTMLParser, adblock: braveblock.Ad
         r['url'] = urllib.parse.urljoin(doc_url, r['url'])
 
     # filter using adblocker
-    resources = [r for r in resources if adblock.check_network_urls(r['url'], source_url=doc_url, request_type=r['type']) == False]
+    resources = [
+        r for r in resources if adblock.check_network_urls(
+            r['url'], source_url=doc_url, request_type=r['type']) == False
+    ]
 
     # remove duplicates
     resources = [dict(t) for t in {tuple(d.items()) for d in resources}]
 
     return resources
-

@@ -20,12 +20,14 @@ import sys
 # 2. select all file metadata
 # 3. output object
 
+
 def or_none(s):
     if s is None:
         return None
     elif type(s) == str and ((not s) or s == "\\N" or s == "-"):
         return None
     return s
+
 
 def process_db(db_path):
 
@@ -52,5 +54,6 @@ def process_db(db_path):
         dois = db.execute("SELECT doi FROM files_id_doi WHERE sha1=?", [sha1])
         print(json.dumps(obj))
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     process_db(sys.argv[1])

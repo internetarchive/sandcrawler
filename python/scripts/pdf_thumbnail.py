@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Quick CLI script to convert a PDF to thumbnail (.png, jpeg, etc).
 
@@ -23,11 +22,13 @@ def run(inpath, outpath):
 
     renderer = poppler.PageRenderer()
     full_page = renderer.render_page(page)
-    img = Image.frombuffer("RGBA", (full_page.width, full_page.height), full_page.data, 'raw', "BGRA", 0, 1)
-    img.thumbnail((180,300), Image.BICUBIC)
+    img = Image.frombuffer("RGBA", (full_page.width, full_page.height), full_page.data, 'raw',
+                           "BGRA", 0, 1)
+    img.thumbnail((180, 300), Image.BICUBIC)
     #img.thumbnail((360,600), Image.BICUBIC)
     img.save(outpath)
     #img.save(outpath, quality=95)
+
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:

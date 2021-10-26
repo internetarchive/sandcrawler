@@ -1,4 +1,3 @@
-
 import argparse
 import datetime
 import io
@@ -11,16 +10,20 @@ import pydantic
 import trafilatura
 from selectolax.parser import HTMLParser
 
-from sandcrawler.html_metadata import BiblioMetadata, html_extract_biblio, html_extract_resources, load_adblock_rules
-from sandcrawler.ia import (CdxApiClient, NoCaptureError, ResourceResult, WaybackClient, WaybackContentError,
-                            cdx_to_dict, fix_transfer_encoding)
-from sandcrawler.misc import clean_url, datetime_to_cdx, gen_file_metadata, parse_cdx_datetime, url_fuzzy_equal
+from sandcrawler.html_metadata import (BiblioMetadata, html_extract_biblio,
+                                       html_extract_resources, load_adblock_rules)
+from sandcrawler.ia import (CdxApiClient, NoCaptureError, ResourceResult, WaybackClient,
+                            WaybackContentError, cdx_to_dict, fix_transfer_encoding)
+from sandcrawler.misc import (clean_url, datetime_to_cdx, gen_file_metadata, parse_cdx_datetime,
+                              url_fuzzy_equal)
 
 TRAFILATURA_AGENT = f"trafilatura/{trafilatura.__version__}"
 
+
 def html_extract_body_teixml(doc: bytes) -> dict:
     try:
-        tei_xml = trafilatura.extract(doc,
+        tei_xml = trafilatura.extract(
+            doc,
             output_format='xmltei',
             include_comments=False,
             include_formatting=True,
@@ -33,12 +36,18 @@ def html_extract_body_teixml(doc: bytes) -> dict:
     if tei_xml:
         body_txt = teixml_body_text(tei_xml)
         word_count = len(body_txt.split())
-        return dict(status="success", agent=TRAFILATURA_AGENT, tei_xml=tei_xml, word_count=word_count)
-    elif doc.startswith(b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 2012"http://www.w3.org/TR/html4/loose.dtd">'):
+        return dict(status="success",
+                    agent=TRAFILATURA_AGENT,
+                    tei_xml=tei_xml,
+                    word_count=word_count)
+    elif doc.startswith(
+            b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 2012"http://www.w3.org/TR/html4/loose.dtd">'
+    ):
         # hack for firstmonday.org
         return html_extract_body_teixml(doc[106:])
     else:
         return dict(status="empty-xml", agent=TRAFILATURA_AGENT)
+
 
 def teixml_body_text(doc_xml: str) -> str:
     ns = {"tei": "http://www.tei-c.org/ns/1.0"}
@@ -48,6 +57,7 @@ def teixml_body_text(doc_xml: str) -> str:
         return " ".join(body.itertext())
     else:
         return ""
+
 
 class WebResource(pydantic.BaseModel):
     surt: str
@@ -61,16 +71,15 @@ class WebResource(pydantic.BaseModel):
     resource_type: Optional[str]
 
     class Config:
-        json_encoders = {
-            datetime.datetime: lambda dt: dt.isoformat()
-        }
+        json_encoders = {datetime.datetime: lambda dt: dt.isoformat()}
+
 
 class IngestWebResult(pydantic.BaseModel):
     status: str
     hit: bool
     error_message: Optional[str]
     cdx: Optional[dict]
-    terminal: Optional[Any] # TODO
+    terminal: Optional[Any]  # TODO
     request: Optional[Any]  # TODO
     file_meta: Optional[dict]
     html_biblio: Optional[BiblioMetadata]
@@ -83,6 +92,7 @@ class IngestWebResult(pydantic.BaseModel):
         json_encoders = {
             datetime.datetime: lambda dt: dt.isoformat(),
         }
+
 
 class HtmlMetaRow(pydantic.BaseModel):
     sha1hex: str
@@ -106,7 +116,7 @@ class HtmlMetaRow(pydantic.BaseModel):
         """
         return (
             self.sha1hex,
-            datetime.datetime.now(), # updated
+            datetime.datetime.now(),  # updated
             self.status,
             self.scope,
             self.has_teixml,
@@ -117,7 +127,8 @@ class HtmlMetaRow(pydantic.BaseModel):
         )
 
 
-def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, when: Optional[datetime.datetime]) -> List[WebResource]:
+def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient,
+                               when: Optional[datetime.datetime]) -> List[WebResource]:
     """
     This is the lazy version that just does a CDX lookup for each resource.
 
@@ -132,27 +143,30 @@ def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient, 
         if not cdx_row:
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         if cdx_row.url != resource['url'] and not url_fuzzy_equal(cdx_row.url, resource['url']):
-            print(f"  WARN: CDX fuzzy match: {cdx_row.url} != {resource['url']}", file=sys.stderr)
+            print(f"  WARN: CDX fuzzy match: {cdx_row.url} != {resource['url']}",
+                  file=sys.stderr)
         if not cdx_row.status_code:
             # TODO: fall back to a full fetch?
             print(f"  WARN: skipping revisit record", file=sys.stderr)
             continue
-        full.append(WebResource(
-            surt=cdx_row.surt,
-            timestamp=cdx_row.datetime,
-            url=cdx_row.url,
-            sha1hex=cdx_row.sha1hex,
-            mimetype=cdx_row.mimetype,
-            status_code=cdx_row.status_code,
-            size=None,
-            sha256hex=None,
-            resource_type=resource['type'],
-        ))
+        full.append(
+            WebResource(
+                surt=cdx_row.surt,
+                timestamp=cdx_row.datetime,
+                url=cdx_row.url,
+                sha1hex=cdx_row.sha1hex,
+                mimetype=cdx_row.mimetype,
+                status_code=cdx_row.status_code,
+                size=None,
+                sha256hex=None,
+                resource_type=resource['type'],
+            ))
 
     return full
 
 
-def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, when: Optional[datetime.datetime]) -> List[WebResource]:
+def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient,
+                         when: Optional[datetime.datetime]) -> List[WebResource]:
     """
     This is the full version which fetches each resource from wayback/petabox
     and calculates additional hashes.
@@ -168,23 +182,28 @@ def fetch_html_resources(resources: List[dict], wayback_client: WaybackClient, w
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         file_meta = gen_file_metadata(wayback_resp.body, allow_empty=True)
         if file_meta['sha1hex'] != wayback_resp.cdx.sha1hex:
-            raise WaybackContentError(f"wayback payload sha1hex mismatch: {wayback_resp.cdx.datetime} {wayback_resp.cdx.url}")
-        full.append(WebResource(
-            surt=wayback_resp.cdx.surt,
-            timestamp=parse_cdx_datetime(wayback_resp.cdx.datetime),
-            url=wayback_resp.cdx.url,
-            sha1hex=file_meta['sha1hex'],
-            mimetype=file_meta['mimetype'],
-            status_code=wayback_resp.cdx.status_code or wayback_resp.revisit_cdx.status_code,
-            size=file_meta['size_bytes'],
-            sha256hex=file_meta['sha256hex'],
-            resource_type=resource['type'],
-        ))
+            raise WaybackContentError(
+                f"wayback payload sha1hex mismatch: {wayback_resp.cdx.datetime} {wayback_resp.cdx.url}"
+            )
+        full.append(
+            WebResource(
+                surt=wayback_resp.cdx.surt,
+                timestamp=parse_cdx_datetime(wayback_resp.cdx.datetime),
+                url=wayback_resp.cdx.url,
+                sha1hex=file_meta['sha1hex'],
+                mimetype=file_meta['mimetype'],
+                status_code=wayback_resp.cdx.status_code
+                or wayback_resp.revisit_cdx.status_code,
+                size=file_meta['size_bytes'],
+                sha256hex=file_meta['sha256hex'],
+                resource_type=resource['type'],
+            ))
 
     return full
 
 
-def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]) -> Optional[str]:
+def html_guess_platform(url: str, doc: HTMLParser,
+                        biblio: Optional[BiblioMetadata]) -> Optional[str]:
 
     generator: Optional[str] = None
     generator_elem = doc.css_first("meta[name='generator']")
@@ -229,7 +248,9 @@ def html_guess_platform(url: str, doc: HTMLParser, biblio: Optional[BiblioMetada
 
     return None
 
-def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata], word_count: Optional[int]) -> str:
+
+def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata],
+                     word_count: Optional[int]) -> str:
     """
     This function tries to guess if an HTML document represents one of:
 
@@ -328,7 +349,9 @@ def html_guess_scope(url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
     return "unknown"
 
 
-def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = False) -> IngestWebResult:
+def run_single(url: str,
+               timestamp: Optional[str] = None,
+               quick_mode: bool = False) -> IngestWebResult:
 
     adblock = load_adblock_rules()
     wayback_client = WaybackClient()
@@ -375,7 +398,8 @@ def run_single(url: str, timestamp: Optional[str] = None, quick_mode: bool = Fal
 
     full_resources: List[WebResource] = []
     if quick_mode:
-        full_resources = quick_fetch_html_resources(raw_resources, wayback_client.cdx_client, when)
+        full_resources = quick_fetch_html_resources(raw_resources, wayback_client.cdx_client,
+                                                    when)
     else:
         full_resources = fetch_html_resources(raw_resources, wayback_client, when)
 
@@ -399,14 +423,11 @@ def main() -> None:
         python -m sandcrawler.ingest_html
     """
 
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
-    sub = subparsers.add_parser(
-        "single", help="tries to ingest a single URL, dumps result to stdout"
-    )
+    sub = subparsers.add_parser("single",
+                                help="tries to ingest a single URL, dumps result to stdout")
     sub.set_defaults(func="run_single")
     sub.add_argument(
         "url",
@@ -436,6 +457,7 @@ def main() -> None:
         #func = getattr(wp, args.func)
         #func()
         raise NotImplementedError()
+
 
 if __name__ == "__main__":
     main()

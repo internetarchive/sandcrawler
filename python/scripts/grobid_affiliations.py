@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Takes old (HBase) or new (pg) style JSON wrappers of GROBID XML extraction
 output, converts the XML to JSON, filters out raw affiliation strings, and
@@ -24,9 +23,11 @@ def parse_hbase(line):
     tei_xml = obj['tei_xml']
     return sha1hex, tei_xml
 
+
 def parse_pg(line):
     obj = json.loads(line)
     return obj['sha1hex'], obj['tei_xml']
+
 
 def run(mode='hbase'):
     for line in sys.stdin:
@@ -49,5 +50,6 @@ def run(mode='hbase'):
             affiliations = [json.loads(a) for a in affiliations]
             print('\t'.join([sha1hex, json.dumps(affiliations)]))
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     run()

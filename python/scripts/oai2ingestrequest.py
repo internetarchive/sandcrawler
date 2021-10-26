@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Transform an OAI-PMH bulk dump (JSON) into ingest requests.
 
@@ -33,16 +32,18 @@ DOMAIN_BLOCKLIST = [
 ]
 
 RELEASE_STAGE_MAP = {
-    'info:eu-repo/semantics/draftVersion':     'draft',
+    'info:eu-repo/semantics/draftVersion': 'draft',
     'info:eu-repo/semantics/submittedVersion': 'submitted',
-    'info:eu-repo/semantics/acceptedVersion':  'accepted',
+    'info:eu-repo/semantics/acceptedVersion': 'accepted',
     'info:eu-repo/semantics/publishedVersion': 'published',
-    'info:eu-repo/semantics/updatedVersion':   'updated',
+    'info:eu-repo/semantics/updatedVersion': 'updated',
 }
+
 
 def canon(s):
     parsed = urlcanon.parse_url(s)
     return str(urlcanon.whatwg(parsed))
+
 
 def transform(obj):
     """
@@ -112,6 +113,7 @@ def transform(obj):
 
     return requests
 
+
 def run(args):
     for l in args.json_file:
         if not l.strip():
@@ -122,17 +124,18 @@ def run(args):
         for r in requests:
             print("{}".format(json.dumps(r, sort_keys=True)))
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('json_file',
-        help="OAI-PMH dump file to use (usually stdin)",
-        type=argparse.FileType('r'))
+                        help="OAI-PMH dump file to use (usually stdin)",
+                        type=argparse.FileType('r'))
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
 
     run(args)
+
 
 if __name__ == '__main__':
     main()

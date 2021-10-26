@@ -34,13 +34,13 @@ def run():
 
         sha1 = base64.b16encode(base64.b32decode(raw_sha1)).decode('ascii').lower()
 
-        obj = dict(
-            sha1=sha1,
-            dois=dois,
-            cdx=[dict(url=cdx['url'], dt=cdx['dt'])],
-            size=size,
-            mimetype=mimetype)
+        obj = dict(sha1=sha1,
+                   dois=dois,
+                   cdx=[dict(url=cdx['url'], dt=cdx['dt'])],
+                   size=size,
+                   mimetype=mimetype)
         print(json.dumps(obj))
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     run()

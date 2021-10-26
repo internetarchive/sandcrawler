@@ -4,7 +4,8 @@ import datetime
 import json
 import sys
 
-MAX_ABSTRACT_BYTES=4096
+MAX_ABSTRACT_BYTES = 4096
+
 
 def parse_grobid_json(obj):
 
@@ -14,10 +15,7 @@ def parse_grobid_json(obj):
     extra = dict()
 
     if obj.get('abstract') and len(obj.get('abstract')) < MAX_ABSTRACT_BYTES:
-        abobj = dict(
-            mimetype="text/plain",
-            language=None,
-            content=obj.get('abstract').strip())
+        abobj = dict(mimetype="text/plain", language=None, content=obj.get('abstract').strip())
         abstracts = [abobj]
     else:
         abstracts = None
@@ -72,16 +70,16 @@ def parse_grobid_json(obj):
     else:
         extra = None
 
-    return dict(
-        title=obj['title'].strip(),
-        contribs=contribs,
-        publisher=obj['journal'].get('publisher'),
-        volume=obj['journal'].get('volume'),
-        issue=obj['journal'].get('issue'),
-        abstracts=abstracts,
-        release_type=release_type,
-        release_date=release_date,
-        extra=extra)
+    return dict(title=obj['title'].strip(),
+                contribs=contribs,
+                publisher=obj['journal'].get('publisher'),
+                volume=obj['journal'].get('volume'),
+                issue=obj['journal'].get('issue'),
+                abstracts=abstracts,
+                release_type=release_type,
+                release_date=release_date,
+                extra=extra)
+
 
 def run():
     for line in sys.stdin:
@@ -90,5 +88,6 @@ def run():
         if out:
             print(out)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     run()

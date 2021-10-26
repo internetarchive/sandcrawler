@@ -1,4 +1,3 @@
-
 """
 This file contains tests to run against "live" wayback services. They default
 to "skip" because you need authentication, and we shouldn't hit these services
@@ -11,8 +10,8 @@ import json
 
 import pytest
 
-from sandcrawler import (CdxApiClient, CdxApiError, CdxPartial, PetaboxError, SavePageNowClient, SavePageNowError,
-                         WaybackClient, WaybackError, gen_file_metadata)
+from sandcrawler import (CdxApiClient, CdxApiError, CdxPartial, PetaboxError, SavePageNowClient,
+                         SavePageNowError, WaybackClient, WaybackError, gen_file_metadata)
 
 
 @pytest.fixture
@@ -20,15 +19,18 @@ def cdx_client():
     client = CdxApiClient()
     return client
 
+
 @pytest.fixture
 def wayback_client():
     client = WaybackClient()
     return client
 
+
 @pytest.fixture
 def spn_client():
     client = SavePageNowClient()
     return client
+
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_cdx_fetch(cdx_client):
@@ -50,6 +52,7 @@ def test_cdx_fetch(cdx_client):
     with pytest.raises(KeyError):
         resp = cdx_client.fetch(url, "12345678123456")
 
+
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_cdx_lookup_best(cdx_client):
 
@@ -68,12 +71,17 @@ def test_cdx_lookup_best(cdx_client):
     assert resp.mimetype == "text/html"
     assert resp.status_code == 200
 
+
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_wayback_fetch(wayback_client):
 
-    resp = wayback_client.fetch_petabox(25683, 2676464871, "archiveteam_archivebot_go_20171205210002/arstechnica.co.uk-inf-20171201-061309-bb65j-00021.warc.gz")
+    resp = wayback_client.fetch_petabox(
+        25683, 2676464871,
+        "archiveteam_archivebot_go_20171205210002/arstechnica.co.uk-inf-20171201-061309-bb65j-00021.warc.gz"
+    )
 
     assert resp.body
+
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_lookup_resource_success(wayback_client):
@@ -85,6 +93,7 @@ def test_lookup_resource_success(wayback_client):
     assert resp.status == "success"
     assert resp.terminal_url in (url, url.replace("https://", "http://"))
     assert resp.cdx.url in (url, url.replace("https://", "http://"))
+
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_cdx_fetch_spn2(cdx_client):
@@ -107,8 +116,8 @@ def test_cdx_fetch_spn2(cdx_client):
     # https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 20200110222410
 
     #com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 200 VYW7JXFK6EC2KC537N5B7PHYZC4B6MZL - - 9006 815069841 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
-#com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1096 815066572 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
-#com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222422 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1094 307563475 liveweb-20200110214449-wwwb-spn18.us.archive.org-8003.warc.gz
+    #com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1096 815066572 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
+    #com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222422 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1094 307563475 liveweb-20200110214449-wwwb-spn18.us.archive.org-8003.warc.gz
 
     url = "https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209"
     datetime = "20200110222410"
@@ -118,6 +127,7 @@ def test_cdx_fetch_spn2(cdx_client):
     assert resp.datetime == datetime
     assert resp.sha1b32 == "VYW7JXFK6EC2KC537N5B7PHYZC4B6MZL"
     assert resp.status_code == 200
+
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_lookup_ftp(wayback_client):
@@ -152,6 +162,7 @@ def test_lookup_ftp(wayback_client):
 
     file_meta = gen_file_metadata(resp.body)
     assert file_meta['sha1hex'] == resp.cdx.sha1hex
+
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
 def test_crawl_ftp(spn_client, wayback_client):

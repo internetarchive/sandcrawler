@@ -24,6 +24,7 @@ NAME_DENYLIST = (
     'phdstudent',
 )
 
+
 def tokenize(s, remove_whitespace=True):
 
     s.replace('&apos;', "'")
@@ -36,8 +37,10 @@ def tokenize(s, remove_whitespace=True):
     # Encode as dumb ASCII (TODO: this is horrible)
     return s.encode('ascii', 'replace').decode('utf8').replace('?', '')
 
+
 assert tokenize("Impact Factor: 2.114") == "impactfactor"
 assert tokenize("Impact Factor: 2.114") in TITLE_DENYLIST
+
 
 def filter_title(title):
 
@@ -83,18 +86,22 @@ def filter_title(title):
 
     return title
 
+
 def filter_author_name(name):
     name = name['name']
     if name.strip().lower().replace(' ', '') in NAME_DENYLIST:
         return None
     return ' '.join([t for t in name.split() if tokenize(t)])
 
+
 def filter_authors(l):
     return [dict(name=n) for n in map(filter_author_name, l) if n and len(n) > 1]
+
 
 def filter_refs(l):
     # TODO:
     return l
+
 
 def filter_journal_name(name):
     # same denylist, for now
@@ -104,10 +111,12 @@ def filter_journal_name(name):
     slug_name = tokenize(name)
     if slug_name in TITLE_DENYLIST or len(slug_name) < 4 or name == "N.º":
         return None
-    for prefix in ("/ ", "~ ", "& ", "© ", "Original Research Article ", "Original Article ", "Research Article ", "Available online www.jocpr.com "):
+    for prefix in ("/ ", "~ ", "& ", "© ", "Original Research Article ", "Original Article ",
+                   "Research Article ", "Available online www.jocpr.com "):
         if name.startswith(prefix):
             name = name.replace(prefix, '')
-    for suffix in (" Available online at www.sciarena.com", " Original Article", " Available online at", " ISSN", " ISSUE"):
+    for suffix in (" Available online at www.sciarena.com", " Original Article",
+                   " Available online at", " ISSN", " ISSUE"):
         if name.endswith(suffix):
             name = name.replace(suffix, '')
     if "====================" in name:
@@ -115,6 +124,7 @@ def filter_journal_name(name):
     if len(name) > 150:
         return None
     return ' '.join(name.split())
+
 
 def filter_metadata(obj):
     if not (obj.get('title') and obj.get('authors')):
@@ -131,6 +141,7 @@ def filter_metadata(obj):
     obj['journal']['name'] = filter_journal_name(obj['journal']['name'])
 
     return obj
+
 
 def run(invert=False):
     for line in sys.stdin:
@@ -155,5 +166,6 @@ def run(invert=False):
         elif invert:
             print(raw.strip())
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     run(invert="--invert" in sys.argv)

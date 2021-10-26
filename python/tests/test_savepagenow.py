@@ -1,4 +1,3 @@
-
 import json
 
 import pytest
@@ -26,9 +25,7 @@ SUCCESS_BODY = {
     "timestamp": "20180326070330",
     "duration_sec": 6.203,
     "resources": [
-        TARGET,
-        TARGET + "/redirect",
-        "http://brewster.kahle.org/",
+        TARGET, TARGET + "/redirect", "http://brewster.kahle.org/",
         "http://brewster.kahle.org/favicon.ico",
         "http://brewster.kahle.org/files/2011/07/bkheader-follow.jpg",
         "http://brewster.kahle.org/files/2016/12/amazon-unhappy.jpg",
@@ -43,8 +40,7 @@ SUCCESS_BODY = {
         "http://brewster.kahle.org/wp-content/themes/twentyten/style.css",
         "http://brewster.kahle.org/wp-includes/js/wp-embed.min.js?ver=4.9.4",
         "http://brewster.kahle.org/wp-includes/js/wp-emoji-release.min.js?ver=4.9.4",
-        "http://platform.twitter.com/widgets.js",
-        "https://archive-it.org/piwik.js",
+        "http://platform.twitter.com/widgets.js", "https://archive-it.org/piwik.js",
         "https://platform.twitter.com/jot.html",
         "https://platform.twitter.com/js/button.556f0ea0e4da4e66cfdc182016dbd6db.js",
         "https://platform.twitter.com/widgets/follow_button.f47a2e0b4471326b6fa0f163bda46011.en.html",
@@ -60,7 +56,7 @@ SUCCESS_BODY = {
         "https://www.syndikat.org/wp-includes/js/jquery/jquery.js?ver=1.12.4",
         "https://www.syndikat.org/wp-includes/js/wp-emoji-release.min.js?ver=4.9.4"
     ],
-    "outlinks":{
+    "outlinks": {
         "https://archive.org/": "xxxxxx89b-f3ca-48d0-9ea6-1d1225e98695",
         "https://other.com": "yyyy89b-f3ca-48d0-9ea6-1d1225e98695"
     }
@@ -74,9 +70,17 @@ ERROR_BODY = {
     "resources": []
 }
 CDX_SPN_HIT = [
- ["urlkey","timestamp","original","mimetype","statuscode","digest","redirect","robotflags","length","offset","filename"],
- ["wiki,fatcat)/", "20180326070330", TARGET + "/redirect", "application/pdf", "200", CDX_BEST_SHA1B32, "-", "-", "8445", "108062304", "liveweb-20200108215212-wwwb-spn04.us.archive.org-kols1pud.warc.gz"],
+    [
+        "urlkey", "timestamp", "original", "mimetype", "statuscode", "digest", "redirect",
+        "robotflags", "length", "offset", "filename"
+    ],
+    [
+        "wiki,fatcat)/", "20180326070330", TARGET + "/redirect", "application/pdf", "200",
+        CDX_BEST_SHA1B32, "-", "-", "8445", "108062304",
+        "liveweb-20200108215212-wwwb-spn04.us.archive.org-kols1pud.warc.gz"
+    ],
 ]
+
 
 @pytest.fixture
 def spn_client():
@@ -88,25 +92,29 @@ def spn_client():
     client.poll_seconds = 0.0
     return client
 
+
 @responses.activate
 def test_savepagenow_success(spn_client):
 
     responses.add(responses.POST,
-        'http://dummy-spnv2/save',
-        status=200,
-        body=json.dumps({"url": TARGET, "job_id": JOB_ID}))
+                  'http://dummy-spnv2/save',
+                  status=200,
+                  body=json.dumps({
+                      "url": TARGET,
+                      "job_id": JOB_ID
+                  }))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(PENDING_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(PENDING_BODY))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(PENDING_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(PENDING_BODY))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(SUCCESS_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(SUCCESS_BODY))
 
     resp = spn_client.save_url_now_v2(TARGET)
 
@@ -119,21 +127,25 @@ def test_savepagenow_success(spn_client):
     assert resp.terminal_dt == SUCCESS_BODY['timestamp']
     assert resp.resources == SUCCESS_BODY['resources']
 
+
 @responses.activate
 def test_savepagenow_remote_error(spn_client):
 
     responses.add(responses.POST,
-        'http://dummy-spnv2/save',
-        status=200,
-        body=json.dumps({"url": TARGET, "job_id": JOB_ID}))
+                  'http://dummy-spnv2/save',
+                  status=200,
+                  body=json.dumps({
+                      "url": TARGET,
+                      "job_id": JOB_ID
+                  }))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(PENDING_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(PENDING_BODY))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(ERROR_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(ERROR_BODY))
 
     resp = spn_client.save_url_now_v2(TARGET)
 
@@ -146,47 +158,56 @@ def test_savepagenow_remote_error(spn_client):
     assert resp.terminal_dt == None
     assert resp.resources == None
 
+
 @responses.activate
 def test_savepagenow_500(spn_client):
 
     responses.add(responses.POST,
-        'http://dummy-spnv2/save',
-        status=200,
-        body=json.dumps({"url": TARGET, "job_id": JOB_ID}))
+                  'http://dummy-spnv2/save',
+                  status=200,
+                  body=json.dumps({
+                      "url": TARGET,
+                      "job_id": JOB_ID
+                  }))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=500,
-        body=json.dumps(ERROR_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=500,
+                  body=json.dumps(ERROR_BODY))
 
     with pytest.raises(SavePageNowError):
         resp = spn_client.save_url_now_v2(TARGET)
 
     assert len(responses.calls) == 2
 
+
 @responses.activate
 def test_crawl_resource(spn_client, wayback_client):
 
     responses.add(responses.POST,
-        'http://dummy-spnv2/save',
-        status=200,
-        body=json.dumps({"url": TARGET, "job_id": JOB_ID}))
+                  'http://dummy-spnv2/save',
+                  status=200,
+                  body=json.dumps({
+                      "url": TARGET,
+                      "job_id": JOB_ID
+                  }))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(PENDING_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(PENDING_BODY))
     responses.add(responses.GET,
-        'http://dummy-spnv2/save/status/' + JOB_ID,
-        status=200,
-        body=json.dumps(SUCCESS_BODY))
+                  'http://dummy-spnv2/save/status/' + JOB_ID,
+                  status=200,
+                  body=json.dumps(SUCCESS_BODY))
     responses.add(responses.GET,
-        'http://dummy-cdx/cdx',
-        status=200,
-        body=json.dumps(CDX_SPN_HIT))
+                  'http://dummy-cdx/cdx',
+                  status=200,
+                  body=json.dumps(CDX_SPN_HIT))
     responses.add(responses.GET,
-        'https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"),
-        status=200,
-        headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
-        body=WARC_BODY)
+                  'https://web.archive.org/web/{}id_/{}'.format("20180326070330",
+                                                                TARGET + "/redirect"),
+                  status=200,
+                  headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
+                  body=WARC_BODY)
 
     print('https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"))
     resp = spn_client.crawl_resource(TARGET, wayback_client)
@@ -201,4 +222,3 @@ def test_crawl_resource(spn_client, wayback_client):
     assert type(resp.cdx) == CdxPartial
     with pytest.raises(AttributeError):
         print(resp.cdx.warc_path)
-

@@ -1,4 +1,3 @@
-
 import datetime
 import json
 import sys
@@ -153,19 +152,20 @@ BAD_PDF_SHA1HEX = [
     "fd9bd560662e070b222d63052830837829c490f0",
 ]
 
+
 @dataclass
 class PdfExtractResult:
     sha1hex: str
     status: str
     error_msg: Optional[str] = None
-    file_meta: Optional[Dict[str,Any]] = None
+    file_meta: Optional[Dict[str, Any]] = None
     text: Optional[str] = None
     page0_thumbnail: Optional[bytes] = None
     has_page0_thumbnail: bool = False
     meta_xml: Optional[str] = None
-    pdf_info: Optional[Dict[str,Any]] = None
-    pdf_extra: Optional[Dict[str,Any]] = None
-    source: Optional[Dict[str,Any]] = None
+    pdf_info: Optional[Dict[str, Any]] = None
+    pdf_extra: Optional[Dict[str, Any]] = None
+    source: Optional[Dict[str, Any]] = None
 
     def to_pdftext_dict(self) -> dict:
         """
@@ -221,7 +221,8 @@ class PdfExtractResult:
             )
         else:
             pdf_extra = dict()
-            for k in ('page_count', 'page0_height', 'page0_width', 'permanent_id', 'pdf_version'):
+            for k in ('page_count', 'page0_height', 'page0_width', 'permanent_id',
+                      'pdf_version'):
                 if record.get(k):
                     pdf_extra[k] = record[k]
             return PdfExtractResult(
@@ -255,7 +256,7 @@ class PdfExtractResult:
             metadata_json = json.dumps(metadata, sort_keys=True)
         return (
             self.sha1hex,
-            datetime.datetime.now(), # updated
+            datetime.datetime.now(),  # updated
             self.status,
             self.has_page0_thumbnail,
             pdf_extra.get('page_count'),
@@ -269,7 +270,7 @@ class PdfExtractResult:
         )
 
 
-def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtractResult:
+def process_pdf(blob: bytes, thumb_size=(180, 300), thumb_type="JPEG") -> PdfExtractResult:
     """
     A known issue is that output text is in "physical layout" mode, which means
     columns will be side-by-side. We would prefer a single stream of tokens!
@@ -330,7 +331,8 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
     renderer = poppler.PageRenderer()
     try:
         full_img = renderer.render_page(page0)
-        img = Image.frombuffer("RGBA", (full_img.width, full_img.height), full_img.data, 'raw', "BGRA", 0, 1)
+        img = Image.frombuffer("RGBA", (full_img.width, full_img.height), full_img.data, 'raw',
+                               "BGRA", 0, 1)
         img.thumbnail(thumb_size, Image.BICUBIC)
         buf = BytesIO()
         img.save(buf, thumb_type)
@@ -356,14 +358,14 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         )
 
     # Kafka message size limit; cap at about 1 MByte
-    if len(full_text)> 1000000:
+    if len(full_text) > 1000000:
         return PdfExtractResult(
             sha1hex=sha1hex,
             status='text-too-large',
             error_msg="full_text chars: {}".format(len(full_text)),
             file_meta=file_meta,
         )
-    if len(pdf.metadata)> 1000000:
+    if len(pdf.metadata) > 1000000:
         return PdfExtractResult(
             sha1hex=sha1hex,
             status='text-too-large',
@@ -414,8 +416,8 @@ def process_pdf(blob: bytes, thumb_size=(180,300), thumb_type="JPEG") -> PdfExtr
         ),
     )
 
-class PdfExtractWorker(SandcrawlerFetchWorker):
 
+class PdfExtractWorker(SandcrawlerFetchWorker):
     def __init__(self, wayback_client=None, sink=None, **kwargs):
         super().__init__(wayback_client=wayback_client)
         self.wayback_client = wayback_client
@@ -445,12 +447,12 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
             self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)
         return result.to_pdftext_dict()
 
+
 class PdfExtractBlobWorker(SandcrawlerWorker):
     """
     This is sort of like PdfExtractWorker, except it receives blobs directly,
     instead of fetching blobs from some remote store.
     """
-
     def __init__(self, sink=None, **kwargs):
         super().__init__()
         self.sink = sink
@@ -466,4 +468,3 @@ class PdfExtractBlobWorker(SandcrawlerWorker):
             self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)
 
         return result.to_pdftext_dict()
-

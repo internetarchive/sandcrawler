@@ -1,4 +1,3 @@
-
 import requests
 
 from grobid2json import teixml2json
@@ -8,7 +7,6 @@ from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 
 class GrobidClient(object):
-
     def __init__(self, host_url="http://grobid.qa.fatcat.wiki", **kwargs):
         self.host_url = host_url
         self.consolidate_mode = int(kwargs.get('consolidate_mode', 0))
@@ -34,7 +32,7 @@ class GrobidClient(object):
                 files={
                     'input': blob,
                     'consolidateHeader': self.consolidate_mode,
-                    'consolidateCitations': 0, # too expensive for now
+                    'consolidateCitations': 0,  # too expensive for now
                     'includeRawCitations': 1,
                 },
                 timeout=180.0,
@@ -46,9 +44,7 @@ class GrobidClient(object):
                 'error_msg': 'GROBID request (HTTP POST) timeout',
             }
 
-        info = dict(
-            status_code=grobid_response.status_code,
-        )
+        info = dict(status_code=grobid_response.status_code, )
         if grobid_response.status_code == 200:
             info['status'] = 'success'
             info['tei_xml'] = grobid_response.text
@@ -56,7 +52,8 @@ class GrobidClient(object):
                 # XML is larger than Kafka message size, and much larger than
                 # an article in general; bail out
                 info['status'] = 'error'
-                info['error_msg'] = "response XML too large: {} bytes".format(len(info['tei_xml']))
+                info['error_msg'] = "response XML too large: {} bytes".format(
+                    len(info['tei_xml']))
                 info.pop('tei_xml')
         else:
             # response.text is .content decoded as utf-8
@@ -70,7 +67,13 @@ class GrobidClient(object):
         tei_json = teixml2json(result['tei_xml'], encumbered=False)
         meta = dict()
         biblio = dict()
-        for k in ('title', 'authors', 'journal', 'date', 'doi', ):
+        for k in (
+                'title',
+                'authors',
+                'journal',
+                'date',
+                'doi',
+        ):
             if tei_json.get(k):
                 biblio[k] = tei_json[k]
         meta['biblio'] = biblio
@@ -79,8 +82,8 @@ class GrobidClient(object):
                 meta[k] = tei_json[k]
         return meta
 
-class GrobidWorker(SandcrawlerFetchWorker):
 
+class GrobidWorker(SandcrawlerFetchWorker):
     def __init__(self, grobid_client, wayback_client=None, sink=None, **kwargs):
         super().__init__(wayback_client=wayback_client)
         self.grobid_client = grobid_client
@@ -104,18 +107,19 @@ class GrobidWorker(SandcrawlerFetchWorker):
             return fetch_result
         blob = fetch_result['blob']
 
-        result = self.grobid_client.process_fulltext(blob, consolidate_mode=self.consolidate_mode)
+        result = self.grobid_client.process_fulltext(blob,
+                                                     consolidate_mode=self.consolidate_mode)
         result['file_meta'] = gen_file_metadata(blob)
         result['source'] = record
         result['key'] = result['file_meta']['sha1hex']
         return result
+
 
 class GrobidBlobWorker(SandcrawlerWorker):
     """
     This is sort of like GrobidWorker, except it receives blobs directly,
     instead of fetching blobs from some remote store.
     """
-
     def __init__(self, grobid_client, sink=None, **kwargs):
         super().__init__()
         self.grobid_client = grobid_client
@@ -125,8 +129,8 @@ class GrobidBlobWorker(SandcrawlerWorker):
     def process(self, blob, key=None):
         if not blob:
             return None
-        result = self.grobid_client.process_fulltext(blob, consolidate_mode=self.consolidate_mode)
+        result = self.grobid_client.process_fulltext(blob,
+                                                     consolidate_mode=self.consolidate_mode)
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']
         return result
-

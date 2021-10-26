@@ -35,9 +35,7 @@ def run():
     print("Looking up collection: {}".format(collection))
 
     # First fetch list
-    item_list = list(
-        ia.search_items(
-            query="collection:{} mediatype:web".format(collection)))
+    item_list = list(ia.search_items(query="collection:{} mediatype:web".format(collection)))
 
     if len(item_list) == 0:
         print("No items found, bailing")
@@ -50,11 +48,12 @@ def run():
         item = item['identifier']
         # TODO: error handling
         try:
-            ret = ia.download(item, files=[item + '.cdx.gz'],
-                verbose=True,
-                destdir=tempdir,
-                no_directory=True,
-                retries=1000)
+            ret = ia.download(item,
+                              files=[item + '.cdx.gz'],
+                              verbose=True,
+                              destdir=tempdir,
+                              no_directory=True,
+                              retries=1000)
             status = ret and status
         except requests.exceptions.ReadTimeout as rt:
             print(str(rt), file=sys.stderr)
@@ -69,14 +68,13 @@ def run():
     # Combine files
     print("Merging and re-compressing all CDX files...")
     #subprocess.run('zcat {0}/*.cdx.gz | pigz > {0}/combined.gz'.format(tempdir),
-    subprocess.run('zcat {0}/*.cdx.gz | gzip > {0}/combined.gz'.format(tempdir),
-        shell=True)
+    subprocess.run('zcat {0}/*.cdx.gz | gzip > {0}/combined.gz'.format(tempdir), shell=True)
 
     # Move and cleanup
-    shutil.move('{}/combined.gz'.format(tempdir),
-                '{}.cdx.gz'.format(collection))
+    shutil.move('{}/combined.gz'.format(tempdir), '{}.cdx.gz'.format(collection))
 
     print("Done!")
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     run()

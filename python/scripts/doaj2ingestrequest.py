@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Transform an DOAJ article dump (JSON) into ingest requests.
 
@@ -42,21 +41,21 @@ CONTENT_TYPE_MAP = {
     "abstract": [],
     "doc": [],
     "": ["pdf"],
-
     "doi": ["pdf"],
     "url": ["pdf"],
     "fulltext": ["pdf"],
     "anySimpleType": ["pdf"],
-
     "application/pdf": ["pdf"],
     "html": ["html", "pdf"],
     "text/html": ["html", "pdf"],
     "xml": ["xml"],
 }
 
+
 def canon(s: str) -> str:
     parsed = urlcanon.parse_url(s)
     return str(urlcanon.whatwg(parsed))
+
 
 def transform(obj: dict) -> List[dict]:
     """
@@ -118,6 +117,7 @@ def transform(obj: dict) -> List[dict]:
 
     return requests
 
+
 def run(args) -> None:
     for l in args.json_file:
         if not l.strip():
@@ -128,17 +128,18 @@ def run(args) -> None:
         for r in requests:
             print("{}".format(json.dumps(r, sort_keys=True)))
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('json_file',
-        help="DOAJ article dump file to use",
-        type=argparse.FileType('r'))
+                        help="DOAJ article dump file to use",
+                        type=argparse.FileType('r'))
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
 
     run(args)
+
 
 if __name__ == '__main__':
     main()
