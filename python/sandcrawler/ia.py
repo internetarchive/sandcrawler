@@ -18,7 +18,7 @@ import requests
 import urllib3.exceptions
 
 # not sure this will really work. Should go before wayback imports.
-http.client._MAXHEADERS = 1000  # noqa
+http.client._MAXHEADERS = 1000  # type: ignore
 
 import wayback.exception
 from gwb.loader import CDXLoaderFactory3
@@ -1153,7 +1153,7 @@ class SavePageNowClient:
                     url=cdx_row.url,
                     datetime=cdx_row.datetime,
                 )
-            except (WaybackError, WaybackContentError) as we:
+            except (WaybackError, WaybackContentError):
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,

@@ -110,7 +110,7 @@ class IngestFilesetWorker(IngestFileWorker):
             result['status'] = 'wayback-content-error'
             result['error_message'] = str(e)[:1600]
             return result
-        except NotImplementedError as e:
+        except NotImplementedError:
             #result['status'] = 'not-implemented'
             #result['error_message'] = str(e)[:1600]
             #return result
@@ -269,10 +269,6 @@ class IngestFilesetWorker(IngestFileWorker):
             return result
 
         # 2. Use platform-specific methods to fetch manifest metadata and decide on an `ingest_strategy`.
-        terminal_url = base_url
-        if resource:
-            terminal_url = resource.terminal_url
-
         try:
             dataset_meta = platform_helper.process_request(request, resource, html_biblio)
         except PlatformScopeError as e:
@@ -363,7 +359,7 @@ class IngestFilesetWorker(IngestFileWorker):
         if ingest_strategy.endswith('-file'):
             result['fileset_file'] = dict()
             if archive_result.file_file_meta:
-                result['fileset_file']['file_meta'] = file_meta = archive_result.file_file_meta,
+                result['fileset_file']['file_meta'] = archive_result.file_file_meta,
             if archive_result.file_resource:
                 result['fileset_file']['terminal'] = dict(
                     terminal_url=archive_result.file_resource.terminal_url,

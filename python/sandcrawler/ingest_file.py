@@ -399,8 +399,8 @@ class IngestFileWorker(SandcrawlerWorker):
         assert resource.body
         try:
             html_doc = HTMLParser(resource.body)
-        except ValueError as ve:
-            return dict(status="html-selectolax-error", )
+        except ValueError:
+            return dict(status="html-selectolax-error")
         html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
         assert html_biblio
         html_body = html_extract_body_teixml(resource.body)

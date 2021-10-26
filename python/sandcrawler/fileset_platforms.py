@@ -126,7 +126,7 @@ class DataverseHelper(FilesetPlatformHelper):
         # TODO: could also do HTML platform detection or something?
 
         components = urllib.parse.urlparse(url)
-        platform_domain = components.netloc.split(':')[0].lower()
+        # platform_domain = components.netloc.split(':')[0].lower()
         params = urllib.parse.parse_qs(components.query)
         id_param = params.get('persistentId')
         if not id_param:
@@ -134,7 +134,7 @@ class DataverseHelper(FilesetPlatformHelper):
         platform_id = id_param[0]
 
         try:
-            parsed = self.parse_dataverse_persistentid(platform_id)
+            self.parse_dataverse_persistentid(platform_id)
         except ValueError:
             return False
 
@@ -411,7 +411,7 @@ class FigshareHelper(FilesetPlatformHelper):
         resp.raise_for_status()
         obj = resp.json()
 
-        _figshare_type = obj['defined_type_name']
+        # figshare_type = obj['defined_type_name']
 
         if not obj['is_public']:
             raise PlatformRestrictedError(f'record not public: {platform_id} {dataset_version}')
@@ -552,7 +552,7 @@ class ZenodoHelper(FilesetPlatformHelper):
             raise PlatformScopeError(
                 "got a work-level zenodo record, not a versioned record: {work_id}")
 
-        zenodo_type = obj['metadata']['resource_type']['type']
+        # zenodo_type = obj['metadata']['resource_type']['type']
 
         if obj['metadata']['access_right'] != 'open':
             raise PlatformRestrictedError(

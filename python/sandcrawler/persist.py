@@ -578,7 +578,7 @@ class PersistThumbnailWorker(SandcrawlerWorker):
         assert isinstance(blob, bytes)
         assert len(blob) >= 50
 
-        resp = self.s3.put_blob(
+        self.s3.put_blob(
             folder=self.s3_folder,
             blob=blob,
             sha1hex=key,
@@ -619,7 +619,7 @@ class GenericPersistDocWorker(SandcrawlerWorker):
         if 'sha1hex' in record:
             assert key_str == record['sha1hex']
 
-        resp = self.s3.put_blob(
+        self.s3.put_blob(
             folder=self.s3_folder,
             blob=record[self.doc_key].encode('utf-8'),
             sha1hex=key_str,

@@ -175,7 +175,7 @@ def test_savepagenow_500(spn_client):
                   body=json.dumps(ERROR_BODY))
 
     with pytest.raises(SavePageNowError):
-        resp = spn_client.save_url_now_v2(TARGET)
+        spn_client.save_url_now_v2(TARGET)
 
     assert len(responses.calls) == 2
 

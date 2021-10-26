@@ -434,8 +434,6 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
         )
 
     def process(self, record, key: Optional[str] = None):
-        default_key = record['sha1hex']
-
         fetch_result = self.fetch_blob(record)
         if fetch_result['status'] != 'success':
             return fetch_result

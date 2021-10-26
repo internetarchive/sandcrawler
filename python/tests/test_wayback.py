@@ -117,6 +117,7 @@ def test_cdx_fetch_errors(cdx_client):
 
     resp = cdx_client.fetch(CDX_TARGET, CDX_DT)
     assert len(responses.calls) == 3
+    assert resp
 
 
 @responses.activate
