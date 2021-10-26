@@ -99,7 +99,7 @@ class SandcrawlerPostgrestClient:
 
 
 class SandcrawlerPostgresClient:
-    def __init__(self, db_url, **kwargs):
+    def __init__(self, db_url: str, **kwargs):
         self.conn = psycopg2.connect(db_url)
 
     def cursor(self) -> psycopg2.extensions.cursor:
@@ -108,7 +108,7 @@ class SandcrawlerPostgresClient:
     def commit(self) -> None:
         self.conn.commit()
 
-    def _inserts_and_updates(self, resp: List[Tuple[Any]], on_conflict: str):
+    def _inserts_and_updates(self, resp: List[Tuple[Any]], on_conflict: str) -> Tuple[int, int]:
         resp_codes = [int(r[0]) for r in resp]
         inserts = len([r for r in resp_codes if r == 0])
         if on_conflict == "update":
@@ -120,7 +120,7 @@ class SandcrawlerPostgresClient:
     def insert_cdx(self,
                    cur: psycopg2.extensions.cursor,
                    batch: List[Dict[str, Any]],
-                   on_conflict: str = "nothing"):
+                   on_conflict: str = "nothing") -> Tuple[int, int]:
         sql = """
             INSERT INTO
             cdx (url, datetime, sha1hex, mimetype, warc_path, warc_csize, warc_offset)
@@ -149,7 +149,7 @@ class SandcrawlerPostgresClient:
     def insert_file_meta(self,
                          cur: psycopg2.extensions.cursor,
                          batch: List[Dict[str, Any]],
-                         on_conflict: str = "nothing"):
+                         on_conflict: str = "nothing") -> Tuple[int, int]:
         sql = """
             INSERT INTO
             file_meta(sha1hex, sha256hex, md5hex, size_bytes, mimetype)
@@ -181,7 +181,7 @@ class SandcrawlerPostgresClient:
     def insert_grobid(self,
                       cur: psycopg2.extensions.cursor,
                       batch: List[Dict[str, Any]],
-                      on_conflict: str = "nothing"):
+                      on_conflict: str = "nothing") -> Tuple[int, int]:
         sql = """
             INSERT INTO
             grobid (sha1hex, grobid_version, status_code, status, fatcat_release, updated, metadata)
@@ -232,7 +232,7 @@ class SandcrawlerPostgresClient:
     def insert_pdf_meta(self,
                         cur: psycopg2.extensions.cursor,
                         rows: List[Tuple[Any]],
-                        on_conflict: str = "nothing"):
+                        on_conflict: str = "nothing") -> Tuple[int, int]:
         """
         batch elements are expected to have .to_sql_tuple() method
         """
@@ -272,7 +272,7 @@ class SandcrawlerPostgresClient:
     def insert_html_meta(self,
                          cur: psycopg2.extensions.cursor,
                          rows: List[Tuple[Any]],
-                         on_conflict: str = "nothing"):
+                         on_conflict: str = "nothing") -> Tuple[int, int]:
         """
         batch elements are expected to have .to_sql_tuple() method
         """
@@ -309,7 +309,7 @@ class SandcrawlerPostgresClient:
     def insert_pdftrio(self,
                        cur: psycopg2.extensions.cursor,
                        batch: List[Dict[str, Any]],
-                       on_conflict: str = "nothing"):
+                       on_conflict: str = "nothing") -> Tuple[int, int]:
         sql = """
             INSERT INTO
             pdftrio (sha1hex, updated, status_code, status, pdftrio_version,
@@ -358,7 +358,7 @@ class SandcrawlerPostgresClient:
     def insert_ingest_request(self,
                               cur: psycopg2.extensions.cursor,
                               batch: List[Dict[str, Any]],
-                              on_conflict: str = "nothing"):
+                              on_conflict: str = "nothing") -> Tuple[int, int]:
         sql = """
             INSERT INTO
             ingest_request (link_source, link_source_id, ingest_type, base_url, ingest_request_source, release_stage, request)
@@ -398,7 +398,7 @@ class SandcrawlerPostgresClient:
     def insert_ingest_file_result(self,
                                   cur: psycopg2.extensions.cursor,
                                   batch: List[Dict[str, Any]],
-                                  on_conflict: str = "nothing"):
+                                  on_conflict: str = "nothing") -> Tuple[int, int]:
         sql = """
             INSERT INTO
             ingest_file_result (ingest_type, base_url, hit, status, terminal_url, terminal_dt, terminal_status_code, terminal_sha1hex)
@@ -441,7 +441,7 @@ class SandcrawlerPostgresClient:
     def insert_ingest_fileset_platform(self,
                                        cur: psycopg2.extensions.cursor,
                                        batch: List[Dict[str, Any]],
-                                       on_conflict: str = "nothing"):
+                                       on_conflict: str = "nothing") -> Tuple[int, int]:
         sql = """
             INSERT INTO
             ingest_fileset_platform (ingest_type, base_url, hit, status, platform_name, platform_domain, platform_id, ingest_strategy, total_size, file_count, archiveorg_item_name, archiveorg_item_bundle_path, web_bundle_url, web_bundle_dt, manifest)

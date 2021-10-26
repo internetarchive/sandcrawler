@@ -1,11 +1,16 @@
 import hashlib
 import io
+from typing import Optional, Tuple, Union
 
 import minio
 
 
 class SandcrawlerMinioClient(object):
-    def __init__(self, host_url, access_key, secret_key, default_bucket=None):
+    def __init__(self,
+                 host_url: str,
+                 access_key: str,
+                 secret_key: str,
+                 default_bucket: Optional[str] = None):
         """
         host is minio connection string (host:port)
         access and secret key are as expected
@@ -25,7 +30,7 @@ class SandcrawlerMinioClient(object):
         )
         self.default_bucket = default_bucket
 
-    def _blob_path(self, folder, sha1hex: str, extension: str, prefix):
+    def _blob_path(self, folder: str, sha1hex: str, extension: str, prefix: str) -> str:
         if not extension:
             extension = ""
         if not prefix:
@@ -41,7 +46,13 @@ class SandcrawlerMinioClient(object):
         )
         return obj_path
 
-    def put_blob(self, folder, blob, sha1hex=None, extension="", prefix="", bucket=None):
+    def put_blob(self,
+                 folder: str,
+                 blob: Union[str, bytes],
+                 sha1hex: Optional[str] = None,
+                 extension: str = "",
+                 prefix: str = "",
+                 bucket: Optional[str] = None) -> Tuple[str, str]:
         """
         blob should be bytes
         sha1hex is assumed to be sha1 of the blob itself; if not supplied it will be calculated
@@ -78,7 +89,12 @@ class SandcrawlerMinioClient(object):
         )
         return (bucket, obj_path)
 
-    def get_blob(self, folder, sha1hex, extension="", prefix="", bucket=None):
+    def get_blob(self,
+                 folder: str,
+                 sha1hex: str,
+                 extension: str = "",
+                 prefix: str = "",
+                 bucket: str = None) -> bytes:
         """
         sha1hex is sha1 of the blob itself
 

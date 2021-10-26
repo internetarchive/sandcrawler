@@ -364,6 +364,8 @@ class IngestFileWorker(SandcrawlerWorker):
 
         # Need to actually processes
         result = process_pdf(resource.body)
+        assert result.sha1hex == file_meta['sha1hex']
+        assert result.file_meta is not None
         assert result.file_meta['sha1hex'] == file_meta['sha1hex']
         if self.thumbnail_sink and result.page0_thumbnail is not None:
             self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)

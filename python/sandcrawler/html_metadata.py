@@ -1,7 +1,7 @@
 import datetime
 import sys
 import urllib.parse
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import braveblock
 import dateparser
@@ -20,7 +20,7 @@ from sandcrawler.misc import url_fuzzy_equal
 # order of these are mostly by preference/quality (best option first), though
 # also/sometimes re-ordered for lookup efficiency (lookup stops after first
 # match)
-HEAD_META_PATTERNS: Any = {
+HEAD_META_PATTERNS: Dict[str, List[str]] = {
     "title": [
         "meta[name='citation_title']",
         "meta[name='eprints.title']",
@@ -151,7 +151,7 @@ HEAD_META_PATTERNS: Any = {
     ],
 }
 
-HEAD_META_LIST_PATTERNS: Any = {
+HEAD_META_LIST_PATTERNS: Dict[str, List[str]] = {
     "contrib_names": [
         "meta[name='citation_author']",
         "meta[name='bepress_citation_author']",
@@ -170,7 +170,7 @@ HEAD_META_LIST_PATTERNS: Any = {
     ],
 }
 
-XML_FULLTEXT_PATTERNS: List[dict] = [
+XML_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
     {
         "selector": "meta[name='citation_xml_url']",
         "attr": "content",
@@ -222,7 +222,7 @@ XML_FULLTEXT_PATTERNS: List[dict] = [
     },
 ]
 
-HTML_FULLTEXT_PATTERNS: List[dict] = [
+HTML_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
     {
         "selector": "meta[name='citation_fulltext_html_url']",
         "attr": "content",
@@ -249,7 +249,7 @@ HTML_FULLTEXT_PATTERNS: List[dict] = [
     },
 ]
 
-COMPONENT_FULLTEXT_PATTERNS: List[dict] = [
+COMPONENT_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
     {
         "in_doc_url": "pensoft.net/article/",  # also /element/
         "in_fulltext_url": "/download/fig/",
@@ -262,7 +262,7 @@ COMPONENT_FULLTEXT_PATTERNS: List[dict] = [
         "in_doc_url": "/file.xhtml?persistentId",
         "in_fulltext_url": "/access/datafile/",
         "selector": "div.form-group code",
-        "use_body": True,
+        "use_body": "true",
         "technique": "Dataverse 'download URL'",
         "example_page": "https://data.lipi.go.id/file.xhtml?persistentId=hdl:20.500.12690/RIN/IDDOAH/BTNH25&version=1.0",
     },
@@ -270,7 +270,7 @@ COMPONENT_FULLTEXT_PATTERNS: List[dict] = [
 
 # This is a database of matching patterns. Most of these discovered by hand,
 # looking at OA journal content that failed to craw/ingest.
-PDF_FULLTEXT_PATTERNS: List[dict] = [
+PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
     {
         "selector": "head meta[name='citation_pdf_url']",
         "attr": "content",
@@ -591,14 +591,14 @@ PDF_FULLTEXT_PATTERNS: List[dict] = [
     },
 ]
 
-FULLTEXT_URL_PATTERNS_SKIP = [
+FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
     # wiley has a weird almost-blank page we don't want to loop on
     "://onlinelibrary.wiley.com/doi/pdf/"
     "://doi.org/"
     "://dx.doi.org/"
 ]
 
-RELEASE_TYPE_MAP = {
+RELEASE_TYPE_MAP: Dict[str, str] = {
     "research article": "article-journal",
     "text.serial.journal": "article-journal",
 }
@@ -807,7 +807,8 @@ def load_adblock_rules() -> braveblock.Adblocker:
     )
 
 
-def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name: str) -> list:
+def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str],
+                     type_name: str) -> List[Dict[str, str]]:
     resources = []
 
     for node in doc.css(selector):
@@ -831,7 +832,7 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str], type_name
 
 
 def html_extract_resources(doc_url: str, doc: HTMLParser,
-                           adblock: braveblock.Adblocker) -> list:
+                           adblock: braveblock.Adblocker) -> List[Dict[str, str]]:
     """
     This function tries to find all the important resources in a page. The
     presumption is that the HTML document is article fulltext, and we want the

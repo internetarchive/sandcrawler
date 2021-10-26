@@ -23,9 +23,10 @@ When invoking import matched, be sure to:
 
 import json
 import sys
+from typing import Any, Dict, Optional
 
 
-def parse(obj):
+def parse(obj: dict) -> Optional[Dict[str, Any]]:
     if obj['metadata']['identifier'].endswith('-test') or obj['metadata'].get('test'):
         print('skip: test item', file=sys.stderr)
         return None
@@ -42,7 +43,7 @@ def parse(obj):
         extid = extid.replace('http://arxiv.org/abs/', '')
         #print(extid)
         assert '/' in extid or '.' in extid
-        if not 'v' in extid or not extid[-1].isdigit():
+        if 'v' not in extid or not extid[-1].isdigit():
             print('skip: non-versioned arxiv_id', file=sys.stderr)
             return None
     elif obj['metadata']['identifier'].startswith('paper-doi-10_'):
@@ -97,13 +98,13 @@ def parse(obj):
     return match
 
 
-def run():
+def run() -> None:
     for line in sys.stdin:
         if not line:
             continue
         obj = json.loads(line)
         match = parse(obj)
-        if match:
+        if match is not None:
             print(json.dumps(match, sort_keys=True))
 
 

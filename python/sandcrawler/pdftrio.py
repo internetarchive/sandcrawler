@@ -1,17 +1,19 @@
 import time
+from typing import Any, Dict, Optional
 
 import requests
 
+from .ia import WaybackClient
 from .misc import gen_file_metadata, requests_retry_session
 from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 
 class PdfTrioClient(object):
-    def __init__(self, host_url="http://pdftrio.qa.fatcat.wiki", **kwargs):
+    def __init__(self, host_url: str = "http://pdftrio.qa.fatcat.wiki", **kwargs):
         self.host_url = host_url
         self.http_session = requests_retry_session(retries=3, backoff_factor=3)
 
-    def classify_pdf(self, blob, mode="auto"):
+    def classify_pdf(self, blob: bytes, mode: str = "auto") -> Dict[str, Any]:
         """
         Returns a dict with at least:
 
@@ -24,7 +26,7 @@ class PdfTrioClient(object):
         appropriately; an optional `error_msg` may also be set. For some other
         errors, like connection failure, an exception is raised.
         """
-        assert blob
+        assert blob and type(blob) == bytes
 
         try:
             pdftrio_response = requests.post(
@@ -68,12 +70,16 @@ class PdfTrioWorker(SandcrawlerFetchWorker):
     """
     This class is basically copied directly from GrobidWorker
     """
-    def __init__(self, pdftrio_client, wayback_client=None, sink=None, **kwargs):
-        super().__init__(wayback_client=wayback_client)
+    def __init__(self,
+                 pdftrio_client: PdfTrioClient,
+                 wayback_client: Optional[WaybackClient] = None,
+                 sink: Optional[SandcrawlerWorker] = None,
+                 **kwargs):
+        super().__init__(wayback_client=wayback_client, **kwargs)
         self.pdftrio_client = pdftrio_client
         self.sink = sink
 
-    def process(self, record, key=None):
+    def process(self, record: Any, key: str = None) -> Any:
         start_process = time.time()
         fetch_sec = None
 
@@ -103,16 +109,21 @@ class PdfTrioBlobWorker(SandcrawlerWorker):
     This is sort of like PdfTrioWorker, except it receives blobs directly,
     instead of fetching blobs from some remote store.
     """
-    def __init__(self, pdftrio_client, sink=None, mode="auto", **kwargs):
-        super().__init__()
+    def __init__(self,
+                 pdftrio_client: PdfTrioClient,
+                 sink: Optional[SandcrawlerWorker] = None,
+                 mode: str = "auto",
+                 **kwargs):
+        super().__init__(**kwargs)
         self.pdftrio_client = pdftrio_client
         self.sink = sink
         self.mode = mode
 
-    def process(self, blob, key=None):
+    def process(self, blob: Any, key: str = None) -> Any:
         start_process = time.time()
         if not blob:
             return None
+        assert isinstance(blob, bytes)
         result = dict()
         result['file_meta'] = gen_file_metadata(blob)
         result['key'] = result['file_meta']['sha1hex']

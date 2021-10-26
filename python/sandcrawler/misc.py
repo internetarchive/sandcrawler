@@ -2,7 +2,7 @@ import base64
 import datetime
 import hashlib
 import os
-from typing import Optional
+from typing import List, Optional
 
 import magic
 import requests
@@ -166,7 +166,7 @@ def normalize_mime(raw: str) -> Optional[str]:
     return None
 
 
-def test_normalize_mime():
+def test_normalize_mime() -> None:
     assert normalize_mime("asdf") is None
     assert normalize_mime("application/pdf") == "application/pdf"
     assert normalize_mime("application/pdf+journal") == "application/pdf"
@@ -179,7 +179,7 @@ def test_normalize_mime():
     assert normalize_mime("binary/octet-stream") == "application/octet-stream"
 
 
-def parse_cdx_line(raw_cdx: str, normalize=True) -> Optional[dict]:
+def parse_cdx_line(raw_cdx: str, normalize: bool = True) -> Optional[dict]:
     """
     This method always filters a few things out:
 
@@ -241,7 +241,7 @@ def parse_cdx_datetime(dt_str: str) -> Optional[datetime.datetime]:
 def test_parse_cdx_datetime() -> None:
     assert parse_cdx_datetime("") is None
     assert parse_cdx_datetime("asdf") is None
-    assert parse_cdx_datetime("19930203123045") != None
+    assert parse_cdx_datetime("19930203123045") is not None
     assert parse_cdx_datetime("20201028235103") == datetime.datetime(year=2020,
                                                                      month=10,
                                                                      day=28,
@@ -266,10 +266,10 @@ def test_datetime_to_cdx() -> None:
         datetime.datetime(year=2020, month=10, day=28, hour=23, minute=51, second=3))
 
 
-def requests_retry_session(retries=10,
-                           backoff_factor=3,
-                           status_forcelist=(500, 502, 504),
-                           session=None) -> requests.Session:
+def requests_retry_session(retries: int = 10,
+                           backoff_factor: int = 3,
+                           status_forcelist: List[int] = [500, 502, 504],
+                           session: requests.Session = None) -> requests.Session:
     """
     From: https://www.peterbe.com/plog/best-practice-with-retries-with-requests
     """

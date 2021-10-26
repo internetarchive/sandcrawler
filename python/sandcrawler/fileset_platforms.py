@@ -4,7 +4,8 @@ from typing import Optional, Tuple
 import internetarchive
 import requests
 
-from sandcrawler.fileset_types import *
+from sandcrawler.fileset_types import (FilesetManifestFile, FilesetPlatformItem, IngestStrategy,
+                                       PlatformRestrictedError, PlatformScopeError)
 from sandcrawler.html_metadata import BiblioMetadata
 from sandcrawler.ia import ResourceResult
 
@@ -262,7 +263,7 @@ class DataverseHelper(FilesetPlatformHelper):
         )
 
 
-def test_parse_dataverse_persistentid():
+def test_parse_dataverse_persistentid() -> None:
 
     valid = {
         "doi:10.25625/LL6WXZ": {
@@ -465,7 +466,7 @@ class FigshareHelper(FilesetPlatformHelper):
         )
 
 
-def test_parse_figshare_url_path():
+def test_parse_figshare_url_path() -> None:
 
     valid = {
         "/articles/Optimized_protocol_to_isolate_high_quality_genomic_DNA_from_different_tissues_of_a_palm_species/8987858/1":

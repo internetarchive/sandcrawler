@@ -105,7 +105,7 @@ def test_ingest_success(ingest_worker_pdf):
     assert 'fatcat_release' in resp['grobid']
     assert 'grobid_version' not in resp['grobid']['metadata']
     assert 'fatcat_release' not in resp['grobid']['metadata']
-    assert not 'tei_xml' in resp['grobid']
+    assert 'tei_xml' not in resp['grobid']
     assert resp['pdf_meta']['status'] == "success"
     assert resp['pdf_meta']['pdf_extra']['page_count'] == 1
     assert resp['pdf_meta'].get('text') is None

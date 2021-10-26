@@ -314,7 +314,7 @@ class CdxApiClient:
         if not rows:
             return None
 
-        def _cdx_sort_key(r):
+        def _cdx_sort_key(r: CdxRow) -> tuple:
             """
             This is a function, not a lambda, because it captures
             best_mimetype. Will create a tuple that can be used to sort in
@@ -901,7 +901,7 @@ class SavePageNowClient:
     def save_url_now_v2(self,
                         request_url: str,
                         force_simple_get: Optional[int] = None,
-                        capture_outlinks: int = 0):
+                        capture_outlinks: int = 0) -> SavePageNowResult:
         """
         Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
         at all, or raises an exception if there was an error with SPN itself.
