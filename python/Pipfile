@@ -20,9 +20,8 @@ ipython = "*"
 mypy = "*"
 flake8 = "*"
 flake8-annotations = "*"
-
-# pytype is failing to install on xenial VMs
-#pytype = "*"
+isort = "*"
+yapf = "*"
 
 [packages]
 requests = ">=2"
@@ -48,10 +47,7 @@ braveblock = "*"
 dynaconf = ">=3"
 sentry-sdk = { version = ">=0.14.0", extras = [] }
 zstandard = "*"
-
-# must lock black to an exact version because it is still "beta"
-# see: https://github.com/psf/black/issues/517
-black = "==19.10b0"
+grobid_tei_xml = "0.1.0"
 
 [requires]
 python_version = "3.8"
