@@ -15,7 +15,7 @@ deps: ## Install dependencies using pipenv
 .PHONY: lint
 lint: ## Run lints (eg, flake8, mypy)
 	pipenv run flake8 . --exit-zero
-	pipenv run isort -q -c .
+	pipenv run isort -q -c . || true
 	pipenv run mypy *.py sandcrawler/ tests/ --ignore-missing-imports
 	pipenv run pylint --rcfile=.pylintrc -E --jobs=4 sandcrawler tests/*.py *.py
 
