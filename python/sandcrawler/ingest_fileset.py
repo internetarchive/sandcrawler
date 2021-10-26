@@ -1,30 +1,19 @@
-import gzip
 import json
 import sys
 import time
-from collections import namedtuple
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import requests
 from selectolax.parser import HTMLParser
 
-from sandcrawler.db import SandcrawlerPostgrestClient
-from sandcrawler.fileset_platforms import DATASET_PLATFORM_HELPER_TABLE, FilesetPlatformHelper
-from sandcrawler.fileset_strategies import FILESET_STRATEGY_HELPER_TABLE, FilesetIngestStrategy
+from sandcrawler.fileset_platforms import DATASET_PLATFORM_HELPER_TABLE
+from sandcrawler.fileset_strategies import FILESET_STRATEGY_HELPER_TABLE
 from sandcrawler.fileset_types import PlatformRestrictedError, PlatformScopeError
-from sandcrawler.html import extract_fulltext_url
-from sandcrawler.html_metadata import (BiblioMetadata, html_extract_biblio,
-                                       html_extract_resources, load_adblock_rules)
-from sandcrawler.ia import (CdxApiClient, CdxApiError, NoCaptureError, PetaboxError,
-                            ResourceResult, SavePageNowClient, SavePageNowError, WaybackClient,
-                            WaybackContentError, WaybackError, cdx_to_dict,
-                            fix_transfer_encoding)
+from sandcrawler.html_metadata import html_extract_biblio
+from sandcrawler.ia import (CdxApiError, PetaboxError, SavePageNowError, WaybackContentError,
+                            WaybackError, cdx_to_dict, fix_transfer_encoding)
 from sandcrawler.ingest_file import IngestFileWorker
-from sandcrawler.ingest_html import (WebResource, fetch_html_resources,
-                                     html_extract_body_teixml, html_guess_platform,
-                                     html_guess_scope, quick_fetch_html_resources)
-from sandcrawler.misc import clean_url, gen_file_metadata, parse_cdx_datetime
-from sandcrawler.workers import SandcrawlerWorker
+from sandcrawler.misc import clean_url, gen_file_metadata
 
 MAX_BODY_SIZE_BYTES = 128 * 1024 * 1024
 
@@ -61,7 +50,7 @@ class IngestFilesetWorker(IngestFileWorker):
             return None
         existing = self.pgrest_client.get_ingest_fileset_result(ingest_type, base_url)
         # TODO: filter on more flags?
-        if existing and existing['hit'] == True:
+        if existing and existing['hit'] is True:
             return existing
         else:
             return None
@@ -196,7 +185,7 @@ class IngestFilesetWorker(IngestFileWorker):
 
             # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
             assert resource
-            assert resource.hit == True
+            assert resource.hit is True
             assert resource.terminal_status_code in (200, 226)
 
             if resource.terminal_url:

@@ -6,7 +6,6 @@ or S3 (SeaweedFS).
 """
 
 import argparse
-import datetime
 import os
 import sys
 
@@ -18,7 +17,7 @@ from sandcrawler.persist import PersistHtmlTeiXmlWorker, PersistXmlDocWorker
 # Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
 try:
     git_sha = raven.fetch_git_sha('..')
-except Exception as e:
+except Exception:
     git_sha = None
 sentry_client = raven.Client(release=git_sha)
 

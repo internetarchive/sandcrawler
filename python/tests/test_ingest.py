@@ -87,7 +87,7 @@ def test_ingest_success(ingest_worker_pdf):
     resp = ingest_worker_pdf.process(request)
 
     print(resp)
-    assert resp['hit'] == True
+    assert resp['hit'] is True
     assert resp['status'] == "success"
     assert resp['request'] == request
     assert resp['terminal']['terminal_sha1hex'] == resp['file_meta']['sha1hex']
@@ -156,7 +156,7 @@ def test_ingest_landing(ingest_worker):
     resp = ingest_worker.process(request)
 
     print(resp)
-    assert resp['hit'] == False
+    assert resp['hit'] is False
     assert resp['status'] == "no-pdf-link"
     assert resp['request'] == request
     assert 'terminal' in resp
@@ -179,7 +179,7 @@ def test_ingest_blocklist(ingest_worker):
 
     resp = ingest_worker.process(request)
 
-    assert resp['hit'] == False
+    assert resp['hit'] is False
     assert resp['status'] == "skip-url-blocklist"
     assert resp['request'] == request
 
@@ -197,7 +197,7 @@ def test_ingest_wall_blocklist(ingest_worker):
 
     resp = ingest_worker.process(request)
 
-    assert resp['hit'] == False
+    assert resp['hit'] is False
     assert resp['status'] == "skip-wall"
     assert resp['request'] == request
 
@@ -212,6 +212,6 @@ def test_ingest_cookie_blocklist(ingest_worker):
 
     resp = ingest_worker.process(request)
 
-    assert resp['hit'] == False
+    assert resp['hit'] is False
     assert resp['status'] == "blocked-cookie"
     assert resp['request'] == request

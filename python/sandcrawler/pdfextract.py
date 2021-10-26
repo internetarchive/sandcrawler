@@ -293,7 +293,7 @@ def process_pdf(blob: bytes, thumb_size=(180, 300), thumb_type="JPEG") -> PdfExt
         return PdfExtractResult(
             sha1hex=sha1hex,
             status='bad-pdf',
-            error_msg=f"PDF known to cause processing issues",
+            error_msg="PDF known to cause processing issues",
             file_meta=file_meta,
         )
 

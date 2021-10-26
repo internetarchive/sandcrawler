@@ -120,7 +120,7 @@ def test_savepagenow_success(spn_client):
 
     assert len(responses.calls) == 4
 
-    assert resp.success == True
+    assert resp.success is True
     assert resp.status == "success"
     assert resp.request_url == TARGET
     assert resp.terminal_url == TARGET + "/redirect"
@@ -151,12 +151,12 @@ def test_savepagenow_remote_error(spn_client):
 
     assert len(responses.calls) == 3
 
-    assert resp.success == False
+    assert resp.success is False
     assert resp.status == ERROR_BODY['status_ext']
     assert resp.request_url == TARGET
-    assert resp.terminal_url == None
-    assert resp.terminal_dt == None
-    assert resp.resources == None
+    assert resp.terminal_url is None
+    assert resp.terminal_dt is None
+    assert resp.resources is None
 
 
 @responses.activate
@@ -214,7 +214,7 @@ def test_crawl_resource(spn_client, wayback_client):
 
     assert len(responses.calls) == 5
 
-    assert resp.hit == True
+    assert resp.hit is True
     assert resp.status == "success"
     assert resp.body == WARC_BODY
     assert resp.cdx.sha1b32 == CDX_BEST_SHA1B32

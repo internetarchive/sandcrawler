@@ -2,11 +2,9 @@ import struct
 
 import poppler
 import pytest
-import responses
-from test_wayback import cdx_client, wayback_client
+from test_wayback import cdx_client, wayback_client  # noqa:F401
 
-from sandcrawler import (BlackholeSink, CdxLinePusher, PdfExtractBlobWorker, PdfExtractWorker,
-                         WaybackClient)
+from sandcrawler import BlackholeSink, CdxLinePusher, PdfExtractBlobWorker, PdfExtractWorker
 from sandcrawler.pdfextract import process_pdf
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
@@ -43,7 +41,7 @@ def test_process_dummy_pdf():
     assert resp.pdf_extra['page_count'] == 1
 
 
-def test_pdfextract_worker_cdx(wayback_client):
+def test_pdfextract_worker_cdx(wayback_client):  # noqa: F811
 
     sink = BlackholeSink()
     worker = PdfExtractWorker(wayback_client, sink=sink, thumbnail_sink=sink)

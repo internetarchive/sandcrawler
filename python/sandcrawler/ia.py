@@ -11,15 +11,14 @@ import sys
 import time
 import urllib.parse
 from collections import namedtuple
+from http.client import IncompleteRead
 from typing import Tuple
 
 import requests
 import urllib3.exceptions
 
 # not sure this will really work. Should go before wayback imports.
-http.client._MAXHEADERS = 1000  # type: ignore
-
-from http.client import IncompleteRead
+http.client._MAXHEADERS = 1000  # noqa
 
 import wayback.exception
 from gwb.loader import CDXLoaderFactory3
@@ -128,18 +127,18 @@ def fuzzy_match_url(left, right):
 
 
 def test_fuzzy_match_url():
-    assert fuzzy_match_url("http://thing.com", "http://thing.com") == True
-    assert fuzzy_match_url("http://thing.com", "https://thing.com") == True
-    assert fuzzy_match_url("http://thing.com", "ftp://thing.com") == True
-    assert fuzzy_match_url("http://thing.com", "http://thing.com/") == True
-    assert fuzzy_match_url("https://thing.com", "http://thing.com/") == True
-    assert fuzzy_match_url("https://thing.com/", "http://thing.com") == True
-    assert fuzzy_match_url("http://thing.com", "http://thing.com/blue") == False
+    assert fuzzy_match_url("http://thing.com", "http://thing.com") is True
+    assert fuzzy_match_url("http://thing.com", "https://thing.com") is True
+    assert fuzzy_match_url("http://thing.com", "ftp://thing.com") is True
+    assert fuzzy_match_url("http://thing.com", "http://thing.com/") is True
+    assert fuzzy_match_url("https://thing.com", "http://thing.com/") is True
+    assert fuzzy_match_url("https://thing.com/", "http://thing.com") is True
+    assert fuzzy_match_url("http://thing.com", "http://thing.com/blue") is False
 
     # should probably handle these?
-    assert fuzzy_match_url("http://thing.com", "http://www.thing.com") == False
-    assert fuzzy_match_url("http://www.thing.com", "http://www2.thing.com") == False
-    assert fuzzy_match_url("http://www.thing.com", "https://www2.thing.com") == False
+    assert fuzzy_match_url("http://thing.com", "http://www.thing.com") is False
+    assert fuzzy_match_url("http://www.thing.com", "http://www2.thing.com") is False
+    assert fuzzy_match_url("http://www.thing.com", "https://www2.thing.com") is False
 
 
 class CdxApiError(Exception):
@@ -951,7 +950,7 @@ class SavePageNowClient:
             resp = self.v2_session.get("{}/status/{}".format(self.v2endpoint, job_id))
             try:
                 resp.raise_for_status()
-            except:
+            except Exception:
                 raise SavePageNowError(resp.content)
             status = resp.json()['status']
             if status == 'pending':
@@ -975,7 +974,7 @@ class SavePageNowClient:
                                                              final_json['original_job_id']))
             try:
                 resp.raise_for_status()
-            except:
+            except Exception:
                 raise SavePageNowError(resp.content)
             final_json = resp.json()
 

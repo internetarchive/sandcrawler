@@ -9,8 +9,6 @@ cat /srv/sandcrawler/tasks/something.cdx | pv -l | parallel -j30 --pipe ./pdftri
 """
 
 import argparse
-import datetime
-import json
 import sys
 
 from sandcrawler import *

@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import io
 import json
 import sys
 import xml.etree.ElementTree as ET
@@ -12,9 +11,9 @@ from selectolax.parser import HTMLParser
 
 from sandcrawler.html_metadata import (BiblioMetadata, html_extract_biblio,
                                        html_extract_resources, load_adblock_rules)
-from sandcrawler.ia import (CdxApiClient, NoCaptureError, ResourceResult, WaybackClient,
-                            WaybackContentError, cdx_to_dict, fix_transfer_encoding)
-from sandcrawler.misc import (clean_url, datetime_to_cdx, gen_file_metadata, parse_cdx_datetime,
+from sandcrawler.ia import (CdxApiClient, NoCaptureError, WaybackClient, WaybackContentError,
+                            cdx_to_dict, fix_transfer_encoding)
+from sandcrawler.misc import (datetime_to_cdx, gen_file_metadata, parse_cdx_datetime,
                               url_fuzzy_equal)
 
 TRAFILATURA_AGENT = f"trafilatura/{trafilatura.__version__}"
@@ -147,7 +146,7 @@ def quick_fetch_html_resources(resources: List[dict], cdx_client: CdxApiClient,
                   file=sys.stderr)
         if not cdx_row.status_code:
             # TODO: fall back to a full fetch?
-            print(f"  WARN: skipping revisit record", file=sys.stderr)
+            print("  WARN: skipping revisit record", file=sys.stderr)
             continue
         full.append(
             WebResource(

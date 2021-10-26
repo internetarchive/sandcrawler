@@ -1,7 +1,7 @@
 import datetime
 import sys
 import urllib.parse
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import braveblock
 import dateparser
@@ -687,7 +687,7 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser,
             continue
         return (val, pattern.get('technique', 'unknown'))
     if self_doc_url:
-        print(f"  WARN: returning fulltext URL pointing to self", file=sys.stderr)
+        print("  WARN: returning fulltext URL pointing to self", file=sys.stderr)
         return self_doc_url
     return None
 
@@ -864,7 +864,7 @@ def html_extract_resources(doc_url: str, doc: HTMLParser,
     # filter using adblocker
     resources = [
         r for r in resources if adblock.check_network_urls(
-            r['url'], source_url=doc_url, request_type=r['type']) == False
+            r['url'], source_url=doc_url, request_type=r['type']) is False
     ]
 
     # remove duplicates

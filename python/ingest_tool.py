@@ -42,8 +42,8 @@ def run_requests(args):
         html_quick_mode=args.html_quick_mode,
     )
     fileset_worker = IngestFilesetWorker(try_spn2=not args.no_spn2, )
-    for l in args.json_file:
-        request = json.loads(l.strip())
+    for line in args.json_file:
+        request = json.loads(line.strip())
         if request['ingest_type'] in [
                 'dataset',
         ]:

@@ -1,19 +1,13 @@
-import gzip
-import json
 import os
 import shutil
 import sys
-import time
-from collections import namedtuple
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Optional
 
 import internetarchive
 
-from sandcrawler.fileset_types import (ArchiveStrategyResult, FilesetManifestFile,
-                                       FilesetPlatformItem, IngestStrategy, PlatformScopeError)
-from sandcrawler.html_metadata import BiblioMetadata
-from sandcrawler.ia import (ResourceResult, SavePageNowClient, WaybackClient,
-                            fix_transfer_encoding)
+from sandcrawler.fileset_types import (ArchiveStrategyResult, FilesetPlatformItem,
+                                       IngestStrategy, PlatformScopeError)
+from sandcrawler.ia import SavePageNowClient, WaybackClient, fix_transfer_encoding
 from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path, sanitize_fs_path
 
 
@@ -233,7 +227,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             via = "wayback"
             resource = self.wayback_client.lookup_resource(fetch_url, m.mimetype)
 
-            if self.try_spn2 and (resource == None or
+            if self.try_spn2 and (resource is None or
                                   (resource and resource.status == 'no-capture')):
                 if len(item.manifest) > self.max_spn_manifest:
                     m.status = 'too-much-spn'

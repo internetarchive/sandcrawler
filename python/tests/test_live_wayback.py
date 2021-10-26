@@ -6,12 +6,9 @@ automatically in CI.
 Simply uncomment lines to run.
 """
 
-import json
-
 import pytest
 
-from sandcrawler import (CdxApiClient, CdxApiError, CdxPartial, PetaboxError, SavePageNowClient,
-                         SavePageNowError, WaybackClient, WaybackError, gen_file_metadata)
+from sandcrawler import CdxApiClient, SavePageNowClient, WaybackClient, gen_file_metadata
 
 
 @pytest.fixture
@@ -89,7 +86,7 @@ def test_lookup_resource_success(wayback_client):
     url = "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0093949&type=printable"
     resp = wayback_client.lookup_resource(url)
 
-    assert resp.hit == True
+    assert resp.hit is True
     assert resp.status == "success"
     assert resp.terminal_url in (url, url.replace("https://", "http://"))
     assert resp.cdx.url in (url, url.replace("https://", "http://"))
@@ -139,7 +136,7 @@ def test_lookup_ftp(wayback_client):
     url = "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_pdf/ad/ab/mmr-17-05-6969.PMC5928650.pdf"
     resp = wayback_client.lookup_resource(url)
 
-    assert resp.hit == True
+    assert resp.hit is True
     assert resp.status == "success"
     assert resp.terminal_url == url
     assert resp.terminal_status_code == 226
@@ -154,7 +151,7 @@ def test_lookup_ftp(wayback_client):
     url = "ftp://ftp.cs.utexas.edu/pub/qsim/papers/Xu-crv-08.pdf"
     resp = wayback_client.lookup_resource(url)
 
-    assert resp.hit == True
+    assert resp.hit is True
     assert resp.status == "success"
     assert resp.terminal_url == url
     assert resp.terminal_status_code == 226
@@ -171,10 +168,10 @@ def test_crawl_ftp(spn_client, wayback_client):
     resp = spn_client.crawl_resource(url, wayback_client)
 
     # FTP isn't supported yet!
-    #assert resp.hit == True
+    #assert resp.hit is True
     #assert resp.status == "success"
     #assert resp.terminal_url == url
     #assert resp.cdx.url == url
 
-    assert resp.hit == False
+    assert resp.hit is False
     assert resp.status == "spn2-no-ftp"

@@ -23,7 +23,7 @@ class GrobidClient(object):
         """
         assert blob
 
-        if consolidate_mode == None:
+        if consolidate_mode is None:
             consolidate_mode = self.consolidate_mode
 
         try:
@@ -100,8 +100,6 @@ class GrobidWorker(SandcrawlerFetchWorker):
         )
 
     def process(self, record, key=None):
-        default_key = record['sha1hex']
-
         fetch_result = self.fetch_blob(record)
         if fetch_result['status'] != 'success':
             return fetch_result

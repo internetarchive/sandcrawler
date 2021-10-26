@@ -2,9 +2,9 @@ import struct
 
 import pytest
 import responses
-from test_wayback import cdx_client, wayback_client
+from test_wayback import cdx_client, wayback_client  # noqa:F401
 
-from sandcrawler import BlackholeSink, CdxLinePusher, GrobidClient, GrobidWorker, WaybackClient
+from sandcrawler import BlackholeSink, CdxLinePusher, GrobidClient, GrobidWorker
 
 FAKE_PDF_BYTES = b"%PDF SOME JUNK" + struct.pack("!q", 112853843)
 
@@ -58,7 +58,7 @@ def test_grobid_success(grobid_client):
 
 
 @responses.activate
-def test_grobid_worker_cdx(grobid_client, wayback_client):
+def test_grobid_worker_cdx(grobid_client, wayback_client):  # noqa: F811
 
     sink = BlackholeSink()
     worker = GrobidWorker(grobid_client, wayback_client, sink=sink)

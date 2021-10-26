@@ -1,23 +1,19 @@
-import base64
-import gzip
 import json
 import sys
 import time
 import xml.etree.ElementTree
-from collections import namedtuple
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Dict, List, Optional, Tuple
+from http.server import BaseHTTPRequestHandler
+from typing import Any, Dict, List, Optional
 
-import requests
 from selectolax.parser import HTMLParser
 
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.html import extract_fulltext_url
-from sandcrawler.html_metadata import (BiblioMetadata, html_extract_biblio,
-                                       html_extract_resources, load_adblock_rules)
-from sandcrawler.ia import (CdxApiClient, CdxApiError, NoCaptureError, PetaboxError,
-                            ResourceResult, SavePageNowClient, SavePageNowError, WaybackClient,
+from sandcrawler.html_metadata import (html_extract_biblio, html_extract_resources,
+                                       load_adblock_rules)
+from sandcrawler.ia import (CdxApiError, NoCaptureError, PetaboxError, ResourceResult,
+                            SavePageNowClient, SavePageNowError, WaybackClient,
                             WaybackContentError, WaybackError, cdx_to_dict,
                             fix_transfer_encoding)
 from sandcrawler.ingest_html import (WebResource, fetch_html_resources,
@@ -211,7 +207,7 @@ class IngestFileWorker(SandcrawlerWorker):
             return None
         existing = self.pgrest_client.get_ingest_file_result(ingest_type, base_url)
         # TODO: filter on more flags?
-        if existing and existing['hit'] == True:
+        if existing and existing['hit'] is True:
             return existing
         else:
             return None
@@ -249,7 +245,7 @@ class IngestFileWorker(SandcrawlerWorker):
         if resource and not resource.hit and resource.terminal_dt and resource.terminal_dt < '20190000000000':
             old_failure = True
 
-        if self.try_spn2 and (resource == None or (resource and resource.status == 'no-capture')
+        if self.try_spn2 and (resource is None or (resource and resource.status == 'no-capture')
                               or soft404 or old_failure):
             via = "spn2"
             resource = self.spn_client.crawl_resource(url, self.wayback_client)
@@ -751,7 +747,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
         assert resource
-        assert resource.hit == True
+        assert resource.hit is True
         assert resource.terminal_status_code in (200, 226)
 
         if resource.terminal_url:

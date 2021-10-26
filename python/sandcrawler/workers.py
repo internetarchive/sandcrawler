@@ -116,7 +116,6 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
         self.wayback_client = wayback_client
 
     def fetch_blob(self, record):
-        start_process = time.time()
         default_key = record['sha1hex']
         wayback_sec = None
         petabox_sec = None

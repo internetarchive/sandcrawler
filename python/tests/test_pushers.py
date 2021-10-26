@@ -1,5 +1,3 @@
-import pytest
-
 from sandcrawler.workers import BlackholeSink, CdxLinePusher
 
 

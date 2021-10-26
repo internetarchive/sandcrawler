@@ -75,7 +75,6 @@ class PdfTrioWorker(SandcrawlerFetchWorker):
 
     def process(self, record, key=None):
         start_process = time.time()
-        default_key = record['sha1hex']
         fetch_sec = None
 
         start = time.time()

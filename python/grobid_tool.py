@@ -9,7 +9,6 @@ Example of large parallel run, locally:
 """
 
 import argparse
-import datetime
 import json
 import sys
 

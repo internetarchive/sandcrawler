@@ -3,7 +3,7 @@ import json
 import pytest
 import responses
 
-from sandcrawler import CdxApiClient, CdxApiError, PetaboxError, WaybackClient, WaybackError
+from sandcrawler import CdxApiClient, WaybackClient
 
 CDX_TARGET = "http://fatcat.wiki/"
 CDX_DT = "20180812220054"
@@ -215,4 +215,4 @@ def test_lookup_resource_success(wayback_client):
 
     resp = wayback_client.lookup_resource(CDX_TARGET)
 
-    assert resp.hit == True
+    assert resp.hit is True

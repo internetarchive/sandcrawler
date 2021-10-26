@@ -1,6 +1,5 @@
 import hashlib
 import io
-import os
 
 import minio
 

@@ -35,10 +35,10 @@ def url_fuzzy_equal(left: str, right: str) -> bool:
 
 
 def test_url_fuzzy_equal() -> None:
-    assert True == url_fuzzy_equal(
+    assert url_fuzzy_equal(
         "http://www.annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree",
         "http://annalsofian.org/article.asp?issn=0972-2327;year=2014;volume=17;issue=4;spage=463;epage=465;aulast=Nithyashree"
-    )
+    ) is True
 
 
 def gen_file_metadata(blob: bytes, allow_empty: bool = False) -> dict:
@@ -239,8 +239,8 @@ def parse_cdx_datetime(dt_str: str) -> Optional[datetime.datetime]:
 
 
 def test_parse_cdx_datetime() -> None:
-    assert parse_cdx_datetime("") == None
-    assert parse_cdx_datetime("asdf") == None
+    assert parse_cdx_datetime("") is None
+    assert parse_cdx_datetime("asdf") is None
     assert parse_cdx_datetime("19930203123045") != None
     assert parse_cdx_datetime("20201028235103") == datetime.datetime(year=2020,
                                                                      month=10,

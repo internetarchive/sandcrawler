@@ -1,10 +1,5 @@
-import gzip
-import json
-import sys
-import time
 import urllib.parse
-from collections import namedtuple
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Optional, Tuple
 
 import internetarchive
 import requests
@@ -175,12 +170,12 @@ class DataverseHelper(FilesetPlatformHelper):
         try:
             parsed_id = self.parse_dataverse_persistentid(platform_id)
         except ValueError:
-            raise PlatformScopeError(f"not actually in scope")
+            raise PlatformScopeError("not actually in scope")
 
         if parsed_id['file_id']:
             # XXX: maybe we could support this?
             raise PlatformScopeError(
-                f"only entire dataverse datasets can be archived with this tool")
+                "only entire dataverse datasets can be archived with this tool")
 
         # 1b. if we didn't get a version number from URL, fetch it from API
         if not dataset_version:
@@ -270,13 +265,6 @@ class DataverseHelper(FilesetPlatformHelper):
 def test_parse_dataverse_persistentid():
 
     valid = {
-        "doi:10.25625/LL6WXZ": {
-            "type": "doi",
-            "authority": "10.25625",
-            "shoulder": None,
-            "dataset_id": "LL6WXZ",
-            "file_id": None,
-        },
         "doi:10.25625/LL6WXZ": {
             "type": "doi",
             "authority": "10.25625",
@@ -423,7 +411,7 @@ class FigshareHelper(FilesetPlatformHelper):
         resp.raise_for_status()
         obj = resp.json()
 
-        figshare_type = obj['defined_type_name']
+        _figshare_type = obj['defined_type_name']
 
         if not obj['is_public']:
             raise PlatformRestrictedError(f'record not public: {platform_id} {dataset_version}')
