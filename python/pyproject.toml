@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta:__legacy__"
+
+[tool.yapf]
+COLUMN_LIMIT = 120
+
+[tool.isort]
+line_length = 120

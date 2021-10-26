@@ -14,14 +14,15 @@ deps: ## Install dependencies using pipenv
 
 .PHONY: lint
 lint: ## Run lints (eg, flake8, mypy)
-	#pipenv run flake8 . --exit-zero
-	pipenv run flake8 . --select=E9,F63,F7,F82 --exit-zero
+	pipenv run flake8 . --exit-zero
+	pipenv run isort -q -c .
 	pipenv run mypy *.py sandcrawler/ tests/ --ignore-missing-imports
 	pipenv run pylint --rcfile=.pylintrc -E --jobs=4 sandcrawler tests/*.py *.py
 
 .PHONY: fmt
 fmt: ## Run code formating on all source code
-	pipenv run black *.py sandcrawler/ tests/
+	pipenv run isort --atomic .
+	pipenv run yapf -p -i -r sandcrawler tests scripts *.py
 
 .PHONY: test
 test: ## Run all tests and lints
