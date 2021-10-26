@@ -21,7 +21,7 @@ TRAFILATURA_AGENT = f"trafilatura/{trafilatura.__version__}"
 def html_extract_body_teixml(doc: bytes) -> dict:
     try:
         tei_xml = trafilatura.extract(doc,
-            tei_output=True,
+            output_format='xmltei',
             include_comments=False,
             include_formatting=True,
         )
