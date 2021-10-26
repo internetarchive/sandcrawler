@@ -12,7 +12,7 @@ import time
 import urllib.parse
 from collections import namedtuple
 from http.client import IncompleteRead
-from typing import Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 import urllib3.exceptions
@@ -80,19 +80,19 @@ CdxPartial = namedtuple('CdxPartial', [
 ])
 
 
-def cdx_partial_from_row(full):
+def cdx_partial_from_row(row: Union[CdxRow, CdxPartial]) -> CdxPartial:
     return CdxPartial(
-        surt=full.surt,
-        datetime=full.datetime,
-        url=full.url,
-        mimetype=full.mimetype,
-        status_code=full.status_code,
-        sha1b32=full.sha1b32,
-        sha1hex=full.sha1hex,
+        surt=row.surt,
+        datetime=row.datetime,
+        url=row.url,
+        mimetype=row.mimetype,
+        status_code=row.status_code,
+        sha1b32=row.sha1b32,
+        sha1hex=row.sha1hex,
     )
 
 
-def cdx_to_dict(cdx):
+def cdx_to_dict(cdx: Union[CdxRow, CdxPartial]) -> Dict[str, Any]:
     d = {
         "surt": cdx.surt,
         "datetime": cdx.datetime,
@@ -109,7 +109,7 @@ def cdx_to_dict(cdx):
     return d
 
 
-def fuzzy_match_url(left, right):
+def fuzzy_match_url(left: str, right: str) -> bool:
     """
     Matches URLs agnostic of http/https (and maybe other normalizations in the
     future)
@@ -126,7 +126,7 @@ def fuzzy_match_url(left, right):
     return False
 
 
-def test_fuzzy_match_url():
+def test_fuzzy_match_url() -> None:
     assert fuzzy_match_url("http://thing.com", "http://thing.com") is True
     assert fuzzy_match_url("http://thing.com", "https://thing.com") is True
     assert fuzzy_match_url("http://thing.com", "ftp://thing.com") is True
@@ -146,7 +146,7 @@ class CdxApiError(Exception):
 
 
 class CdxApiClient:
-    def __init__(self, host_url="https://web.archive.org/cdx/search/cdx", **kwargs):
+    def __init__(self, host_url: str = "https://web.archive.org/cdx/search/cdx", **kwargs):
         self.host_url = host_url
         self.http_session = requests_retry_session(retries=3, backoff_factor=3)
         cdx_auth_token = kwargs.get('cdx_auth_token', os.environ.get('CDX_AUTH_TOKEN'))
@@ -158,7 +158,7 @@ class CdxApiClient:
             'Cookie': 'cdx_auth_token={}'.format(cdx_auth_token),
         })
 
-    def _query_api(self, params):
+    def _query_api(self, params: Dict[str, str]) -> Optional[List[CdxRow]]:
         """
         Hits CDX API with a query, parses result into a list of CdxRow
         """
@@ -206,7 +206,11 @@ class CdxApiClient:
             rows.append(row)
         return rows
 
-    def fetch(self, url, datetime, filter_status_code=None, retry_sleep=None):
+    def fetch(self,
+              url: str,
+              datetime: str,
+              filter_status_code: Optional[int] = None,
+              retry_sleep: Optional[int] = None) -> CdxRow:
         """
         Fetches a single CDX row by url/datetime. Raises a KeyError if not
         found, because we expect to be looking up a specific full record.
@@ -214,7 +218,7 @@ class CdxApiClient:
         if len(datetime) != 14:
             raise ValueError(
                 "CDX fetch requires full 14 digit timestamp. Got: {}".format(datetime))
-        params = {
+        params: Dict[str, str] = {
             'url': url,
             'from': datetime,
             'to': datetime,
@@ -257,7 +261,11 @@ class CdxApiClient:
             assert row.status_code == filter_status_code
         return row
 
-    def lookup_best(self, url, max_age_days=None, best_mimetype=None, closest=None):
+    def lookup_best(self,
+                    url: str,
+                    max_age_days: Optional[int] = None,
+                    best_mimetype: Optional[str] = None,
+                    closest: Union[datetime.datetime, str, None] = None) -> Optional[CdxRow]:
         """
         Fetches multiple CDX rows for the given URL, tries to find the most recent.
 
@@ -280,7 +288,7 @@ class CdxApiClient:
                 most-recent
 
         """
-        params = {
+        params: Dict[str, str] = {
             'url': url,
             'matchType': 'exact',
             'limit': -25,
@@ -340,7 +348,7 @@ class NoCaptureError(Exception):
 
 
 class WaybackClient:
-    def __init__(self, cdx_client=None, **kwargs):
+    def __init__(self, cdx_client: Optional[CdxApiClient] = None, **kwargs):
         if cdx_client:
             self.cdx_client = cdx_client
         else:
@@ -361,7 +369,11 @@ class WaybackClient:
             'User-Agent': 'Mozilla/5.0 sandcrawler.WaybackClient',
         }
 
-    def fetch_petabox(self, csize, offset, warc_path, resolve_revisit=True):
+    def fetch_petabox(self,
+                      csize: int,
+                      offset: int,
+                      warc_path: str,
+                      resolve_revisit: bool = True) -> WarcResource:
         """
         Fetches wayback resource directly from petabox using WARC path/offset/csize.
 
@@ -391,6 +403,7 @@ class WaybackClient:
         if not self.rstore:
             self.rstore = ResourceStore(
                 loaderfactory=CDXLoaderFactory3(webdata_secret=self.petabox_webdata_secret, ))
+        assert self.rstore
         try:
             #print("offset: {} csize: {} uri: {}".format(offset, csize, warc_uri), file=sys.stderr)
             gwb_record = self.rstore.load_resource(warc_uri, offset, csize)
@@ -487,11 +500,11 @@ class WaybackClient:
         )
 
     def fetch_petabox_body(self,
-                           csize,
-                           offset,
-                           warc_path,
-                           resolve_revisit=True,
-                           expected_status_code=None):
+                           csize: int,
+                           offset: int,
+                           warc_path: str,
+                           resolve_revisit: bool = True,
+                           expected_status_code: Optional[int] = None) -> WarcResource:
         """
         Fetches HTTP 200 WARC resource directly from petabox using WARC path/offset/csize.
 
@@ -518,7 +531,10 @@ class WaybackClient:
 
         return resource.body
 
-    def fetch_replay_body(self, url, datetime, cdx_sha1hex=None):
+    def fetch_replay_body(self,
+                          url: str,
+                          datetime: str,
+                          cdx_sha1hex: Optional[str] = None) -> bytes:
         """
         Fetches an HTTP 200 record from wayback via the replay interface
         (web.archive.org) instead of petabox.
@@ -579,7 +595,7 @@ class WaybackClient:
                         cdx_sha1hex, file_meta['sha1hex']), )
         return resp.content
 
-    def fetch_replay_redirect(self, url, datetime):
+    def fetch_replay_redirect(self, url: str, datetime: str) -> Optional[str]:
         """
         Fetches an HTTP 3xx redirect Location from wayback via the replay interface
         (web.archive.org) instead of petabox.
@@ -633,7 +649,10 @@ class WaybackClient:
         else:
             return None
 
-    def lookup_resource(self, start_url, best_mimetype=None, closest=None):
+    def lookup_resource(self,
+                        start_url: str,
+                        best_mimetype: Optional[str] = None,
+                        closest: Union[str, datetime.datetime, None] = None) -> ResourceResult:
         """
         Looks in wayback for a resource starting at the URL, following any
         redirects. Returns a ResourceResult object, which may indicate a
@@ -701,6 +720,7 @@ class WaybackClient:
 
             if cdx_row.status_code in (200, 226):
                 revisit_cdx = None
+                final_cdx: Union[CdxRow, CdxPartial] = cdx_row
                 if '/' in cdx_row.warc_path:
                     resource = self.fetch_petabox(
                         csize=cdx_row.warc_csize,
@@ -714,7 +734,7 @@ class WaybackClient:
                         url=cdx_row.url,
                         datetime=cdx_row.datetime,
                     )
-                    cdx_row = cdx_partial_from_row(cdx_row)
+                    final_cdx = cdx_partial_from_row(cdx_row)
                 return ResourceResult(
                     start_url=start_url,
                     hit=True,
@@ -723,7 +743,7 @@ class WaybackClient:
                     terminal_dt=cdx_row.datetime,
                     terminal_status_code=cdx_row.status_code,
                     body=body,
-                    cdx=cdx_row,
+                    cdx=final_cdx,
                     revisit_cdx=revisit_cdx,
                 )
             elif 300 <= (cdx_row.status_code or 0) < 400:
@@ -801,6 +821,7 @@ class WaybackClient:
                     cdx=cdx_row,
                     revisit_cdx=None,
                 )
+
         return ResourceResult(
             start_url=start_url,
             hit=False,
@@ -834,7 +855,7 @@ SavePageNowResult = namedtuple('SavePageNowResult', [
 
 
 class SavePageNowClient:
-    def __init__(self, v2endpoint="https://web.archive.org/save", **kwargs):
+    def __init__(self, v2endpoint: str = "https://web.archive.org/save", **kwargs):
         self.ia_access_key = kwargs.get('ia_access_key', os.environ.get('IA_ACCESS_KEY'))
         self.ia_secret_key = kwargs.get('ia_secret_key', os.environ.get('IA_SECRET_KEY'))
         self.v2endpoint = v2endpoint
@@ -872,7 +893,10 @@ class SavePageNowClient:
             "://s3-eu-west-1.amazonaws.com/",
         ]
 
-    def save_url_now_v2(self, request_url, force_simple_get=None, capture_outlinks=0):
+    def save_url_now_v2(self,
+                        request_url: str,
+                        force_simple_get: Optional[int] = None,
+                        capture_outlinks: int = 0):
         """
         Returns a "SavePageNowResult" (namedtuple) if SPN request was processed
         at all, or raises an exception if there was an error with SPN itself.
@@ -1006,7 +1030,10 @@ class SavePageNowClient:
                 None,
             )
 
-    def crawl_resource(self, start_url, wayback_client, force_simple_get=None):
+    def crawl_resource(self,
+                       start_url: str,
+                       wayback_client: WaybackClient,
+                       force_simple_get: Optional[int] = None) -> ResourceResult:
         """
         Runs a SPN2 crawl, then fetches body.
 
@@ -1083,7 +1110,7 @@ class SavePageNowClient:
                 revisit_cdx=None,
             )
 
-        cdx_row = None
+        cdx_row: Optional[CdxRow] = None
         # hack to work around elsevier weirdness
         if "://pdf.sciencedirectassets.com/" in spn_result.request_url:
             elsevier_pdf_cdx = wayback_client.cdx_client.lookup_best(
@@ -1135,6 +1162,7 @@ class SavePageNowClient:
         #print(cdx_row, file=sys.stderr)
 
         revisit_cdx = None
+        final_cdx: Union[CdxRow, CdxPartial] = cdx_row
         if '/' in cdx_row.warc_path:
             # Usually can't do this kind of direct fetch because CDX result is recent/live
             resource = wayback_client.fetch_petabox(
@@ -1166,7 +1194,7 @@ class SavePageNowClient:
                     revisit_cdx=None,
                 )
             # warc_path etc will change, so strip them out
-            cdx_row = cdx_partial_from_row(cdx_row)
+            final_cdx = cdx_partial_from_row(cdx_row)
 
         assert cdx_row.status_code
         if cdx_row.status_code in (200, 226):
@@ -1178,7 +1206,7 @@ class SavePageNowClient:
                 terminal_dt=cdx_row.datetime,
                 terminal_status_code=cdx_row.status_code,
                 body=body,
-                cdx=cdx_row,
+                cdx=final_cdx,
                 revisit_cdx=revisit_cdx,
             )
         else:
@@ -1190,7 +1218,7 @@ class SavePageNowClient:
                 terminal_dt=cdx_row.datetime,
                 terminal_status_code=cdx_row.status_code,
                 body=body,
-                cdx=cdx_row,
+                cdx=final_cdx,
                 revisit_cdx=revisit_cdx,
             )
 
