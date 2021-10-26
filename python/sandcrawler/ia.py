@@ -302,7 +302,7 @@ class CdxApiClient:
         }
         if max_age_days:
             since = datetime.date.today() - datetime.timedelta(days=max_age_days)
-            params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day),
+            params['from'] = '%04d%02d%02d' % (since.year, since.month, since.day)
         if closest:
             params['closest'] = closest
             params['sort'] = "closest"
