@@ -369,7 +369,7 @@ class FigshareHelper(FilesetPlatformHelper):
         platform_domain = components.netloc.split(':')[0].lower()
 
         # only work with full, versioned figshare.com URLs
-        if not 'figshare.com' in platform_domain:
+        if 'figshare.com' not in platform_domain:
             return False
 
         try:
@@ -537,7 +537,7 @@ class ZenodoHelper(FilesetPlatformHelper):
         platform_id = components.path.split('/')[2]
         assert platform_id.isdigit(), f"expected numeric: {platform_id}"
 
-        if not 'zenodo.org' in platform_domain:
+        if 'zenodo.org' not in platform_domain:
             raise PlatformScopeError(f"unexpected zenodo.org domain: {platform_domain}")
 
         # 2. API fetch

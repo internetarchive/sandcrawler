@@ -58,7 +58,7 @@ def gen_file_metadata(blob: bytes, allow_empty: bool = False) -> dict:
         # crude checks for XHTML or JATS XML, using only first 1 kB of file
         if b"<htm" in blob[:1024] and b'xmlns="http://www.w3.org/1999/xhtml"' in blob[:1024]:
             mimetype = "application/xhtml+xml"
-        elif b"<article " in blob[:1024] and not b"<html" in blob[:1024]:
+        elif b"<article " in blob[:1024] and b"<html" not in blob[:1024]:
             mimetype = "application/jats+xml"
     hashes = [
         hashlib.sha1(),
@@ -88,7 +88,7 @@ def gen_file_metadata_path(path: str, allow_empty: bool = False) -> dict:
             # crude checks for XHTML or JATS XML, using only first 1 kB of file
             if b"<htm" in blob[:1024] and b'xmlns="http://www.w3.org/1999/xhtml"' in blob[:1024]:
                 mimetype = "application/xhtml+xml"
-            elif b"<article " in blob[:1024] and not b"<html" in blob[:1024]:
+            elif b"<article " in blob[:1024] and b"<html" not in blob[:1024]:
                 mimetype = "application/jats+xml"
     hashes = [
         hashlib.sha1(),

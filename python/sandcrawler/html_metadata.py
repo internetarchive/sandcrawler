@@ -656,10 +656,10 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser,
     """
     self_doc_url: Optional[Tuple[str, str]] = None
     for pattern in patterns:
-        if not 'selector' in pattern:
+        if 'selector' not in pattern:
             continue
         if 'in_doc_url' in pattern:
-            if not pattern['in_doc_url'] in doc_url:
+            if pattern['in_doc_url'] not in doc_url:
                 continue
         elem = doc.css_first(pattern['selector'])
         if not elem:
@@ -669,14 +669,14 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser,
             val = elem.attrs.get(pattern['attr'])
         elif pattern.get('use_body'):
             val = elem.text()
-            if not '://' in val:
+            if '://' not in val:
                 continue
         if not val:
             continue
         val = urllib.parse.urljoin(doc_url, val)
         assert val
         if 'in_fulltext_url' in pattern:
-            if not pattern['in_fulltext_url'] in val:
+            if pattern['in_fulltext_url'] not in val:
                 continue
         for skip_pattern in FULLTEXT_URL_PATTERNS_SKIP:
             if skip_pattern in val.lower():
@@ -714,7 +714,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
             if val_list:
                 for val in val_list:
                     if 'content' in val.attrs and val.attrs['content']:
-                        if not field in meta:
+                        if field not in meta:
                             meta[field] = []
                         meta[field].append(val.attrs['content'])
                 break
@@ -740,13 +740,13 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
     raw_identifiers = meta.pop('raw_identifiers', [])
     for ident in raw_identifiers:
         if ident.startswith('doi:10.'):
-            if not 'doi' in meta:
+            if 'doi' not in meta:
                 meta['doi'] = ident.replace('doi:', '')
         elif ident.startswith('10.') and '/' in ident:
-            if not 'doi' in meta:
+            if 'doi' not in meta:
                 meta['doi'] = ident
         elif ident.startswith('isbn:'):
-            if not 'isbn' in meta:
+            if 'isbn' not in meta:
                 meta['isbn'] = ident.replace('isbn:', '')
 
     raw_date = meta.pop('raw_date', None)
@@ -813,7 +813,7 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str],
 
     for node in doc.css(selector):
         for attr in attrs:
-            if not attr in node.attrs:
+            if attr not in node.attrs:
                 continue
             url = node.attrs.get(attr)
             # special-case a couple meta URI prefixes which don't match with adblock rules

@@ -86,7 +86,7 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
             raw['link_source_id'] = raw['fatcat']['release_ident']
 
         for k in ('ingest_type', 'base_url', 'link_source', 'link_source_id'):
-            if not k in raw:
+            if k not in raw:
                 self.counts['skip-request-fields'] += 1
                 return None
         if raw['ingest_type'] not in ('pdf', 'xml', 'html'):
@@ -120,10 +120,10 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         if there is a problem with conversion, return None and set skip count
         """
         for k in ('request', 'hit', 'status'):
-            if not k in raw:
+            if k not in raw:
                 self.counts['skip-result-fields'] += 1
                 return None
-        if not 'base_url' in raw['request']:
+        if 'base_url' not in raw['request']:
             self.counts['skip-result-fields'] += 1
             return None
         ingest_type = raw['request'].get('ingest_type')
@@ -181,9 +181,9 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         if there is a problem with conversion, return None and set skip count
         """
         for k in ('request', 'hit', 'status'):
-            if not k in raw:
+            if k not in raw:
                 return None
-        if not 'base_url' in raw['request']:
+        if 'base_url' not in raw['request']:
             return None
         ingest_type = raw['request'].get('ingest_type')
         if ingest_type not in ('dataset'):

@@ -399,7 +399,7 @@ class WaybackClient:
         """
         if not self.petabox_webdata_secret:
             raise Exception("WaybackClient needs petabox secret to do direct WARC fetches")
-        if not "/" in warc_path:
+        if "/" not in warc_path:
             raise ValueError(
                 "what looks like a liveweb/SPN temporary warc path: {}".format(warc_path))
         warc_uri = self.warc_uri_prefix + warc_path
@@ -579,9 +579,9 @@ class WaybackClient:
         #print(resp.url, file=sys.stderr)
 
         # defensively check that this is actually correct replay based on headers
-        if not "X-Archive-Src" in resp.headers:
+        if "X-Archive-Src" not in resp.headers:
             raise WaybackError("replay fetch didn't return X-Archive-Src in headers")
-        if not datetime in resp.url:
+        if datetime not in resp.url:
             raise WaybackError("didn't get exact reply (redirect?) datetime:{} got:{}".format(
                 datetime, resp.url))
 
@@ -634,9 +634,9 @@ class WaybackClient:
 
         # defensively check that this is actually correct replay based on headers
         # previously check for "X-Archive-Redirect-Reason" here
-        if not "X-Archive-Src" in resp.headers:
+        if "X-Archive-Src" not in resp.headers:
             raise WaybackError("redirect replay fetch didn't return X-Archive-Src in headers")
-        if not datetime in resp.url:
+        if datetime not in resp.url:
             raise WaybackError("didn't get exact reply (redirect?) datetime:{} got:{}".format(
                 datetime, resp.url))
 
@@ -772,7 +772,7 @@ class WaybackClient:
                             cdx=cdx_row,
                             revisit_cdx=None,
                         )
-                    if not "://" in resource.location:
+                    if "://" not in resource.location:
                         next_url = urllib.parse.urljoin(next_url, resource.location)
                     else:
                         next_url = resource.location
@@ -1087,7 +1087,7 @@ class SavePageNowClient:
         #print(spn_result, file=sys.stderr)
 
         # detect partial URL response (aka, success, but missing full URL)
-        if not "://" in spn_result.terminal_url or spn_result.terminal_url.startswith('/'):
+        if "://" not in spn_result.terminal_url or spn_result.terminal_url.startswith('/'):
             return ResourceResult(
                 start_url=start_url,
                 hit=False,

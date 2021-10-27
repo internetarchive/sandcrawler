@@ -208,7 +208,7 @@ class SandcrawlerPostgresClient:
                 # though (to save database space)
                 dupe_fields = ('fatcat_release', 'grobid_version')
                 for k in dupe_fields:
-                    if not k in r:
+                    if k not in r:
                         r[k] = r['metadata'].get(k)
                     r['metadata'].pop(k, None)
                 r['metadata'] = json.dumps(r['metadata'], sort_keys=True)

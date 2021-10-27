@@ -48,7 +48,7 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
     if meta and not meta.get('content'):
         meta = None
     # wiley has a weird almost-blank page we don't want to loop on
-    if meta and not "://onlinelibrary.wiley.com/doi/pdf/" in html_url:
+    if meta and "://onlinelibrary.wiley.com/doi/pdf/" not in html_url:
         url = meta['content'].strip()
         if '://doi.org/' in url:
             print(f"\tdoi.org in citation_pdf_url (loop?): {url}", file=sys.stderr)
@@ -198,7 +198,7 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
 
     # american archivist (OA)
     # https://americanarchivist.org/doi/abs/10.17723/aarc.62.2.j475270470145630
-    if "://americanarchivist.org/doi/" in html_url and not "/doi/pdf" in html_url:
+    if "://americanarchivist.org/doi/" in html_url and "/doi/pdf" not in html_url:
         # use a more aggressive direct guess to avoid rate-limiting...
         if "/doi/10." in html_url:
             url = html_url.replace("/doi/10.", "/doi/pdf/10.")
@@ -240,7 +240,7 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
 
     # www.ahajournals.org
     # https://www.ahajournals.org/doi/10.1161/circ.110.19.2977
-    if "://www.ahajournals.org/doi/" in html_url and not '/doi/pdf/' in html_url:
+    if "://www.ahajournals.org/doi/" in html_url and '/doi/pdf/' not in html_url:
         # <a href="/doi/pdf/10.1161/circ.110.19.2977?download=true">PDF download</a>
         if b'/doi/pdf/10.' in html_body:
             url = html_url.replace('/doi/10.', '/doi/pdf/10.')
@@ -259,7 +259,7 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
 
     # cogentoa.com
     # https://www.cogentoa.com/article/10.1080/23311975.2017.1412873
-    if "://www.cogentoa.com/article/" in html_url and not ".pdf" in html_url:
+    if "://www.cogentoa.com/article/" in html_url and ".pdf" not in html_url:
         # blech, it's a SPA! All JS
         # https://www.cogentoa.com/article/10.1080/23311975.2017.1412873.pdf
         url = html_url + ".pdf"
@@ -321,14 +321,14 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
 
     # JMIR
     # https://mhealth.jmir.org/2020/7/e17891/
-    if '.jmir.org/' in html_url and not "/pdf" in html_url and html_url.endswith("/"):
+    if '.jmir.org/' in html_url and "/pdf" not in html_url and html_url.endswith("/"):
         url = html_url + "pdf"
         return dict(pdf_url=url, technique='jmir-url')
 
     ### below here we are doing guesses
 
     # generic guess: try current URL plus .pdf, if it exists in the HTML body
-    if not '.pdf' in html_url:
+    if '.pdf' not in html_url:
         url = html_url + ".pdf"
         if url.encode('utf-8') in html_body:
             return dict(pdf_url=url, technique='guess-url-plus-pdf')
