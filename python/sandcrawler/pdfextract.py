@@ -3,18 +3,19 @@ import json
 import sys
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import poppler
 from PIL import Image
 
+from .ia import WaybackClient
 from .misc import gen_file_metadata
 from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 # This is a hack to work around timeouts when processing certain PDFs with
 # poppler. For some reason, the usual Kafka timeout catcher isn't working on
 # these, maybe due to threading.
-BAD_PDF_SHA1HEX = [
+BAD_PDF_SHA1HEX: List[str] = [
     "011478a1e63a2a31eae1a93832a74cc95f220760",
     "018dfe9824de6d2ac068ce0f7dc9961bffa1b558",
     "057c7a9dfb611bfd52f7de6c39b2d5757c5e4e53",
@@ -185,8 +186,8 @@ class PdfExtractResult:
             'source': self.source,
         }
 
-    @classmethod
-    def from_pdftext_dict(cls, record):
+    @staticmethod
+    def from_pdftext_dict(record: Dict[str, Any]) -> 'PdfExtractResult':
         """
         Outputs a JSON string as would be published to Kafka text/info topic.
         """
@@ -208,8 +209,8 @@ class PdfExtractResult:
                 pdf_extra=record.get('pdf_extra'),
             )
 
-    @classmethod
-    def from_pdf_meta_dict(cls, record):
+    @staticmethod
+    def from_pdf_meta_dict(record: Dict[str, Any]) -> 'PdfExtractResult':
         """
         Parses what would be returned from postgrest
         """
@@ -270,7 +271,9 @@ class PdfExtractResult:
         )
 
 
-def process_pdf(blob: bytes, thumb_size=(180, 300), thumb_type="JPEG") -> PdfExtractResult:
+def process_pdf(blob: bytes,
+                thumb_size: Tuple[int, int] = (180, 300),
+                thumb_type: str = "JPEG") -> PdfExtractResult:
     """
     A known issue is that output text is in "physical layout" mode, which means
     columns will be side-by-side. We would prefer a single stream of tokens!
@@ -418,13 +421,16 @@ def process_pdf(blob: bytes, thumb_size=(180, 300), thumb_type="JPEG") -> PdfExt
 
 
 class PdfExtractWorker(SandcrawlerFetchWorker):
-    def __init__(self, wayback_client=None, sink=None, **kwargs):
+    def __init__(self,
+                 wayback_client: Optional[WaybackClient] = None,
+                 sink: Optional[SandcrawlerWorker] = None,
+                 **kwargs):
         super().__init__(wayback_client=wayback_client)
         self.wayback_client = wayback_client
         self.sink = sink
         self.thumbnail_sink = kwargs.get('thumbnail_sink')
 
-    def timeout_response(self, task) -> Dict:
+    def timeout_response(self, task: Dict[str, Any]) -> Dict[str, Any]:
         default_key = task['sha1hex']
         return dict(
             status="error-timeout",
@@ -433,7 +439,7 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
             sha1hex=default_key,
         )
 
-    def process(self, record, key: Optional[str] = None):
+    def process(self, record: Any, key: Optional[str] = None) -> dict:
         fetch_result = self.fetch_blob(record)
         if fetch_result['status'] != 'success':
             return fetch_result
@@ -451,12 +457,12 @@ class PdfExtractBlobWorker(SandcrawlerWorker):
     This is sort of like PdfExtractWorker, except it receives blobs directly,
     instead of fetching blobs from some remote store.
     """
-    def __init__(self, sink=None, **kwargs):
+    def __init__(self, sink: Optional[SandcrawlerWorker] = None, **kwargs):
         super().__init__()
         self.sink = sink
         self.thumbnail_sink = kwargs.get('thumbnail_sink')
 
-    def process(self, blob, key: Optional[str] = None):
+    def process(self, blob: Any, key: Optional[str] = None) -> Any:
         if not blob:
             return None
         assert isinstance(blob, bytes)

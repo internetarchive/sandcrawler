@@ -53,23 +53,32 @@ class IngestFileWorker(SandcrawlerWorker):
         process_file_hit(ResourceResult) -> response
         process_grobid(ResourceResult)
     """
-    def __init__(self, sink=None, **kwargs):
+    def __init__(self, sink: Optional[SandcrawlerWorker] = None, **kwargs):
         super().__init__()
 
         self.sink = sink
-        self.wayback_client = kwargs.get('wayback_client')
-        if not self.wayback_client:
+
+        if kwargs.get('wayback_client'):
+            self.wayback_client: WaybackClient = kwargs['wayback_client']
+        else:
             self.wayback_client = WaybackClient()
-        self.spn_client = kwargs.get('spn_client')
-        if not self.spn_client:
+
+        if kwargs.get('spn_client'):
+            self.spn_client: SavePageNowClient = kwargs['spn_client']
+        else:
             self.spn_client = SavePageNowClient(
                 spn_cdx_retry_sec=kwargs.get('spn_cdx_retry_sec', 9.0))
-        self.grobid_client = kwargs.get('grobid_client')
-        if not self.grobid_client:
+
+        if kwargs.get('grobid_client'):
+            self.grobid_client: GrobidClient = kwargs['grobid_client']
+        else:
             self.grobid_client = GrobidClient()
-        self.pgrest_client = kwargs.get('pgrest_client')
-        if not self.pgrest_client:
+
+        if kwargs.get('pgrest_client'):
+            self.pgrest_client: SandcrawlerPostgrestClient = kwargs['pgrest_client']
+        else:
             self.pgrest_client = SandcrawlerPostgrestClient()
+
         self.grobid_sink = kwargs.get('grobid_sink')
         self.thumbnail_sink = kwargs.get('thumbnail_sink')
         self.pdftext_sink = kwargs.get('pdftext_sink')
@@ -213,9 +222,9 @@ class IngestFileWorker(SandcrawlerWorker):
             return None
 
     def find_resource(self,
-                      url,
-                      best_mimetype=None,
-                      force_recrawl=False) -> Optional[ResourceResult]:
+                      url: str,
+                      best_mimetype: Optional[str] = None,
+                      force_recrawl: bool = False) -> Optional[ResourceResult]:
         """
         Looks in wayback for a resource starting at the URL, following any
         redirects. If a hit isn't found, try crawling with SPN.

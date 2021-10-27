@@ -2,6 +2,7 @@ import json
 import re
 import sys
 import urllib.parse
+from typing import Dict
 
 from bs4 import BeautifulSoup
 
@@ -12,7 +13,7 @@ OVID_JOURNAL_URL_REGEX = re.compile(r'journalURL = "(http.*)";')
 SCIENCEDIRECT_BOUNCE_URL_REGEX = re.compile(r"window.location = '(http.*)';")
 
 
-def extract_fulltext_url(html_url, html_body):
+def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
     """
     Takes an HTML document (and URL), assumed to be a landing page, and tries
     to find a fulltext PDF url.
@@ -335,12 +336,13 @@ def extract_fulltext_url(html_url, html_body):
     return dict()
 
 
-def test_regex():
+def test_regex() -> None:
     lines = """
     blah
     var journalURL = "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689";
     asdf"""
     m = OVID_JOURNAL_URL_REGEX.search(lines)
+    assert m
     assert m.group(
         1) == "https://journals.lww.com/co-urology/fulltext/10.1097/MOU.0000000000000689"
 
@@ -352,4 +354,5 @@ def test_regex():
     """
     url = "https://pdf.sciencedirectassets.com/320270/AIP/1-s2.0-S2590109519300424/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEH0aCXVzLWVhc3QtMSJGMEQCICBF0dnrtKfpcs3T1kOjMS9w9gedqiLBrcbp4aKQSP8fAiAT9G426t6FWXHO2zPSXRFLq2eiqgbew2vkNKbcn87teyq9Awj1%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAIaDDA1OTAwMzU0Njg2NSIMnZcTRhbvMwF%2F5PA5KpEDdN%2FDI4V%2BNMDWQDFeAdUc99Lyxak%2B6vhAsfCBCf8hhvrRpalz75e74%2FXMAQwMN9m6i98o0Ljv9od7cuQEy8t%2B0DLzjzX5n3%2FxmpttowhMUm1jc8tBniLKBjwhTyiSHwhdeaVZf6x2zCJ0EIOWMNJHp3iFEqpaFvkRZbC1KWK4XPNNKo72HCvXuG7xmGrdHByz91AP7UgIYCy4hT10fnM43gbOE4wW8fqpgnvwCId%2F2u8k4rQoCLBqLYZzqshCRm1DBbsXCQhTwDXiMC2Ek3f63yKgw7rRCAxvs0vqirG%2B4mJ6LADaztAFMtKDPfnd4e%2B7%2FvnKU2NeotrqrkRgOkIAoFumbQXf20ky6mKWyHBk%2FxirVp60vUcLQpUm2Pcp6ythYxUi9IJxRGX8EF6aV4UHuCpUDUE7o8N84KUXIedUpytUZx7Xoxfk9w%2BR3%2FgX4LEHfkrWgiFAS3bVxNGOeV7GTwcXdcAggbdCaiAe46dfv7DDedx0KhVKOPH7obfvShqd6TYc0BjrV4sx61594ZJ3%2FO0ws7Lj8AU67AF17%2B1NZ3Ugu%2BwG9Ys9s7OxG8E4kBJ58vEY1yuBOQK9y2we4%2FTGPuqSxCuezqA%2BseslXYP%2FRc%2FZL9xx%2FUYaSjZhk1p1mhojxgBrckJYU7d8c4ELMPmtVy6R1yd2VDUoawEU8SB7nbNnMKzqQ3RgGgqGJiELys6dt%2FIr%2BVhpqM%2FZT4zadvzs8P%2FLoGzUHJKNZt0f99wLvZilphV92E%2BOUnwC4wbg3i3af3zozULwgEr7T%2FX2VsyREgexlzk76qMALPn0lgnciUyyQXxyUWAilXYQ0mQdXefh9lFfycczvt0UEuarX9p1sMwl8Ve5aw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200110T210936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTY23CMDBNC%2F20200110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b43525576e1a0fdbab581481a3fe6db2862cbb2c69f2860b70cc8d444ccd73d5&hash=ccd128dfe597e704224bdfb4b3358de29b2be5d95887c71076bdab1236ba9e42&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S2590109519300424&tid=spdf-74468ebd-6be6-43ac-b294-ced86e8eea58&sid=f9676d658285a749c46b6d081d965bb12aa8gxrqa&type=client"
     m = SCIENCEDIRECT_BOUNCE_URL_REGEX.search(lines)
+    assert m
     assert m.group(1) == url

@@ -108,7 +108,7 @@ class SandcrawlerPostgresClient:
     def commit(self) -> None:
         self.conn.commit()
 
-    def _inserts_and_updates(self, resp: List[Tuple[Any]], on_conflict: str) -> Tuple[int, int]:
+    def _inserts_and_updates(self, resp: List[Tuple], on_conflict: str) -> Tuple[int, int]:
         resp_codes = [int(r[0]) for r in resp]
         inserts = len([r for r in resp_codes if r == 0])
         if on_conflict == "update":
@@ -231,7 +231,7 @@ class SandcrawlerPostgresClient:
 
     def insert_pdf_meta(self,
                         cur: psycopg2.extensions.cursor,
-                        rows: List[Tuple[Any]],
+                        rows: List[Tuple],
                         on_conflict: str = "nothing") -> Tuple[int, int]:
         """
         batch elements are expected to have .to_sql_tuple() method
@@ -271,7 +271,7 @@ class SandcrawlerPostgresClient:
 
     def insert_html_meta(self,
                          cur: psycopg2.extensions.cursor,
-                         rows: List[Tuple[Any]],
+                         rows: List[Tuple],
                          on_conflict: str = "nothing") -> Tuple[int, int]:
         """
         batch elements are expected to have .to_sql_tuple() method

@@ -117,7 +117,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
     Wrapper of SandcrawlerWorker that adds a helper method to fetch blobs (eg,
     PDFs) from wayback, archive.org, or other sources.
     """
-    def __init__(self, wayback_client: WaybackClient, **kwargs):
+    def __init__(self, wayback_client: Optional[WaybackClient], **kwargs):
         super().__init__(**kwargs)
         self.wayback_client = wayback_client
 

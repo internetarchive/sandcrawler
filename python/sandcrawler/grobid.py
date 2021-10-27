@@ -14,7 +14,9 @@ class GrobidClient(object):
         self.host_url = host_url
         self.consolidate_mode = int(kwargs.get('consolidate_mode', 0))
 
-    def process_fulltext(self, blob: bytes, consolidate_mode: Optional[int] = None) -> Dict[str, Any]:
+    def process_fulltext(self,
+                         blob: bytes,
+                         consolidate_mode: Optional[int] = None) -> Dict[str, Any]:
         """
         Returns dict with keys:
             - status_code

@@ -51,7 +51,7 @@ class PdfTrioClient(object):
                 'error_msg': 'pdftrio request connection timout',
             }
 
-        info = dict(status_code=pdftrio_response.status_code, )
+        info: Dict[str, Any] = dict(status_code=pdftrio_response.status_code)
         if pdftrio_response.status_code == 200:
             resp_json = pdftrio_response.json()
             assert 'ensemble_score' in resp_json

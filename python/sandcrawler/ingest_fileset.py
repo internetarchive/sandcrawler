@@ -14,6 +14,7 @@ from sandcrawler.ia import (CdxApiError, PetaboxError, SavePageNowError, Wayback
                             WaybackError, cdx_to_dict, fix_transfer_encoding)
 from sandcrawler.ingest_file import IngestFileWorker
 from sandcrawler.misc import clean_url, gen_file_metadata
+from sandcrawler.worker import SandcrawlerWorker
 
 MAX_BODY_SIZE_BYTES = 128 * 1024 * 1024
 
@@ -31,7 +32,7 @@ class IngestFilesetWorker(IngestFileWorker):
        checking to see if content has been archived already)
     4. summarize status
     """
-    def __init__(self, sink=None, **kwargs):
+    def __init__(self, sink: Optional[SandcrawlerWorker] = None, **kwargs):
         super().__init__(sink=None, **kwargs)
 
         self.sink = sink
@@ -246,7 +247,7 @@ class IngestFilesetWorker(IngestFileWorker):
                                                  base_url,
                                                  force_recrawl=force_recrawl)
         result['request'] = request
-        if result.get('status') != None:
+        if result.get('status') is not None:
             result['request'] = request
             return result
 
