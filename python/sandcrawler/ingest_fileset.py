@@ -341,9 +341,9 @@ class IngestFilesetWorker(IngestFileWorker):
             result['fileset_bundle'] = dict()
             if archive_result.bundle_file_meta:
                 result['fileset_bundle']['file_meta'] = archive_result.bundle_file_meta
-            if archive_result.archiveorg_bundle_path:
+            if archive_result.bundle_archiveorg_path:
                 result['fileset_bundle'][
-                    'archiveorg_bundle_path'] = archive_result.archiveorg_bundle_path
+                    'archiveorg_bundle_path'] = archive_result.bundle_archiveorg_path
             if archive_result.bundle_resource:
                 result['fileset_bundle']['terminal'] = dict(
                     terminal_url=archive_result.bundle_resource.terminal_url,
