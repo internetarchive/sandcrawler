@@ -6,9 +6,12 @@ from typing import Any, Dict, Optional
 import requests
 from selectolax.parser import HTMLParser
 
-from sandcrawler.fileset_platforms import DATASET_PLATFORM_HELPER_TABLE
-from sandcrawler.fileset_strategies import FILESET_STRATEGY_HELPER_TABLE
-from sandcrawler.fileset_types import PlatformRestrictedError, PlatformScopeError
+from sandcrawler.fileset_platforms import (ArchiveOrgHelper, DataverseHelper, FigshareHelper,
+                                           ZenodoHelper)
+from sandcrawler.fileset_strategies import (ArchiveorgFilesetStrategy, ArchiveorgFileStrategy,
+                                            WebFilesetStrategy, WebFileStrategy)
+from sandcrawler.fileset_types import (IngestStrategy, PlatformRestrictedError,
+                                       PlatformScopeError)
 from sandcrawler.html_metadata import html_extract_biblio
 from sandcrawler.ia import (CdxApiError, PetaboxError, SavePageNowError, WaybackContentError,
                             WaybackError, cdx_to_dict, fix_transfer_encoding)
@@ -36,8 +39,19 @@ class IngestFilesetWorker(IngestFileWorker):
         super().__init__(sink=None, **kwargs)
 
         self.sink = sink
-        self.dataset_platform_helpers = DATASET_PLATFORM_HELPER_TABLE
-        self.dataset_strategy_archivers = FILESET_STRATEGY_HELPER_TABLE
+        self.dataset_platform_helpers = {
+            'dataverse': DataverseHelper(),
+            'figshare': FigshareHelper(),
+            'zenodo': ZenodoHelper(),
+            'archiveorg': ArchiveOrgHelper(),
+        }
+        self.dataset_strategy_archivers = {
+            IngestStrategy.ArchiveorgFileset: ArchiveorgFilesetStrategy(),
+            IngestStrategy.ArchiveorgFile: ArchiveorgFileStrategy(),
+            IngestStrategy.WebFileset: WebFilesetStrategy(),
+            IngestStrategy.WebFile: WebFileStrategy(),
+        }
+
         self.max_total_size = kwargs.get('max_total_size', 64 * 1024 * 1024 * 1024)
         self.max_file_count = kwargs.get('max_file_count', 200)
         self.ingest_file_result_sink = kwargs.get('ingest_file_result_sink')

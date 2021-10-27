@@ -748,11 +748,3 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
             return IngestStrategy.ArchiveorgFileset
         else:
             raise NotImplementedError("empty dataset")
-
-
-DATASET_PLATFORM_HELPER_TABLE = {
-    'dataverse': DataverseHelper(),
-    'figshare': FigshareHelper(),
-    'zenodo': ZenodoHelper(),
-    'archiveorg': ArchiveOrgHelper(),
-}

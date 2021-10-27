@@ -294,11 +294,3 @@ class WebFileStrategy(WebFilesetStrategy):
         super().__init__(**kwargs)
         self.ingest_strategy = IngestStrategy.WebFile
         self.success_status = "success-file"
-
-
-FILESET_STRATEGY_HELPER_TABLE = {
-    IngestStrategy.ArchiveorgFileset: ArchiveorgFilesetStrategy(),
-    IngestStrategy.ArchiveorgFile: ArchiveorgFileStrategy(),
-    IngestStrategy.WebFileset: WebFilesetStrategy(),
-    IngestStrategy.WebFile: WebFileStrategy(),
-}
