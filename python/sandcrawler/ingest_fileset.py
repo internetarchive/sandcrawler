@@ -49,7 +49,7 @@ class IngestFilesetWorker(IngestFileWorker):
         """
         if not self.try_existing_ingest:
             return None
-        existing = self.pgrest_client.get_ingest_fileset_result(ingest_type, base_url)
+        existing = self.pgrest_client.get_ingest_fileset_platform(ingest_type, base_url)
         # TODO: filter on more flags?
         if existing and existing['hit'] is True:
             return existing
