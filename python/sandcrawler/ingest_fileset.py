@@ -14,7 +14,7 @@ from sandcrawler.ia import (CdxApiError, PetaboxError, SavePageNowError, Wayback
                             WaybackError, cdx_to_dict, fix_transfer_encoding)
 from sandcrawler.ingest_file import IngestFileWorker
 from sandcrawler.misc import clean_url, gen_file_metadata
-from sandcrawler.worker import SandcrawlerWorker
+from sandcrawler.workers import SandcrawlerWorker
 
 MAX_BODY_SIZE_BYTES = 128 * 1024 * 1024
 
