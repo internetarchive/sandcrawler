@@ -382,7 +382,7 @@ class IngestFilesetWorker(IngestFileWorker):
 
         if result[
                 'status'] == 'success-file' and archive_result.file_resource and archive_result.file_file_meta:
-            file_result = dict(
+            file_result: Dict[str, Any] = dict(
                 hit=True,
                 status='success',
                 request=request.copy(),
