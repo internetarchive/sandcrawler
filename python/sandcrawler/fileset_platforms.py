@@ -32,9 +32,6 @@ class FilesetPlatformHelper():
         assert item.manifest
         total_size = sum([m.size for m in item.manifest]) or 0
         largest_size = max([m.size or 0 for m in item.manifest]) or 0
-        #print(f"  total_size={total_size} largest_size={largest_size}", file=sys.stderr)
-        # XXX: while developing ArchiveorgFileset path
-        #return IngestStrategy.ArchiveorgFileset
         if len(item.manifest) == 1:
             if total_size < 64 * 1024 * 1024:
                 return IngestStrategy.WebFile
@@ -174,7 +171,7 @@ class DataverseHelper(FilesetPlatformHelper):
             raise PlatformScopeError("not actually in scope")
 
         if parsed_id['file_id']:
-            # XXX: maybe we could support this?
+            # TODO: maybe we could support this?
             raise PlatformScopeError(
                 "only entire dataverse datasets can be archived with this tool")
 
@@ -227,7 +224,7 @@ class DataverseHelper(FilesetPlatformHelper):
         platform_sub_id = platform_id.split('/')[-1]
         archiveorg_item_name = f"{platform_domain}-{platform_sub_id}-v{dataset_version}"
         archiveorg_item_meta = dict(
-            # XXX: collection=platform_domain,
+            # TODO: collection=platform_domain,
             collection="datasets",
             date=obj_latest['releaseTime'].split('T')[0],
             source=
@@ -439,7 +436,7 @@ class FigshareHelper(FilesetPlatformHelper):
             authors.append(author['full_name'])
         archiveorg_item_name = f"{platform_domain}-{platform_id}-v{dataset_version}"
         archiveorg_item_meta = dict(
-            # XXX: collection=platform_domain,
+            # TODO: collection=platform_domain,
             collection="datasets",
             creator=authors,
             doi=obj['doi'],
@@ -524,7 +521,7 @@ class ZenodoHelper(FilesetPlatformHelper):
         else:
             url = request['base_url']
 
-        # XXX: also look in base_url and resource-non-terminal for ident? to
+        # TODO: also look in base_url and resource-non-terminal for ident? to
         # check for work-level redirects
 
         # 1. extract identifier from URL
@@ -581,7 +578,7 @@ class ZenodoHelper(FilesetPlatformHelper):
             authors.append(author['name'])
         archiveorg_item_name = f"{platform_domain}-{platform_id}"
         archiveorg_item_meta = dict(
-            # XXX: collection=platform_domain,
+            # TODO: collection=platform_domain,
             collection="datasets",
             creator=authors,
             doi=obj['doi'],

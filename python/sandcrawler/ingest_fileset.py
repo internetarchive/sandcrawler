@@ -80,7 +80,7 @@ class IngestFilesetWorker(IngestFileWorker):
 
         # check against blocklist
         for block in self.base_url_blocklist:
-            # XXX: hack to not skip archive.org content
+            # NOTE: hack to not skip archive.org content
             if 'archive.org' in block:
                 continue
             if block in next_url:
