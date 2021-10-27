@@ -113,7 +113,8 @@ class GrobidWorker(SandcrawlerFetchWorker):
         fetch_result = self.fetch_blob(record)
         if fetch_result['status'] != 'success':
             return fetch_result
-        blob = fetch_result['blob']
+        blob: bytes = fetch_result['blob']
+        assert blob and isinstance(blob, bytes)
 
         result = self.grobid_client.process_fulltext(blob,
                                                      consolidate_mode=self.consolidate_mode)

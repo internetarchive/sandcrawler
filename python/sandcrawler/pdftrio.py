@@ -88,7 +88,8 @@ class PdfTrioWorker(SandcrawlerFetchWorker):
         fetch_sec = time.time() - start
         if fetch_result['status'] != 'success':
             return fetch_result
-        blob = fetch_result['blob']
+        blob: bytes = fetch_result['blob']
+        assert blob and isinstance(blob, bytes)
 
         result = dict()
         result['file_meta'] = gen_file_metadata(blob)

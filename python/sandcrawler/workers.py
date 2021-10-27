@@ -132,7 +132,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                 raise Exception("wayback client not configured for this SandcrawlerFetchWorker")
             try:
                 start = time.time()
-                blob = self.wayback_client.fetch_petabox_body(
+                blob: bytes = self.wayback_client.fetch_petabox_body(
                     csize=record['warc_csize'],
                     offset=record['warc_offset'],
                     warc_path=record['warc_path'],
@@ -166,11 +166,11 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
         elif record.get('item') and record.get('path'):
             # it's petabox link; fetch via HTTP
             start = time.time()
-            resp = requests.get("https://archive.org/serve/{}/{}".format(
+            ia_resp = requests.get("https://archive.org/serve/{}/{}".format(
                 record['item'], record['path']))
             petabox_sec = time.time() - start
             try:
-                resp.raise_for_status()
+                ia_resp.raise_for_status()
             except Exception as e:
                 return dict(
                     key=default_key,
@@ -178,7 +178,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
                     status="error-petabox",
                     error_msg=str(e),
                 )
-            blob = resp.content
+            blob = ia_resp.content
         else:
             raise ValueError(
                 "not a CDX (wayback) or petabox (archive.org) dict; not sure how to proceed")

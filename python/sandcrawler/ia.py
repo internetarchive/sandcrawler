@@ -507,7 +507,7 @@ class WaybackClient:
                            offset: int,
                            warc_path: str,
                            resolve_revisit: bool = True,
-                           expected_status_code: Optional[int] = None) -> WarcResource:
+                           expected_status_code: Optional[int] = None) -> bytes:
         """
         Fetches HTTP 200 WARC resource directly from petabox using WARC path/offset/csize.
 
