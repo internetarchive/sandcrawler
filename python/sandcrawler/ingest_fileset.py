@@ -177,7 +177,7 @@ class IngestFilesetWorker(IngestFileWorker):
                     html_doc = HTMLParser(resource.body)
                     html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
                     if html_biblio:
-                        if not 'html_biblio' in result or html_biblio.title:
+                        if 'html_biblio' not in result and html_biblio.title:
                             result['html_biblio'] = json.loads(
                                 html_biblio.json(exclude_none=True))
                             #print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
