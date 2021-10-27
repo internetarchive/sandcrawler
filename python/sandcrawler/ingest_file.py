@@ -826,11 +826,11 @@ class IngestFileWorker(SandcrawlerWorker):
 
 
 class IngestFileRequestHandler(BaseHTTPRequestHandler):
-    def do_POST(self):
+    def do_POST(self) -> None:
         if self.path != "/ingest":
             self.send_response(404)
             self.end_headers()
-            self.wfile.write("404: Not Found")
+            self.wfile.write(b"404: Not Found")
             return
         length = int(self.headers.get('content-length'))
         request = json.loads(self.rfile.read(length).decode('utf-8'))
@@ -839,4 +839,4 @@ class IngestFileRequestHandler(BaseHTTPRequestHandler):
         result = ingester.process(request)
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(json.dumps(result))
+        self.wfile.write(json.dumps(result).encode('utf8'))
