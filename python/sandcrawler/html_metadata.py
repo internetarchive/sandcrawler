@@ -30,7 +30,9 @@ HEAD_META_PATTERNS: Dict[str, List[str]] = {
         "meta[name='dcterms.title']",
         "meta[name='dc.title']",
     ],
-    "subtitle": ["meta[name='prism.subtitle']", ],
+    "subtitle": [
+        "meta[name='prism.subtitle']",
+    ],
     "doi": [
         "meta[name='citation_doi']",
         "meta[name='DOI']",
@@ -40,7 +42,9 @@ HEAD_META_PATTERNS: Dict[str, List[str]] = {
         "meta[name='dc.identifier.doi']",
         "meta[name='dc.identifier'][scheme='doi']",
     ],
-    "pmid": ["meta[name='citation_pmid']", ],
+    "pmid": [
+        "meta[name='citation_pmid']",
+    ],
     "abstract": [
         "meta[name='citation_abstract']",
         "meta[name='bepress_citation_abstract']",
@@ -61,7 +65,9 @@ HEAD_META_PATTERNS: Dict[str, List[str]] = {
         "meta[name='dc.source']",
         "meta[property='og:site_name']",
     ],
-    "container_abbrev": ["meta[name='citation_journal_abbrev']", ],
+    "container_abbrev": [
+        "meta[name='citation_journal_abbrev']",
+    ],
     "raw_date": [
         "meta[name='citation_publication_date']",
         "meta[name='bepress_citation_publication_date']",
@@ -162,7 +168,9 @@ HEAD_META_LIST_PATTERNS: Dict[str, List[str]] = {
         "meta[name='dc.contributor']",
     ],
     # TODO: citation_author_institution
-    "raw_references": ["meta[name='citation_reference']", ],
+    "raw_references": [
+        "meta[name='citation_reference']",
+    ],
     "raw_identifiers": [
         "meta[name='eprints.id_number']",
         "meta[name='dcterms.identifier']",
@@ -646,8 +654,9 @@ class BiblioMetadata(pydantic.BaseModel):
         json_encoders = {datetime.date: lambda dt: dt.isoformat()}
 
 
-def html_extract_fulltext_url(doc_url: str, doc: HTMLParser,
-                              patterns: List[dict]) -> Optional[Tuple[str, str]]:
+def html_extract_fulltext_url(
+    doc_url: str, doc: HTMLParser, patterns: List[dict]
+) -> Optional[Tuple[str, str]]:
     """
     Tries to quickly extract fulltext URLs using a set of patterns. This
     function is intendend to be generic across various extraction techniques.
@@ -656,36 +665,36 @@ def html_extract_fulltext_url(doc_url: str, doc: HTMLParser,
     """
     self_doc_url: Optional[Tuple[str, str]] = None
     for pattern in patterns:
-        if 'selector' not in pattern:
+        if "selector" not in pattern:
             continue
-        if 'in_doc_url' in pattern:
-            if pattern['in_doc_url'] not in doc_url:
+        if "in_doc_url" in pattern:
+            if pattern["in_doc_url"] not in doc_url:
                 continue
-        elem = doc.css_first(pattern['selector'])
+        elem = doc.css_first(pattern["selector"])
         if not elem:
             continue
         val = None
-        if 'attr' in pattern:
-            val = elem.attrs.get(pattern['attr'])
-        elif pattern.get('use_body'):
+        if "attr" in pattern:
+            val = elem.attrs.get(pattern["attr"])
+        elif pattern.get("use_body"):
             val = elem.text()
-            if '://' not in val:
+            if "://" not in val:
                 continue
         if not val:
             continue
         val = urllib.parse.urljoin(doc_url, val)
         assert val
-        if 'in_fulltext_url' in pattern:
-            if pattern['in_fulltext_url'] not in val:
+        if "in_fulltext_url" in pattern:
+            if pattern["in_fulltext_url"] not in val:
                 continue
         for skip_pattern in FULLTEXT_URL_PATTERNS_SKIP:
             if skip_pattern in val.lower():
                 continue
         if url_fuzzy_equal(doc_url, val):
             # don't link to self, unless no other options
-            self_doc_url = (val, pattern.get('technique', 'unknown'))
+            self_doc_url = (val, pattern.get("technique", "unknown"))
             continue
-        return (val, pattern.get('technique', 'unknown'))
+        return (val, pattern.get("technique", "unknown"))
     if self_doc_url:
         print("  WARN: returning fulltext URL pointing to self", file=sys.stderr)
         return self_doc_url
@@ -703,9 +712,9 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
     for field, patterns in HEAD_META_PATTERNS.items():
         for pattern in patterns:
             val = head.css_first(pattern)
-            #print((field, pattern, val))
-            if val and 'content' in val.attrs and val.attrs['content']:
-                meta[field] = val.attrs['content']
+            # print((field, pattern, val))
+            if val and "content" in val.attrs and val.attrs["content"]:
+                meta[field] = val.attrs["content"]
                 break
 
     for field, patterns in HEAD_META_LIST_PATTERNS.items():
@@ -713,53 +722,53 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
             val_list = head.css(pattern)
             if val_list:
                 for val in val_list:
-                    if 'content' in val.attrs and val.attrs['content']:
+                    if "content" in val.attrs and val.attrs["content"]:
                         if field not in meta:
                             meta[field] = []
-                        meta[field].append(val.attrs['content'])
+                        meta[field].append(val.attrs["content"])
                 break
 
     # (some) fulltext extractions
     pdf_fulltext_url = html_extract_fulltext_url(doc_url, doc, PDF_FULLTEXT_PATTERNS)
     if pdf_fulltext_url:
-        meta['pdf_fulltext_url'] = pdf_fulltext_url[0]
+        meta["pdf_fulltext_url"] = pdf_fulltext_url[0]
     xml_fulltext_url = html_extract_fulltext_url(doc_url, doc, XML_FULLTEXT_PATTERNS)
     if xml_fulltext_url:
-        meta['xml_fulltext_url'] = xml_fulltext_url[0]
+        meta["xml_fulltext_url"] = xml_fulltext_url[0]
     html_fulltext_url = html_extract_fulltext_url(doc_url, doc, HTML_FULLTEXT_PATTERNS)
     if html_fulltext_url:
-        meta['html_fulltext_url'] = html_fulltext_url[0]
+        meta["html_fulltext_url"] = html_fulltext_url[0]
     component_url = html_extract_fulltext_url(doc_url, doc, COMPONENT_FULLTEXT_PATTERNS)
     if component_url:
-        meta['component_url'] = component_url[0]
+        meta["component_url"] = component_url[0]
 
     # TODO: replace with clean_doi() et al
-    if meta.get('doi') and meta.get('doi').startswith('doi:'):
-        meta['doi'] = meta['doi'][4:]
+    if meta.get("doi") and meta.get("doi").startswith("doi:"):
+        meta["doi"] = meta["doi"][4:]
 
-    raw_identifiers = meta.pop('raw_identifiers', [])
+    raw_identifiers = meta.pop("raw_identifiers", [])
     for ident in raw_identifiers:
-        if ident.startswith('doi:10.'):
-            if 'doi' not in meta:
-                meta['doi'] = ident.replace('doi:', '')
-        elif ident.startswith('10.') and '/' in ident:
-            if 'doi' not in meta:
-                meta['doi'] = ident
-        elif ident.startswith('isbn:'):
-            if 'isbn' not in meta:
-                meta['isbn'] = ident.replace('isbn:', '')
+        if ident.startswith("doi:10."):
+            if "doi" not in meta:
+                meta["doi"] = ident.replace("doi:", "")
+        elif ident.startswith("10.") and "/" in ident:
+            if "doi" not in meta:
+                meta["doi"] = ident
+        elif ident.startswith("isbn:"):
+            if "isbn" not in meta:
+                meta["isbn"] = ident.replace("isbn:", "")
 
-    raw_date = meta.pop('raw_date', None)
+    raw_date = meta.pop("raw_date", None)
     if raw_date:
         parsed = dateparser.parse(raw_date)
         if parsed:
-            meta['release_date'] = parsed.date()
+            meta["release_date"] = parsed.date()
 
-    raw_release_type = meta.pop('raw_release_type', None)
+    raw_release_type = meta.pop("raw_release_type", None)
     if raw_release_type:
         release_type = RELEASE_TYPE_MAP.get(raw_release_type.lower().strip())
         if release_type:
-            meta['release_type'] = release_type
+            meta["release_type"] = release_type
 
     return BiblioMetadata(**meta)
 
@@ -786,29 +795,26 @@ def load_adblock_rules() -> braveblock.Adblocker:
             "||pbs.twimg.com^",
             "||badge.dimensions.ai^",
             "||recaptcha.net^",
-
             # not sure about these CC badges (usually via a redirect)
-            #"||licensebuttons.net^",
-            #"||i.creativecommons.org^",
-
+            # "||licensebuttons.net^",
+            # "||i.creativecommons.org^",
             # Should we skip jquery, or other generic javascript CDNs?
-            #"||code.jquery.com^",
-            #"||ajax.googleapis.com^",
-            #"||cdnjs.cloudflare.com^",
-
+            # "||code.jquery.com^",
+            # "||ajax.googleapis.com^",
+            # "||cdnjs.cloudflare.com^",
             # badges, "share" buttons, tracking, etc
             "apis.google.com/js/plusone",
             "www.google.com/recaptcha/",
             "js/_getUACode.js"
-
             # PLOS images
             "/resource/img/icon.*.16.png^",
         ],
     )
 
 
-def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str],
-                     type_name: str) -> List[Dict[str, str]]:
+def _extract_generic(
+    doc: HTMLParser, selector: str, attrs: List[str], type_name: str
+) -> List[Dict[str, str]]:
     resources = []
 
     for node in doc.css(selector):
@@ -818,21 +824,22 @@ def _extract_generic(doc: HTMLParser, selector: str, attrs: List[str],
             url = node.attrs.get(attr)
             # special-case a couple meta URI prefixes which don't match with adblock rules
             skip = False
-            for prefix in ['about:', 'data:', 'magnet:', 'urn:', 'mailto:']:
+            for prefix in ["about:", "data:", "magnet:", "urn:", "mailto:"]:
                 if url and url.startswith(prefix):
                     skip = True
                     break
             if skip:
                 continue
             if url:
-                #print(url, file=sys.stderr)
+                # print(url, file=sys.stderr)
                 resources.append(dict(url=url.strip(), type=type_name))
 
     return resources
 
 
-def html_extract_resources(doc_url: str, doc: HTMLParser,
-                           adblock: braveblock.Adblocker) -> List[Dict[str, str]]:
+def html_extract_resources(
+    doc_url: str, doc: HTMLParser, adblock: braveblock.Adblocker
+) -> List[Dict[str, str]]:
     """
     This function tries to find all the important resources in a page. The
     presumption is that the HTML document is article fulltext, and we want the
@@ -860,12 +867,14 @@ def html_extract_resources(doc_url: str, doc: HTMLParser,
 
     # ensure URLs are absolute
     for r in resources:
-        r['url'] = urllib.parse.urljoin(doc_url, r['url'])
+        r["url"] = urllib.parse.urljoin(doc_url, r["url"])
 
     # filter using adblocker
     resources = [
-        r for r in resources if adblock.check_network_urls(
-            r['url'], source_url=doc_url, request_type=r['type']) is False
+        r
+        for r in resources
+        if adblock.check_network_urls(r["url"], source_url=doc_url, request_type=r["type"])
+        is False
     ]
 
     # remove duplicates

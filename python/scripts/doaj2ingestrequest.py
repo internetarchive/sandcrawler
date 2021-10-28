@@ -17,23 +17,21 @@ import urlcanon
 
 DOMAIN_BLOCKLIST = [
     # large OA publishers (we get via DOI)
-
     # large repos and aggregators (we crawl directly)
     "://arxiv.org/",
     "://europepmc.org/",
     "ncbi.nlm.nih.gov/",
-    #"semanticscholar.org/",
+    # "semanticscholar.org/",
     "://doi.org/",
     "zenodo.org/",
     "figshare.com/",
     "://archive.org/",
     ".archive.org/",
-
     # large publishers/platforms; may remove in the future
-    #"://link.springer.com/",
-    #"://dergipark.gov.tr/",
-    #"frontiersin.org/",
-    #"scielo",
+    # "://link.springer.com/",
+    # "://dergipark.gov.tr/",
+    # "frontiersin.org/",
+    # "scielo",
 ]
 
 # these default to PDF; note that we also do pdf ingests for HTML pages
@@ -63,35 +61,35 @@ def transform(obj: dict) -> List[dict]:
     Returns a list of dicts.
     """
 
-    doaj_id = obj['id'].lower()
+    doaj_id = obj["id"].lower()
     assert doaj_id
 
-    bibjson = obj['bibjson']
-    if not bibjson['link']:
+    bibjson = obj["bibjson"]
+    if not bibjson["link"]:
         return []
 
     requests = []
 
     doi: Optional[str] = None
-    for ident in (bibjson['identifier'] or []):
-        if ident['type'].lower() == "doi" and ident.get('id') and ident['id'].startswith('10.'):
-            doi = ident['id'].lower()
+    for ident in bibjson["identifier"] or []:
+        if ident["type"].lower() == "doi" and ident.get("id") and ident["id"].startswith("10."):
+            doi = ident["id"].lower()
 
-    for link in (bibjson['link'] or []):
-        if link.get('type') != "fulltext" or not link.get('url'):
+    for link in bibjson["link"] or []:
+        if link.get("type") != "fulltext" or not link.get("url"):
             continue
-        ingest_types = CONTENT_TYPE_MAP.get((link.get('content_type') or '').lower())
+        ingest_types = CONTENT_TYPE_MAP.get((link.get("content_type") or "").lower())
         if not ingest_types:
             continue
 
         skip = False
         for domain in DOMAIN_BLOCKLIST:
-            if domain in link['url'].lower():
+            if domain in link["url"].lower():
                 skip = True
         if skip:
             continue
         try:
-            base_url = canon(link['url'].strip())
+            base_url = canon(link["url"].strip())
         except UnicodeEncodeError:
             continue
 
@@ -100,18 +98,18 @@ def transform(obj: dict) -> List[dict]:
 
         for ingest_type in ingest_types:
             request = {
-                'base_url': base_url,
-                'ingest_type': ingest_type,
-                'link_source': 'doaj',
-                'link_source_id': doaj_id,
-                'ingest_request_source': 'doaj',
-                'release_stage': 'published',
-                'rel': 'publisher',
-                'ext_ids': {
-                    'doi': doi,
-                    'doaj': doaj_id,
+                "base_url": base_url,
+                "ingest_type": ingest_type,
+                "link_source": "doaj",
+                "link_source_id": doaj_id,
+                "ingest_request_source": "doaj",
+                "release_stage": "published",
+                "rel": "publisher",
+                "ext_ids": {
+                    "doi": doi,
+                    "doaj": doaj_id,
                 },
-                'edit_extra': {},
+                "edit_extra": {},
             }
             requests.append(request)
 
@@ -131,9 +129,9 @@ def run(args) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('json_file',
-                        help="DOAJ article dump file to use",
-                        type=argparse.FileType('r'))
+    parser.add_argument(
+        "json_file", help="DOAJ article dump file to use", type=argparse.FileType("r")
+    )
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
@@ -141,5 +139,5 @@ def main() -> None:
     run(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

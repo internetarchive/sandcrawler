@@ -43,7 +43,10 @@ def test_cdx_fetch(cdx_client):
     assert resp.sha1b32 == "OJ6FN5AAPU62VMMVJPXZYNBQD5VMYHFV"
     assert resp.warc_csize == 25338
     assert resp.warc_offset == 240665973
-    assert resp.warc_path == "MEDIACLOUD-20181105115107-crawl851/MEDIACLOUD-20181105115107-09234.warc.gz"
+    assert (
+        resp.warc_path
+        == "MEDIACLOUD-20181105115107-crawl851/MEDIACLOUD-20181105115107-09234.warc.gz"
+    )
 
     # bogus datetime; shouldn't match
     with pytest.raises(KeyError):
@@ -73,8 +76,9 @@ def test_cdx_lookup_best(cdx_client):
 def test_wayback_fetch(wayback_client):
 
     resp = wayback_client.fetch_petabox(
-        25683, 2676464871,
-        "archiveteam_archivebot_go_20171205210002/arstechnica.co.uk-inf-20171201-061309-bb65j-00021.warc.gz"
+        25683,
+        2676464871,
+        "archiveteam_archivebot_go_20171205210002/arstechnica.co.uk-inf-20171201-061309-bb65j-00021.warc.gz",
     )
 
     assert resp.body
@@ -112,9 +116,9 @@ def test_cdx_fetch_spn2(cdx_client):
 
     # https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 20200110222410
 
-    #com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 200 VYW7JXFK6EC2KC537N5B7PHYZC4B6MZL - - 9006 815069841 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
-    #com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1096 815066572 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
-    #com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222422 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1094 307563475 liveweb-20200110214449-wwwb-spn18.us.archive.org-8003.warc.gz
+    # com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 200 VYW7JXFK6EC2KC537N5B7PHYZC4B6MZL - - 9006 815069841 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
+    # com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222410 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1096 815066572 liveweb-20200110214015-wwwb-spn18.us.archive.org-8002.warc.gz
+    # com,wiley,onlinelibrary)/doi/pdf/10.1002/lrh2.10209 20200110222422 https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209 text/html 302 AFI55BZE23HDTTEERUFKRP6WQVO3LOLS - - 1094 307563475 liveweb-20200110214449-wwwb-spn18.us.archive.org-8003.warc.gz
 
     url = "https://onlinelibrary.wiley.com/doi/pdf/10.1002/lrh2.10209"
     datetime = "20200110222410"
@@ -145,7 +149,7 @@ def test_lookup_ftp(wayback_client):
     assert resp.revisit_cdx.url != url
 
     file_meta = gen_file_metadata(resp.body)
-    assert file_meta['sha1hex'] == resp.cdx.sha1hex
+    assert file_meta["sha1hex"] == resp.cdx.sha1hex
 
     # not revisit?
     url = "ftp://ftp.cs.utexas.edu/pub/qsim/papers/Xu-crv-08.pdf"
@@ -158,7 +162,7 @@ def test_lookup_ftp(wayback_client):
     assert resp.cdx.url == url
 
     file_meta = gen_file_metadata(resp.body)
-    assert file_meta['sha1hex'] == resp.cdx.sha1hex
+    assert file_meta["sha1hex"] == resp.cdx.sha1hex
 
 
 @pytest.mark.skip(reason="hits prod services, requires auth")
@@ -168,10 +172,10 @@ def test_crawl_ftp(spn_client, wayback_client):
     resp = spn_client.crawl_resource(url, wayback_client)
 
     # FTP isn't supported yet!
-    #assert resp.hit is True
-    #assert resp.status == "success"
-    #assert resp.terminal_url == url
-    #assert resp.cdx.url == url
+    # assert resp.hit is True
+    # assert resp.status == "success"
+    # assert resp.terminal_url == url
+    # assert resp.cdx.url == url
 
     assert resp.hit is False
     assert resp.status == "spn2-no-ftp"

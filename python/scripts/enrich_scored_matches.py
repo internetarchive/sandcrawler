@@ -24,23 +24,25 @@ import sys
 
 def run():
     for line in sys.stdin:
-        line = line.split('\t')
+        line = line.split("\t")
         assert len(line) == 5
-        raw_sha1 = line[0].replace('sha1:', '')
+        raw_sha1 = line[0].replace("sha1:", "")
         dois = json.loads(line[1])
         cdx = json.loads(line[2])
         mimetype = line[3]
         size = int(line[4])
 
-        sha1 = base64.b16encode(base64.b32decode(raw_sha1)).decode('ascii').lower()
+        sha1 = base64.b16encode(base64.b32decode(raw_sha1)).decode("ascii").lower()
 
-        obj = dict(sha1=sha1,
-                   dois=dois,
-                   cdx=[dict(url=cdx['url'], dt=cdx['dt'])],
-                   size=size,
-                   mimetype=mimetype)
+        obj = dict(
+            sha1=sha1,
+            dois=dois,
+            cdx=[dict(url=cdx["url"], dt=cdx["dt"])],
+            size=size,
+            mimetype=mimetype,
+        )
         print(json.dumps(obj))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

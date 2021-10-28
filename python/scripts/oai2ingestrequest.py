@@ -13,7 +13,6 @@ import urlcanon
 
 DOMAIN_BLOCKLIST = [
     # large OA publishers (we get via DOI)
-
     # large repos and aggregators (we crawl directly)
     "://arxiv.org/",
     "://europepmc.org/",
@@ -26,17 +25,16 @@ DOMAIN_BLOCKLIST = [
     "://archive.org/",
     ".archive.org/",
     "://127.0.0.1/",
-
     # OAI specific additions
     "://hdl.handle.net/",
 ]
 
 RELEASE_STAGE_MAP = {
-    'info:eu-repo/semantics/draftVersion': 'draft',
-    'info:eu-repo/semantics/submittedVersion': 'submitted',
-    'info:eu-repo/semantics/acceptedVersion': 'accepted',
-    'info:eu-repo/semantics/publishedVersion': 'published',
-    'info:eu-repo/semantics/updatedVersion': 'updated',
+    "info:eu-repo/semantics/draftVersion": "draft",
+    "info:eu-repo/semantics/submittedVersion": "submitted",
+    "info:eu-repo/semantics/acceptedVersion": "accepted",
+    "info:eu-repo/semantics/publishedVersion": "published",
+    "info:eu-repo/semantics/updatedVersion": "updated",
 }
 
 
@@ -52,38 +50,38 @@ def transform(obj):
     """
 
     requests = []
-    if not obj.get('oai') or not obj['oai'].startswith('oai:'):
+    if not obj.get("oai") or not obj["oai"].startswith("oai:"):
         return []
-    if not obj.get('urls'):
+    if not obj.get("urls"):
         return []
 
     # look in obj['formats'] for PDF?
-    if obj.get('formats'):
+    if obj.get("formats"):
         # if there is a list of formats, and it does not contain PDF, then
         # skip. Note that we will continue if there is no formats list.
         has_pdf = False
-        for f in obj['formats']:
-            if 'pdf' in f.lower():
+        for f in obj["formats"]:
+            if "pdf" in f.lower():
                 has_pdf = True
         if not has_pdf:
             return []
 
     doi = None
-    if obj.get('doi'):
-        doi = obj['doi'][0].lower().strip()
-        if not doi.startswith('10.'):
+    if obj.get("doi"):
+        doi = obj["doi"][0].lower().strip()
+        if not doi.startswith("10."):
             doi = None
 
     # infer release stage and/or type from obj['types']
     release_stage = None
-    for t in obj.get('types', []):
+    for t in obj.get("types", []):
         if t in RELEASE_STAGE_MAP:
             release_stage = RELEASE_STAGE_MAP[t]
 
     # TODO: infer rel somehow? Eg, repository vs. OJS publisher
     rel = None
 
-    for url in obj['urls']:
+    for url in obj["urls"]:
         skip = False
         for domain in DOMAIN_BLOCKLIST:
             if domain in url:
@@ -96,18 +94,18 @@ def transform(obj):
             continue
 
         request = {
-            'base_url': base_url,
-            'ingest_type': 'pdf',
-            'link_source': 'oai',
-            'link_source_id': obj['oai'].lower(),
-            'ingest_request_source': 'metha-bulk',
-            'release_stage': release_stage,
-            'rel': rel,
-            'ext_ids': {
-                'doi': doi,
-                'oai': obj['oai'].lower(),
+            "base_url": base_url,
+            "ingest_type": "pdf",
+            "link_source": "oai",
+            "link_source_id": obj["oai"].lower(),
+            "ingest_request_source": "metha-bulk",
+            "release_stage": release_stage,
+            "rel": rel,
+            "ext_ids": {
+                "doi": doi,
+                "oai": obj["oai"].lower(),
             },
-            'edit_extra': {},
+            "edit_extra": {},
         }
         requests.append(request)
 
@@ -127,9 +125,11 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('json_file',
-                        help="OAI-PMH dump file to use (usually stdin)",
-                        type=argparse.FileType('r'))
+    parser.add_argument(
+        "json_file",
+        help="OAI-PMH dump file to use (usually stdin)",
+        type=argparse.FileType("r"),
+    )
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
@@ -137,5 +137,5 @@ def main():
     run(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

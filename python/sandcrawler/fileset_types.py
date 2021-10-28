@@ -62,6 +62,7 @@ class PlatformScopeError(Exception):
     - a 'latest version' record, when the platform has version-specific records
     - a single file within a dataset for a platform which has file-level identifiers
     """
+
     pass
 
 
@@ -69,4 +70,5 @@ class PlatformRestrictedError(Exception):
     """
     When datasets are not publicly available on a platform (yet)
     """
+
     pass

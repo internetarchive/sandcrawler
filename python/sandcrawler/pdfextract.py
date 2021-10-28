@@ -173,64 +173,69 @@ class PdfExtractResult:
         Outputs a JSON string as would be published to Kafka text/info topic.
         """
         return {
-            'key': self.sha1hex,
-            'sha1hex': self.sha1hex,
-            'status': self.status,
-            'file_meta': self.file_meta,
-            'error_msg': self.error_msg,
-            'text': self.text,
-            'has_page0_thumbnail': self.has_page0_thumbnail,
-            'meta_xml': self.meta_xml,
-            'pdf_info': self.pdf_info,
-            'pdf_extra': self.pdf_extra,
-            'source': self.source,
+            "key": self.sha1hex,
+            "sha1hex": self.sha1hex,
+            "status": self.status,
+            "file_meta": self.file_meta,
+            "error_msg": self.error_msg,
+            "text": self.text,
+            "has_page0_thumbnail": self.has_page0_thumbnail,
+            "meta_xml": self.meta_xml,
+            "pdf_info": self.pdf_info,
+            "pdf_extra": self.pdf_extra,
+            "source": self.source,
         }
 
     @staticmethod
-    def from_pdftext_dict(record: Dict[str, Any]) -> 'PdfExtractResult':
+    def from_pdftext_dict(record: Dict[str, Any]) -> "PdfExtractResult":
         """
         Outputs a JSON string as would be published to Kafka text/info topic.
         """
-        if record['status'] != 'success':
+        if record["status"] != "success":
             return PdfExtractResult(
-                sha1hex=record.get('sha1hex') or record['key'],
-                status=record['status'],
-                error_msg=record.get('error_msg'),
+                sha1hex=record.get("sha1hex") or record["key"],
+                status=record["status"],
+                error_msg=record.get("error_msg"),
             )
         else:
             return PdfExtractResult(
-                sha1hex=record['sha1hex'],
-                status=record['status'],
-                file_meta=record.get('file_meta'),
-                text=record.get('text'),
-                has_page0_thumbnail=bool(record.get('has_page0_thumbnail', False)),
-                meta_xml=record.get('meta_xml'),
-                pdf_info=record.get('pdf_info'),
-                pdf_extra=record.get('pdf_extra'),
+                sha1hex=record["sha1hex"],
+                status=record["status"],
+                file_meta=record.get("file_meta"),
+                text=record.get("text"),
+                has_page0_thumbnail=bool(record.get("has_page0_thumbnail", False)),
+                meta_xml=record.get("meta_xml"),
+                pdf_info=record.get("pdf_info"),
+                pdf_extra=record.get("pdf_extra"),
             )
 
     @staticmethod
-    def from_pdf_meta_dict(record: Dict[str, Any]) -> 'PdfExtractResult':
+    def from_pdf_meta_dict(record: Dict[str, Any]) -> "PdfExtractResult":
         """
         Parses what would be returned from postgrest
         """
-        if record['status'] != 'success':
+        if record["status"] != "success":
             return PdfExtractResult(
-                sha1hex=record['sha1hex'],
-                status=record['status'],
-                error_msg=(record.get('metadata') or {}).get('error_msg'),
+                sha1hex=record["sha1hex"],
+                status=record["status"],
+                error_msg=(record.get("metadata") or {}).get("error_msg"),
             )
         else:
             pdf_extra = dict()
-            for k in ('page_count', 'page0_height', 'page0_width', 'permanent_id',
-                      'pdf_version'):
+            for k in (
+                "page_count",
+                "page0_height",
+                "page0_width",
+                "permanent_id",
+                "pdf_version",
+            ):
                 if record.get(k):
                     pdf_extra[k] = record[k]
             return PdfExtractResult(
-                sha1hex=record['sha1hex'],
-                status=record['status'],
-                has_page0_thumbnail=bool(record.get('has_page0_thumbnail', False)),
-                pdf_info=record.get('metadata'),
+                sha1hex=record["sha1hex"],
+                status=record["status"],
+                has_page0_thumbnail=bool(record.get("has_page0_thumbnail", False)),
+                pdf_info=record.get("metadata"),
                 pdf_extra=pdf_extra,
             )
 
@@ -247,11 +252,11 @@ class PdfExtractResult:
         # TODO: form, encrypted
         if self.pdf_info:
             metadata = dict()
-            for k in ('Title', 'Subject', 'Author', 'Creator', 'Producer', 'doi'):
+            for k in ("Title", "Subject", "Author", "Creator", "Producer", "doi"):
                 if k in self.pdf_info:
                     metadata[k.lower()] = self.pdf_info[k]
-            if 'CreationDate' in self.pdf_info:
-                pdf_created = self.pdf_info['CreationDate']
+            if "CreationDate" in self.pdf_info:
+                pdf_created = self.pdf_info["CreationDate"]
         metadata_json: Optional[str] = None
         if metadata:
             metadata_json = json.dumps(metadata, sort_keys=True)
@@ -260,20 +265,20 @@ class PdfExtractResult:
             datetime.datetime.now(),  # updated
             self.status,
             self.has_page0_thumbnail,
-            pdf_extra.get('page_count'),
+            pdf_extra.get("page_count"),
             word_count,
-            pdf_extra.get('page0_height'),
-            pdf_extra.get('page0_width'),
-            pdf_extra.get('permanent_id'),
+            pdf_extra.get("page0_height"),
+            pdf_extra.get("page0_width"),
+            pdf_extra.get("permanent_id"),
             pdf_created,
-            pdf_extra.get('pdf_version'),
+            pdf_extra.get("pdf_version"),
             metadata_json,
         )
 
 
-def process_pdf(blob: bytes,
-                thumb_size: Tuple[int, int] = (180, 300),
-                thumb_type: str = "JPEG") -> PdfExtractResult:
+def process_pdf(
+    blob: bytes, thumb_size: Tuple[int, int] = (180, 300), thumb_type: str = "JPEG"
+) -> PdfExtractResult:
     """
     A known issue is that output text is in "physical layout" mode, which means
     columns will be side-by-side. We would prefer a single stream of tokens!
@@ -283,11 +288,11 @@ def process_pdf(blob: bytes,
     didn't seem to work at all (returned empty strings).
     """
     file_meta = gen_file_metadata(blob)
-    sha1hex = file_meta['sha1hex']
-    if file_meta['mimetype'] != 'application/pdf':
+    sha1hex = file_meta["sha1hex"]
+    if file_meta["mimetype"] != "application/pdf":
         return PdfExtractResult(
             sha1hex=sha1hex,
-            status='not-pdf',
+            status="not-pdf",
             error_msg=f"mimetype is '{file_meta['mimetype']}'",
             file_meta=file_meta,
         )
@@ -295,7 +300,7 @@ def process_pdf(blob: bytes,
     if sha1hex in BAD_PDF_SHA1HEX:
         return PdfExtractResult(
             sha1hex=sha1hex,
-            status='bad-pdf',
+            status="bad-pdf",
             error_msg="PDF known to cause processing issues",
             file_meta=file_meta,
         )
@@ -306,7 +311,7 @@ def process_pdf(blob: bytes,
         if pdf is None:
             return PdfExtractResult(
                 sha1hex=sha1hex,
-                status='empty-pdf',
+                status="empty-pdf",
                 file_meta=file_meta,
                 has_page0_thumbnail=False,
             )
@@ -314,7 +319,7 @@ def process_pdf(blob: bytes,
         if page0 is None:
             return PdfExtractResult(
                 sha1hex=sha1hex,
-                status='empty-page0',
+                status="empty-page0",
                 file_meta=file_meta,
             )
         # this call sometimes fails an returns an AttributeError
@@ -324,7 +329,7 @@ def process_pdf(blob: bytes,
         # starting with a narrow set
         return PdfExtractResult(
             sha1hex=sha1hex,
-            status='parse-error',
+            status="parse-error",
             error_msg=str(e),
             file_meta=file_meta,
         )
@@ -334,8 +339,9 @@ def process_pdf(blob: bytes,
     renderer = poppler.PageRenderer()
     try:
         full_img = renderer.render_page(page0)
-        img = Image.frombuffer("RGBA", (full_img.width, full_img.height), full_img.data, 'raw',
-                               "BGRA", 0, 1)
+        img = Image.frombuffer(
+            "RGBA", (full_img.width, full_img.height), full_img.data, "raw", "BGRA", 0, 1
+        )
         img.thumbnail(thumb_size, Image.BICUBIC)
         buf = BytesIO()
         img.save(buf, thumb_type)
@@ -355,7 +361,7 @@ def process_pdf(blob: bytes,
     except AttributeError as e:
         return PdfExtractResult(
             sha1hex=sha1hex,
-            status='parse-error',
+            status="parse-error",
             error_msg=str(e),
             file_meta=file_meta,
         )
@@ -364,14 +370,14 @@ def process_pdf(blob: bytes,
     if len(full_text) > 1000000:
         return PdfExtractResult(
             sha1hex=sha1hex,
-            status='text-too-large',
+            status="text-too-large",
             error_msg="full_text chars: {}".format(len(full_text)),
             file_meta=file_meta,
         )
     if len(pdf.metadata) > 1000000:
         return PdfExtractResult(
             sha1hex=sha1hex,
-            status='text-too-large',
+            status="text-too-large",
             error_msg="meta_xml chars: {}".format(len(full_text)),
             file_meta=file_meta,
         )
@@ -381,7 +387,7 @@ def process_pdf(blob: bytes,
     except UnicodeDecodeError:
         return PdfExtractResult(
             sha1hex=sha1hex,
-            status='bad-unicode',
+            status="bad-unicode",
             error_msg="in infos()",
             file_meta=file_meta,
         )
@@ -402,7 +408,7 @@ def process_pdf(blob: bytes,
     return PdfExtractResult(
         sha1hex=sha1hex,
         file_meta=file_meta,
-        status='success',
+        status="success",
         error_msg=None,
         text=full_text or None,
         has_page0_thumbnail=page0_thumbnail is not None,
@@ -421,17 +427,19 @@ def process_pdf(blob: bytes,
 
 
 class PdfExtractWorker(SandcrawlerFetchWorker):
-    def __init__(self,
-                 wayback_client: Optional[WaybackClient] = None,
-                 sink: Optional[SandcrawlerWorker] = None,
-                 **kwargs):
+    def __init__(
+        self,
+        wayback_client: Optional[WaybackClient] = None,
+        sink: Optional[SandcrawlerWorker] = None,
+        **kwargs,
+    ):
         super().__init__(wayback_client=wayback_client)
         self.wayback_client = wayback_client
         self.sink = sink
-        self.thumbnail_sink = kwargs.get('thumbnail_sink')
+        self.thumbnail_sink = kwargs.get("thumbnail_sink")
 
     def timeout_response(self, task: Dict[str, Any]) -> Dict[str, Any]:
-        default_key = task['sha1hex']
+        default_key = task["sha1hex"]
         return dict(
             status="error-timeout",
             error_msg="internal pdf-extract worker timeout",
@@ -441,9 +449,9 @@ class PdfExtractWorker(SandcrawlerFetchWorker):
 
     def process(self, record: Any, key: Optional[str] = None) -> dict:
         fetch_result = self.fetch_blob(record)
-        if fetch_result['status'] != 'success':
+        if fetch_result["status"] != "success":
             return fetch_result
-        blob: bytes = fetch_result['blob']
+        blob: bytes = fetch_result["blob"]
         assert blob and isinstance(blob, bytes)
 
         result = process_pdf(blob)
@@ -458,10 +466,11 @@ class PdfExtractBlobWorker(SandcrawlerWorker):
     This is sort of like PdfExtractWorker, except it receives blobs directly,
     instead of fetching blobs from some remote store.
     """
+
     def __init__(self, sink: Optional[SandcrawlerWorker] = None, **kwargs):
         super().__init__()
         self.sink = sink
-        self.thumbnail_sink = kwargs.get('thumbnail_sink')
+        self.thumbnail_sink = kwargs.get("thumbnail_sink")
 
     def process(self, blob: Any, key: Optional[str] = None) -> Any:
         if not blob:

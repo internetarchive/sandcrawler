@@ -10,13 +10,30 @@ CDX_DT = "20180812220054"
 # cdx -m exact -p output=json -p from=20180812220054 -p to=20180812220054 http://fatcat.wiki/
 CDX_SINGLE_HIT = [
     [
-        "urlkey", "timestamp", "original", "mimetype", "statuscode", "digest", "redirect",
-        "robotflags", "length", "offset", "filename"
+        "urlkey",
+        "timestamp",
+        "original",
+        "mimetype",
+        "statuscode",
+        "digest",
+        "redirect",
+        "robotflags",
+        "length",
+        "offset",
+        "filename",
     ],
     [
-        "wiki,fatcat)/", CDX_DT, CDX_TARGET, "text/html", "200",
-        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR", "-", "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        CDX_DT,
+        CDX_TARGET,
+        "text/html",
+        "200",
+        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR",
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
 ]
 
@@ -24,47 +41,112 @@ CDX_BEST_SHA1B32 = "AAAAAAAAASIHDJIEP7ZW53DLRX5NFIJR"
 # cdx -m exact -p output=json -p from=20180812220054 -p to=20180812220054 http://fatcat.wiki/
 CDX_MULTI_HIT = [
     [
-        "urlkey", "timestamp", "original", "mimetype", "statuscode", "digest", "redirect",
-        "robotflags", "length", "offset", "filename"
+        "urlkey",
+        "timestamp",
+        "original",
+        "mimetype",
+        "statuscode",
+        "digest",
+        "redirect",
+        "robotflags",
+        "length",
+        "offset",
+        "filename",
     ],
     [
-        "wiki,fatcat)/", CDX_DT, CDX_TARGET, "text/html", "200",
-        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR", "-", "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        CDX_DT,
+        CDX_TARGET,
+        "text/html",
+        "200",
+        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR",
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
     # sooner, but not right mimetype
     [
-        "wiki,fatcat)/", "20180912220054", CDX_TARGET, "text/html", "200",
-        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR", "-", "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        "20180912220054",
+        CDX_TARGET,
+        "text/html",
+        "200",
+        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR",
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
     # sooner and mimetype, but wrong status code
     [
-        "wiki,fatcat)/", "20180912220054", CDX_TARGET, "application/pdf", "400",
-        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR", "-", "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        "20180912220054",
+        CDX_TARGET,
+        "application/pdf",
+        "400",
+        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR",
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
     [
-        "wiki,fatcat)/", "20180912220054", CDX_TARGET, "application/pdf", "500",
-        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR", "-", "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        "20180912220054",
+        CDX_TARGET,
+        "application/pdf",
+        "500",
+        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR",
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
     [
-        "wiki,fatcat)/", "20180912220054", CDX_TARGET, "application/pdf", "150",
-        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR", "-", "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        "20180912220054",
+        CDX_TARGET,
+        "application/pdf",
+        "150",
+        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR",
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
     # "best"
     [
-        "wiki,fatcat)/", CDX_DT, CDX_TARGET, "application/pdf", "200", CDX_BEST_SHA1B32, "-",
-        "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        CDX_DT,
+        CDX_TARGET,
+        "application/pdf",
+        "200",
+        CDX_BEST_SHA1B32,
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
     # older
     [
-        "wiki,fatcat)/", "20180712220054", CDX_TARGET, "application/pdf", "200",
-        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR", "-", "-", "8445", "108062304",
-        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz"
+        "wiki,fatcat)/",
+        "20180712220054",
+        CDX_TARGET,
+        "application/pdf",
+        "200",
+        "O5RHV6OQ7SIHDJIEP7ZW53DLRX5NFIJR",
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "WIDE-20180810142205-crawl802/WIDE-20180812131623-00059.warc.gz",
     ],
 ]
 
@@ -81,10 +163,9 @@ def cdx_client():
 @responses.activate
 def test_cdx_fetch(cdx_client):
 
-    responses.add(responses.GET,
-                  'http://dummy-cdx/cdx',
-                  status=200,
-                  body=json.dumps(CDX_SINGLE_HIT))
+    responses.add(
+        responses.GET, "http://dummy-cdx/cdx", status=200, body=json.dumps(CDX_SINGLE_HIT)
+    )
 
     resp = cdx_client.fetch(CDX_TARGET, CDX_DT)
 
@@ -104,10 +185,9 @@ def test_cdx_fetch_errors(cdx_client):
     with pytest.raises(ValueError):
         resp = cdx_client.fetch(CDX_TARGET, "2019")
 
-    responses.add(responses.GET,
-                  'http://dummy-cdx/cdx',
-                  status=200,
-                  body=json.dumps(CDX_SINGLE_HIT))
+    responses.add(
+        responses.GET, "http://dummy-cdx/cdx", status=200, body=json.dumps(CDX_SINGLE_HIT)
+    )
 
     with pytest.raises(KeyError):
         resp = cdx_client.fetch(CDX_TARGET, "20180812220055")
@@ -123,10 +203,9 @@ def test_cdx_fetch_errors(cdx_client):
 @responses.activate
 def test_cdx_lookup_best(cdx_client):
 
-    responses.add(responses.GET,
-                  'http://dummy-cdx/cdx',
-                  status=200,
-                  body=json.dumps(CDX_MULTI_HIT))
+    responses.add(
+        responses.GET, "http://dummy-cdx/cdx", status=200, body=json.dumps(CDX_MULTI_HIT)
+    )
 
     resp = cdx_client.lookup_best(CDX_TARGET, best_mimetype="application/pdf")
 
@@ -175,7 +254,7 @@ def wayback_client(cdx_client, mocker):
 @pytest.fixture
 def wayback_client_pdf(cdx_client, mocker):
 
-    with open('tests/files/dummy.pdf', 'rb') as f:
+    with open("tests/files/dummy.pdf", "rb") as f:
         pdf_bytes = f.read()
 
     client = WaybackClient(
@@ -209,10 +288,9 @@ def test_wayback_fetch(wayback_client):
 @responses.activate
 def test_lookup_resource_success(wayback_client):
 
-    responses.add(responses.GET,
-                  'http://dummy-cdx/cdx',
-                  status=200,
-                  body=json.dumps(CDX_MULTI_HIT))
+    responses.add(
+        responses.GET, "http://dummy-cdx/cdx", status=200, body=json.dumps(CDX_MULTI_HIT)
+    )
 
     resp = wayback_client.lookup_resource(CDX_TARGET)
 

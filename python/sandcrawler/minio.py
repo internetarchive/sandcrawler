@@ -6,11 +6,13 @@ import minio
 
 
 class SandcrawlerMinioClient(object):
-    def __init__(self,
-                 host_url: str,
-                 access_key: str,
-                 secret_key: str,
-                 default_bucket: Optional[str] = None):
+    def __init__(
+        self,
+        host_url: str,
+        access_key: str,
+        secret_key: str,
+        default_bucket: Optional[str] = None,
+    ):
         """
         host is minio connection string (host:port)
         access and secret key are as expected
@@ -46,13 +48,15 @@ class SandcrawlerMinioClient(object):
         )
         return obj_path
 
-    def put_blob(self,
-                 folder: str,
-                 blob: Union[str, bytes],
-                 sha1hex: Optional[str] = None,
-                 extension: str = "",
-                 prefix: str = "",
-                 bucket: Optional[str] = None) -> Tuple[str, str]:
+    def put_blob(
+        self,
+        folder: str,
+        blob: Union[str, bytes],
+        sha1hex: Optional[str] = None,
+        extension: str = "",
+        prefix: str = "",
+        bucket: Optional[str] = None,
+    ) -> Tuple[str, str]:
         """
         blob should be bytes
         sha1hex is assumed to be sha1 of the blob itself; if not supplied it will be calculated
@@ -61,7 +65,7 @@ class SandcrawlerMinioClient(object):
         filename is SHA1 with an optional file extension.
         """
         if type(blob) == str:
-            blob = blob.encode('utf-8')
+            blob = blob.encode("utf-8")
         assert type(blob) == bytes
         if not sha1hex:
             h = hashlib.sha1()
@@ -72,13 +76,13 @@ class SandcrawlerMinioClient(object):
             bucket = self.default_bucket
         assert bucket
         content_type = "application/octet-stream"
-        if extension.endswith('.xml'):
+        if extension.endswith(".xml"):
             content_type = "application/xml"
-        if extension.endswith('.png'):
+        if extension.endswith(".png"):
             content_type = "image/png"
-        elif extension.endswith('.jpg') or extension.endswith('.jpeg'):
+        elif extension.endswith(".jpg") or extension.endswith(".jpeg"):
             content_type = "image/jpeg"
-        elif extension.endswith('.txt'):
+        elif extension.endswith(".txt"):
             content_type = "text/plain"
         self.mc.put_object(
             bucket,
@@ -89,12 +93,14 @@ class SandcrawlerMinioClient(object):
         )
         return (bucket, obj_path)
 
-    def get_blob(self,
-                 folder: str,
-                 sha1hex: str,
-                 extension: str = "",
-                 prefix: str = "",
-                 bucket: str = None) -> bytes:
+    def get_blob(
+        self,
+        folder: str,
+        sha1hex: str,
+        extension: str = "",
+        prefix: str = "",
+        bucket: str = None,
+    ) -> bytes:
         """
         sha1hex is sha1 of the blob itself
 

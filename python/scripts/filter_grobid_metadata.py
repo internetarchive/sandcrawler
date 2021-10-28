@@ -3,39 +3,41 @@
 import json
 import sys
 
-with open('title_slug_denylist.txt', 'r') as f:
+with open("title_slug_denylist.txt", "r") as f:
     TITLE_DENYLIST = [l.strip() for l in f]
 
-TITLE_DENYLIST.extend((
-    'editorial',
-    'advertisement',
-    'bookreviews',
-    'reviews',
-    'nr',
-    'abstractoriginalarticle',
-    'originalarticle',
-    'impactfactor',
-    'articlenumber',
-))
+TITLE_DENYLIST.extend(
+    (
+        "editorial",
+        "advertisement",
+        "bookreviews",
+        "reviews",
+        "nr",
+        "abstractoriginalarticle",
+        "originalarticle",
+        "impactfactor",
+        "articlenumber",
+    )
+)
 
 # The full name can't *entirely* be one of these
 NAME_DENYLIST = (
-    'phd',
-    'phdstudent',
+    "phd",
+    "phdstudent",
 )
 
 
 def tokenize(s, remove_whitespace=True):
 
-    s.replace('&apos;', "'")
+    s.replace("&apos;", "'")
     # Remove non-alphanumeric characters
-    s = ''.join([c for c in s.lower() if c.isalpha() or c.isspace()])
+    s = "".join([c for c in s.lower() if c.isalpha() or c.isspace()])
 
     if remove_whitespace:
-        s = ''.join(s.split())
+        s = "".join(s.split())
 
     # Encode as dumb ASCII (TODO: this is horrible)
-    return s.encode('ascii', 'replace').decode('utf8').replace('?', '')
+    return s.encode("ascii", "replace").decode("utf8").replace("?", "")
 
 
 assert tokenize("Impact Factor: 2.114") == "impactfactor"
@@ -50,14 +52,14 @@ def filter_title(title):
     title_slug = tokenize(title, remove_whitespace=True)
     if len(title_slug) < 10 or title_slug in TITLE_DENYLIST:
         return None
-    if title_slug.startswith('nr'):
+    if title_slug.startswith("nr"):
         return None
-    if title.lower().replace('.', '').startswith('int j '):
+    if title.lower().replace(".", "").startswith("int j "):
         return None
 
     for prefix in ("Title: ", "Original Article: ", "Article: ", "Original Article "):
         if title.startswith(prefix):
-            title.replace(prefix, '')
+            title.replace(prefix, "")
 
     if title.startswith("The Journal of "):
         return None
@@ -81,17 +83,17 @@ def filter_title(title):
         return None
 
     # too deep subtitling/splitting
-    if title.count(':') > 3 or title.count('|') > 1 or title.count('.') > 1:
+    if title.count(":") > 3 or title.count("|") > 1 or title.count(".") > 1:
         return None
 
     return title
 
 
 def filter_author_name(name):
-    name = name['name']
-    if name.strip().lower().replace(' ', '') in NAME_DENYLIST:
+    name = name["name"]
+    if name.strip().lower().replace(" ", "") in NAME_DENYLIST:
         return None
-    return ' '.join([t for t in name.split() if tokenize(t)])
+    return " ".join([t for t in name.split() if tokenize(t)])
 
 
 def filter_authors(l):
@@ -107,45 +109,58 @@ def filter_journal_name(name):
     # same denylist, for now
     if not name:
         return None
-    name = name.replace(' e-ISSN', '').replace(' p-ISSN', '')
+    name = name.replace(" e-ISSN", "").replace(" p-ISSN", "")
     slug_name = tokenize(name)
     if slug_name in TITLE_DENYLIST or len(slug_name) < 4 or name == "N.º":
         return None
-    for prefix in ("/ ", "~ ", "& ", "© ", "Original Research Article ", "Original Article ",
-                   "Research Article ", "Available online www.jocpr.com "):
+    for prefix in (
+        "/ ",
+        "~ ",
+        "& ",
+        "© ",
+        "Original Research Article ",
+        "Original Article ",
+        "Research Article ",
+        "Available online www.jocpr.com ",
+    ):
         if name.startswith(prefix):
-            name = name.replace(prefix, '')
-    for suffix in (" Available online at www.sciarena.com", " Original Article",
-                   " Available online at", " ISSN", " ISSUE"):
+            name = name.replace(prefix, "")
+    for suffix in (
+        " Available online at www.sciarena.com",
+        " Original Article",
+        " Available online at",
+        " ISSN",
+        " ISSUE",
+    ):
         if name.endswith(suffix):
-            name = name.replace(suffix, '')
+            name = name.replace(suffix, "")
     if "====================" in name:
         return None
     if len(name) > 150:
         return None
-    return ' '.join(name.split())
+    return " ".join(name.split())
 
 
 def filter_metadata(obj):
-    if not (obj.get('title') and obj.get('authors')):
+    if not (obj.get("title") and obj.get("authors")):
         return None
 
-    title = filter_title(obj['title'])
+    title = filter_title(obj["title"])
     if not title:
-        #sys.stderr.write("bad title\n")
+        # sys.stderr.write("bad title\n")
         return None
     else:
-        obj['title'] = title
-    obj['authors'] = filter_authors(obj['authors'])
-    obj['citations'] = filter_refs(obj['citations'])
-    obj['journal']['name'] = filter_journal_name(obj['journal']['name'])
+        obj["title"] = title
+    obj["authors"] = filter_authors(obj["authors"])
+    obj["citations"] = filter_refs(obj["citations"])
+    obj["journal"]["name"] = filter_journal_name(obj["journal"]["name"])
 
     return obj
 
 
 def run(invert=False):
     for line in sys.stdin:
-        fields = line.split('\t')
+        fields = line.split("\t")
         if len(fields) == 5:
             raw = fields[4]
         elif len(fields) == 1:
@@ -162,7 +177,7 @@ def run(invert=False):
                     fields[4] = processed
                 else:
                     fields[0] = processed
-                print('\t'.join(fields))
+                print("\t".join(fields))
         elif invert:
             print(raw.strip())
 

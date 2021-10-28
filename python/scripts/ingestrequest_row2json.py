@@ -15,13 +15,13 @@ def transform(row):
     """
     dict-to-dict
     """
-    row.pop('created', None)
-    extra = row.pop('request', None) or {}
-    for k in ('ext_ids', 'edit_extra'):
+    row.pop("created", None)
+    extra = row.pop("request", None) or {}
+    for k in ("ext_ids", "edit_extra"):
         if k in extra:
             row[k] = extra[k]
-    if 'release_ident' in extra:
-        row['fatcat'] = dict(release_ident=extra['release_ident'])
+    if "release_ident" in extra:
+        row["fatcat"] = dict(release_ident=extra["release_ident"])
     return row
 
 
@@ -38,9 +38,9 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('json_file',
-                        help="arabesque output file to use",
-                        type=argparse.FileType('r'))
+    parser.add_argument(
+        "json_file", help="arabesque output file to use", type=argparse.FileType("r")
+    )
     subparsers = parser.add_subparsers()
 
     args = parser.parse_args()
@@ -48,5 +48,5 @@ def main():
     run(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

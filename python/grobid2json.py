@@ -202,7 +202,8 @@ def main() -> None:  # pragma no cover
             json.dumps(
                 teixml2json(content, encumbered=(not args.no_encumbered)),
                 sort_keys=True,
-            ))
+            )
+        )
 
 
 if __name__ == "__main__":  # pragma no cover

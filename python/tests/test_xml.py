@@ -5,7 +5,7 @@ from sandcrawler.xml import xml_reserialize
 
 def test_xml_reserialize() -> None:
 
-    with open('tests/files/scielo_article.jats.xml', 'rb') as f:
+    with open("tests/files/scielo_article.jats.xml", "rb") as f:
         raw_xml = f.read()
 
     assert b'encoding="ISO-8859-1"' in raw_xml

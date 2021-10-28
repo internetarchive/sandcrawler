@@ -23,15 +23,15 @@ require_authors = 1
 
 def tokenize(s, remove_whitespace=False):
 
-    s.replace('&apos;', "'")
+    s.replace("&apos;", "'")
     # Remove non-alphanumeric characters
-    s = ''.join([c for c in s.lower() if c.isalnum() or c.isspace()])
+    s = "".join([c for c in s.lower() if c.isalnum() or c.isspace()])
 
     if remove_whitespace:
-        s = ''.join(s.split())
+        s = "".join(s.split())
 
     # Encode as dumb ASCII (TODO: this is horrible)
-    return s.encode('ascii', 'replace').replace(b'?', b'')
+    return s.encode("ascii", "replace").replace(b"?", b"")
 
 
 def check_authors(left, right):
@@ -45,7 +45,7 @@ def check_authors(left, right):
         return False
     right_all = tokenize(" ".join(right))
     for i in range(len(left)):
-        l = left[i].lower().replace('jr.', '').split()
+        l = left[i].lower().replace("jr.", "").split()
         if not l:
             return False
         l = tokenize(l[-1])
@@ -53,21 +53,21 @@ def check_authors(left, right):
             # weird author name (single char)
             return False
         if l not in right_all:
-            #print("MISSING: {} from {}".format(l.decode('utf8'), right_all.decode('utf8')))
+            # print("MISSING: {} from {}".format(l.decode('utf8'), right_all.decode('utf8')))
             return False
     return True
 
 
 def test_check_authors():
     assert not check_authors([], [])
-    assert not check_authors([], ['one'])
-    assert check_authors(['one'], ['one'])
-    assert check_authors(['one two'], ['One Two'])
-    assert check_authors(['two'], ['One Two'])
-    assert check_authors(['two'], ['two, one'])
-    assert check_authors(['mago'], ['Mr. Magoo'])
-    assert check_authors(['Mr. Magoo'], ['Mr Magoo'])
-    assert check_authors(['one', 'tw', 'thr'], ['one', 'two', 'three'])
+    assert not check_authors([], ["one"])
+    assert check_authors(["one"], ["one"])
+    assert check_authors(["one two"], ["One Two"])
+    assert check_authors(["two"], ["One Two"])
+    assert check_authors(["two"], ["two, one"])
+    assert check_authors(["mago"], ["Mr. Magoo"])
+    assert check_authors(["Mr. Magoo"], ["Mr Magoo"])
+    assert check_authors(["one", "tw", "thr"], ["one", "two", "three"])
 
 
 # Rows are (score, grobid, crossref)
@@ -81,14 +81,14 @@ def process_group(rows):
             continue
         grobid = json.loads(row[1])
         crossref = json.loads(row[2])
-        if not check_authors(crossref['authors'], grobid['authors']):
-            #print("NO (crossref/grobid): {} {}".format(crossref['authors'], grobid['authors']))
+        if not check_authors(crossref["authors"], grobid["authors"]):
+            # print("NO (crossref/grobid): {} {}".format(crossref['authors'], grobid['authors']))
             continue
         else:
-            #print("YES: {} {}".format(crossref['authors'], grobid['authors']))
+            # print("YES: {} {}".format(crossref['authors'], grobid['authors']))
             pass
-        sha1 = grobid['sha1']
-        doi = crossref['doi'].lower()
+        sha1 = grobid["sha1"]
+        doi = crossref["doi"].lower()
         l = keepers.get(sha1, list())
         l.append(doi)
         keepers[sha1] = l
@@ -103,7 +103,7 @@ def run():
 
     # group lines by slug, and process in batches
     for line in sys.stdin:
-        line = line.strip().split('\t')
+        line = line.strip().split("\t")
         assert len(line) == 4
         slug = line[0]
         if last_slug and slug != last_slug and lines:
@@ -117,5 +117,5 @@ def run():
         process_group(lines)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

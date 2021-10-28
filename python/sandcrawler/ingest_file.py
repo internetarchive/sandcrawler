@@ -10,15 +10,32 @@ from selectolax.parser import HTMLParser
 from sandcrawler.db import SandcrawlerPostgrestClient
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.html import extract_fulltext_url
-from sandcrawler.html_metadata import (html_extract_biblio, html_extract_resources,
-                                       load_adblock_rules)
-from sandcrawler.ia import (CdxApiError, NoCaptureError, PetaboxError, ResourceResult,
-                            SavePageNowClient, SavePageNowError, WaybackClient,
-                            WaybackContentError, WaybackError, cdx_to_dict,
-                            fix_transfer_encoding)
-from sandcrawler.ingest_html import (WebResource, fetch_html_resources,
-                                     html_extract_body_teixml, html_guess_platform,
-                                     html_guess_scope, quick_fetch_html_resources)
+from sandcrawler.html_metadata import (
+    html_extract_biblio,
+    html_extract_resources,
+    load_adblock_rules,
+)
+from sandcrawler.ia import (
+    CdxApiError,
+    NoCaptureError,
+    PetaboxError,
+    ResourceResult,
+    SavePageNowClient,
+    SavePageNowError,
+    WaybackClient,
+    WaybackContentError,
+    WaybackError,
+    cdx_to_dict,
+    fix_transfer_encoding,
+)
+from sandcrawler.ingest_html import (
+    WebResource,
+    fetch_html_resources,
+    html_extract_body_teixml,
+    html_guess_platform,
+    html_guess_scope,
+    quick_fetch_html_resources,
+)
 from sandcrawler.misc import clean_url, gen_file_metadata, parse_cdx_datetime
 from sandcrawler.pdfextract import PdfExtractResult, process_pdf
 from sandcrawler.workers import SandcrawlerWorker
@@ -53,74 +70,71 @@ class IngestFileWorker(SandcrawlerWorker):
         process_file_hit(ResourceResult) -> response
         process_grobid(ResourceResult)
     """
+
     def __init__(self, sink: Optional[SandcrawlerWorker] = None, **kwargs):
         super().__init__()
 
         self.sink = sink
 
-        if kwargs.get('wayback_client'):
-            self.wayback_client: WaybackClient = kwargs['wayback_client']
+        if kwargs.get("wayback_client"):
+            self.wayback_client: WaybackClient = kwargs["wayback_client"]
         else:
             self.wayback_client = WaybackClient()
 
-        if kwargs.get('spn_client'):
-            self.spn_client: SavePageNowClient = kwargs['spn_client']
+        if kwargs.get("spn_client"):
+            self.spn_client: SavePageNowClient = kwargs["spn_client"]
         else:
             self.spn_client = SavePageNowClient(
-                spn_cdx_retry_sec=kwargs.get('spn_cdx_retry_sec', 9.0))
+                spn_cdx_retry_sec=kwargs.get("spn_cdx_retry_sec", 9.0)
+            )
 
-        if kwargs.get('grobid_client'):
-            self.grobid_client: GrobidClient = kwargs['grobid_client']
+        if kwargs.get("grobid_client"):
+            self.grobid_client: GrobidClient = kwargs["grobid_client"]
         else:
             self.grobid_client = GrobidClient()
 
-        if kwargs.get('pgrest_client'):
-            self.pgrest_client: SandcrawlerPostgrestClient = kwargs['pgrest_client']
+        if kwargs.get("pgrest_client"):
+            self.pgrest_client: SandcrawlerPostgrestClient = kwargs["pgrest_client"]
         else:
             self.pgrest_client = SandcrawlerPostgrestClient()
 
-        self.grobid_sink = kwargs.get('grobid_sink')
-        self.thumbnail_sink = kwargs.get('thumbnail_sink')
-        self.pdftext_sink = kwargs.get('pdftext_sink')
-        self.xmldoc_sink = kwargs.get('xmldoc_sink')
-        self.htmlteixml_sink = kwargs.get('htmlteixml_sink')
+        self.grobid_sink = kwargs.get("grobid_sink")
+        self.thumbnail_sink = kwargs.get("thumbnail_sink")
+        self.pdftext_sink = kwargs.get("pdftext_sink")
+        self.xmldoc_sink = kwargs.get("xmldoc_sink")
+        self.htmlteixml_sink = kwargs.get("htmlteixml_sink")
         self.max_hops = 6
 
-        self.try_existing_ingest = kwargs.get('try_existing_ingest', False)
-        self.try_existing_grobid = kwargs.get('try_existing_grobid', True)
-        self.try_existing_pdfextract = kwargs.get('try_existing_pdfextract', True)
-        self.try_wayback = kwargs.get('try_wayback', True)
-        self.try_spn2 = kwargs.get('try_spn2', True)
-        self.html_quick_mode = kwargs.get('html_quick_mode', False)
+        self.try_existing_ingest = kwargs.get("try_existing_ingest", False)
+        self.try_existing_grobid = kwargs.get("try_existing_grobid", True)
+        self.try_existing_pdfextract = kwargs.get("try_existing_pdfextract", True)
+        self.try_wayback = kwargs.get("try_wayback", True)
+        self.try_spn2 = kwargs.get("try_spn2", True)
+        self.html_quick_mode = kwargs.get("html_quick_mode", False)
         self.adblock_rules = load_adblock_rules()
         self.max_html_resources = 200
 
         self.base_url_blocklist = [
             # robot blocking
             "://hkvalidate.perfdrive.com/",
-
             # temporary, until we implement specific fetch and 'petabox' output
             "://archive.org/",
             "://www.archive.org/",
             "://web.archive.org/web/",
-
             # out of scope
             "://openlibrary.org/",
             "://www.openlibrary.org/",
             "://fatcat.wiki/",
             "://orcid.org/",
             "://doaj.org/",
-
             # Domain squats
             "://bartandjones.com",
             "://ijretm.com",
             "://ijrcemas.com",
             "://jist.net.in",
             "://croisements-revue.org",
-
             # all stubs/previews, not full papers
             "://page-one.live.cf.public.springer.com",
-
             # large datasets-only (no PDF expected)
             "plutof.ut.ee/",
             "www.gbif.org/",
@@ -129,16 +143,13 @@ class IngestFileWorker(SandcrawlerWorker):
             "://doi.org/10.25642/ipk/gbis/",
             "://apex.ipk-gatersleben.de/",
             "fao.org/glis/",
-
             # Historical non-paper content:
             "dhz.uni-passau.de/",  # newspapers
             "digital.ucd.ie/",  # ireland national historical
-
             # DOI prefixes
             "doi.org/10.2307/",  # JSTOR; slow and many redirects
             "doi.org/10.18730/",  # fao.org: database entry
             "doi.org/10.15468/",  # gbif.org: database entry
-
             # deprecated domain (doesn't redirect correctly)
             "://edoc.mpg.de/",
         ]
@@ -216,15 +227,14 @@ class IngestFileWorker(SandcrawlerWorker):
             return None
         existing = self.pgrest_client.get_ingest_file_result(ingest_type, base_url)
         # TODO: filter on more flags?
-        if existing and existing['hit'] is True:
+        if existing and existing["hit"] is True:
             return existing
         else:
             return None
 
-    def find_resource(self,
-                      url: str,
-                      best_mimetype: Optional[str] = None,
-                      force_recrawl: bool = False) -> Optional[ResourceResult]:
+    def find_resource(
+        self, url: str, best_mimetype: Optional[str] = None, force_recrawl: bool = False
+    ) -> Optional[ResourceResult]:
         """
         Looks in wayback for a resource starting at the URL, following any
         redirects. If a hit isn't found, try crawling with SPN.
@@ -233,7 +243,8 @@ class IngestFileWorker(SandcrawlerWorker):
         resource = None
 
         if url.startswith("http://web.archive.org/web/") or url.startswith(
-                "https://web.archive.org/web/"):
+            "https://web.archive.org/web/"
+        ):
             raise NotImplementedError("handling direct wayback links not supported yet")
 
         if url.startswith("http://archive.org/") or url.startswith("https://archive.org/"):
@@ -247,20 +258,32 @@ class IngestFileWorker(SandcrawlerWorker):
         soft404 = False
         # NOTE: these are often not working with SPNv2 either, so disabling. If
         # we really want to try again, should do force-recrawl
-        #if resource and resource.hit and resource.terminal_url.endswith('/cookieAbsent'):
+        # if resource and resource.hit and resource.terminal_url.endswith('/cookieAbsent'):
         #    soft404 = True
 
         old_failure = False
-        if resource and not resource.hit and resource.terminal_dt and resource.terminal_dt < '20190000000000':
+        if (
+            resource
+            and not resource.hit
+            and resource.terminal_dt
+            and resource.terminal_dt < "20190000000000"
+        ):
             old_failure = True
 
-        if self.try_spn2 and (resource is None or (resource and resource.status == 'no-capture')
-                              or soft404 or old_failure):
+        if self.try_spn2 and (
+            resource is None
+            or (resource and resource.status == "no-capture")
+            or soft404
+            or old_failure
+        ):
             via = "spn2"
             resource = self.spn_client.crawl_resource(url, self.wayback_client)
-        print("[FETCH {:>6}] {}  {}".format(via, (resource and resource.status),
-                                            (resource and resource.terminal_url) or url),
-              file=sys.stderr)
+        print(
+            "[FETCH {:>6}] {}  {}".format(
+                via, (resource and resource.status), (resource and resource.terminal_url) or url
+            ),
+            file=sys.stderr,
+        )
         return resource
 
     def process_existing(self, request: dict, result_row: dict) -> dict:
@@ -269,51 +292,55 @@ class IngestFileWorker(SandcrawlerWorker):
         additional processing necessary to return a result.
         """
         raise NotImplementedError("process_existing() not tested or safe yet")
-        assert result_row['hit']
-        existing_file_meta = self.pgrest_client.get_file_meta(result_row['terminal_sha1hex'])
-        existing_grobid = self.pgrest_client.get_grobid(result_row['terminal_sha1hex'])
-        existing_cdx = self.pgrest_client.get_cdx(result_row['terminal_url'],
-                                                  result_row['terminal_dt'])
+        assert result_row["hit"]
+        existing_file_meta = self.pgrest_client.get_file_meta(result_row["terminal_sha1hex"])
+        existing_grobid = self.pgrest_client.get_grobid(result_row["terminal_sha1hex"])
+        existing_cdx = self.pgrest_client.get_cdx(
+            result_row["terminal_url"], result_row["terminal_dt"]
+        )
         if not (existing_file_meta and existing_grobid and existing_cdx):
             raise NotImplementedError("partially-exsiting records not implemented yet")
         result = {
-            'hit': result_row['hit'],
-            'status': "existing",
-            'request': request,
-            'grobid': existing_grobid,
-            'file_meta': existing_file_meta,
-            'cdx': existing_cdx,
-            'terminal': {
-                'terminal_url': result_row['terminal_url'],
-                'terminal_dt': result_row['terminal_dt'],
-                'terminal_status_code': result_row['terminal_status_code'],
-                'terminal_sha1hex': result_row['terminal_sha1hex'],
+            "hit": result_row["hit"],
+            "status": "existing",
+            "request": request,
+            "grobid": existing_grobid,
+            "file_meta": existing_file_meta,
+            "cdx": existing_cdx,
+            "terminal": {
+                "terminal_url": result_row["terminal_url"],
+                "terminal_dt": result_row["terminal_dt"],
+                "terminal_status_code": result_row["terminal_status_code"],
+                "terminal_sha1hex": result_row["terminal_sha1hex"],
             },
         }
         return result
 
-    def process_file_hit(self, ingest_type: str, resource: ResourceResult,
-                         file_meta: dict) -> dict:
+    def process_file_hit(
+        self, ingest_type: str, resource: ResourceResult, file_meta: dict
+    ) -> dict:
         """
         Run all the necessary processing for a new/fresh ingest hit.
         """
-        if ingest_type in ["dataset-file", "component"
-                           ] and file_meta['mimetype'] == "application/pdf":
+        if (
+            ingest_type in ["dataset-file", "component"]
+            and file_meta["mimetype"] == "application/pdf"
+        ):
             ingest_type = "pdf"
         if ingest_type == "pdf":
             return {
-                'grobid': self.process_grobid(resource, file_meta),
-                'pdf_meta': self.process_pdfextract(resource, file_meta),
+                "grobid": self.process_grobid(resource, file_meta),
+                "pdf_meta": self.process_pdfextract(resource, file_meta),
             }
         elif ingest_type == "xml":
             return {
-                'xml_meta': self.process_xml(resource, file_meta),
+                "xml_meta": self.process_xml(resource, file_meta),
             }
         elif ingest_type == "html":
             html_info = self.process_html(resource, file_meta)
             # if there is no html_biblio, don't clobber anything possibly extracted earlier
-            if 'html_biblio' in html_info and not html_info['html_biblio']:
-                html_info.pop('html_biblio')
+            if "html_biblio" in html_info and not html_info["html_biblio"]:
+                html_info.pop("html_biblio")
             return html_info
         elif ingest_type == "src":
             return {}
@@ -332,7 +359,7 @@ class IngestFileWorker(SandcrawlerWorker):
         decide if we should re-process
         """
         if self.try_existing_grobid:
-            existing = self.pgrest_client.get_grobid(file_meta['sha1hex'])
+            existing = self.pgrest_client.get_grobid(file_meta["sha1hex"])
             if existing:
                 print("found existing GROBID result", file=sys.stderr)
                 return existing
@@ -341,18 +368,18 @@ class IngestFileWorker(SandcrawlerWorker):
         result = self.grobid_client.process_fulltext(resource.body)
         if self.grobid_sink:
             # extra fields for GROBID kafka messages
-            result['file_meta'] = file_meta
-            result['key'] = result['file_meta']['sha1hex']
+            result["file_meta"] = file_meta
+            result["key"] = result["file_meta"]["sha1hex"]
             self.grobid_sink.push_record(result.copy())
-        if result['status'] == "success":
+        if result["status"] == "success":
             metadata = self.grobid_client.metadata(result)
             if metadata:
-                result['metadata'] = self.grobid_client.metadata(result)
-                result['fatcat_release'] = result['metadata'].pop('fatcat_release', None)
-                result['grobid_version'] = result['metadata'].pop('grobid_version', None)
-        result.pop('tei_xml', None)
-        result.pop('file_meta', None)
-        result.pop('key', None)
+                result["metadata"] = self.grobid_client.metadata(result)
+                result["fatcat_release"] = result["metadata"].pop("fatcat_release", None)
+                result["grobid_version"] = result["metadata"].pop("grobid_version", None)
+        result.pop("tei_xml", None)
+        result.pop("file_meta", None)
+        result.pop("key", None)
         return result
 
     def process_pdfextract(self, resource: ResourceResult, file_meta: dict) -> dict:
@@ -365,7 +392,7 @@ class IngestFileWorker(SandcrawlerWorker):
         TODO: difference between Kafka schema and SQL/postgrest schema
         """
         if self.try_existing_pdfextract:
-            existing = self.pgrest_client.get_pdf_meta(file_meta['sha1hex'])
+            existing = self.pgrest_client.get_pdf_meta(file_meta["sha1hex"])
             if existing:
                 print("found existing pdf_meta result", file=sys.stderr)
                 result = PdfExtractResult.from_pdf_meta_dict(existing)
@@ -373,9 +400,9 @@ class IngestFileWorker(SandcrawlerWorker):
 
         # Need to actually processes
         result = process_pdf(resource.body)
-        assert result.sha1hex == file_meta['sha1hex']
+        assert result.sha1hex == file_meta["sha1hex"]
         assert result.file_meta is not None
-        assert result.file_meta['sha1hex'] == file_meta['sha1hex']
+        assert result.file_meta["sha1hex"] == file_meta["sha1hex"]
         if self.thumbnail_sink and result.page0_thumbnail is not None:
             self.thumbnail_sink.push_record(result.page0_thumbnail, key=result.sha1hex)
         if self.pdftext_sink:
@@ -392,7 +419,7 @@ class IngestFileWorker(SandcrawlerWorker):
         In the future, could extract other metadata here (like body word
         count), or attempting to fetch sub-resources.
         """
-        if self.xmldoc_sink and file_meta['mimetype'] == "application/jats+xml":
+        if self.xmldoc_sink and file_meta["mimetype"] == "application/jats+xml":
             try:
                 jats_xml = xml_reserialize(resource.body)
             except xml.etree.ElementTree.ParseError:
@@ -402,7 +429,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 status="success",
                 jats_xml=jats_xml,
             )
-            self.xmldoc_sink.push_record(msg, key=file_meta['sha1hex'])
+            self.xmldoc_sink.push_record(msg, key=file_meta["sha1hex"])
         return dict(status="success")
 
     def process_html(self, resource: ResourceResult, file_meta: dict) -> dict:
@@ -416,11 +443,12 @@ class IngestFileWorker(SandcrawlerWorker):
         assert html_biblio
         html_body = html_extract_body_teixml(resource.body)
         html_platform = html_guess_platform(resource.terminal_url, html_doc, html_biblio)
-        html_scope = html_guess_scope(resource.terminal_url, html_doc, html_biblio,
-                                      html_body.get('word_count'))
+        html_scope = html_guess_scope(
+            resource.terminal_url, html_doc, html_biblio, html_body.get("word_count")
+        )
         html_biblio_dict = json.loads(html_biblio.json(exclude_none=True))
 
-        if html_scope in ('blocked-captcha', 'blocked-cookie', 'blocked-forbidden'):
+        if html_scope in ("blocked-captcha", "blocked-cookie", "blocked-forbidden"):
             return dict(
                 status=html_scope,
                 html_biblio=html_biblio_dict,
@@ -428,8 +456,8 @@ class IngestFileWorker(SandcrawlerWorker):
                 platform=html_platform,
             )
         elif html_scope not in (
-                'article-fulltext',
-                'unknown',
+            "article-fulltext",
+            "unknown",
         ):
             html_body.pop("tei_xml", None)
             return dict(
@@ -440,8 +468,9 @@ class IngestFileWorker(SandcrawlerWorker):
                 html_body=html_body,
             )
 
-        raw_resources = html_extract_resources(resource.terminal_url, html_doc,
-                                               self.adblock_rules)
+        raw_resources = html_extract_resources(
+            resource.terminal_url, html_doc, self.adblock_rules
+        )
         if len(raw_resources) > self.max_html_resources:
             html_body.pop("tei_xml", None)
             return dict(
@@ -452,8 +481,8 @@ class IngestFileWorker(SandcrawlerWorker):
                 html_body=html_body,
             )
 
-        if self.htmlteixml_sink and html_body['status'] == "success":
-            self.htmlteixml_sink.push_record(html_body, key=file_meta['sha1hex'])
+        if self.htmlteixml_sink and html_body["status"] == "success":
+            self.htmlteixml_sink.push_record(html_body, key=file_meta["sha1hex"])
 
         html_body.pop("tei_xml", None)
 
@@ -470,30 +499,30 @@ class IngestFileWorker(SandcrawlerWorker):
         try:
             if self.html_quick_mode:
                 print("  WARN: running quick CDX-only fetches", file=sys.stderr)
-                full_resources = quick_fetch_html_resources(raw_resources,
-                                                            self.wayback_client.cdx_client,
-                                                            when)
+                full_resources = quick_fetch_html_resources(
+                    raw_resources, self.wayback_client.cdx_client, when
+                )
             else:
                 full_resources = fetch_html_resources(raw_resources, self.wayback_client, when)
         except PetaboxError as e:
-            partial_result['status'] = 'petabox-error'
-            partial_result['error_message'] = str(e)[:1600]
+            partial_result["status"] = "petabox-error"
+            partial_result["error_message"] = str(e)[:1600]
             return partial_result
         except CdxApiError as e:
-            partial_result['status'] = 'cdx-error'
-            partial_result['error_message'] = str(e)[:1600]
+            partial_result["status"] = "cdx-error"
+            partial_result["error_message"] = str(e)[:1600]
             return partial_result
         except WaybackError as e:
-            partial_result['status'] = 'wayback-error'
-            partial_result['error_message'] = str(e)[:1600]
+            partial_result["status"] = "wayback-error"
+            partial_result["error_message"] = str(e)[:1600]
             return partial_result
         except WaybackContentError as e:
-            partial_result['status'] = 'wayback-content-error'
-            partial_result['error_message'] = str(e)[:1600]
+            partial_result["status"] = "wayback-content-error"
+            partial_result["error_message"] = str(e)[:1600]
             return partial_result
         except NoCaptureError as e:
-            partial_result['status'] = 'html-resource-no-capture'
-            partial_result['error_message'] = str(e)[:1600]
+            partial_result["status"] = "html-resource-no-capture"
+            partial_result["error_message"] = str(e)[:1600]
             return partial_result
 
         info = dict(
@@ -503,8 +532,8 @@ class IngestFileWorker(SandcrawlerWorker):
             platform=html_platform,
             html_resources=[json.loads(r.json(exclude_none=True)) for r in full_resources],
         )
-        if html_scope == 'unknown':
-            info['status'] = 'unknown-scope'
+        if html_scope == "unknown":
+            info["status"] = "unknown-scope"
         return info
 
     def timeout_response(self, task: dict) -> dict:
@@ -517,7 +546,7 @@ class IngestFileWorker(SandcrawlerWorker):
         )
 
     def want(self, request: dict) -> bool:
-        if not request.get('ingest_type') in ('file', 'pdf', 'xml', 'html', 'src', 'component'):
+        if not request.get("ingest_type") in ("file", "pdf", "xml", "html", "src", "component"):
             return False
         return True
 
@@ -527,19 +556,19 @@ class IngestFileWorker(SandcrawlerWorker):
     def process_file(self, request: dict, key: Any = None) -> dict:
 
         # old backwards compatibility
-        if request.get('ingest_type') == 'file':
-            request['ingest_type'] = 'pdf'
+        if request.get("ingest_type") == "file":
+            request["ingest_type"] = "pdf"
 
-        ingest_type = request.get('ingest_type')
+        ingest_type = request.get("ingest_type")
         if ingest_type not in ("pdf", "xml", "html", "src", "component"):
             raise NotImplementedError(f"can't handle ingest_type={ingest_type}")
 
         # parse/clean URL
         # note that we pass through the original/raw URL, and that is what gets
         # persisted in database table
-        base_url = clean_url(request['base_url'])
+        base_url = clean_url(request["base_url"])
 
-        force_recrawl = bool(request.get('force_recrawl', False))
+        force_recrawl = bool(request.get("force_recrawl", False))
 
         for block in self.base_url_blocklist:
             if block in base_url:
@@ -569,112 +598,113 @@ class IngestFileWorker(SandcrawlerWorker):
 
         while len(hops) <= self.max_hops:
 
-            result['hops'] = hops
+            result["hops"] = hops
 
             # check against blocklist again on each hop
             for block in self.base_url_blocklist:
                 if block in next_url:
-                    result['status'] = "skip-url-blocklist"
+                    result["status"] = "skip-url-blocklist"
                     return result
 
             # check against known loginwall URLs
             for block in self.wall_blocklist:
                 if block in next_url:
                     # TODO: blocked-wall instead of skip-wall
-                    result['status'] = "skip-wall"
+                    result["status"] = "skip-wall"
                     return result
 
             # check for popular cookie blocking URL patterns. On successful SPN
             # crawls, shouldn't see these redirect URLs
             for pattern in self.cookie_blocklist:
                 if pattern in next_url:
-                    result['status'] = 'blocked-cookie'
+                    result["status"] = "blocked-cookie"
                     return result
 
             try:
-                resource = self.find_resource(next_url,
-                                              best_mimetype,
-                                              force_recrawl=force_recrawl)
+                resource = self.find_resource(
+                    next_url, best_mimetype, force_recrawl=force_recrawl
+                )
             except SavePageNowError as e:
-                result['status'] = 'spn2-error'
-                result['error_message'] = str(e)[:1600]
+                result["status"] = "spn2-error"
+                result["error_message"] = str(e)[:1600]
                 return result
             except PetaboxError as e:
-                result['status'] = 'petabox-error'
-                result['error_message'] = str(e)[:1600]
+                result["status"] = "petabox-error"
+                result["error_message"] = str(e)[:1600]
                 return result
             except CdxApiError as e:
-                result['status'] = 'cdx-error'
-                result['error_message'] = str(e)[:1600]
+                result["status"] = "cdx-error"
+                result["error_message"] = str(e)[:1600]
                 # add a sleep in cdx-error path as a slow-down
                 time.sleep(2.0)
                 return result
             except WaybackError as e:
-                result['status'] = 'wayback-error'
-                result['error_message'] = str(e)[:1600]
+                result["status"] = "wayback-error"
+                result["error_message"] = str(e)[:1600]
                 return result
             except WaybackContentError as e:
-                result['status'] = 'wayback-content-error'
-                result['error_message'] = str(e)[:1600]
+                result["status"] = "wayback-content-error"
+                result["error_message"] = str(e)[:1600]
                 return result
             except NotImplementedError as e:
-                result['status'] = 'not-implemented'
-                result['error_message'] = str(e)[:1600]
+                result["status"] = "not-implemented"
+                result["error_message"] = str(e)[:1600]
                 return result
 
             assert resource
 
             if resource.terminal_url:
-                result['terminal'] = {
+                result["terminal"] = {
                     "terminal_url": resource.terminal_url,
                     "terminal_dt": resource.terminal_dt,
                     "terminal_status_code": resource.terminal_status_code,
                 }
-                if resource.terminal_url not in result['hops']:
-                    result['hops'].append(resource.terminal_url)
+                if resource.terminal_url not in result["hops"]:
+                    result["hops"].append(resource.terminal_url)
 
             if not resource.hit:
-                result['status'] = resource.status
+                result["status"] = resource.status
                 return result
 
             if resource.terminal_url:
                 for pattern in self.base_url_blocklist:
                     if pattern in resource.terminal_url:
-                        result['status'] = 'skip-url-blocklist'
+                        result["status"] = "skip-url-blocklist"
                         return result
 
             if resource.terminal_url:
                 for pattern in self.cookie_blocklist:
                     if pattern in resource.terminal_url:
-                        result['status'] = 'blocked-cookie'
+                        result["status"] = "blocked-cookie"
                         return result
 
             if not resource.body:
-                result['status'] = 'null-body'
+                result["status"] = "null-body"
                 return result
 
             if len(resource.body) > MAX_BODY_SIZE_BYTES:
-                result['status'] = 'body-too-large'
+                result["status"] = "body-too-large"
                 return result
 
             file_meta = gen_file_metadata(resource.body)
             try:
                 file_meta, resource = fix_transfer_encoding(file_meta, resource)
             except Exception as e:
-                result['status'] = 'bad-gzip-encoding'
-                result['error_message'] = str(e)
+                result["status"] = "bad-gzip-encoding"
+                result["error_message"] = str(e)
                 return result
 
-            if not resource.body or file_meta['size_bytes'] == 0:
-                result['status'] = 'null-body'
+            if not resource.body or file_meta["size_bytes"] == 0:
+                result["status"] = "null-body"
                 return result
 
             # here we split based on ingest type to try and extract a next hop
             html_ish_resource = bool(
-                "html" in file_meta['mimetype']
-                or "xhtml" in file_meta['mimetype']  # matches "application/xhtml+xml"
-                or "application/xml" in file_meta['mimetype']
-                or "text/xml" in file_meta['mimetype'])
+                "html" in file_meta["mimetype"]
+                or "xhtml" in file_meta["mimetype"]  # matches "application/xhtml+xml"
+                or "application/xml" in file_meta["mimetype"]
+                or "text/xml" in file_meta["mimetype"]
+            )
             html_biblio = None
             html_doc = None
             if html_ish_resource and resource.body:
@@ -682,10 +712,11 @@ class IngestFileWorker(SandcrawlerWorker):
                     html_doc = HTMLParser(resource.body)
                     html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
                     if html_biblio:
-                        if 'html_biblio' not in result and html_biblio.title:
-                            result['html_biblio'] = json.loads(
-                                html_biblio.json(exclude_none=True))
-                            #print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
+                        if "html_biblio" not in result and html_biblio.title:
+                            result["html_biblio"] = json.loads(
+                                html_biblio.json(exclude_none=True)
+                            )
+                            # print(f"  setting html_biblio: {result['html_biblio']}", file=sys.stderr)
                 except ValueError:
                     pass
 
@@ -700,27 +731,32 @@ class IngestFileWorker(SandcrawlerWorker):
                 else:
                     fulltext_url = extract_fulltext_url(resource.terminal_url, resource.body)
 
-                result['extract_next_hop'] = fulltext_url
+                result["extract_next_hop"] = fulltext_url
                 if not fulltext_url:
-                    result['status'] = 'no-pdf-link'
+                    result["status"] = "no-pdf-link"
                     return result
-                next_url = fulltext_url.get('pdf_url') or fulltext_url.get('next_url') or ""
+                next_url = fulltext_url.get("pdf_url") or fulltext_url.get("next_url") or ""
                 assert next_url
                 next_url = clean_url(next_url)
-                print("[PARSE  {:>6}] {}  {}".format(
-                    ingest_type,
-                    fulltext_url.get('technique'),
-                    next_url,
-                ),
-                      file=sys.stderr)
+                print(
+                    "[PARSE  {:>6}] {}  {}".format(
+                        ingest_type,
+                        fulltext_url.get("technique"),
+                        next_url,
+                    ),
+                    file=sys.stderr,
+                )
                 if next_url in hops:
-                    result['status'] = 'link-loop'
-                    result['error_message'] = "repeated: {}".format(next_url)
+                    result["status"] = "link-loop"
+                    result["error_message"] = "repeated: {}".format(next_url)
                     return result
                 hops.append(next_url)
                 continue
-            elif ingest_type in ("xml", "html",
-                                 "component") and html_ish_resource and html_biblio:
+            elif (
+                ingest_type in ("xml", "html", "component")
+                and html_ish_resource
+                and html_biblio
+            ):
                 # NOTE: src_fulltext_url is not a thing
                 next_url_found = None
                 if ingest_type == "xml" and html_biblio.xml_fulltext_url:
@@ -733,18 +769,20 @@ class IngestFileWorker(SandcrawlerWorker):
                 if next_url_found:
                     next_url = next_url_found
                     technique = "html_biblio"
-                    print("[PARSE  {:>6}] {}  {}".format(
-                        ingest_type,
-                        technique,
-                        next_url,
-                    ),
-                          file=sys.stderr)
+                    print(
+                        "[PARSE  {:>6}] {}  {}".format(
+                            ingest_type,
+                            technique,
+                            next_url,
+                        ),
+                        file=sys.stderr,
+                    )
                     if next_url in hops:
                         if ingest_type == "html":
                             # for HTML ingest, we don't count this as a link-loop
                             break
-                        result['status'] = 'link-loop'
-                        result['error_message'] = "repeated: {}".format(next_url)
+                        result["status"] = "link-loop"
+                        result["error_message"] = "repeated: {}".format(next_url)
                         return result
                     hops.append(next_url)
                     continue
@@ -753,7 +791,7 @@ class IngestFileWorker(SandcrawlerWorker):
             break
 
         if len(hops) >= self.max_hops:
-            result['status'] = "max-hops-exceeded"
+            result["status"] = "max-hops-exceeded"
             return result
 
         # fetch must be a hit if we got this far (though not necessarily an ingest hit!)
@@ -762,38 +800,41 @@ class IngestFileWorker(SandcrawlerWorker):
         assert resource.terminal_status_code in (200, 226)
 
         if resource.terminal_url:
-            result['terminal'] = {
+            result["terminal"] = {
                 "terminal_url": resource.terminal_url,
                 "terminal_dt": resource.terminal_dt,
                 "terminal_status_code": resource.terminal_status_code,
-                "terminal_sha1hex": file_meta['sha1hex'],
+                "terminal_sha1hex": file_meta["sha1hex"],
             }
 
-        result['file_meta'] = file_meta
-        result['cdx'] = cdx_to_dict(resource.cdx)
+        result["file_meta"] = file_meta
+        result["cdx"] = cdx_to_dict(resource.cdx)
         if resource.revisit_cdx:
-            result['revisit_cdx'] = cdx_to_dict(resource.revisit_cdx)
+            result["revisit_cdx"] = cdx_to_dict(resource.revisit_cdx)
 
         if ingest_type == "pdf":
-            if file_meta['mimetype'] != "application/pdf":
-                result['status'] = "wrong-mimetype"  # formerly: "other-mimetype"
+            if file_meta["mimetype"] != "application/pdf":
+                result["status"] = "wrong-mimetype"  # formerly: "other-mimetype"
                 return result
         elif ingest_type == "xml":
-            if file_meta['mimetype'] not in ("application/xml", "text/xml",
-                                             "application/jats+xml"):
-                result['status'] = "wrong-mimetype"
+            if file_meta["mimetype"] not in (
+                "application/xml",
+                "text/xml",
+                "application/jats+xml",
+            ):
+                result["status"] = "wrong-mimetype"
                 return result
         elif ingest_type == "html":
-            if file_meta['mimetype'] not in ("text/html", "application/xhtml+xml"):
-                result['status'] = "wrong-mimetype"
+            if file_meta["mimetype"] not in ("text/html", "application/xhtml+xml"):
+                result["status"] = "wrong-mimetype"
                 return result
         elif ingest_type == "src":
-            if file_meta['mimetype'] not in self.src_valid_mimetypes:
-                result['status'] = "wrong-mimetype"
+            if file_meta["mimetype"] not in self.src_valid_mimetypes:
+                result["status"] = "wrong-mimetype"
                 return result
         elif ingest_type == "component":
-            if file_meta['mimetype'] not in self.component_valid_mimetypes:
-                result['status'] = "wrong-mimetype"
+            if file_meta["mimetype"] not in self.component_valid_mimetypes:
+                result["status"] = "wrong-mimetype"
                 return result
         else:
             raise NotImplementedError()
@@ -802,26 +843,30 @@ class IngestFileWorker(SandcrawlerWorker):
         result.update(info)
 
         # check if processing turned up an error
-        if info.get('status') not in ('success', None):
-            result['status'] = info['status']
+        if info.get("status") not in ("success", None):
+            result["status"] = info["status"]
             return result
 
-        result['status'] = "success"
-        result['hit'] = True
+        result["status"] = "success"
+        result["hit"] = True
         if ingest_type == "pdf":
-            print("[SUCCESS {:>5}] sha1:{} grobid:{} pdfextract:{}".format(
-                ingest_type,
-                result.get('file_meta', {}).get('sha1hex'),
-                result.get('grobid', {}).get('status_code'),
-                result.get('pdf_meta', {}).get('status'),
-            ),
-                  file=sys.stderr)
+            print(
+                "[SUCCESS {:>5}] sha1:{} grobid:{} pdfextract:{}".format(
+                    ingest_type,
+                    result.get("file_meta", {}).get("sha1hex"),
+                    result.get("grobid", {}).get("status_code"),
+                    result.get("pdf_meta", {}).get("status"),
+                ),
+                file=sys.stderr,
+            )
         else:
-            print("[SUCCESS {:>5}] sha1:{}".format(
-                ingest_type,
-                result.get('file_meta', {}).get('sha1hex'),
-            ),
-                  file=sys.stderr)
+            print(
+                "[SUCCESS {:>5}] sha1:{}".format(
+                    ingest_type,
+                    result.get("file_meta", {}).get("sha1hex"),
+                ),
+                file=sys.stderr,
+            )
         return result
 
 
@@ -832,11 +877,11 @@ class IngestFileRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"404: Not Found")
             return
-        length = int(self.headers.get('content-length'))
-        request = json.loads(self.rfile.read(length).decode('utf-8'))
+        length = int(self.headers.get("content-length"))
+        request = json.loads(self.rfile.read(length).decode("utf-8"))
         print("Got request: {}".format(request))
         ingester = IngestFileWorker()
         result = ingester.process(request)
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(json.dumps(result).encode('utf8'))
+        self.wfile.write(json.dumps(result).encode("utf8"))

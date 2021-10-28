@@ -39,7 +39,7 @@ def run_extract_cdx(args):
             multi_worker,
             args.cdx_file,
             filter_http_statuses=[200, 226],
-            filter_mimetypes=['application/pdf'],
+            filter_mimetypes=["application/pdf"],
             batch_size=args.jobs,
         )
     else:
@@ -48,7 +48,7 @@ def run_extract_cdx(args):
             worker,
             args.cdx_file,
             filter_http_statuses=[200, 226],
-            filter_mimetypes=['application/pdf'],
+            filter_mimetypes=["application/pdf"],
         )
     pusher.run()
 
@@ -75,64 +75,74 @@ def run_transform(args):
         if args.metadata_only:
             out = grobid_client.metadata(line)
         else:
-            out = teixml2json(line['tei_xml'])
+            out = teixml2json(line["tei_xml"])
         if out:
-            if 'source' in line:
-                out['source'] = line['source']
+            if "source" in line:
+                out["source"] = line["source"]
             print(json.dumps(out))
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--kafka-mode',
-                        action='store_true',
-                        help="send output to Kafka (not stdout)")
-    parser.add_argument('--kafka-hosts',
-                        default="localhost:9092",
-                        help="list of Kafka brokers (host/port) to use")
-    parser.add_argument('--kafka-env',
-                        default="dev",
-                        help="Kafka topic namespace to use (eg, prod, qa, dev)")
-    parser.add_argument('-j',
-                        '--jobs',
-                        default=8,
-                        type=int,
-                        help="parallelism for batch CPU jobs")
-    parser.add_argument('--grobid-host',
-                        default="http://grobid.qa.fatcat.wiki",
-                        help="GROBID API host/port")
+    parser.add_argument(
+        "--kafka-mode", action="store_true", help="send output to Kafka (not stdout)"
+    )
+    parser.add_argument(
+        "--kafka-hosts",
+        default="localhost:9092",
+        help="list of Kafka brokers (host/port) to use",
+    )
+    parser.add_argument(
+        "--kafka-env", default="dev", help="Kafka topic namespace to use (eg, prod, qa, dev)"
+    )
+    parser.add_argument(
+        "-j", "--jobs", default=8, type=int, help="parallelism for batch CPU jobs"
+    )
+    parser.add_argument(
+        "--grobid-host", default="http://grobid.qa.fatcat.wiki", help="GROBID API host/port"
+    )
     subparsers = parser.add_subparsers()
 
     sub_extract_json = subparsers.add_parser(
-        'extract-json',
-        help="for each JSON line with CDX info, fetches PDF and does GROBID extraction")
+        "extract-json",
+        help="for each JSON line with CDX info, fetches PDF and does GROBID extraction",
+    )
     sub_extract_json.set_defaults(func=run_extract_json)
-    sub_extract_json.add_argument('json_file',
-                                  help="JSON file to import from (or '-' for stdin)",
-                                  type=argparse.FileType('r'))
+    sub_extract_json.add_argument(
+        "json_file",
+        help="JSON file to import from (or '-' for stdin)",
+        type=argparse.FileType("r"),
+    )
 
     sub_extract_cdx = subparsers.add_parser(
-        'extract-cdx', help="for each CDX line, fetches PDF and does GROBID extraction")
+        "extract-cdx", help="for each CDX line, fetches PDF and does GROBID extraction"
+    )
     sub_extract_cdx.set_defaults(func=run_extract_cdx)
-    sub_extract_cdx.add_argument('cdx_file',
-                                 help="CDX file to import from (or '-' for stdin)",
-                                 type=argparse.FileType('r'))
+    sub_extract_cdx.add_argument(
+        "cdx_file",
+        help="CDX file to import from (or '-' for stdin)",
+        type=argparse.FileType("r"),
+    )
 
     sub_extract_zipfile = subparsers.add_parser(
-        'extract-zipfile',
-        help="opens zipfile, iterates over PDF files inside and does GROBID extract for each")
+        "extract-zipfile",
+        help="opens zipfile, iterates over PDF files inside and does GROBID extract for each",
+    )
     sub_extract_zipfile.set_defaults(func=run_extract_zipfile)
-    sub_extract_zipfile.add_argument('zip_file', help="zipfile with PDFs to extract", type=str)
+    sub_extract_zipfile.add_argument("zip_file", help="zipfile with PDFs to extract", type=str)
 
-    sub_transform = subparsers.add_parser('transform')
+    sub_transform = subparsers.add_parser("transform")
     sub_transform.set_defaults(func=run_transform)
-    sub_transform.add_argument('--metadata-only',
-                               action='store_true',
-                               help="Only pass through bibliographic metadata, not fulltext")
     sub_transform.add_argument(
-        'json_file',
+        "--metadata-only",
+        action="store_true",
+        help="Only pass through bibliographic metadata, not fulltext",
+    )
+    sub_transform.add_argument(
+        "json_file",
         help="convert TEI-XML to JSON. Input is JSON lines with tei_xml field",
-        type=argparse.FileType('r'))
+        type=argparse.FileType("r"),
+    )
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
@@ -148,5 +158,5 @@ def main():
     args.func(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

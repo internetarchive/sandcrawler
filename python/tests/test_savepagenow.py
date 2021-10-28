@@ -15,7 +15,7 @@ PENDING_BODY = {
         "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js",
         "https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js",
         "https://cdn.onesignal.com/sdks/OneSignalSDK.js",
-    ]
+    ],
 }
 SUCCESS_BODY = {
     "status": "success",
@@ -25,7 +25,9 @@ SUCCESS_BODY = {
     "timestamp": "20180326070330",
     "duration_sec": 6.203,
     "resources": [
-        TARGET, TARGET + "/redirect", "http://brewster.kahle.org/",
+        TARGET,
+        TARGET + "/redirect",
+        "http://brewster.kahle.org/",
         "http://brewster.kahle.org/favicon.ico",
         "http://brewster.kahle.org/files/2011/07/bkheader-follow.jpg",
         "http://brewster.kahle.org/files/2016/12/amazon-unhappy.jpg",
@@ -40,7 +42,8 @@ SUCCESS_BODY = {
         "http://brewster.kahle.org/wp-content/themes/twentyten/style.css",
         "http://brewster.kahle.org/wp-includes/js/wp-embed.min.js?ver=4.9.4",
         "http://brewster.kahle.org/wp-includes/js/wp-emoji-release.min.js?ver=4.9.4",
-        "http://platform.twitter.com/widgets.js", "https://archive-it.org/piwik.js",
+        "http://platform.twitter.com/widgets.js",
+        "https://archive-it.org/piwik.js",
         "https://platform.twitter.com/jot.html",
         "https://platform.twitter.com/js/button.556f0ea0e4da4e66cfdc182016dbd6db.js",
         "https://platform.twitter.com/widgets/follow_button.f47a2e0b4471326b6fa0f163bda46011.en.html",
@@ -54,12 +57,12 @@ SUCCESS_BODY = {
         "https://www.syndikat.org/wp-content/uploads/2017/11/s_miete_fr-200x116.png",
         "https://www.syndikat.org/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.4.1",
         "https://www.syndikat.org/wp-includes/js/jquery/jquery.js?ver=1.12.4",
-        "https://www.syndikat.org/wp-includes/js/wp-emoji-release.min.js?ver=4.9.4"
+        "https://www.syndikat.org/wp-includes/js/wp-emoji-release.min.js?ver=4.9.4",
     ],
     "outlinks": {
         "https://archive.org/": "xxxxxx89b-f3ca-48d0-9ea6-1d1225e98695",
-        "https://other.com": "yyyy89b-f3ca-48d0-9ea6-1d1225e98695"
-    }
+        "https://other.com": "yyyy89b-f3ca-48d0-9ea6-1d1225e98695",
+    },
 }
 ERROR_BODY = {
     "status": "error",
@@ -67,17 +70,34 @@ ERROR_BODY = {
     "status_ext": "error:invalid-host-resolution",
     "job_id": JOB_ID,
     "message": "Couldn't resolve host for http://example5123.com.",
-    "resources": []
+    "resources": [],
 }
 CDX_SPN_HIT = [
     [
-        "urlkey", "timestamp", "original", "mimetype", "statuscode", "digest", "redirect",
-        "robotflags", "length", "offset", "filename"
+        "urlkey",
+        "timestamp",
+        "original",
+        "mimetype",
+        "statuscode",
+        "digest",
+        "redirect",
+        "robotflags",
+        "length",
+        "offset",
+        "filename",
     ],
     [
-        "wiki,fatcat)/", "20180326070330", TARGET + "/redirect", "application/pdf", "200",
-        CDX_BEST_SHA1B32, "-", "-", "8445", "108062304",
-        "liveweb-20200108215212-wwwb-spn04.us.archive.org-kols1pud.warc.gz"
+        "wiki,fatcat)/",
+        "20180326070330",
+        TARGET + "/redirect",
+        "application/pdf",
+        "200",
+        CDX_BEST_SHA1B32,
+        "-",
+        "-",
+        "8445",
+        "108062304",
+        "liveweb-20200108215212-wwwb-spn04.us.archive.org-kols1pud.warc.gz",
     ],
 ]
 
@@ -96,25 +116,30 @@ def spn_client():
 @responses.activate
 def test_savepagenow_success(spn_client):
 
-    responses.add(responses.POST,
-                  'http://dummy-spnv2/save',
-                  status=200,
-                  body=json.dumps({
-                      "url": TARGET,
-                      "job_id": JOB_ID
-                  }))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=200,
-                  body=json.dumps(PENDING_BODY))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=200,
-                  body=json.dumps(PENDING_BODY))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=200,
-                  body=json.dumps(SUCCESS_BODY))
+    responses.add(
+        responses.POST,
+        "http://dummy-spnv2/save",
+        status=200,
+        body=json.dumps({"url": TARGET, "job_id": JOB_ID}),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=200,
+        body=json.dumps(PENDING_BODY),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=200,
+        body=json.dumps(PENDING_BODY),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=200,
+        body=json.dumps(SUCCESS_BODY),
+    )
 
     resp = spn_client.save_url_now_v2(TARGET)
 
@@ -124,35 +149,38 @@ def test_savepagenow_success(spn_client):
     assert resp.status == "success"
     assert resp.request_url == TARGET
     assert resp.terminal_url == TARGET + "/redirect"
-    assert resp.terminal_dt == SUCCESS_BODY['timestamp']
-    assert resp.resources == SUCCESS_BODY['resources']
+    assert resp.terminal_dt == SUCCESS_BODY["timestamp"]
+    assert resp.resources == SUCCESS_BODY["resources"]
 
 
 @responses.activate
 def test_savepagenow_remote_error(spn_client):
 
-    responses.add(responses.POST,
-                  'http://dummy-spnv2/save',
-                  status=200,
-                  body=json.dumps({
-                      "url": TARGET,
-                      "job_id": JOB_ID
-                  }))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=200,
-                  body=json.dumps(PENDING_BODY))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=200,
-                  body=json.dumps(ERROR_BODY))
+    responses.add(
+        responses.POST,
+        "http://dummy-spnv2/save",
+        status=200,
+        body=json.dumps({"url": TARGET, "job_id": JOB_ID}),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=200,
+        body=json.dumps(PENDING_BODY),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=200,
+        body=json.dumps(ERROR_BODY),
+    )
 
     resp = spn_client.save_url_now_v2(TARGET)
 
     assert len(responses.calls) == 3
 
     assert resp.success is False
-    assert resp.status == ERROR_BODY['status_ext']
+    assert resp.status == ERROR_BODY["status_ext"]
     assert resp.request_url == TARGET
     assert resp.terminal_url is None
     assert resp.terminal_dt is None
@@ -162,17 +190,18 @@ def test_savepagenow_remote_error(spn_client):
 @responses.activate
 def test_savepagenow_500(spn_client):
 
-    responses.add(responses.POST,
-                  'http://dummy-spnv2/save',
-                  status=200,
-                  body=json.dumps({
-                      "url": TARGET,
-                      "job_id": JOB_ID
-                  }))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=500,
-                  body=json.dumps(ERROR_BODY))
+    responses.add(
+        responses.POST,
+        "http://dummy-spnv2/save",
+        status=200,
+        body=json.dumps({"url": TARGET, "job_id": JOB_ID}),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=500,
+        body=json.dumps(ERROR_BODY),
+    )
 
     with pytest.raises(SavePageNowError):
         spn_client.save_url_now_v2(TARGET)
@@ -183,33 +212,36 @@ def test_savepagenow_500(spn_client):
 @responses.activate
 def test_crawl_resource(spn_client, wayback_client):
 
-    responses.add(responses.POST,
-                  'http://dummy-spnv2/save',
-                  status=200,
-                  body=json.dumps({
-                      "url": TARGET,
-                      "job_id": JOB_ID
-                  }))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=200,
-                  body=json.dumps(PENDING_BODY))
-    responses.add(responses.GET,
-                  'http://dummy-spnv2/save/status/' + JOB_ID,
-                  status=200,
-                  body=json.dumps(SUCCESS_BODY))
-    responses.add(responses.GET,
-                  'http://dummy-cdx/cdx',
-                  status=200,
-                  body=json.dumps(CDX_SPN_HIT))
-    responses.add(responses.GET,
-                  'https://web.archive.org/web/{}id_/{}'.format("20180326070330",
-                                                                TARGET + "/redirect"),
-                  status=200,
-                  headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
-                  body=WARC_BODY)
+    responses.add(
+        responses.POST,
+        "http://dummy-spnv2/save",
+        status=200,
+        body=json.dumps({"url": TARGET, "job_id": JOB_ID}),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=200,
+        body=json.dumps(PENDING_BODY),
+    )
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/" + JOB_ID,
+        status=200,
+        body=json.dumps(SUCCESS_BODY),
+    )
+    responses.add(
+        responses.GET, "http://dummy-cdx/cdx", status=200, body=json.dumps(CDX_SPN_HIT)
+    )
+    responses.add(
+        responses.GET,
+        "https://web.archive.org/web/{}id_/{}".format("20180326070330", TARGET + "/redirect"),
+        status=200,
+        headers={"X-Archive-Src": "liveweb-whatever.warc.gz"},
+        body=WARC_BODY,
+    )
 
-    print('https://web.archive.org/web/{}id_/{}'.format("20180326070330", TARGET + "/redirect"))
+    print("https://web.archive.org/web/{}id_/{}".format("20180326070330", TARGET + "/redirect"))
     resp = spn_client.crawl_resource(TARGET, wayback_client)
 
     assert len(responses.calls) == 5
