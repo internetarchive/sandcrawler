@@ -2,7 +2,7 @@ import json
 import re
 import sys
 import urllib.parse
-from typing import Dict
+from typing import Any, Dict
 
 from bs4 import BeautifulSoup
 
@@ -31,6 +31,11 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
     except UnboundLocalError as ule:
         print(f"{ule} (url={html_url})", file=sys.stderr)
         return dict()
+
+    # ignoring most type checks on bs4 output in this function (which is partially deprecated)
+    meta: Any
+    url: Any
+    redirect: Any
 
     ### General Tricks ###
 
@@ -99,7 +104,9 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
     # sciencedirect PDF URL extract
     # https://www.sciencedirect.com/science/article/pii/S0169204621000670
     if "sciencedirect.com/science/article/pii/" in html_url and not html_url.endswith(".pdf"):
-        json_tag = soup.find("script", attrs={"type": "application/json", "data-iso-key": "_0"})
+        json_tag: Any = soup.find(
+            "script", attrs={"type": "application/json", "data-iso-key": "_0"}
+        )
         url = None
         if json_tag:
             try:
@@ -146,7 +153,7 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
     if "://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber" in html_url:
         # HTML iframe like:
         # <iframe src="http://web.archive.org/web/20191026011528if_/https://ieeexplore.ieee.org/ielx7/6287639/8600701/08730313.pdf?tp=&amp;arnumber=8730313&amp;isnumber=8600701&amp;ref=" frameborder="0"></iframe>
-        iframe = soup.find("iframe")
+        iframe: Any = soup.find("iframe")
         if iframe and ".pdf" in iframe["src"]:
             return dict(pdf_url=iframe["src"], technique="iframe")
 

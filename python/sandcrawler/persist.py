@@ -22,6 +22,8 @@ import os
 import xml.etree.ElementTree
 from typing import Any, Dict, List, Optional
 
+import psycopg2
+
 from sandcrawler.db import SandcrawlerPostgresClient
 from sandcrawler.grobid import GrobidClient
 from sandcrawler.ingest_html import HtmlMetaRow
@@ -358,7 +360,7 @@ class PersistGrobidWorker(SandcrawlerWorker):
         assert not (self.s3_only and self.db_only), "Only one of s3_only and db_only allowed"
         if not self.s3_only:
             self.db: Optional[SandcrawlerPostgresClient] = SandcrawlerPostgresClient(db_url)
-            self.cur = self.db.conn.cursor()
+            self.cur: Optional[psycopg2.extensions.cursor] = self.db.conn.cursor()
         else:
             self.db = None
             self.cur = None
@@ -514,7 +516,7 @@ class PersistPdfTextWorker(SandcrawlerWorker):
         assert not (self.s3_only and self.db_only), "Only one of s3_only and db_only allowed"
         if not self.s3_only:
             self.db: Optional[SandcrawlerPostgresClient] = SandcrawlerPostgresClient(db_url)
-            self.cur = self.db.conn.cursor()
+            self.cur: Optional[psycopg2.extensions.cursor] = self.db.conn.cursor()
         else:
             self.db = None
             self.cur = None
