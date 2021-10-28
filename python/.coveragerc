@@ -2,4 +2,3 @@
 omit = tests/*
 source =
     sandcrawler
-    grobid2json

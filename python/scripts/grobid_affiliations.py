@@ -12,7 +12,7 @@ Run in bulk like:
 import json
 import sys
 
-from grobid2json import teixml2json
+from grobid_tei_xml import parse_document_xml
 
 
 def parse_hbase(line):
@@ -38,7 +38,9 @@ def run(mode="hbase"):
         else:
             raise NotImplementedError("parse mode: {}".format(mode))
 
-        obj = teixml2json(tei_xml, encumbered=False)
+        tei_doc = parse_document_xml(tei_xml)
+        tei_doc.remove_encumbered()
+        obj = tei_doc.to_legacy_dict()
 
         affiliations = []
         for author in obj["authors"]:

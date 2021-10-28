@@ -1,8 +1,7 @@
 from typing import Any, Dict, Optional
 
 import requests
-
-from grobid2json import teixml2json
+from grobid_tei_xml import parse_document_xml
 
 from .ia import WaybackClient
 from .misc import gen_file_metadata
@@ -71,7 +70,9 @@ class GrobidClient(object):
     def metadata(self, result: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         if result["status"] != "success":
             return None
-        tei_json = teixml2json(result["tei_xml"], encumbered=False)
+        tei_doc = parse_document_xml(result["tei_xml"])
+        tei_doc.remove_encumbered()
+        tei_json = tei_doc.to_legacy_dict()
         meta = dict()
         biblio = dict()
         for k in (

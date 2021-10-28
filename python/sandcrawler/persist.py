@@ -395,7 +395,7 @@ class PersistGrobidWorker(SandcrawlerWorker):
                 )
                 self.counts["s3-put"] += 1
 
-            # enhance with teixml2json metadata, if available
+            # enhance with GROBID TEI-XML metadata, if available
             try:
                 metadata = self.grobid.metadata(r)
             except xml.etree.ElementTree.ParseError as xml_e:

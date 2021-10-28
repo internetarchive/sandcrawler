@@ -12,7 +12,8 @@ import argparse
 import json
 import sys
 
-from grobid2json import teixml2json
+from grobid_tei_xml import parse_document_xml
+
 from sandcrawler import *
 
 
@@ -75,7 +76,8 @@ def run_transform(args):
         if args.metadata_only:
             out = grobid_client.metadata(line)
         else:
-            out = teixml2json(line["tei_xml"])
+            tei_doc = parse_document_xml(line["tei_xml"])
+            out = tei_doc.to_legacy_dict()
         if out:
             if "source" in line:
                 out["source"] = line["source"]
