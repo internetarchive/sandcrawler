@@ -4,14 +4,15 @@ select = C,E,F,W,ANN
 # ANN101 is annotation on 'self' (why would that be wanted?)
 # ANN204 is annotation on '__init__()'
 # E265,E266 are restrictions on comments ('#')
-# E501 is line-too-long, which we enforce with yapf
+# E501 is line-too-long, which we enforce with black
+# W503,E203 are allowed by black
 # TODO: C901 is complexity, should be re-enabled at some point
-# TODO: E251,W504,E126,E125,W503 are unfortunate yapf behaviors; could try to work around them?
-ignore = ANN003,ANN101,ANN204,E265,E266,E501,C901,E251,W504,E126,E125,W503
+ignore = ANN003,ANN101,ANN204,E265,E266,E501,C901,W503,E203
 per-file-ignores =
     sandcrawler/__init__.py: F401
     sandcrawler/ia.py: E402
     tests/*.py: ANN201,ANN001,F403,F405
+    # TODO: add more annotations to CLI scripts
     *_tool.py,sandcrawler_worker.py: ANN201,ANN001,ANN202,ANN206,ANN205,F403,F405
     scripts:  ANN201,ANN001,ANN202,ANN206,ANN205
 exclude = .git,__pycache__,.venv,scripts/

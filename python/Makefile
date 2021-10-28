@@ -17,12 +17,11 @@ lint: ## Run lints (eg, flake8, mypy)
 	pipenv run flake8 . --exit-zero
 	pipenv run isort -q -c . || true
 	pipenv run mypy *.py sandcrawler/ tests/ --ignore-missing-imports
-	pipenv run pylint --rcfile=.pylintrc -E --jobs=4 sandcrawler tests/*.py *.py
 
 .PHONY: fmt
 fmt: ## Run code formating on all source code
 	pipenv run isort --atomic .
-	pipenv run yapf -p -i -r sandcrawler tests scripts *.py
+	pipenv run black --line-length 96 sandcrawler/ tests/ scripts/ *.py
 
 .PHONY: test
 test: ## Run all tests and lints
