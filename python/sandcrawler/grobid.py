@@ -1,5 +1,6 @@
-from typing import Any, Dict, List, Optional
 import sys
+import unicodedata
+from typing import Any, Dict, List, Optional
 
 import requests
 from grobid_tei_xml import GrobidBiblio, parse_citation_list_xml, parse_document_xml
@@ -7,6 +8,30 @@ from grobid_tei_xml import GrobidBiblio, parse_citation_list_xml, parse_document
 from .ia import WaybackClient
 from .misc import gen_file_metadata
 from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
+
+
+def clean_ref_str(raw: str) -> str:
+    """
+    When comparing raw unstructured strings (from upstream sources) to
+    GROBID-returned citations, we sometimes want to do exact comparisons to
+    match up records (eg, from crossref). GROBID does some (totally reasonable)
+    arbitrary normalizations of strings, like simplifying whitespace.
+
+    This routine is to make comparisons against when GROBID returned and
+    original strings easier.
+    """
+    # TODO: dead test code
+    # raw = unicodedata.normalize('NFKC', raw)
+    # raw = raw.replace('\u00a0', ' ').replace('\u2013', '-').replace('\u2014', '-').strip()
+    # raw = ' '.join(raw.split())
+    raw = raw.replace("  ", " ")
+    return raw
+
+
+def test_clean_ref_str() -> None:
+    raw_with_nbsp = """Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385–394.  Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385–394."""
+    raw_without_nbsp = """Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385-394. Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385-394."""
+    assert clean_ref_str(raw_with_nbsp) == raw_without_nbsp
 
 
 class GrobidClient(object):
@@ -190,7 +215,14 @@ class GrobidClient(object):
         refs_json = []
         for i in range(len(refs)):
             refs[i].id = unstructured_refs[i].get("key")
-            assert refs[i].unstructured == unstructured_refs[i]["unstructured"]
+            original = unstructured_refs[i]["unstructured"]
+            original_clean = clean_ref_str(unstructured_refs[i]["unstructured"])
+            assert (
+                refs[i].unstructured == original or refs[i].unstructured == original_clean
+            ), f'raw citation mismatch (GROBID then original cleaned): \n{refs[i].unstructured.encode("utf-8")}\n{original_clean.encode("utf-8")}'
+            # intentionally put "unclean" original string in, to allow later
+            # exact byte-accurate comparisons
+            refs[i].unstructured = original
             refs_json.append(refs[i].to_dict())
         ret["refs_json"] = refs_json
         return ret
