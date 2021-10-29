@@ -15,6 +15,7 @@ import sys
 from grobid_tei_xml import parse_document_xml
 
 from sandcrawler import *
+from sandcrawler.grobid import CrossrefRefsWorker
 
 
 def run_extract_json(args):
@@ -84,6 +85,13 @@ def run_transform(args):
             print(json.dumps(out))
 
 
+def run_parse_crossref_refs(args):
+    grobid_client = GrobidClient(host_url=args.grobid_host)
+    worker = CrossrefRefsWorker(grobid_client, sink=args.sink)
+    pusher = JsonLinePusher(worker, args.json_file)
+    pusher.run()
+
+
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
@@ -101,7 +109,7 @@ def main():
         "-j", "--jobs", default=8, type=int, help="parallelism for batch CPU jobs"
     )
     parser.add_argument(
-        "--grobid-host", default="http://grobid.qa.fatcat.wiki", help="GROBID API host/port"
+        "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
     )
     subparsers = parser.add_subparsers()
 
@@ -132,6 +140,17 @@ def main():
     )
     sub_extract_zipfile.set_defaults(func=run_extract_zipfile)
     sub_extract_zipfile.add_argument("zip_file", help="zipfile with PDFs to extract", type=str)
+
+    sub_parse_crossref_refs = subparsers.add_parser(
+        "parse-crossref-refs",
+        help="reads Crossref metadata records, parses any unstructured refs with GROBID",
+    )
+    sub_parse_crossref_refs.set_defaults(func=run_parse_crossref_refs)
+    sub_parse_crossref_refs.add_argument(
+        "json_file",
+        help="JSON-L file to process (or '-' for stdin)",
+        type=argparse.FileType("r"),
+    )
 
     sub_transform = subparsers.add_parser("transform")
     sub_transform.set_defaults(func=run_transform)

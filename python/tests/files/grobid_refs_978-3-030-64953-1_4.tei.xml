@@ -1,0 +1,66 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" 
+ xmlns:mml="http://www.w3.org/1998/Math/MathML">
+	<teiHeader/>
+	<text>
+		<front/>
+		<body/>
+		<back>
+			<div>
+				<listBibl>
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">A world of individuals</title>
+		<author>
+			<persName><forename type="first">N</forename><surname>Goodman</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Problems and projects</title>
+				<imprint>
+			<date type="published" when="1972">1972</date>
+			<biblScope unit="page" from="155" to="172" />
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Goodman, N. (1972). A world of individuals. In Problems and projects (pp. 155–172). Bobs-Merrill company.</note>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Implicit definition sustained</title>
+		<author>
+			<persName><forename type="first">W</forename><forename type="middle">V O</forename><surname>Quine</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">The ways of paradox and other essays</title>
+				<meeting><address><addrLine>Cambridge, MA</addrLine></address></meeting>
+		<imprint>
+			<publisher>Harvard University Press</publisher>
+			<date type="published" when="1976">1976b</date>
+			<biblScope unit="page" from="133" to="136" />
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Quine, W. V. O. (1976b). Implicit definition sustained. In The ways of paradox and other essays (2. enlarged and revised ed., pp. 133–136). Cambridge, MA: Harvard University Press.</note>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<monogr>
+		<title level="m" type="main">On some difficulties in the theory of transfinite numbers and order types</title>
+		<author>
+			<persName><forename type="first">B</forename><surname>Russell</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1906">1906</date>
+			<publisher>Proceedings of London Mathematical Society</publisher>
+			<biblScope unit="volume">4</biblScope>
+			<biblScope unit="page" from="29" to="53" />
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Russell, B. (1906). On some difficulties in the theory of transfinite numbers and order types. Proceedings of London Mathematical Society, 4, 29–53.</note>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

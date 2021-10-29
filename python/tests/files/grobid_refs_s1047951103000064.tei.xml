@@ -1,0 +1,499 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" 
+ xmlns:mml="http://www.w3.org/1998/Math/MathML">
+	<teiHeader/>
+	<text>
+		<front/>
+		<body/>
+		<back>
+			<div>
+				<listBibl>
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">The community control of rheumatic fever and rheumatic heart disease</title>
+		<author>
+			<persName><forename type="first">T</forename><surname>Strasser</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><surname>Dondong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Elkholy</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Bull. WHO</title>
+		<imprint>
+			<biblScope unit="volume">59</biblScope>
+			<biblScope unit="page" from="285" to="294" />
+			<date type="published" when="1981">1981</date>
+		</imprint>
+	</monogr>
+	<note>Report of a WHO international co-operative project</note>
+	<note type="raw_reference">Strasser T , Dondong N , Elkholy A et al. The community control of rheumatic fever and rheumatic heart disease. Report of a WHO international co-operative project. Bull. WHO 1981; 59: 285–294.</note>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Acute rheumatic fever in children</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">J</forename><surname>Rahimtoola</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Rehman</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">JPMA</title>
+		<imprint>
+			<biblScope unit="volume">22</biblScope>
+			<biblScope unit="page" from="185" to="192" />
+			<date type="published" when="1972">1972</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Rahimtoola RJ , Rehman H . Acute rheumatic fever in children. JPMA 1972; 22: 185–192.</note>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Rheumatic fever in Sudanese children</title>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">A</forename><surname>Ismail</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>El Amin</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Arab J Med</title>
+		<imprint>
+			<biblScope unit="volume">2</biblScope>
+			<biblScope unit="page" from="21" to="24" />
+			<date type="published" when="1983">1983</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Ismail SA , El Amin A . Rheumatic fever in Sudanese children. Arab J Med 1983; 2: 21–24.</note>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Incidence of heart disease in children at NICVD</title>
+		<author>
+			<persName><forename type="first">K</forename><forename type="middle">U</forename><surname>Aziz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">JPMA</title>
+		<imprint>
+			<biblScope unit="volume">34</biblScope>
+			<biblScope unit="page" from="300" to="305" />
+			<date type="published" when="1984">1984</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Aziz KU . Incidence of heart disease in children at NICVD. JPMA 1984; 34: 300–305.</note>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<monogr>
+		<title level="m" type="main">The various manifestations of rheumatic fever as exemplified in childhood and early life</title>
+		<author>
+			<persName><forename type="first">W</forename><forename type="middle">B</forename><surname>Cheadle</surname></persName>
+		</author>
+		<imprint>
+			<publisher>Smith and Co</publisher>
+			<biblScope unit="page">1889</biblScope>
+			<pubPlace>London</pubPlace>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Cheadle WB . The various manifestations of rheumatic fever as exemplified in childhood and early life. Smith and Co., London, 1889.</note>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Community control of rheumatic heart disease in developing countries-I. A major public health problem</title>
+	</analytic>
+	<monogr>
+		<title level="j">WHO Chron</title>
+		<imprint>
+			<biblScope unit="volume">34</biblScope>
+			<biblScope unit="page" from="336" to="345" />
+			<date type="published" when="1980">1980</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Community control of rheumatic heart disease in developing countries-I. A major public health problem. WHO Chron 1980; 34: 336–345.</note>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">Prevalence of heart disease in school children of Islamabad</title>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">M</forename><surname>Malik</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Jaffrey</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Ahmed</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zubeda</forename><surname>Khanum</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Pakistan Heart Journal</title>
+		<imprint>
+			<biblScope unit="volume">14</biblScope>
+			<biblScope unit="page" from="2" to="6" />
+			<date type="published" when="1981">1981</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Malik SM , Jaffrey S , Ahmed S , Zubeda Khanum : Prevalence of heart disease in school children of Islamabad. Pakistan Heart Journal 1981; 14: 2–6.</note>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Rheumatic heart disease and overcrowding</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">H</forename><surname>Watkins</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">P</forename><surname>Quinn</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Am J Public Health</title>
+		<imprint>
+			<biblScope unit="volume">38</biblScope>
+			<biblScope unit="page" from="1071" to="1081" />
+			<date type="published" when="1948">1948</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Watkins JH , Quinn JP . Rheumatic heart disease and overcrowding. Am J Public Health 1948; 38: 1071–1081.</note>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">The spectrum and specter of rheumatic fever in 1980&apos;s</title>
+		<author>
+			<persName><forename type="first">W</forename><surname>El-Sadr</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Taranta</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Clinical Immunology Up-Date. Edited by Franklin EC</title>
+		<imprint>
+			<biblScope unit="page" from="183" to="203" />
+			<date type="published" when="1979">1979</date>
+			<publisher>Elsevier</publisher>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">El-Sadr W , Taranta A . The spectrum and specter of rheumatic fever in 1980&apos;s. In: Clinical Immunology Up-Date. Edited by Franklin EC . Elsevier, New York, 1979, pp 183–203.</note>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<monogr>
+		<title level="m" type="main">Tonsillitis in adolescent, Bailliere Tendoll and Cox</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Haig-Brown</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1886">1886</date>
+			<pubPlace>London</pubPlace>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Haig-Brown C . Tonsillitis in adolescent, Bailliere Tendoll and Cox, London 1886.</note>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">Studies on the transmission within the families of group A hemolytic streptococci</title>
+		<author>
+			<persName><forename type="first">L</forename><forename type="middle">I</forename><surname>Levine</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">S</forename><surname>Chapman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">V</forename><surname>Guerra</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Cooper</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">M</forename><surname>Krause</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">J Lab Clin Med</title>
+		<imprint>
+			<biblScope unit="volume">67</biblScope>
+			<biblScope unit="page" from="483" to="494" />
+			<date type="published" when="1966">1966</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Levine LI , Chapman SS , Guerra V , Cooper J , Krause RM . Studies on the transmission within the families of group A hemolytic streptococci. J Lab Clin Med 1966; 67: 483–494.</note>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<monogr>
+		<title level="m" type="main">Rheumatic fever and rheumatic heart disease in the 1970&apos;s. WHO Chron</title>
+		<author>
+			<persName><forename type="first">T</forename><surname>Strasser</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1978">1978</date>
+			<biblScope unit="volume">32</biblScope>
+			<biblScope unit="page" from="18" to="25" />
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Strasser T . Rheumatic fever and rheumatic heart disease in the 1970&apos;s. WHO Chron. 1978; 32: 18–25.</note>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<monogr>
+		<title level="m" type="main">Brittanica: Book of year 1991</title>
+		<imprint>
+			<date type="published" when="1991">1991</date>
+			<publisher>Chicago</publisher>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Brittanica: Book of year 1991. Chicago, 1991.</note>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<monogr>
+		<title level="m" type="main">Pockets of rheumatic fever in developed world. XI World Congress of Cardiology</title>
+		<author>
+			<persName><forename type="first">R</forename><surname>Talbot</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1990">1990</date>
+			<pubPlace>Manila</pubPlace>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Talbot R . Pockets of rheumatic fever in developed world. XI World Congress of Cardiology. Manila 1990.</note>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<analytic>
+		<title level="a" type="main">Intersociety commission for heart disease and resources. Rheumatic fever and rheumatic heart disease study group. Prevention of rheumatic fever and rheumatic heart disease</title>
+	</analytic>
+	<monogr>
+		<title level="j">Circulation</title>
+		<imprint>
+			<biblScope unit="volume">41</biblScope>
+			<biblScope unit="page" from="A1" to="15" />
+			<date type="published" when="1970">1970</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Intersociety commission for heart disease and resources. Rheumatic fever and rheumatic heart disease study group. Prevention of rheumatic fever and rheumatic heart disease. Circulation 1970; 41: A1–15.</note>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Acute rheumatic fever and rheumatic carditis in children</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">J</forename><surname>Rahimtoola</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Shafqat</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Ramzan</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Pak Heart J</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="page" from="2" to="9" />
+			<date type="published" when="1980">1980</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Rahimtoola RJ , Shafqat H , Ramzan A . Acute rheumatic fever and rheumatic carditis in children. Pak Heart J 1980; 3: 2–9.</note>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<analytic>
+		<title level="a" type="main">Rheumatic fever and rheumatic heart disease in developing countries</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Padmavati</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Bull. WHO</title>
+		<imprint>
+			<biblScope unit="volume">56</biblScope>
+			<biblScope unit="page" from="543" to="550" />
+			<date type="published" when="1979">1979</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Padmavati S . Rheumatic fever and rheumatic heart disease in developing countries. Bull. WHO 1979; 56: 543–550.</note>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">Streptococcal infections in families. Factors altering individual susceptibility</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">J</forename><surname>Meyer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">J</forename><surname>Haggerty</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Pediatrics</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="539" to="549" />
+			<date type="published" when="1962">1962</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Meyer RJ , Haggerty RJ . Streptococcal infections in families. Factors altering individual susceptibility. Pediatrics 1962; 29: 539–549.</note>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Collagen and connective tissue diseases</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">A</forename><surname>Shanks</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Textbook of Pediatrics</title>
+				<editor>
+			<persName><forename type="first">J</forename><forename type="middle">A</forename><surname>Forfar</surname></persName>
+			<persName><forename type="first">C</forename><forename type="middle">C</forename><surname>Arneil</surname></persName>
+		</editor>
+		<meeting><address><addrLine>Edinburgh</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1978">1978</date>
+			<biblScope unit="page" from="1501" to="1515" />
+		</imprint>
+		<respStmt>
+			<orgName>Churchill Livingstone</orgName>
+		</respStmt>
+	</monogr>
+	<note type="raw_reference">Shanks RA . Collagen and connective tissue diseases. In: Forfar JA , Arneil CC (eds) Textbook of Pediatrics. Churchill Livingstone, Edinburgh, 1978: 1501–1515.</note>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<analytic>
+		<title level="a" type="main">Prophylaxis against recurrence of rheumatic fever</title>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">G</forename><surname>Billoo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">S</forename><surname>Abbasi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Sultana</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Desa</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">A</forename><surname>Syed</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Pak Heart J</title>
+		<imprint>
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="8" to="14" />
+			<date type="published" when="1968">1968</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Billoo AG , Abbasi AS , Sultana S , Desa L , Syed SA . Prophylaxis against recurrence of rheumatic fever. Pak Heart J 1968; 1: 8–14.</note>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">Rheumatic heart disease</title>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">A</forename><surname>Syed</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Pak Heart J</title>
+		<imprint>
+			<biblScope unit="volume">5</biblScope>
+			<biblScope unit="page" from="14" to="16" />
+			<date type="published" when="1972">1972</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Syed SA . Rheumatic heart disease. Pak Heart J 1972; 5: 14–16.</note>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<analytic>
+		<title level="a" type="main">Community control of rheumatic heart disease in developing countries-II. Strategies for prevention and control</title>
+	</analytic>
+	<monogr>
+		<title level="j">WHO Chron</title>
+		<imprint>
+			<biblScope unit="volume">34</biblScope>
+			<biblScope unit="page" from="389" to="395" />
+			<date type="published" when="1980">1980</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Community control of rheumatic heart disease in developing countries-II. Strategies for prevention and control. WHO Chron 1980; 34: 389–395.</note>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<analytic>
+		<title level="a" type="main">Rheumatic fever: Clinical profile of 339 cases with long term follow-up</title>
+		<author>
+			<persName><forename type="first">M</forename><forename type="middle">K</forename><surname>Joshi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><forename type="middle">W</forename><surname>Kandoth</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">J</forename><surname>Barve</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Kamat</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Indian pediatr</title>
+		<imprint>
+			<biblScope unit="volume">20</biblScope>
+			<biblScope unit="page" from="849" to="853" />
+			<date type="published" when="1983">1983</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Joshi MK , Kandoth PW , Barve RJ , Kamat JR . Rheumatic fever: Clinical profile of 339 cases with long term follow-up. Indian pediatr 1983; 20: 849–853.</note>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<analytic>
+		<title level="a" type="main">Rheumatic fever and rheumatic heart disease in rural south Indian children</title>
+		<author>
+			<persName><forename type="first">G</forename><surname>Koshi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">V</forename><surname>Benjamin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Cherian</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Bull WHO</title>
+		<imprint>
+			<biblScope unit="volume">59</biblScope>
+			<biblScope unit="page" from="599" to="603" />
+			<date type="published" when="1981">1981</date>
+		</imprint>
+	</monogr>
+	<note type="raw_reference">Koshi G , Benjamin V , Cherian G . Rheumatic fever and rheumatic heart disease in rural south Indian children. Bull WHO 1981; 59: 599–603.</note>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>
