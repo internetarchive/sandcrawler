@@ -119,6 +119,22 @@ def run_ingest_request(args):
     pusher.run()
 
 
+def run_crossref(args):
+    grobid_client = GrobidClient(
+        host_url=args.grobid_host,
+    )
+    worker = PersistCrossrefWorker(
+        db_url=args.db_url,
+        grobid_client=grobid_client,
+    )
+    pusher = JsonLinePusher(
+        worker,
+        args.json_file,
+        batch_size=10,
+    )
+    pusher.run()
+
+
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
@@ -236,6 +252,20 @@ def main():
         "json_file",
         help="ingest_request to import from (or '-' for stdin)",
         type=argparse.FileType("r"),
+    )
+
+    sub_crossref = subparsers.add_parser(
+        "crossref",
+        help="backfill a crossref JSON dump into postgresql, and extract references at the same time",
+    )
+    sub_crossref.set_defaults(func=run_crossref)
+    sub_crossref.add_argument(
+        "json_file",
+        help="crossref file to import from (or '-' for stdin)",
+        type=argparse.FileType("r"),
+    )
+    sub_crossref.add_argument(
+        "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
     )
 
     args = parser.parse_args()
