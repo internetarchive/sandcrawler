@@ -219,3 +219,24 @@ CREATE TABLE IF NOT EXISTS crossref (
     record              JSON NOT NULL,
     PRIMARY KEY(doi)
 );
+
+CREATE TABLE IF NOT EXISTS grobid_refs (
+    source              TEXT NOT NULL CHECK (octet_length(source) >= 1),
+    source_id           TEXT NOT NULL CHECK (octet_length(source_id) >= 1),
+    source_ts           TIMESTAMP WITH TIME ZONE,
+    updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    refs_json           JSONB NOT NULL,
+    PRIMARY KEY(source, source_id)
+);
+
+CREATE OR REPLACE VIEW crossref_with_refs (doi, indexed, record, source_ts, refs_json) AS
+    SELECT
+        crossref.doi as doi,
+        crossref.indexed as indexed,
+        crossref.record as record,
+        grobid_refs.source_ts as source_ts,
+        grobid_refs.refs_json as refs_json
+    FROM crossref
+    LEFT JOIN grobid_refs ON
+        grobid_refs.source_id = crossref.doi
+        AND grobid_refs.source = 'crossref';
