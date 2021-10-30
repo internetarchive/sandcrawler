@@ -13,18 +13,61 @@ in Crossref, and include them in refcat.
 
 ## Schema and Semantics
 
-Follows that of `grobid_tei_xml` version 0.1.
+The output JSON/dict schema for parsed references follows that of
+`grobid_tei_xml` version 0.1.x, for the `GrobidBiblio` field. The
+`unstructured` field that was parsed is included in the output, though it may
+not be byte-for-byte exact (see below). One notable change from the past (eg,
+older GROBID-parsed references) is that author `name` is now `full_name`. New
+fields include `editors` (same schema as `authors`), `book_title`, and
+`series_title`.
 
-Not all references are necessarily included for GROBID processing. They should
-identified and mapped using the entire unstructured string.
+The overall output schema matches that of the `grobid_refs` SQL table:
 
-When present, `key` or `id` is woven back in to the ref objects (GROBID
-`processCitationList` doesn't ever see the keys). `index`, returned by
-`grobid_tei_xml`, may not be accurate (because not all references were passed),
-and may be removed (TBD).
+    source: string, lower-case. eg 'crossref'
+    source_id: string, eg '10.1145/3366650.3366668'
+    source_ts: optional timestamp (full ISO datetime with timezone (eg, `Z`
+               suffix), which identifies version of upstream metadata
+    refs_json: JSONB, list of `GrobidBiblio` JSON objects
+
+References are re-processed on a per-article (or per-release) basis. All the
+references for an article are handled as a batch and output as a batch. If
+there are no upstream references, row with `ref_json` as empty list may be
+returned.
+
+Not all upstream references get re-parsed, even if an 'unstructured' field is
+available. If 'unstructured' is not available, no row is ever output. For
+example, if a reference includes `unstructured` (raw citation string), but also
+has structured metadata for authors, title, year, and journal name, we might
+not re-parse the `unstructured` string. Whether to re-parse is evaulated on a
+per-reference basis. This behavior may change over time.
+
+`unstructured` strings may be pre-processed before being submitted to GROBID.
+This is because many sources have systemic encoding issues. GROBID itself may
+also do some modification of the input citation string before returning it in
+the output. This means the `unstructured` string is not a reliable way to map
+between specific upstream references and parsed references. Instead, the `id`
+field (str) of `GrobidBiblio` gets set to any upstream "key" or "index"
+identifier used to track individual references. If there is only a numeric
+index, the `id` is that number as a string.
+
+The `key` or `id` may need to be woven back in to the ref objects manually,
+because GROBID `processCitationList` takes just a list of raw strings, with no
+attached reference-level key or id.
 
 
 ## New SQL Table and View
+
+We may want to do re-parsing of references from sources other than `crossref`,
+so there is a generic `grobid_refs` table. But it is also common to fetch both
+the crossref metadata and any re-parsed references together, so as a convience
+there is a PostgreSQL view (virtual table) that includes both a crossref
+metadata record and parsed citations, if available. If downstream code cares a
+lot about having the refs and record be in sync, the `source_ts` field on
+`grobid_refs` can be matched againt the `indexed` column of `crossref` (or the
+`.indexed.date-time` JSON field in the record itself).
+
+Remember that DOIs should always be lower-cased before querying, inserting,
+comparing, etc.
 
     CREATE TABLE IF NOT EXISTS grobid_refs (
         source              TEXT NOT NULL CHECK (octet_length(source) >= 1),
@@ -35,8 +78,7 @@ and may be removed (TBD).
         PRIMARY KEY(source, source_id)
     );
 
-    CREATE OR REPLACE VIEW crossref_with_refs
-        doi, indexed, record, source_ts, refs_json AS
+    CREATE OR REPLACE VIEW crossref_with_refs (doi, indexed, record, source_ts, refs_json) AS
         SELECT
             crossref.doi as doi,
             crossref.indexed as indexed,
@@ -61,3 +103,23 @@ locally on the machine with sandcrawler-db.
 Another tool will support taking large chunks of Crossref JSON (as lines),
 filter them, process with GROBID, and print JSON to stdout, in the
 `grobid_refs` JSON schema.
+
+
+## Task Examples
+
+Command to process crossref records with refs tool:
+
+    cat crossref_sample.json \
+        | parallel -j5 --linebuffer --round-robin --pipe ./grobid_tool.py parse-crossref-refs - \
+        | pv -l \
+        > crossref_sample.parsed.json
+
+    # => 10.0k 0:00:27 [ 368 /s]
+
+Load directly in to postgres (after tables have been created):
+
+    cat crossref_sample.parsed.json \
+        | jq -rc '[.source, .source_id, .source_ts, (.refs_json | tostring)] | @tsv' \
+        | psql sandcrawler -c "COPY grobid_refs (source, source_id, source_ts, refs_json) FROM STDIN (DELIMITER E'\t');"
+
+    # => COPY 9999
