@@ -1,5 +1,5 @@
+import html
 import sys
-import unicodedata
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -10,28 +10,51 @@ from .misc import gen_file_metadata
 from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 
-def clean_ref_str(raw: str) -> str:
+def clean_crossref_unstructured(raw: str) -> str:
     """
-    When comparing raw unstructured strings (from upstream sources) to
-    GROBID-returned citations, we sometimes want to do exact comparisons to
-    match up records (eg, from crossref). GROBID does some (totally reasonable)
-    arbitrary normalizations of strings, like simplifying whitespace.
+    Applies Crossref-specific cleanups to an 'unstructured' citation string.
+    """
 
-    This routine is to make comparisons against when GROBID returned and
-    original strings easier.
-    """
-    # TODO: dead test code
-    # raw = unicodedata.normalize('NFKC', raw)
-    # raw = raw.replace('\u00a0', ' ').replace('\u2013', '-').replace('\u2014', '-').strip()
-    # raw = ' '.join(raw.split())
-    raw = raw.replace("  ", " ")
+    # detect repeated strings with double space separating them
+    subs = raw.split("  ")
+    if len(subs) == 2 and subs[0] == subs[1]:
+        raw = subs[0]
+    else:
+        raw = " ".join(subs)
+
+    # remove HTML/XML numeric characters
+    if "&#" in raw or "&amp;" in raw or "&gt;" in raw or "&lt;" in raw:
+        raw = html.unescape(raw)
+
+    raw.replace("  ", " ")
     return raw
 
 
 def test_clean_ref_str() -> None:
-    raw_with_nbsp = """Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385–394.  Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385–394."""
-    raw_without_nbsp = """Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385-394. Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W. Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385-394."""
-    assert clean_ref_str(raw_with_nbsp) == raw_without_nbsp
+    # NOTE: this as emdash, non-breaking string characters in it
+    raw_with_nbsp = """Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W.\u00a0Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385\u2013394.  Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W.\u00a0Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385\u2013394."""
+    cleaned = """Qingyao Ai Keping Bi Cheng Luo Jiafeng Guo and W.\u00a0Bruce Croft. 2018. Unbiased Learning to Rank with Unbiased Propensity Estimation. (2018) 385\u2013394."""
+    assert clean_crossref_unstructured(raw_with_nbsp) == cleaned
+
+    # HTML escape characters
+    assert (
+        clean_crossref_unstructured(
+            "J-B Champion, C.Collin, INSEE Premi&#232;re N&#176;1710 september 2018 - National Institute of Statistics and Economic Studies"
+        )
+        == "J-B Champion, C.Collin, INSEE Première N°1710 september 2018 - National Institute of Statistics and Economic Studies"
+    )
+
+    # simple doubling
+    assert (
+        clean_crossref_unstructured("https://graph500.org/.  https://graph500.org/.")
+        == "https://graph500.org/."
+    )
+    assert (
+        clean_crossref_unstructured(
+            """Ronald L. Rivest and Butler W. Lampson. 1996. SDSI: A Simple Distributed Security Infrastructure. In Advances in Cryptology — CRYPTO ’96. Springer Berlin Heidelberg.  Ronald L. Rivest and Butler W. Lampson. 1996. SDSI: A Simple Distributed Security Infrastructure. In Advances in Cryptology — CRYPTO ’96. Springer Berlin Heidelberg."""
+        )
+        == """Ronald L. Rivest and Butler W. Lampson. 1996. SDSI: A Simple Distributed Security Infrastructure. In Advances in Cryptology — CRYPTO ’96. Springer Berlin Heidelberg."""
+    )
 
 
 class GrobidClient(object):
@@ -205,24 +228,19 @@ class GrobidClient(object):
         # some reasonable cap on length of refs per work
         if len(unstructured_refs) > 2000:
             print(
-                f"truncatin very large reference list for doi:{record['DOI']} len:{len(unstructured_refs)}",
+                f"truncating very large reference list for doi:{record['DOI']} len:{len(unstructured_refs)}",
                 file=sys.stderr,
             )
             unstructured_refs = unstructured_refs[:2000]
 
-        refs = self.process_citation_list([r["unstructured"] for r in unstructured_refs])
+        refs = self.process_citation_list(
+            [clean_crossref_unstructured(r["unstructured"]) for r in unstructured_refs]
+        )
         assert len(refs) == len(unstructured_refs)
         refs_json = []
         for i in range(len(refs)):
             refs[i].id = unstructured_refs[i].get("key")
-            original = unstructured_refs[i]["unstructured"]
-            original_clean = clean_ref_str(unstructured_refs[i]["unstructured"])
-            assert (
-                refs[i].unstructured == original or refs[i].unstructured == original_clean
-            ), f'raw citation mismatch (GROBID then original cleaned): \n{refs[i].unstructured.encode("utf-8")}\n{original_clean.encode("utf-8")}'
-            # intentionally put "unclean" original string in, to allow later
-            # exact byte-accurate comparisons
-            refs[i].unstructured = original
+            refs[i].index = None
             refs_json.append(refs[i].to_dict())
         ret["refs_json"] = refs_json
         return ret
