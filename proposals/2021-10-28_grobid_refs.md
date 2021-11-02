@@ -27,7 +27,7 @@ The overall output schema matches that of the `grobid_refs` SQL table:
     source_id: string, eg '10.1145/3366650.3366668'
     source_ts: optional timestamp (full ISO datetime with timezone (eg, `Z`
                suffix), which identifies version of upstream metadata
-    refs_json: JSONB, list of `GrobidBiblio` JSON objects
+    refs_json: JSON, list of `GrobidBiblio` JSON objects
 
 References are re-processed on a per-article (or per-release) basis. All the
 references for an article are handled as a batch and output as a batch. If
@@ -74,7 +74,7 @@ comparing, etc.
         source_id           TEXT NOT NULL CHECK (octet_length(source_id) >= 1),
         source_ts           TIMESTAMP WITH TIME ZONE,
         updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-        refs_json           JSONB NOT NULL,
+        refs_json           JSON NOT NULL,
         PRIMARY KEY(source, source_id)
     );
 

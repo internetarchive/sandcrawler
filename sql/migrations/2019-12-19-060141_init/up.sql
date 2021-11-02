@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS grobid_refs (
     source_id           TEXT NOT NULL CHECK (octet_length(source_id) >= 1),
     source_ts           TIMESTAMP WITH TIME ZONE,
     updated             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-    refs_json           JSONB NOT NULL,
+    refs_json           JSON NOT NULL,
     PRIMARY KEY(source, source_id)
 );
 
