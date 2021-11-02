@@ -259,17 +259,17 @@ Note that this table *complements* `ingest_file_result`, doesn't replace it.
         hit                     BOOLEAN NOT NULL,
         status                  TEXT CHECK (octet_length(status) >= 1),
 
-        platform_name           TEXT NOT NULL CHECK (octet_length(platform) >= 1),
+        platform_name           TEXT NOT NULL CHECK (octet_length(platform_name) >= 1),
         platform_domain         TEXT NOT NULL CHECK (octet_length(platform_domain) >= 1),
         platform_id             TEXT NOT NULL CHECK (octet_length(platform_id) >= 1),
         ingest_strategy         TEXT CHECK (octet_length(ingest_strategy) >= 1),
         total_size              BIGINT,
-        file_count              INT,
-        archiveorg_item_name    TEXT CHECK (octet_length(item_name) >= 1),
+        file_count              BIGINT,
+        archiveorg_item_name    TEXT CHECK (octet_length(archiveorg_item_name) >= 1),
 
-        archiveorg_item_bundle_path TEXT CHECK (octet_length(item_path_bundle) >= 1),
-        web_bundle_url          TEXT CHECK (octet_length(terminal_url) >= 1),
-        web_bundle_dt           TEXT CHECK (octet_length(terminal_dt) = 14),
+        archiveorg_item_bundle_path TEXT CHECK (octet_length(archiveorg_item_bundle_path) >= 1),
+        web_bundle_url          TEXT CHECK (octet_length(web_bundle_url) >= 1),
+        web_bundle_dt           TEXT CHECK (octet_length(web_bundle_dt) = 14),
 
         manifest                JSONB,
         -- list, similar to fatcat fileset manifest, plus extra:
