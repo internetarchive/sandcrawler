@@ -1,0 +1,19 @@
+
+Size: 832.66G
+
+          table_name           | table_size | indexes_size | total_size 
+-------------------------------+------------+--------------+------------
+ "public"."crossref"           | 311 GB     | 9812 MB      | 320 GB
+ "public"."ingest_request"     | 44 GB      | 40 GB        | 84 GB
+ "public"."cdx"                | 52 GB      | 28 GB        | 80 GB
+ "public"."grobid"             | 72 GB      | 6952 MB      | 79 GB
+ "public"."ingest_file_result" | 38 GB      | 40 GB        | 78 GB
+ "public"."grobid_shadow"      | 67 GB      | 5455 MB      | 73 GB
+ "public"."file_meta"          | 34 GB      | 21 GB        | 54 GB
+ "public"."pdf_meta"           | 20 GB      | 5813 MB      | 26 GB
+ "public"."fatcat_file"        | 12 GB      | 6602 MB      | 18 GB
+ "public"."shadow"             | 9517 MB    | 8026 MB      | 17 GB
+ "public"."html_meta"          | 1200 MB    | 8072 kB      | 1208 MB
+ "public"."petabox"            | 403 MB     | 461 MB       | 864 MB
+ "public"."pdftrio"            | 550 MB     | 297 MB       | 847 MB
+(13 rows)
