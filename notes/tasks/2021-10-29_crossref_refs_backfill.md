@@ -48,7 +48,49 @@ This resulted in ~36 million rows, 46GB.
 `scp` that around, then run persist on `sandcrawler-db`:
 
     # in pipenv, as sandcrawler user
+    # manually edited to set batch size to 200
     zcat /srv/sandcrawler/tasks/crossref_feed_start20210428_end20211029.json.gz \
         | pv -l \
-        | ./persist_tool crossref -
+        | ./persist_tool.py crossref -
+
+With a single thread, the persist process runs at about 1,000 rows/sec, which
+works out to about 10 hours for 36 million rows.
+
+At the start of this process, total PostgreSQL database size is 832.21G.
+
+Query to dump crossref rows which have any refs and compress output with pigz:
+
+    # dump_crossref.sql
+    COPY (
+        SELECT record
+        FROM crossref
+        WHERE record::jsonb @? '$.reference[*].unstructured'
+        -- LIMIT 5
+    )
+    TO STDOUT
+    WITH NULL '';
+
+    # 'sed' required because of double quote escaping in postgresql output::
+    # https://stackoverflow.com/questions/29869983/postgres-row-to-json-produces-invalid-json-with-double-escaped-quotes/29871069
+    # 'rg' filter is just being conservative
+
+    psql sandcrawler < dump_crossref.sql \
+        | sed 's/\\"/\"/g' \
+        | rg '^\{' \
+        | pv -l \
+        | pigz \
+        > /srv/sandcrawler/tasks/crossref_sandcrawler_unstructured.json.gz
+
+
+    # NOTE: -j40 is for production run with ~dedicated GROBID server with many cores
+    zcat /srv/sandcrawler/tasks/crossref_sandcrawler_unstructured.json.gz \
+        | parallel -j40 --linebuffer --round-robin --pipe ./grobid_tool.py --grobid-host http://wbgrp-svc096.us.archive.org:8070 parse-crossref-refs - \
+        | pv -l \
+        | pigz \
+        > /srv/sandcrawler/tasks/crossref_sandcrawler_unstructured.grobid_refs.json.gz
+
+    # able to do about 300-500 records/second
+    # 23.9k 0:01:14 [ 320 /s]
+    # 134518 total refs parsed
+    # ~1817 refs/second parsed
 
