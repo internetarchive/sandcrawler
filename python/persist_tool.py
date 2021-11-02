@@ -126,6 +126,7 @@ def run_crossref(args):
     worker = PersistCrossrefWorker(
         db_url=args.db_url,
         grobid_client=grobid_client,
+        parse_refs=args.parse_refs,
     )
     pusher = JsonLinePusher(
         worker,
@@ -266,6 +267,11 @@ def main():
     )
     sub_crossref.add_argument(
         "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
+    )
+    sub_crossref.add_argument(
+        "--parse-refs",
+        action="store_true",
+        help="use GROBID to parse any unstructured references (default is to not)",
     )
 
     args = parser.parse_args()

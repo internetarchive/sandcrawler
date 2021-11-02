@@ -298,12 +298,16 @@ def run_persist_ingest_file(args):
 def run_persist_crossref(args):
     grobid_client = GrobidClient(host_url=args.grobid_host)
     consume_topic = "fatcat-{}.api-crossref".format(args.env)
-    worker = PersistCrossrefWorker(db_url=args.db_url, grobid_client=grobid_client)
+    worker = PersistCrossrefWorker(
+        db_url=args.db_url,
+        grobid_client=grobid_client,
+        parse_refs=args.parse_refs,
+    )
     pusher = KafkaJsonPusher(
         worker=worker,
         kafka_hosts=args.kafka_hosts,
         consume_topic=consume_topic,
-        group="persist-ingest",
+        group="persist-crossref",
         push_batches=True,
         # small batch size because doing GROBID processing
         batch_size=20,
@@ -443,6 +447,11 @@ def main():
     )
     sub_persist_crossref.add_argument(
         "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
+    )
+    sub_persist_crossref.add_argument(
+        "--parse-refs",
+        action="store_true",
+        help="use GROBID to parse any unstructured references (default is to not)",
     )
     sub_persist_crossref.set_defaults(func=run_persist_crossref)
 

@@ -676,7 +676,13 @@ class PersistHtmlTeiXmlWorker(GenericPersistDocWorker):
 
 
 class PersistCrossrefWorker(SandcrawlerWorker):
-    def __init__(self, db_url: str, grobid_client: Optional[GrobidClient], **kwargs):
+    def __init__(
+        self,
+        db_url: str,
+        grobid_client: Optional[GrobidClient],
+        parse_refs: bool = True,
+        **kwargs
+    ):
         super().__init__(**kwargs)
         self.db = SandcrawlerPostgresClient(db_url)
         self.cur = self.db.conn.cursor()
@@ -684,6 +690,7 @@ class PersistCrossrefWorker(SandcrawlerWorker):
             self.grobid_client = grobid_client
         else:
             self.grobid_client = GrobidClient()
+        self.parse_refs = parse_refs
 
     def process(self, record: Any, key: Optional[str] = None) -> Any:
         """Only do batches (as transactions)"""
@@ -702,7 +709,8 @@ class PersistCrossrefWorker(SandcrawlerWorker):
                     record=record,
                 )
             )
-            refs_batch.append(self.grobid_client.crossref_refs(record))
+            if self.parse_refs:
+                refs_batch.append(self.grobid_client.crossref_refs(record))
 
         resp = self.db.insert_crossref(self.cur, crossref_batch)
         if len(crossref_batch) < len(batch):
@@ -710,11 +718,12 @@ class PersistCrossrefWorker(SandcrawlerWorker):
         self.counts["insert-crossref"] += resp[0]
         self.counts["update-crossref"] += resp[1]
 
-        resp = self.db.insert_grobid_refs(self.cur, refs_batch)
-        if len(refs_batch) < len(batch):
-            self.counts["skip"] += len(batch) - len(refs_batch)
-        self.counts["insert-grobid_refs"] += resp[0]
-        self.counts["update-grobid_refs"] += resp[1]
+        if refs_batch:
+            resp = self.db.insert_grobid_refs(self.cur, refs_batch)
+            if len(refs_batch) < len(batch):
+                self.counts["skip"] += len(batch) - len(refs_batch)
+            self.counts["insert-grobid_refs"] += resp[0]
+            self.counts["update-grobid_refs"] += resp[1]
 
         self.db.commit()
         return []
