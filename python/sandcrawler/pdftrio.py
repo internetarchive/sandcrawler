@@ -29,7 +29,7 @@ class PdfTrioClient(object):
         assert blob and type(blob) == bytes
 
         try:
-            pdftrio_response = requests.post(
+            pdftrio_response = self.http_session.post(
                 self.host_url + "/classify/research-pub/" + mode,
                 files={
                     "pdf_content": blob,
