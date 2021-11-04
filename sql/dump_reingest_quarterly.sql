@@ -23,7 +23,7 @@ COPY (
         AND ingest_file_result.status != 'spn2-error:too-many-redirects'
         AND ingest_file_result.status != 'spn2-error:network-authentication-required'
         AND ingest_file_result.status != 'spn2-error:unknown'
-) TO '/srv/sandcrawler/tasks/reingest_weekly_current.rows.json';
+) TO '/srv/sandcrawler/tasks/reingest_quarterly_current.rows.json';
 
 -- bulk re-tries would be:
 --      AND (ingest_request.ingest_request_source != 'fatcat-changelog'
