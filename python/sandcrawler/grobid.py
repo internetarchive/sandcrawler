@@ -27,6 +27,7 @@ def clean_crossref_unstructured(raw: str) -> str:
         raw = html.unescape(raw)
 
     raw.replace("  ", " ")
+    raw = raw.strip()
     return raw
 
 
@@ -54,6 +55,14 @@ def test_clean_ref_str() -> None:
             """Ronald L. Rivest and Butler W. Lampson. 1996. SDSI: A Simple Distributed Security Infrastructure. In Advances in Cryptology — CRYPTO ’96. Springer Berlin Heidelberg.  Ronald L. Rivest and Butler W. Lampson. 1996. SDSI: A Simple Distributed Security Infrastructure. In Advances in Cryptology — CRYPTO ’96. Springer Berlin Heidelberg."""
         )
         == """Ronald L. Rivest and Butler W. Lampson. 1996. SDSI: A Simple Distributed Security Infrastructure. In Advances in Cryptology — CRYPTO ’96. Springer Berlin Heidelberg."""
+    )
+
+    # all non-breaking whitespace
+    assert (
+        clean_crossref_unstructured(
+            "\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
+        )
+        == ""
     )
 
 
@@ -173,7 +182,7 @@ class GrobidClient(object):
         """
         if ref.get("DOI"):
             return False
-        if len(ref.get("unstructured", "")) <= 6:
+        if len(ref.get("unstructured", "").strip()) <= 6:
             return False
 
         # TODO: what other combinations are enough to skip parsing?
