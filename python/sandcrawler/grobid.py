@@ -311,7 +311,7 @@ class CrossrefRefsWorker(SandcrawlerWorker):
             return self.grobid_client.crossref_refs(record)
         except xml.etree.ElementTree.ParseError:
             print(
-                f"  GROBID returned bad XML for Crossref DOI: {record.get('DOI')}",
+                f"GROBID returned bad XML for Crossref DOI: {record.get('DOI')}",
                 file=sys.stderr,
             )
             # but add a small slow-down so we don't churn through these if
@@ -319,9 +319,11 @@ class CrossrefRefsWorker(SandcrawlerWorker):
             time.sleep(3)
             return None
         except requests.exceptions.HTTPError:
-            print(f"  GROBID HTTP error for Crossref DOI: {record.get('DOI')}", file=sys.stderr)
-            # but add a small slow-down so we don't churn through these if
-            # GROBID is just misconfigured or something
+            print(f"GROBID HTTP error for Crossref DOI: {record.get('DOI')}", file=sys.stderr)
+            time.sleep(3)
+            return None
+        except requests.exceptions.ReadTimeout:
+            print(f"GROBID HTTP timeout for Crossref DOI: {record.get('DOI')}", file=sys.stderr)
             time.sleep(3)
             return None
 

@@ -715,7 +715,11 @@ class PersistCrossrefWorker(SandcrawlerWorker):
                 try:
                     parsed_refs = self.grobid_client.crossref_refs(record)
                     refs_batch.append(parsed_refs)
-                except (xml.etree.ElementTree.ParseError, requests.exceptions.HTTPError):
+                except (
+                    xml.etree.ElementTree.ParseError,
+                    requests.exceptions.HTTPError,
+                    requests.exceptions.ReadTimeout,
+                ):
                     print("GROBID crossref refs parsing error, skipping with a sleep")
                     time.sleep(3)
                     pass
