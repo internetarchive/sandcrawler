@@ -4,20 +4,24 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import psycopg2
 import psycopg2.extras
-import requests
+
+from .misc import requests_retry_session
 
 
 class SandcrawlerPostgrestClient:
     def __init__(self, api_url: str = "http://wbgrp-svc506.us.archive.org:3030", **kwargs):
         self.api_url = api_url
+        self.http_session = requests_retry_session()
 
     def get_cdx(self, url: str) -> Optional[dict]:
-        resp = requests.get(self.api_url + "/cdx", params=dict(url="eq." + url))
+        resp = self.http_session.get(self.api_url + "/cdx", params=dict(url="eq." + url))
         resp.raise_for_status()
         return resp.json() or None
 
     def get_grobid(self, sha1: str) -> Optional[dict]:
-        resp = requests.get(self.api_url + "/grobid", params=dict(sha1hex="eq." + sha1))
+        resp = self.http_session.get(
+            self.api_url + "/grobid", params=dict(sha1hex="eq." + sha1)
+        )
         resp.raise_for_status()
         resp_json = resp.json()
         if resp_json:
@@ -26,7 +30,9 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_pdftrio(self, sha1: str) -> Optional[dict]:
-        resp = requests.get(self.api_url + "/pdftrio", params=dict(sha1hex="eq." + sha1))
+        resp = self.http_session.get(
+            self.api_url + "/pdftrio", params=dict(sha1hex="eq." + sha1)
+        )
         resp.raise_for_status()
         resp_json = resp.json()
         if resp_json:
@@ -35,7 +41,9 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_pdf_meta(self, sha1: str) -> Optional[dict]:
-        resp = requests.get(self.api_url + "/pdf_meta", params=dict(sha1hex="eq." + sha1))
+        resp = self.http_session.get(
+            self.api_url + "/pdf_meta", params=dict(sha1hex="eq." + sha1)
+        )
         resp.raise_for_status()
         resp_json = resp.json()
         if resp_json:
@@ -44,7 +52,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_html_meta(self, sha1hex: str) -> Optional[dict]:
-        resp = requests.get(
+        resp = self.http_session.get(
             self.api_url + "/html_meta",
             params=dict(sha1hex=f"eq.{sha1hex}"),
         )
@@ -56,7 +64,9 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_file_meta(self, sha1: str) -> Optional[dict]:
-        resp = requests.get(self.api_url + "/file_meta", params=dict(sha1hex="eq." + sha1))
+        resp = self.http_session.get(
+            self.api_url + "/file_meta", params=dict(sha1hex="eq." + sha1)
+        )
         resp.raise_for_status()
         resp_json = resp.json()
         if resp_json:
@@ -65,7 +75,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_ingest_file_result(self, ingest_type: str, url: str) -> Optional[dict]:
-        resp = requests.get(
+        resp = self.http_session.get(
             self.api_url + "/ingest_file_result",
             params=dict(ingest_type=f"eq.{ingest_type}", base_url=f"eq.{url}"),
         )
@@ -77,7 +87,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_ingest_fileset_platform(self, ingest_type: str, url: str) -> Optional[dict]:
-        resp = requests.get(
+        resp = self.http_session.get(
             self.api_url + "/ingest_fileset_platform",
             params=dict(ingest_type=f"eq.{ingest_type}", base_url=f"eq.{url}"),
         )
@@ -89,7 +99,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_crossref(self, doi: str) -> Optional[dict]:
-        resp = requests.get(self.api_url + "/crossref", params=dict(doi=f"eq.{doi}"))
+        resp = self.http_session.get(self.api_url + "/crossref", params=dict(doi=f"eq.{doi}"))
         resp.raise_for_status()
         resp_json = resp.json()
         if resp_json:
@@ -98,7 +108,9 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_crossref_with_refs(self, doi: str) -> Optional[dict]:
-        resp = requests.get(self.api_url + "/crossref_with_refs", params=dict(doi=f"eq.{doi}"))
+        resp = self.http_session.get(
+            self.api_url + "/crossref_with_refs", params=dict(doi=f"eq.{doi}")
+        )
         resp.raise_for_status()
         resp_json = resp.json()
         if resp_json:
@@ -107,7 +119,7 @@ class SandcrawlerPostgrestClient:
             return None
 
     def get_grobid_refs(self, source: str, source_id: str) -> Optional[dict]:
-        resp = requests.get(
+        resp = self.http_session.get(
             self.api_url + "/grobid_refs",
             params=dict(source=f"eq.{source}", source_id=f"eq.{source_id}"),
         )
