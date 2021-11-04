@@ -1,5 +1,7 @@
 import html
 import sys
+import time
+import xml.etree.ElementTree
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -242,9 +244,9 @@ class GrobidClient(object):
             )
             unstructured_refs = unstructured_refs[:2000]
 
-        refs = self.process_citation_list(
-            [clean_crossref_unstructured(r["unstructured"]) for r in unstructured_refs]
-        )
+        clean_refs = [clean_crossref_unstructured(r["unstructured"]) for r in unstructured_refs]
+        refs = self.process_citation_list(clean_refs)
+
         assert len(refs) == len(unstructured_refs)
         refs_json = []
         for i in range(len(refs)):
@@ -302,7 +304,25 @@ class CrossrefRefsWorker(SandcrawlerWorker):
         self.sink = sink
 
     def process(self, record: Any, key: Optional[str] = None) -> Any:
-        return self.grobid_client.crossref_refs(record)
+        # handle the rare case of bad TEI-XML response
+        # eg: https://github.com/kermitt2/grobid/issues/848
+        try:
+            return self.grobid_client.crossref_refs(record)
+        except xml.etree.ElementTree.ParseError:
+            print(
+                f"  GROBID returned bad XML for Crossref DOI: {record.get('DOI')}",
+                file=sys.stderr,
+            )
+            # but add a small slow-down so we don't churn through these if
+            # GROBID is just misconfigured or something
+            time.sleep(3)
+            return None
+        except requests.exceptions.HTTPError:
+            print(f"  GROBID HTTP error for Crossref DOI: {record.get('DOI')}", file=sys.stderr)
+            # but add a small slow-down so we don't churn through these if
+            # GROBID is just misconfigured or something
+            time.sleep(3)
+            return None
 
 
 class GrobidBlobWorker(SandcrawlerWorker):

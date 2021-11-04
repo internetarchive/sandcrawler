@@ -19,10 +19,12 @@ grobid
 """
 
 import os
+import time
 import xml.etree.ElementTree
 from typing import Any, Dict, List, Optional
 
 import psycopg2
+import requests
 
 from sandcrawler.db import SandcrawlerPostgresClient
 from sandcrawler.grobid import GrobidClient
@@ -710,7 +712,13 @@ class PersistCrossrefWorker(SandcrawlerWorker):
                 )
             )
             if self.parse_refs:
-                refs_batch.append(self.grobid_client.crossref_refs(record))
+                try:
+                    parsed_refs = self.grobid_client.crossref_refs(record)
+                    refs_batch.append(parsed_refs)
+                except (xml.etree.ElementTree.ParseError, requests.exceptions.HTTPError):
+                    print("GROBID crossref refs parsing error, skipping with a sleep")
+                    time.sleep(3)
+                    pass
 
         resp = self.db.insert_crossref(self.cur, crossref_batch)
         if len(crossref_batch) < len(batch):
