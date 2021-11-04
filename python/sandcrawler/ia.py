@@ -395,6 +395,7 @@ class WaybackClient:
         self.replay_headers = {
             "User-Agent": "Mozilla/5.0 sandcrawler.WaybackClient",
         }
+        self.http_session = requests_retry_session()
 
     def fetch_petabox(
         self, csize: int, offset: int, warc_path: str, resolve_revisit: bool = True
@@ -603,7 +604,7 @@ class WaybackClient:
         assert datetime.isdigit()
 
         try:
-            resp = requests.get(
+            resp = self.http_session.get(
                 self.wayback_endpoint + datetime + "id_/" + url,
                 allow_redirects=False,
                 headers=self.replay_headers,
@@ -670,7 +671,7 @@ class WaybackClient:
         assert datetime.isdigit()
 
         try:
-            resp = requests.get(
+            resp = self.http_session.get(
                 self.wayback_endpoint + datetime + "id_/" + url,
                 allow_redirects=False,
                 headers=self.replay_headers,
