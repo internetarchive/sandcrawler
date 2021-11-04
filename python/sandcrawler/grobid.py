@@ -8,7 +8,7 @@ import requests
 from grobid_tei_xml import GrobidBiblio, parse_citation_list_xml, parse_document_xml
 
 from .ia import WaybackClient
-from .misc import gen_file_metadata
+from .misc import gen_file_metadata, requests_retry_session
 from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
 
@@ -72,6 +72,7 @@ class GrobidClient(object):
     def __init__(self, host_url: str = "https://grobid.qa.fatcat.wiki", **kwargs):
         self.host_url = host_url
         self.consolidate_mode = int(kwargs.get("consolidate_mode", 0))
+        self.session = requests_retry_session()
 
     def process_fulltext(
         self, blob: bytes, consolidate_mode: Optional[int] = None
@@ -92,7 +93,7 @@ class GrobidClient(object):
         assert consolidate_mode is not None
 
         try:
-            grobid_response = requests.post(
+            grobid_response = self.session.post(
                 self.host_url + "/api/processFulltextDocument",
                 files={
                     "input": blob,
@@ -134,7 +135,7 @@ class GrobidClient(object):
             raise ValueError("more than 5,000 references in a batch is just too much")
 
         try:
-            grobid_response = requests.post(
+            grobid_response = self.session.post(
                 self.host_url + "/api/processCitationList",
                 data={
                     "citations": unstructured_list,
