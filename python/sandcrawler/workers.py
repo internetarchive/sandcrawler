@@ -7,7 +7,6 @@ import zipfile
 from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence
 
-import requests
 from confluent_kafka import Consumer, KafkaException, Producer
 
 from .ia import (
@@ -17,7 +16,7 @@ from .ia import (
     WaybackContentError,
     WaybackError,
 )
-from .misc import parse_cdx_line
+from .misc import parse_cdx_line, requests_retry_session
 
 
 class SandcrawlerWorker(object):
@@ -127,6 +126,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
     def __init__(self, wayback_client: Optional[WaybackClient], **kwargs):
         super().__init__(**kwargs)
         self.wayback_client = wayback_client
+        self.http_session = requests_retry_session()
 
     def fetch_blob(self, record: Dict[str, Any]) -> Dict[str, Any]:
         default_key = record["sha1hex"]
@@ -173,7 +173,7 @@ class SandcrawlerFetchWorker(SandcrawlerWorker):
         elif record.get("item") and record.get("path"):
             # it's petabox link; fetch via HTTP
             start = time.time()
-            ia_resp = requests.get(
+            ia_resp = self.http_session.get(
                 "https://archive.org/serve/{}/{}".format(record["item"], record["path"])
             )
             petabox_sec = time.time() - start
