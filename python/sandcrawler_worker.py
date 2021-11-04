@@ -296,6 +296,9 @@ def run_persist_ingest_file(args):
 
 
 def run_persist_crossref(args):
+    batch_size = 200
+    if args.parse_refs:
+        batch_size = 10
     grobid_client = GrobidClient(host_url=args.grobid_host)
     consume_topic = "fatcat-{}.api-crossref".format(args.env)
     worker = PersistCrossrefWorker(
@@ -310,7 +313,7 @@ def run_persist_crossref(args):
         group="persist-crossref",
         push_batches=True,
         # small batch size because doing GROBID processing
-        batch_size=20,
+        batch_size=batch_size,
     )
     pusher.run()
 

@@ -120,6 +120,9 @@ def run_ingest_request(args):
 
 
 def run_crossref(args):
+    batch_size = 200
+    if args.parse_refs:
+        batch_size = 10
     grobid_client = GrobidClient(
         host_url=args.grobid_host,
     )
@@ -131,7 +134,7 @@ def run_crossref(args):
     pusher = JsonLinePusher(
         worker,
         args.json_file,
-        batch_size=10,
+        batch_size=batch_size,
     )
     pusher.run()
 
