@@ -83,8 +83,6 @@ class GrobidClient(object):
             - status (slug)
             - error_msg (if status == 'error')
             - tei_xml (if status is 200)
-
-        TODO: persist connection for performance?
         """
         assert blob
 
@@ -188,7 +186,6 @@ class GrobidClient(object):
         if len(ref.get("unstructured", "").strip()) <= 6:
             return False
 
-        # TODO: what other combinations are enough to skip parsing?
         if (
             ref.get("year")
             and ref.get("author")
