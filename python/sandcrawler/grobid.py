@@ -95,9 +95,14 @@ class GrobidClient(object):
                 self.host_url + "/api/processFulltextDocument",
                 files={
                     "input": blob,
+                },
+                data={
                     "consolidateHeader": consolidate_mode,
                     "consolidateCitations": 0,  # too expensive for now
                     "includeRawCitations": 1,
+                    "includeRawAffiliations": 1,
+                    "teiCoordinates": ["ref", "figure", "persName", "formula", "biblStruct"],
+                    "segmentSentences": 1,
                 },
                 timeout=180.0,
             )
