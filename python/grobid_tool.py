@@ -18,6 +18,13 @@ from sandcrawler import *
 from sandcrawler.grobid import CrossrefRefsWorker
 
 
+def run_single(args):
+    grobid_client = GrobidClient(host_url=args.grobid_host)
+    resp = grobid_client.process_fulltext(blob=args.pdf_file.read())
+    resp["_metadata"] = grobid_client.metadata(resp)
+    print(json.dumps(resp, sort_keys=True))
+
+
 def run_extract_json(args):
     grobid_client = GrobidClient(host_url=args.grobid_host)
     wayback_client = WaybackClient()
@@ -112,6 +119,14 @@ def main():
         "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
     )
     subparsers = parser.add_subparsers()
+
+    sub_single = subparsers.add_parser("single")
+    sub_single.set_defaults(func=run_single)
+    sub_single.add_argument(
+        "pdf_file",
+        help="path to PDF file to process",
+        type=argparse.FileType("rb"),
+    )
 
     sub_extract_json = subparsers.add_parser(
         "extract-json",
