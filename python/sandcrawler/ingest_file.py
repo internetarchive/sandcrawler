@@ -361,8 +361,12 @@ class IngestFileWorker(SandcrawlerWorker):
         if self.try_existing_grobid:
             existing = self.pgrest_client.get_grobid(file_meta["sha1hex"])
             if existing:
-                print("found existing GROBID result", file=sys.stderr)
-                return existing
+                # grobid_timestamp = existing.get("grobid_timestamp") or None
+                # status
+                grobid_version = existing.get("grobid_version") or None
+                if grobid_version and grobid_version.startswith("0.7"):
+                    print("found existing GROBID result", file=sys.stderr)
+                    return existing
 
         # Need to actually processes
         result = self.grobid_client.process_fulltext(resource.body)
