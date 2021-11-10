@@ -678,6 +678,12 @@ class PersistHtmlTeiXmlWorker(GenericPersistDocWorker):
 
 
 class PersistCrossrefWorker(SandcrawlerWorker):
+    """
+    Pushes Crossref API JSON records into postgresql. Can also talk to GROBID,
+    parsed 'unstructured' references, and push the results in to postgresql at
+    the same time.
+    """
+
     def __init__(
         self,
         db_url: str,
@@ -736,6 +742,40 @@ class PersistCrossrefWorker(SandcrawlerWorker):
                 self.counts["skip"] += len(batch) - len(refs_batch)
             self.counts["insert-grobid_refs"] += resp[0]
             self.counts["update-grobid_refs"] += resp[1]
+
+        self.db.commit()
+        return []
+
+
+class PersistGrobidRefsWorker(SandcrawlerWorker):
+    """
+    Simple persist worker to backfill GROBID references in to postgresql
+    locally. Consumes the JSON output from GROBID CrossrefRefsWorker.
+    """
+
+    def __init__(self, db_url: str, **kwargs):
+        super().__init__(**kwargs)
+        self.db = SandcrawlerPostgresClient(db_url)
+        self.cur = self.db.conn.cursor()
+
+    def process(self, record: Any, key: Optional[str] = None) -> Any:
+        """Only do batches (as transactions)"""
+        raise NotImplementedError
+
+    def push_batch(self, batch: list) -> list:
+        self.counts["total"] += len(batch)
+
+        refs_batch = []
+        for record in batch:
+            assert record["source"]
+            assert record["source_id"]
+            refs_batch.append(record)
+
+        resp = self.db.insert_grobid_refs(self.cur, refs_batch)
+        if len(refs_batch) < len(batch):
+            self.counts["skip"] += len(batch) - len(refs_batch)
+        self.counts["insert-grobid_refs"] += resp[0]
+        self.counts["update-grobid_refs"] += resp[1]
 
         self.db.commit()
         return []

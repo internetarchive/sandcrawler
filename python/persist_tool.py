@@ -139,6 +139,18 @@ def run_crossref(args):
     pusher.run()
 
 
+def run_grobid_refs(args):
+    worker = PersistGrobidRefsWorker(
+        db_url=args.db_url,
+    )
+    pusher = JsonLinePusher(
+        worker,
+        args.json_file,
+        batch_size=100,
+    )
+    pusher.run()
+
+
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
@@ -275,6 +287,16 @@ def main():
         "--parse-refs",
         action="store_true",
         help="use GROBID to parse any unstructured references (default is to not)",
+    )
+
+    sub_grobid_refs = subparsers.add_parser(
+        "grobid-refs", help="backfill a grobid_refs JSON dump into postgresql"
+    )
+    sub_grobid_refs.set_defaults(func=run_grobid_refs)
+    sub_grobid_refs.add_argument(
+        "json_file",
+        help="grobid_refs to import from (or '-' for stdin)",
+        type=argparse.FileType("r"),
     )
 
     args = parser.parse_args()
