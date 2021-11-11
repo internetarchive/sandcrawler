@@ -186,3 +186,50 @@ Summary lines looked like:
     Worker: Counter({'total': 536541, 'failed': 3})
 
 Failures per batch were on the order of 0 to 3.
+
+## Postgres Backfill
+
+Start with a sample:
+
+    zcat /srv/sandcrawler/tasks/crossref_sandcrawler_unstructured.grobid_refs.json.gz \
+        | head -n1000 \
+        | ./persist_tool.py grobid-refs -
+    # Worker: Counter({'total': 1000, 'insert-grobid_refs': 1000, 'update-grobid_refs': 0})
+
+    # same command again:
+    # Worker: Counter({'total': 1000, 'update-grobid_refs': 1000, 'insert-grobid_refs': 0})
+
+Example DOIs:
+
+    # no refs
+    10.1007/978-1-349-04135-0_3
+    http get :3030/crossref_with_refs "doi==eq.10.1007/978-1-349-04135-0_3"
+
+    # with refs
+    10.1007/978-1-349-03594-6_2
+    http get :3030/crossref_with_refs "doi==eq.10.1007/978-1-349-03594-6_2"
+
+Seems to be working, so will do the full backfill. Can check table sizes on a
+per-table basis when complete.
+
+    zcat /srv/sandcrawler/tasks/crossref_sandcrawler_unstructured.grobid_refs.json.gz \
+        | pv -l \
+        | ./persist_tool.py grobid-refs -
+    # Worker: Counter({'total': 18646668, 'insert-grobid_refs': 18639195, 'update-grobid_refs': 7473})
+
+
+## Kafka Setup
+
+Added ansible config and deployed persist-crossref worker.
+
+First roll-back just a couple days as a test:
+
+    ./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group persist-crossref --reset-offsets --topic fatcat-prod.api-crossref --to-datetime 2021-11-07T00:00:00.000
+
+    # eg: Import counts: Counter({'total': 372350, 'insert-grobid_refs': 326987, 'update-crossref': 265581, 'insert-crossref': 106769, 'update-grobid_refs': 45362, 'skip': 1})
+
+Then roll-back to before the snapshot and backfill, to catch up:
+
+    ./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group persist-crossref --reset-offsets --topic fatcat-prod.api-crossref --to-datetime 2021-10-26T00:00:00.000
+
+Ran this last command on 2021-11-10, and total lag was around 2,566,741.
