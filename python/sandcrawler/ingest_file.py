@@ -378,9 +378,9 @@ class IngestFileWorker(SandcrawlerWorker):
         if result["status"] == "success":
             metadata = self.grobid_client.metadata(result)
             if metadata:
-                result["metadata"] = self.grobid_client.metadata(result)
-                result["fatcat_release"] = result["metadata"].pop("fatcat_release", None)
-                result["grobid_version"] = result["metadata"].pop("grobid_version", None)
+                result["metadata"] = metadata
+                result["fatcat_release"] = metadata.pop("fatcat_release", None)
+                result["grobid_version"] = metadata.pop("grobid_version", None)
         result.pop("tei_xml", None)
         result.pop("file_meta", None)
         result.pop("key", None)
