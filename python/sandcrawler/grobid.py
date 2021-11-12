@@ -157,7 +157,11 @@ class GrobidClient(object):
     def metadata(self, result: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         if result["status"] != "success":
             return None
-        tei_doc = parse_document_xml(result["tei_xml"])
+        try:
+            tei_doc = parse_document_xml(result["tei_xml"])
+        except xml.etree.ElementTree.ParseError as pe:
+            result['status'] = 'bad-grobid-xml'
+            return dict(error_msg=str(pe)[:1000])
         tei_doc.remove_encumbered()
         tei_json = tei_doc.to_legacy_dict()
         meta = dict()
