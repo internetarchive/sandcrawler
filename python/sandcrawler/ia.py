@@ -1101,7 +1101,7 @@ class SavePageNowClient:
                 request_url,
                 final_json["original_url"],
                 final_json["timestamp"],
-                final_json["resources"],
+                final_json.get("resources") or None,
             )
         else:
             if final_json["status"] == "pending":
