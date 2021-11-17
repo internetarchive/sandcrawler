@@ -160,7 +160,7 @@ class GrobidClient(object):
         try:
             tei_doc = parse_document_xml(result["tei_xml"])
         except xml.etree.ElementTree.ParseError as pe:
-            result['status'] = 'bad-grobid-xml'
+            result["status"] = "bad-grobid-xml"
             return dict(error_msg=str(pe)[:1000])
         tei_doc.remove_encumbered()
         tei_json = tei_doc.to_legacy_dict()
