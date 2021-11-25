@@ -12,7 +12,7 @@ pipeline. This code is of mixed quality and is mostly experimental. The goal
 for most of this is to submit metadata to [fatcat](https://fatcat.wiki), which
 is the more stable, maintained, and public-facing service.
 
-Code in this repository is potentially public! Not intented to accept public
+Code in this repository is potentially public! Not intended to accept public
 contributions for the most part. Much of this will not work outside the IA
 cluster environment.
 

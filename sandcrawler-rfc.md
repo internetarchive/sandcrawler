@@ -73,7 +73,7 @@ process HTML and look for PDF outlinks, but wouldn't crawl recursively.
 HBase is used for de-dupe, with records (pointers) stored in WARCs.
 
 A second config would take seeds as entire journal websites, and would crawl
-continously.
+continuously.
 
 Other components of the system "push" tasks to the crawlers by copying schedule
 files into the crawl action directories.
