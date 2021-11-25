@@ -27,7 +27,7 @@ There are a few million papers in fatacat which:
 2. are known OA, usually because publication is Gold OA
 3. don't have any fulltext PDF in fatcat
 
-As a detail, some of these "known OA" journals actually have embargos (aka,
+As a detail, some of these "known OA" journals actually have embargoes (aka,
 they aren't true Gold OA). In particular, those marked via EZB OA "color", and
 recent pubmed central ids.
 
@@ -104,7 +104,7 @@ Actions:
   update ingest result table with status.
 - fetch new MAG and unpaywall seedlists, transform to ingest requests, persist
   into ingest request table. use SQL to dump only the *new* URLs (not seen in
-  previous dumps) using the created timestamp, outputing new bulk ingest
+  previous dumps) using the created timestamp, outputting new bulk ingest
   request lists. if possible, de-dupe between these two. then start bulk
   heritrix crawls over these two long lists. Probably sharded over several
   machines. Could also run serially (first one, then the other, with
@@ -133,7 +133,7 @@ We have run GROBID+glutton over basically all of these PDFs. We should be able
 to do a SQL query to select PDFs that:
 
 - have at least one known CDX row
-- GROBID processed successfuly and glutton matched to a fatcat release
+- GROBID processed successfully and glutton matched to a fatcat release
 - do not have an existing fatcat file (based on sha1hex)
 - output GROBID metadata, `file_meta`, and one or more CDX rows
 
@@ -161,7 +161,7 @@ Coding Tasks:
 
 Actions:
 - update `fatcat_file` sandcrawler table
-- check how many PDFs this might ammount to. both by uniq SHA1 and uniq
+- check how many PDFs this might amount to. both by uniq SHA1 and uniq
   `fatcat_release` matches
 - do some manual random QA verification to check that this method results in
   quality content in fatcat

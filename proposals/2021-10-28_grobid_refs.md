@@ -59,11 +59,11 @@ attached reference-level key or id.
 
 We may want to do re-parsing of references from sources other than `crossref`,
 so there is a generic `grobid_refs` table. But it is also common to fetch both
-the crossref metadata and any re-parsed references together, so as a convience
+the crossref metadata and any re-parsed references together, so as a convenience
 there is a PostgreSQL view (virtual table) that includes both a crossref
 metadata record and parsed citations, if available. If downstream code cares a
 lot about having the refs and record be in sync, the `source_ts` field on
-`grobid_refs` can be matched againt the `indexed` column of `crossref` (or the
+`grobid_refs` can be matched against the `indexed` column of `crossref` (or the
 `.indexed.date-time` JSON field in the record itself).
 
 Remember that DOIs should always be lower-cased before querying, inserting,

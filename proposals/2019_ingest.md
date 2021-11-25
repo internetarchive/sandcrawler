@@ -84,7 +84,7 @@ HTML? Or both? Let's just recrawl.
 *IngestRequest*
   - `ingest_type`: required, one of `pdf`, `xml`, `html`, `dataset`. For
     backwards compatibility, `file` should be interpreted as `pdf`. `pdf` and
-    `xml` return file ingest respose; `html` and `dataset` not implemented but
+    `xml` return file ingest response; `html` and `dataset` not implemented but
     would be webcapture (wayback) and fileset (archive.org item or wayback?).
     In the future: `epub`, `video`, `git`, etc.
   - `base_url`: required, where to start crawl process
@@ -258,7 +258,7 @@ and hacks to crawl publicly available papers. Related existing work includes
 [unpaywall's crawler][unpaywall_crawl], LOCKSS extraction code, dissem.in's
 efforts, zotero's bibliography extractor, etc. The "memento tracer" work is
 also similar. Many of these are even in python! It would be great to reduce
-duplicated work and maintenance. An analagous system in the wild is youtube-dl
+duplicated work and maintenance. An analogous system in the wild is youtube-dl
 for downloading video from many sources.
 
 [unpaywall_crawl]: https://github.com/ourresearch/oadoi/blob/master/webpage.py

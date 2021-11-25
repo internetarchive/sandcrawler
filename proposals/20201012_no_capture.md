@@ -29,7 +29,7 @@ The current status quo is to store the missing URL as the last element in the
 pipeline that would read from the Kafka feed and extract them, but this would
 be messy. Eg, re-ingesting would not update the old kafka messages, so we could
 need some accounting of consumer group offsets after which missing URLs are
-truely missing.
+truly missing.
 
 We could add a new `missing_url` database column and field to the JSON schema,
 for this specific use case. This seems like unnecessary extra work.

@@ -133,7 +133,7 @@ Deployment will involve:
 Plan for processing/catchup is:
 
 - test with COVID-19 PDF corpus
-- run extraction on all current fatcat files avaiable via IA
+- run extraction on all current fatcat files available via IA
 - integrate with ingest pipeline for all new files
 - run a batch catchup job over all GROBID-parsed files with no pdf meta
   extracted, on basis of SQL table query

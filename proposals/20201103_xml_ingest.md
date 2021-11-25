@@ -37,7 +37,7 @@ document. For recording in fatcat, the file metadata will be passed through.
 For storing in Kafka and blob store (for downstream analysis), we will parse
 the raw XML document (as "bytes") with an XML parser, then re-output with UTF-8
 encoding. The hash of the *original* XML file will be used as the key for
-refering to this document. This is unintuitive, but similar to what we are
+referring to this document. This is unintuitive, but similar to what we are
 doing with PDF and HTML documents (extracting in a useful format, but keeping
 the original document's hash as a key).
 

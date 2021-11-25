@@ -19,10 +19,10 @@ datasets:
   specific to individual platforms and host software packages
 - the storage backend and fatcat entity type is flexible: a dataset might be
   represented by a single file, multiple files combined in to a single .zip
-  file, or mulitple separate files; the data may get archived in wayback or in
+  file, or multiple separate files; the data may get archived in wayback or in
   an archive.org item
 
-The new concepts of "strategy" and "platform" are introduced to accomodate
+The new concepts of "strategy" and "platform" are introduced to accommodate
 these complications.
 
 
@@ -56,7 +56,7 @@ is via a "download all as .zip" (or similar) do we consider a zipfile a
 
 The term "bundle file" is used over "archive file" or "container file" to
 prevent confusion with the other use of those terms in the context of fatcat
-(container entities; archive; Internet Archive as an organiztion).
+(container entities; archive; Internet Archive as an organization).
 
 The motivation for supporting both `web` and `archiveorg` is that `web` is
 somewhat simpler for small files, but `archiveorg` is better for larger groups
@@ -155,7 +155,7 @@ New python APIs/classes:
   valid platform, which could be found via API or parsing, but has the wrong
   scope. Eg, tried to fetch a dataset, but got a DOI which represents all
   versions of the dataset, not a specific version.
-- `platform-restricted`/`PlatformRestrictedError`: for, eg, embargos
+- `platform-restricted`/`PlatformRestrictedError`: for, eg, embargoes 
 - `platform-404`: got to a landing page, and seemed like in-scope, but no
   platform record found anyways
 

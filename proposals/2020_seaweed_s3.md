@@ -316,7 +316,7 @@ grows very much with the number of volumes. Therefore, keep default volume size
 and do not limit number of volumes `-volume.max 0` and do not use in-memory
 index (rather leveldb)
 
-Status: done, 200M object upload via Python script sucessfully in about 6 days,
+Status: done, 200M object upload via Python script successfully in about 6 days,
 memory usage was at a moderate 400M (~10% of RAM). Relatively constant
 performance at about 400 `PutObject` requests/s (over 5 threads, each thread
 was around 80 requests/s; then testing with 4 threads, each thread got to
