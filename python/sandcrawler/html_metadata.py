@@ -297,7 +297,7 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "example_page": "https://journals.lww.com/otainternational/Fulltext/2019/03011/Trauma_systems_in_North_America.2.aspx",
     },
     {
-        "selector": "head meta[propery='citation_pdf_url']",
+        "selector": "head meta[property='citation_pdf_url']",
         "attr": "content",
         "technique": "citation_pdf_url",
         # eg, researchgate
