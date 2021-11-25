@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Input is IA item metadata JSON.
-Ouput is insertable fatcat "match" JSON
+Output is insertable fatcat "match" JSON
 
 - md5
 - sha1

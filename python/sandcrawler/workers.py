@@ -526,7 +526,7 @@ class KafkaJsonPusher(RecordPusher):
         while True:
             # TODO: this is batch-oriented, because underlying worker is
             # often batch-oriented, but this doesn't confirm that entire batch
-            # has been pushed to fatcat before commiting offset. Eg, consider
+            # has been pushed to fatcat before committing offset. Eg, consider
             # case where there there is one update and thousands of creates;
             # update would be lingering in worker, and if worker crashed
             # never created. Not great.

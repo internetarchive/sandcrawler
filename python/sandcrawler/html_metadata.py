@@ -843,7 +843,7 @@ def html_extract_resources(
     """
     This function tries to find all the important resources in a page. The
     presumption is that the HTML document is article fulltext, and we want the
-    list of all resoures (by URL) necessary to replay the page.
+    list of all resources (by URL) necessary to replay the page.
 
     The returned resource URLs each have a type (script, img, css, etc), and
     should be fully-qualified URLs (not relative).

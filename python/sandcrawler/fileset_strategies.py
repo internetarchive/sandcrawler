@@ -92,7 +92,7 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             return existing
 
         if item.platform_name == "archiveorg":
-            raise PlatformScopeError("should't download archive.org into itself")
+            raise PlatformScopeError("shouldn't download archive.org into itself")
 
         local_dir = self.working_dir + item.archiveorg_item_name
         assert local_dir.startswith("/")

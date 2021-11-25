@@ -48,7 +48,7 @@ class PdfTrioClient(object):
             return {
                 "status": "error-connect",
                 "status_code": -2,  # heritrix3 "HTTP connect" code
-                "error_msg": "pdftrio request connection timout",
+                "error_msg": "pdftrio request connection timeout",
             }
 
         info: Dict[str, Any] = dict(status_code=pdftrio_response.status_code)
