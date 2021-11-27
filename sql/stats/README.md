@@ -49,7 +49,7 @@ mimetype counts:
 
 Counts:
 
-    SELECT COUNT(*) AS total_files, COUNT(DISTINCT fatcat_release) AS unique_releases FROM grobid;
+    SELECT COUNT(*) AS total_files FROM grobid;
 
 Status?
 
@@ -106,15 +106,4 @@ Ingest result by status:
 Failed ingest by terminal status code:
 
     SELECT ingest_type, terminal_status_code, COUNT(*) FROM ingest_file_result WHERE hit = false GROUP BY ingest_type, terminal_status_code ORDER BY COUNT DESC LIMIT 50;
-
-## Fatcat Files
-
-Count of PDF files that GROBID processed and matched to a release (via
-glutton), but no PDF in `fatcat_file`:
-
-    SELECT COUNT(*) as total_count, COUNT(DISTINCT grobid.fatcat_release) as release_count
-    FROM grobid
-    LEFT JOIN fatcat_file ON grobid.sha1hex = fatcat_file.sha1hex
-    WHERE fatcat_file.sha1hex IS NULL
-      AND grobid.fatcat_release IS NOT NULL;
 
