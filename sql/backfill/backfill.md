@@ -76,6 +76,19 @@ In psql:
     COPY fatcat_file FROM '/sandcrawler-db/backfill/fatcat_file.2019-07-07.tsv' WITH (FORMAT TEXT, DELIMITER E'\t', NULL '');
     # => COPY 24727350
 
+In 2021-11-26:
+
+    zcat file_export.json.gz \
+        | pv -l \
+        | jq -r 'select(.sha1 != null) | [.sha1, .ident, .release_ids[0], (.urls|length >= 1), .content_scope] | @tsv' \
+        | sort -S 8G \
+        | uniq -w 40 \
+        | pigz \
+        > fatcat_file.2021-11-26.tsv.gz
+
+    COPY fatcat_file FROM '/srv/sandcrawler/tasks/fatcat_file.2021-11-26.tsv' WITH (FORMAT TEXT, DELIMITER E'\t', NULL '');
+    # COPY 112086814
+
 ## `file_meta`
 
     zcat /fast/download/file_export.2019-07-07.json.gz | pv -l | jq -r 'select(.md5 != null) | [.sha1, .sha256, .md5, .size, .mimetype] | @tsv' | sort -S 8G | uniq -w 40 > /sandcrawler-db/backfill/file_meta.2019-07-07.tsv
