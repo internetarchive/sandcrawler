@@ -42,7 +42,9 @@ CREATE INDEX file_meta_md5hex_idx ON file_meta(md5hex);
 CREATE TABLE IF NOT EXISTS fatcat_file (
     sha1hex             TEXT PRIMARY KEY CHECK (octet_length(sha1hex) = 40),
     file_ident          TEXT CHECK (octet_length(file_ident) = 26),
-    first_release_ident TEXT CHECK (octet_length(first_release_ident) = 26)
+    first_release_ident TEXT CHECK (octet_length(first_release_ident) = 26),
+    any_url             BOOLEAN,
+    content_scope       TEXT CHECK (octet_length(content_scope) >= 1)
 );
 
 CREATE TABLE IF NOT EXISTS petabox (
