@@ -27,9 +27,13 @@ def run_single_ingest(args):
             ingest_file_result_stdout=True,
         )
     else:
+        grobid_client = GrobidClient(
+            host_url=args.grobid_host,
+        )
         ingester = IngestFileWorker(
             try_spn2=not args.no_spn2,
             html_quick_mode=args.html_quick_mode,
+            grobid_client=grobid_client,
         )
     result = ingester.process(request)
     print(json.dumps(result, sort_keys=True))
@@ -140,6 +144,9 @@ def main():
         help="don't fetch individual sub-resources, just use CDX",
     )
     sub_single.add_argument("url", help="URL of paper to fetch")
+    sub_single.add_argument(
+        "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
+    )
 
     sub_requests = subparsers.add_parser(
         "requests", help="takes a series of ingest requests (JSON, per line) and runs each"
