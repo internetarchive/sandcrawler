@@ -142,13 +142,21 @@ Questions we might want to answer
 
 ## Full SQL Database Dumps
 
-Run a dump in compressed, postgres custom format:
+Run a dump in compressed, postgres custom format, not including `crossref` table (which is large and redundant):
 
     export DATESLUG="`date +%Y-%m-%d.%H%M%S`"
-    time sudo -u postgres pg_dump --verbose --format=custom sandcrawler > sandcrawler_full_dbdump_${DATESLUG}.pgdump
+    time sudo -u postgres pg_dump --verbose --format=custom --exclude-table-data=crossref sandcrawler > sandcrawler_full_dbdump_${DATESLUG}.pgdump
 
-As of 2021-04-07, this process runs for about 4 hours and the compressed
-snapshot is 88 GBytes (compared with 551.34G database disk consumption).
+As of 2021-12-03, this process runs for about 6 hours and the compressed
+snapshot is 102 GBytes (compared with 940GB database disk consumption,
+including crossref).
+
+Then, upload to petabox as a backup:
+
+    ia upload sandcrawler_full_dbdump_YYYY-MM-DD -m mediatype:data -m collection:webgroup-internal-backups -m title:"Sandcrawler SQL Dump (YYYY-MM-DD)" sandcrawler_full_dbdump_${DATESLUG}.pgdump
+
+
+## SQL Database Restore
 
 To restore a dump (which will delete local database content, if any):
 
