@@ -11,6 +11,8 @@ from .ia import WaybackClient
 from .misc import gen_file_metadata, requests_retry_session
 from .workers import SandcrawlerFetchWorker, SandcrawlerWorker
 
+MAX_GROBID_BLOB_SIZE: int = 256 * 1024 * 1024  # ~256 MByte
+
 
 def clean_crossref_unstructured(raw: str) -> str:
     """
@@ -85,6 +87,12 @@ class GrobidClient(object):
             - tei_xml (if status is 200)
         """
         assert blob
+
+        if len(blob) > MAX_GROBID_BLOB_SIZE:
+            return {
+                "status": "blob-too-large",
+                "error_msg": f"Not going to process very large file ({len(blob)} bytes)",
+            }
 
         if consolidate_mode is None:
             consolidate_mode = self.consolidate_mode
