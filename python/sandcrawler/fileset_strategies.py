@@ -222,7 +222,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
         super().__init__()
         self.ingest_strategy = IngestStrategy.WebFileset
         self.wayback_client = WaybackClient()
-        self.try_spn2 = True
+        self.try_spn2 = kwargs.get("try_spn2", True)
         self.spn_client = SavePageNowClient(
             spn_cdx_retry_sec=kwargs.get("spn_cdx_retry_sec", 9.0)
         )

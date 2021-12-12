@@ -57,6 +57,7 @@ class IngestFilesetWorker(IngestFileWorker):
     def __init__(self, sink: Optional[SandcrawlerWorker] = None, **kwargs):
         super().__init__(sink=None, **kwargs)
 
+        self.try_spn2 = kwargs.get("try_spn2", True)
         self.sink = sink
         self.dataset_platform_helpers = {
             "dataverse": DataverseHelper(),
@@ -67,8 +68,8 @@ class IngestFilesetWorker(IngestFileWorker):
         self.dataset_strategy_archivers = {
             IngestStrategy.ArchiveorgFileset: ArchiveorgFilesetStrategy(),
             IngestStrategy.ArchiveorgFile: ArchiveorgFileStrategy(),
-            IngestStrategy.WebFileset: WebFilesetStrategy(),
-            IngestStrategy.WebFile: WebFileStrategy(),
+            IngestStrategy.WebFileset: WebFilesetStrategy(try_spn2=self.try_spn2),
+            IngestStrategy.WebFile: WebFileStrategy(try_spn2=self.try_spn2),
         }
 
         self.max_total_size = kwargs.get("max_total_size", 64 * 1024 * 1024 * 1024)
