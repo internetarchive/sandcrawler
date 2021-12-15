@@ -4,6 +4,7 @@ import sys
 from typing import Optional
 
 import internetarchive
+import requests
 
 from sandcrawler.fileset_types import (
     ArchiveStrategyResult,
@@ -12,7 +13,12 @@ from sandcrawler.fileset_types import (
     PlatformScopeError,
 )
 from sandcrawler.ia import SavePageNowClient, WaybackClient, fix_transfer_encoding
-from sandcrawler.misc import gen_file_metadata, gen_file_metadata_path, sanitize_fs_path
+from sandcrawler.misc import (
+    gen_file_metadata,
+    gen_file_metadata_path,
+    requests_retry_session,
+    sanitize_fs_path,
+)
 
 
 class FilesetIngestStrategy:
@@ -40,12 +46,15 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
         except FileExistsError:
             pass
 
-        self.ia_session = internetarchive.get_session(config={
-            's3': {
-                'access': os.environ.get("IA_ACCESS_KEY"),
-                'secret': os.environ.get("IA_SECRET_KEY"),
-            },
-        })
+        self.http_session = requests_retry_session()
+        self.ia_session = internetarchive.get_session(
+            config={
+                "s3": {
+                    "access": os.environ.get("IA_ACCESS_KEY"),
+                    "secret": os.environ.get("IA_SECRET_KEY"),
+                },
+            }
+        )
 
     def check_existing(self, item: FilesetPlatformItem) -> Optional[ArchiveStrategyResult]:
         """
@@ -119,22 +128,28 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
 
             if not os.path.exists(os.path.dirname(local_path)):
                 os.mkdir(os.path.dirname(local_path))
-            if not os.path.exists(local_path):
+            if os.path.exists(local_path):
+                m.status = "exists-local"
+            else:
                 print(f"  downloading {m.path}", file=sys.stderr)
                 # create any sub-directories for this path, if necessary
                 if not os.path.exists(os.path.dirname(local_path)):
                     os.mkdir(os.path.dirname(local_path))
-                with self.ia_session.get(
-                    m.platform_url, stream=True, allow_redirects=True
-                ) as r:
-                    r.raise_for_status()
-                    with open(local_path + ".partial", "wb") as f:
-                        for chunk in r.iter_content(chunk_size=256 * 1024):
-                            f.write(chunk)
-                os.rename(local_path + ".partial", local_path)
-                m.status = "downloaded-local"
-            else:
-                m.status = "exists-local"
+                try:
+                    with self.http_session.get(
+                        m.platform_url,
+                        stream=True,
+                        allow_redirects=True,
+                        timeout=2 * 60 * 60,
+                    ) as r:
+                        r.raise_for_status()
+                        with open(local_path + ".partial", "wb") as f:
+                            for chunk in r.iter_content(chunk_size=256 * 1024):
+                                f.write(chunk)
+                    os.rename(local_path + ".partial", local_path)
+                    m.status = "downloaded-local"
+                except requests.exceptions.RequestException:
+                    m.status = "error-platform-download"
 
             print(f"  verifying {m.path}", file=sys.stderr)
             file_meta = gen_file_metadata_path(local_path, allow_empty=True)
@@ -190,14 +205,21 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             f"  uploading all files to {item.archiveorg_item_name} under {item.archiveorg_item_meta.get('collection')}...",
             file=sys.stderr,
         )
-        internetarchive.upload(
-            item.archiveorg_item_name,
-            files=item_files,
-            metadata=item.archiveorg_item_meta,
-            checksum=True,
-            queue_derive=False,
-            verify=True,
-        )
+        try:
+            internetarchive.upload(
+                item.archiveorg_item_name,
+                files=item_files,
+                metadata=item.archiveorg_item_meta,
+                checksum=True,
+                queue_derive=False,
+                verify=True,
+            )
+        except requests.exceptions.RequestException:
+            return ArchiveStrategyResult(
+                ingest_strategy=self.ingest_strategy,
+                manifest=item.manifest,
+                status="error-archiveorg-upload",
+            )
 
         for m in item.manifest:
             m.status = "success"

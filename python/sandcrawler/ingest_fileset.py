@@ -325,12 +325,18 @@ class IngestFilesetWorker(IngestFileWorker):
             result["error_message"] = str(e)[:1600]
             return result
         except requests.exceptions.HTTPError as e:
+            result["error_message"] = str(e)[:1600]
             if e.response.status_code == 404:
                 result["status"] = "platform-404"
                 result["error_message"] = str(e)[:1600]
                 return result
             else:
-                raise e
+                result["status"] = "platform-http-error"
+                return result
+        except requests.exceptions.RequestException as e:
+            result["error_message"] = str(e)[:1600]
+            result["status"] = "platform-error"
+            return result
 
         # print(dataset_meta, file=sys.stderr)
         platform = dataset_meta.platform_name

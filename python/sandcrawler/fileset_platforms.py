@@ -2,7 +2,6 @@ import urllib.parse
 from typing import Optional, Tuple
 
 import internetarchive
-import requests
 
 from sandcrawler.fileset_types import (
     FilesetManifestFile,
@@ -13,6 +12,7 @@ from sandcrawler.fileset_types import (
 )
 from sandcrawler.html_metadata import BiblioMetadata
 from sandcrawler.ia import ResourceResult
+from sandcrawler.misc import requests_retry_session
 
 
 class FilesetPlatformHelper:
@@ -61,7 +61,7 @@ class DataverseHelper(FilesetPlatformHelper):
     def __init__(self):
         super().__init__()
         self.platform_name = "dataverse"
-        self.session = requests.Session()
+        self.session = requests_retry_session()
 
     @staticmethod
     def parse_dataverse_persistentid(pid: str) -> dict:
@@ -200,7 +200,8 @@ class DataverseHelper(FilesetPlatformHelper):
         # 1b. if we didn't get a version number from URL, fetch it from API
         if not dataset_version:
             resp = self.session.get(
-                f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}"
+                f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}",
+                timeout=60.0,
             )
             resp.raise_for_status()
             obj = resp.json()
@@ -211,7 +212,8 @@ class DataverseHelper(FilesetPlatformHelper):
 
         # 2. API fetch
         resp = self.session.get(
-            f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}&version={dataset_version}"
+            f"https://{platform_domain}/api/datasets/:persistentId/?persistentId={platform_id}&version={dataset_version}",
+            timeout=60.0,
         )
         resp.raise_for_status()
         obj = resp.json()
@@ -350,7 +352,7 @@ class FigshareHelper(FilesetPlatformHelper):
     def __init__(self):
         super().__init__()
         self.platform_name = "figshare"
-        self.session = requests.Session()
+        self.session = requests_retry_session()
 
     @staticmethod
     def parse_figshare_url_path(path: str) -> Tuple[str, Optional[str]]:
@@ -441,7 +443,8 @@ class FigshareHelper(FilesetPlatformHelper):
 
         # 2. API fetch
         resp = self.session.get(
-            f"https://api.figshare.com/v2/articles/{platform_id}/versions/{dataset_version}"
+            f"https://api.figshare.com/v2/articles/{platform_id}/versions/{dataset_version}",
+            timeout=60.0,
         )
         resp.raise_for_status()
         obj = resp.json()
@@ -537,7 +540,7 @@ class ZenodoHelper(FilesetPlatformHelper):
     def __init__(self):
         super().__init__()
         self.platform_name = "zenodo"
-        self.session = requests.Session()
+        self.session = requests_retry_session()
 
     def match_request(
         self,
@@ -589,7 +592,7 @@ class ZenodoHelper(FilesetPlatformHelper):
             raise PlatformScopeError(f"unexpected zenodo.org domain: {platform_domain}")
 
         # 2. API fetch
-        resp = self.session.get(f"https://zenodo.org/api/records/{platform_id}")
+        resp = self.session.get(f"https://zenodo.org/api/records/{platform_id}", timeout=60.0)
         if resp.status_code == 410:
             raise PlatformRestrictedError("record deleted")
         resp.raise_for_status()
@@ -764,7 +767,7 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
             )
 
         # print(f"  archiveorg processing item={item_name}", file=sys.stderr)
-        item = self.session.get_item(item_name)
+        item = self.session.get_item(item_name, timeout=60.0)
         item_name = item.identifier
         item_collection = item.metadata["collection"]
         if type(item_collection) == list:
