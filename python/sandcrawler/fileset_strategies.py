@@ -40,7 +40,12 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
         except FileExistsError:
             pass
 
-        self.ia_session = internetarchive.get_session()
+        self.ia_session = internetarchive.get_session(config={
+            's3': {
+                'access': os.environ.get("IA_ACCESS_KEY"),
+                'secret': os.environ.get("IA_SECRET_KEY"),
+            },
+        })
 
     def check_existing(self, item: FilesetPlatformItem) -> Optional[ArchiveStrategyResult]:
         """
