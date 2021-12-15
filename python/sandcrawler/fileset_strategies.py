@@ -117,8 +117,13 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             local_path = local_dir + "/" + m.path
             assert m.platform_url
 
+            if not os.path.exists(os.path.dirname(local_path)):
+                os.mkdir(os.path.dirname(local_path))
             if not os.path.exists(local_path):
                 print(f"  downloading {m.path}", file=sys.stderr)
+                # create any sub-directories for this path, if necessary
+                if not os.path.exists(os.path.dirname(local_path)):
+                    os.mkdir(os.path.dirname(local_path))
                 with self.ia_session.get(
                     m.platform_url, stream=True, allow_redirects=True
                 ) as r:
