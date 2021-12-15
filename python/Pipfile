@@ -48,7 +48,7 @@ urlcanon = "*"
 Pillow = ">=3"
 python-poppler = ">=0.2.1"
 selectolax = ">=0.2"
-trafilatura = "*"
+trafilatura = ">=1"
 pydantic = ">=1.7"
 dateparser = "*"
 braveblock = "*"
@@ -56,6 +56,7 @@ dynaconf = ">=3"
 sentry-sdk = { version = ">=0.14.0", extras = [] }
 zstandard = "*"
 grobid_tei_xml = ">=0.1.2,<0.2.0"
+PyMuPDF = ">=1.19.0,<1.20.0"
 
 [requires]
 python_version = "3.8"
