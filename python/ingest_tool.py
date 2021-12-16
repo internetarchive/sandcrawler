@@ -48,7 +48,7 @@ def run_requests(args):
             git_sha = raven.fetch_git_sha("..")
         except Exception:
             git_sha = None
-        sentry_client = raven.Client(release=git_sha)
+        sentry_client = raven.Client(release=git_sha)  # noqa:
     # TODO: switch to using JsonLinePusher
     file_worker = IngestFileWorker(
         try_spn2=not args.no_spn2,
