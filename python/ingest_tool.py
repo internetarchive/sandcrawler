@@ -162,7 +162,7 @@ def main():
     sub_requests.add_argument(
         "--no-spn2", action="store_true", help="don't use live web (SPNv2)"
     )
-    parser.add_argument(
+    sub_requests.add_argument(
         "--enable-sentry",
         action="store_true",
         help="report exceptions to Sentry",
