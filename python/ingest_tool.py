@@ -5,6 +5,8 @@ import json
 import sys
 from http.server import HTTPServer
 
+import raven
+
 from sandcrawler import GrobidClient, JsonLinePusher, KafkaCompressSink, KafkaSink
 from sandcrawler.ingest_file import IngestFileRequestHandler, IngestFileWorker
 from sandcrawler.ingest_fileset import IngestFilesetWorker
@@ -41,6 +43,12 @@ def run_single_ingest(args):
 
 
 def run_requests(args):
+    if args.enable_sentry:
+        try:
+            git_sha = raven.fetch_git_sha("..")
+        except Exception:
+            git_sha = None
+        sentry_client = raven.Client(release=git_sha)
     # TODO: switch to using JsonLinePusher
     file_worker = IngestFileWorker(
         try_spn2=not args.no_spn2,
@@ -153,6 +161,11 @@ def main():
     )
     sub_requests.add_argument(
         "--no-spn2", action="store_true", help="don't use live web (SPNv2)"
+    )
+    parser.add_argument(
+        "--enable-sentry",
+        action="store_true",
+        help="report exceptions to Sentry",
     )
     sub_requests.add_argument(
         "--html-quick-mode",
