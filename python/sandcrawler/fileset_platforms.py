@@ -205,7 +205,7 @@ class DataverseHelper(FilesetPlatformHelper):
             )
             resp.raise_for_status()
             obj = resp.json()
-            if not "latestVersion" in obj["data"]:
+            if "latestVersion" not in obj["data"]:
                 raise PlatformScopeError("could not find latest version for dataverse record")
             obj_latest = obj["data"]["latestVersion"]
             dataset_version = (
@@ -769,7 +769,7 @@ class ArchiveOrgHelper(FilesetPlatformHelper):
             )
 
         # print(f"  archiveorg processing item={item_name}", file=sys.stderr)
-        item = self.session.get_item(item_name, timeout=60.0)
+        item = self.session.get_item(item_name)
         item_name = item.identifier
         item_collection = item.metadata["collection"]
         if type(item_collection) == list:
