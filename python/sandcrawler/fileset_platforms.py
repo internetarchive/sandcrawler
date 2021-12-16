@@ -472,7 +472,10 @@ class FigshareHelper(FilesetPlatformHelper):
                     # extra=dict(),
                 )
             )
-            assert not row.get("is_link_only")
+            if row.get("is_link_only"):
+                raise PlatformScopeError(
+                    f"figshare.org file is just a link (not a file): {row['name']} at {row['download_url']}"
+                )
 
         authors = []
         for author in obj["authors"]:
