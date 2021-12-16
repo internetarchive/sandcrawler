@@ -205,6 +205,8 @@ class DataverseHelper(FilesetPlatformHelper):
             )
             resp.raise_for_status()
             obj = resp.json()
+            if not "latestVersion" in obj["data"]:
+                raise PlatformScopeError("could not find latest version for dataverse record")
             obj_latest = obj["data"]["latestVersion"]
             dataset_version = (
                 f"{obj_latest['versionNumber']}.{obj_latest['versionMinorNumber']}"

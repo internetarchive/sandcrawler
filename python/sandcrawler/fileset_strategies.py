@@ -150,6 +150,11 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
                     m.status = "downloaded-local"
                 except requests.exceptions.RequestException:
                     m.status = "error-platform-download"
+                    return ArchiveStrategyResult(
+                        ingest_strategy=self.ingest_strategy,
+                        manifest=item.manifest,
+                        status="error-platform-download",
+                    )
 
             print(f"  verifying {m.path}", file=sys.stderr)
             file_meta = gen_file_metadata_path(local_path, allow_empty=True)
