@@ -1040,6 +1040,16 @@ class SavePageNowClient:
             and "You have already reached the limit of active sessions" in resp_json["message"]
         ):
             raise SavePageNowBackoffError(resp_json["message"])
+        elif resp_json.get("status") == "error":
+            return SavePageNowResult(
+                False,
+                resp_json.get("status_ext") or resp_json["status"],
+                None,
+                request_url,
+                None,
+                None,
+                None,
+            )
         elif not resp_json or "job_id" not in resp_json or not resp_json["job_id"]:
             raise SavePageNowError(
                 "Didn't get expected 'job_id' field in SPN2 response: {}".format(resp_json)
