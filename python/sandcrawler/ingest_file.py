@@ -683,7 +683,7 @@ class IngestFileWorker(SandcrawlerWorker):
                         return result
 
             if not resource.body:
-                result["status"] = "null-body"
+                result["status"] = "empty-blob"
                 return result
 
             if len(resource.body) > MAX_BODY_SIZE_BYTES:
@@ -699,7 +699,7 @@ class IngestFileWorker(SandcrawlerWorker):
                 return result
 
             if not resource.body or file_meta["size_bytes"] == 0:
-                result["status"] = "null-body"
+                result["status"] = "empty-blob"
                 return result
 
             # here we split based on ingest type to try and extract a next hop

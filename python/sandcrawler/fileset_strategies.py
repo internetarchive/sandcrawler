@@ -317,6 +317,10 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             else:
                 assert resource.terminal_status_code == 200
 
+            if not resource.body:
+                m.status = "empty-blob"
+                continue
+
             file_meta = gen_file_metadata(resource.body)
             file_meta, html_resource = fix_transfer_encoding(file_meta, resource)
 
