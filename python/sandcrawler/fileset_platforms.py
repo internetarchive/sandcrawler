@@ -375,6 +375,11 @@ class FigshareHelper(FilesetPlatformHelper):
         comp = comp[2:]
         if comp[0] in [
             "dataset",
+            # TODO: should the following be considered "out of scope"?
+            "journal_contribution",
+            "presentation",
+            "poster",
+            "thesis",
         ]:
             comp = comp[1:]
 
@@ -523,6 +528,14 @@ def test_parse_figshare_url_path() -> None:
         "/articles/dataset/STable_1_U-Pb_geochronologic_analyses_on_samples_xls/12127176/4": (
             "12127176",
             "4",
+        ),
+        "/articles/journal_contribution/Improved_Time_Resolved_Measurements_of_Inorganic_Ions_in_Particulate_Matter_by_PILS_IC_Integrated_with_a_Sample_Pre_Concentration_System/1407386/3": (
+            "1407386",
+            "3",
+        ),
+        "/articles/poster/Effect_of_nanoclay_loading_on_the_thermal_decomposition_of_nanoclay_polyurethane_elastomers_obtained_by_bulk_polymerization/1094056/1": (
+            "1094056",
+            "1",
         ),
     }
 
