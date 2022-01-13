@@ -597,6 +597,14 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "technique": "PDF Download link (journals.uchicago.edu)",
         "example_page": "https://www.journals.uchicago.edu/doi/10.14318/hau1.1.008",
     },
+    {
+        "in_doc_url": "integrityresjournals.org",
+        "in_fulltext_url": "/article-full-text-pdf/",
+        "selector": "a[target='_blank'].btn-danger",
+        "attr": "href",
+        "technique": "PDF Download link (integrityresjournals.org)",
+        "example_page": "https://integrityresjournals.org/journal/JBBD/article-abstract/750B649A1",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
