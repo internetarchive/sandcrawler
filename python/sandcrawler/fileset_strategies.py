@@ -158,22 +158,29 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
 
             print(f"  verifying {m.path}", file=sys.stderr)
             file_meta = gen_file_metadata_path(local_path, allow_empty=True)
-            assert (
-                file_meta["size_bytes"] == m.size
-            ), f"expected: {m.size} found: {file_meta['size_bytes']}"
+            if file_meta["size_bytes"] != m.size:
+                print(f"  expected: {m.size} found: {file_meta['size_bytes']}", file=sys.stderr)
+                m.status = "mismatch-size"
+                continue
 
             if m.sha1:
-                assert file_meta["sha1hex"] == m.sha1
+                if file_meta["sha1hex"] != m.sha1:
+                    m.status = "mismatch-sha1"
+                    continue
             else:
                 m.sha1 = file_meta["sha1hex"]
 
             if m.sha256:
-                assert file_meta["sha256hex"] == m.sha256
+                if file_meta["sha256hex"] != m.sha256:
+                    m.status = "mismatch-sha256"
+                    continue
             else:
                 m.sha256 = file_meta["sha256hex"]
 
             if m.md5:
-                assert file_meta["md5hex"] == m.md5
+                if file_meta["md5hex"] != m.md5:
+                    m.status = "mismatch-md5"
+                    continue
             else:
                 m.md5 = file_meta["md5hex"]
 
@@ -193,6 +200,15 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
             else:
                 m.mimetype = file_meta["mimetype"]
             m.status = "verified-local"
+
+        # if verification failed for any individual files, bail out
+        for m in item.manifest:
+            if m.status != "verified-local":
+                return ArchiveStrategyResult(
+                    ingest_strategy=self.ingest_strategy,
+                    manifest=item.manifest,
+                    status=m.status,
+                )
 
         # 2. upload all files, with metadata
         assert item.archiveorg_item_meta and item.archiveorg_item_meta["collection"]
@@ -322,7 +338,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
                 continue
 
             file_meta = gen_file_metadata(resource.body)
-            file_meta, html_resource = fix_transfer_encoding(file_meta, resource)
+            file_meta, _html_resource = fix_transfer_encoding(file_meta, resource)
 
             if self.ingest_strategy == "web-file":
                 file_file_meta = file_meta
