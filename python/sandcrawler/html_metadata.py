@@ -328,7 +328,7 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "in_doc_url": "/article/view/",
         "selector": "a#pdfDownloadLink",
         "attr": "href",
-        "technique": "pdfDownloadLink link",
+        "technique": "OJS pdfDownloadLink link",
         "example_page": "http://www.revistas.unam.mx/index.php/rep/article/view/35503/32336",
     },
     {
@@ -604,6 +604,28 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "attr": "href",
         "technique": "PDF Download link (integrityresjournals.org)",
         "example_page": "https://integrityresjournals.org/journal/JBBD/article-abstract/750B649A1",
+    },
+    {
+        "in_doc_url": "/article/view/",
+        "in_fulltext_url": "/article/download/",
+        "selector": "body.pkp_page_article a.download",
+        "attr": "href",
+        "technique": "OJS PDF Embed",
+        "example_page": "https://periodicals.karazin.ua/language_teaching/article/view/12543/11957",
+    },
+    {
+        "in_doc_url": "/article/view/",
+        "in_fulltext_url": "/article/",
+        "selector": "a.pdf",
+        "attr": "href",
+        "technique": "OJS PDF link",
+    },
+    {
+        "in_doc_url": "scitemed.com/article/",
+        "in_fulltext_url": ".pdf",
+        "selector": "li.tab_pdf_btn a",
+        "attr": "href",
+        "technique": "PDF link (scitemed.com)",
     },
 ]
 
