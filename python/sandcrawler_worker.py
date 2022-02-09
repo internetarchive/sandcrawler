@@ -278,8 +278,8 @@ def run_ingest_file(args):
         pdftext_sink=pdftext_sink,
         xmldoc_sink=xmldoc_sink,
         htmlteixml_sink=htmlteixml_sink,
-        # don't SPNv2 for --bulk backfill
-        try_spn2=not args.bulk,
+        # don't SPNv2 for --bulk or --skip-spn
+        try_spn2=not (args.bulk or args.skip_spn),
         spn_cdx_retry_sec=spn_cdx_retry_sec,
     )
     pusher = KafkaJsonPusher(
@@ -446,6 +446,11 @@ def main():
         "--bulk",
         action="store_true",
         help="consume from bulk kafka topic (eg, for ingest backfill)",
+    )
+    sub_ingest_file.add_argument(
+        "--skip-spn",
+        action="store_true",
+        help="don't do SPN lookups",
     )
     sub_ingest_file.add_argument(
         "--priority",
