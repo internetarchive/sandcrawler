@@ -566,9 +566,78 @@ requests, slightly updated to allow `https://doi.org/10*` in terminal URL:
     => 4,488,193
 
     ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/patch_ingest_request_2022-01-06.rows.json | pv -l | shuf > /srv/sandcrawler/tasks/patch_ingest_request_2022-01-06.ingest_request.json
+    => DONE
 
     cat /srv/sandcrawler/tasks/patch_ingest_request_2022-01-06.ingest_request.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+    => TIMEDOUT
+    => (probably due to re-assignment)
+    => TODO: try again
 
-## Stats Again
+## Stats Again (just OAI-PMH)
 
-Re-run the "progress check" stuff from above
+OAI-PMH query:
+
+    SELECT ingest_file_result.status, COUNT(*)
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_file_result.ingest_type = ingest_request.ingest_type
+        AND ingest_file_result.base_url = ingest_request.base_url
+    WHERE 
+        ingest_request.ingest_type = 'pdf'
+        AND ingest_request.link_source = 'oai'
+        AND ingest_request.link_source_id NOT LIKE 'oai:kb.dk:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:bdr.oai.bsb-muenchen.de:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:hispana.mcu.es:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:bnf.fr:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:ukm.si:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:biodiversitylibrary.org:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:hsp.org:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:repec:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:n/a:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:quod.lib.umich.edu:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:americanae.aecid.es:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:www.irgrid.ac.cn:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:espace.library.uq.edu:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:edoc.mpg.de:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:bibliotecadigital.jcyl.es:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:repository.erciyes.edu.tr:%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:krm.or.kr:%'
+        AND ingest_request.base_url NOT LIKE '%www.kb.dk%'
+        AND ingest_request.base_url NOT LIKE '%kb-images.kb.dk%'
+        AND ingest_request.base_url NOT LIKE '%mdz-nbn-resolving.de%'
+        AND ingest_request.base_url NOT LIKE '%aggr.ukm.um.si%'
+        AND ingest_request.base_url NOT LIKE '%edoc.mpg.de%'
+        AND ingest_request.base_url NOT LIKE '%doaj.org%'
+        AND ingest_request.base_url NOT LIKE '%orcid.org%'
+        AND ingest_request.base_url NOT LIKE '%gateway.isiknowledge.com%'
+        AND ingest_request.link_source_id NOT LIKE 'oai:hypotheses.org:%'
+    GROUP BY status
+    ORDER BY COUNT DESC
+    LIMIT 20;
+
+On 2022-02-08:
+
+            status         |  count
+    -----------------------+----------
+     success               | 13505143
+     no-pdf-link           |  8741007
+     no-capture            |  4429986
+     redirect-loop         |  1566611
+     terminal-bad-status   |   816162
+     link-loop             |   459006
+     wrong-mimetype        |   448983
+     null-body             |    71871
+     cdx-error             |    19055
+                           |    15275
+     petabox-error         |    11713
+     blocked-cookie        |    11664
+     wayback-error         |     8745
+     skip-url-blocklist    |     7828
+     max-hops-exceeded     |     2031
+     wayback-content-error |      338
+     body-too-large        |      280
+     spn2-error:job-failed |      191
+     bad-redirect          |      134
+     redirects-exceeded    |      120
+    (20 rows)
+
