@@ -6,17 +6,14 @@ COPY (
         (ingest_request.ingest_type = 'pdf'
             OR ingest_request.ingest_type = 'html')
         AND ingest_file_result.hit = false
-        AND ingest_request.created < NOW() - '6 hour'::INTERVAL
-        AND ingest_request.created > NOW() - '180 day'::INTERVAL
-        AND ingest_request.ingest_request_source = 'savepapernow-web'
+        AND ingest_request.created < NOW() - '24 hour'::INTERVAL
+        AND ingest_request.created > NOW() - '181 day'::INTERVAL
+        AND (ingest_request.ingest_request_source = 'fatcat-changelog'
+             OR ingest_request.ingest_request_source = 'fatcat-ingest')
         AND (
             ingest_file_result.status like 'spn2-%'
-            -- OR ingest_file_result.status = 'cdx-error'
-            -- OR ingest_file_result.status = 'wayback-error'
-            -- OR ingest_file_result.status = 'wayback-content-error'
-            OR ingest_file_result.status = 'petabox-error'
-            -- OR ingest_file_result.status = 'gateway-timeout'
-            OR ingest_file_result.status = 'no-capture'
+            OR ingest_file_result.status like 'cdx-error'
+            OR ingest_file_result.status like 'petabox-error'
         )
         AND ingest_file_result.status != 'spn2-error:invalid-url-syntax'
         AND ingest_file_result.status != 'spn2-error:filesize-limit'
@@ -25,4 +22,4 @@ COPY (
         AND ingest_file_result.status != 'spn2-error:too-many-redirects'
         AND ingest_file_result.status != 'spn2-error:network-authentication-required'
         AND ingest_file_result.status != 'spn2-error:unknown'
-) TO '/srv/sandcrawler/tasks/reingest_spn.rows.json';
+) TO '/srv/sandcrawler/tasks/reingest_bulk_current.rows.json';

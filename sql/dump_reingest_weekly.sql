@@ -2,7 +2,9 @@
 COPY (
     SELECT row_to_json(ingest_request.*) FROM ingest_request
     LEFT JOIN ingest_file_result ON ingest_file_result.base_url = ingest_request.base_url
-    WHERE ingest_request.ingest_type = 'pdf'
+    WHERE
+        (ingest_request.ingest_type = 'pdf'
+            OR ingest_request.ingest_type = 'html')
         AND ingest_file_result.hit = false
         AND ingest_request.created < NOW() - '8 hour'::INTERVAL
         AND ingest_request.created > NOW() - '8 day'::INTERVAL
@@ -10,11 +12,12 @@ COPY (
              OR ingest_request.ingest_request_source = 'fatcat-ingest')
         AND (
             ingest_file_result.status like 'spn2-%'
-            -- OR ingest_file_result.status like 'cdx-error'
-            -- OR ingest_file_result.status like 'wayback-error'
-            -- OR ingest_file_result.status like 'wayback-content-error'
-            OR ingest_file_result.status like 'petabox-error'
-            -- OR ingest_file_result.status like 'gateway-timeout'
+            -- OR ingest_file_result.status = 'cdx-error'
+            -- OR ingest_file_result.status = 'wayback-error'
+            -- OR ingest_file_result.status = 'wayback-content-error'
+            OR ingest_file_result.status = 'petabox-error'
+            -- OR ingest_file_result.status = 'gateway-timeout'
+            OR ingest_file_result.status = 'no-capture'
         )
         AND ingest_file_result.status != 'spn2-error:invalid-url-syntax'
         AND ingest_file_result.status != 'spn2-error:filesize-limit'
