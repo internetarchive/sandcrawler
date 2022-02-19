@@ -147,10 +147,9 @@ class IngestFilesetWorker(IngestFileWorker):
             result["error_message"] = str(e)[:1600]
             return result
         except NotImplementedError:
-            # result['status'] = 'not-implemented'
-            # result['error_message'] = str(e)[:1600]
-            # return result
-            resource = None
+            result['status'] = 'not-implemented'
+            result['error_message'] = str(e)[:1600]
+            return result
 
         html_biblio = None
         if resource:
