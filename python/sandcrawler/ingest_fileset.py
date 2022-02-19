@@ -256,7 +256,7 @@ class IngestFilesetWorker(IngestFileWorker):
                     result["status"] = "wrong-mimetype"
                     return result
             else:
-                # raise NotImplementedError()
+                # eg, datasets, components, etc
                 pass
 
         result["_html_biblio"] = html_biblio
@@ -378,7 +378,30 @@ class IngestFilesetWorker(IngestFileWorker):
             return result
 
         # 3. Use strategy-specific methods to archive all files in platform manifest, and verify manifest metadata.
-        archive_result = strategy_helper.process(dataset_meta)
+        try:
+            archive_result = strategy_helper.process(dataset_meta)
+        except SavePageNowError as e:
+            result["status"] = "spn2-error"
+            result["error_message"] = str(e)[:1600]
+            return result
+        except PetaboxError as e:
+            result["status"] = "petabox-error"
+            result["error_message"] = str(e)[:1600]
+            return result
+        except CdxApiError as e:
+            result["status"] = "cdx-error"
+            result["error_message"] = str(e)[:1600]
+            # add a sleep in cdx-error path as a slow-down
+            time.sleep(2.0)
+            return result
+        except WaybackError as e:
+            result["status"] = "wayback-error"
+            result["error_message"] = str(e)[:1600]
+            return result
+        except WaybackContentError as e:
+            result["status"] = "wayback-content-error"
+            result["error_message"] = str(e)[:1600]
+            return result
 
         # 4. Summarize status and return structured result metadata.
         result["status"] = archive_result.status
