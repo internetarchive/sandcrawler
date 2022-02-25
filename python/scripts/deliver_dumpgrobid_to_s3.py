@@ -19,7 +19,7 @@ Output:
 - log to stdout (redirect to file), prefixed by sha1
 
 Requires:
-- raven (sentry)
+- sentry-sdk
 - boto3 (AWS S3 client library)
 """
 
@@ -32,10 +32,7 @@ import sys
 from collections import Counter
 
 import boto3
-import raven
-
-# Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
-sentry_client = raven.Client()
+import sentry_sdk
 
 
 def b32_hex(s):
@@ -88,7 +85,6 @@ class DeliverDumpGrobidS3:
         sys.stderr.write("{}\n".format(self.count))
 
 
-@sentry_client.capture_exceptions
 def main():
 
     parser = argparse.ArgumentParser()
@@ -114,6 +110,8 @@ def main():
         "dump_file", help="TSV/JSON dump file", default=sys.stdin, type=argparse.FileType("r")
     )
     args = parser.parse_args()
+
+    sentry_client = sentry_sdk.Client()
 
     worker = DeliverDumpGrobidS3(**args.__dict__)
     worker.run(args.dump_file)

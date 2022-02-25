@@ -2,10 +2,11 @@
 
 import argparse
 import json
+import subprocess
 import sys
 from http.server import HTTPServer
 
-import raven
+import sentry_sdk
 
 from sandcrawler import GrobidClient, JsonLinePusher, KafkaCompressSink, KafkaSink
 from sandcrawler.ingest_file import IngestFileRequestHandler, IngestFileWorker
@@ -43,12 +44,6 @@ def run_single_ingest(args):
 
 
 def run_requests(args):
-    if args.enable_sentry:
-        try:
-            git_sha = raven.fetch_git_sha("..")
-        except Exception:
-            git_sha = None
-        sentry_client = raven.Client(release=git_sha)  # noqa:
     # TODO: switch to using JsonLinePusher
     file_worker = IngestFileWorker(
         try_spn2=not args.no_spn2,
@@ -129,6 +124,11 @@ def run_api(args):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "--enable-sentry",
+        action="store_true",
+        help="report exceptions to Sentry",
+    )
     subparsers = parser.add_subparsers()
 
     sub_single = subparsers.add_parser("single", help="ingests a single base URL")
@@ -161,11 +161,6 @@ def main():
     )
     sub_requests.add_argument(
         "--no-spn2", action="store_true", help="don't use live web (SPNv2)"
-    )
-    sub_requests.add_argument(
-        "--enable-sentry",
-        action="store_true",
-        help="report exceptions to Sentry",
     )
     sub_requests.add_argument(
         "--html-quick-mode",
@@ -213,6 +208,17 @@ def main():
     if not args.__dict__.get("func"):
         parser.print_help(file=sys.stderr)
         sys.exit(-1)
+
+    # configure sentry *after* parsing args
+    if args.enable_sentry:
+        try:
+            GIT_REVISION = (
+                subprocess.check_output(["git", "describe", "--always"]).strip().decode("utf-8")
+            )
+        except Exception:
+            print("failed to configure git revision", file=sys.stderr)
+            GIT_REVISION = None
+        sentry_sdk.Client(release=GIT_REVISION, environment=args.env, max_breadcrumbs=10)
 
     args.func(args)
 

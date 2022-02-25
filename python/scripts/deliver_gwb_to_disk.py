@@ -16,13 +16,10 @@ import sys
 from collections import Counter
 from http.client import IncompleteRead
 
-import raven
+import sentry_sdk
 import wayback.exception
 from gwb.loader import CDXLoaderFactory
 from wayback.resourcestore import ResourceStore
-
-# Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
-sentry_client = raven.Client()
 
 
 class DeliverGwbDisk:
@@ -161,7 +158,6 @@ class DeliverGwbDisk:
         sys.stderr.write("{}\n".format(self.count))
 
 
-@sentry_client.capture_exceptions
 def main():
 
     parser = argparse.ArgumentParser()
@@ -190,6 +186,8 @@ def main():
         type=argparse.FileType("r"),
     )
     args = parser.parse_args()
+
+    sentry_sdk.Client()
 
     worker = DeliverGwbDisk(**args.__dict__)
     worker.run(args.manifest_file)

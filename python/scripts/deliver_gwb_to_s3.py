@@ -24,7 +24,7 @@ Output:
 - log to stdout (redirect to file), prefixed by sha1
 
 Requires:
-- raven (sentry)
+- sentry-sdk
 - boto3 (AWS S3 client library)
 - wayback/GWB libraries
 """
@@ -43,13 +43,10 @@ from collections import Counter
 from http.client import IncompleteRead
 
 import boto3
-import raven
+import sentry_sdk
 import wayback.exception
 from gwb.loader import CDXLoaderFactory
 from wayback.resourcestore import ResourceStore
-
-# Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
-sentry_client = raven.Client()
 
 
 class DeliverGwbS3:
@@ -179,7 +176,6 @@ class DeliverGwbS3:
         sys.stderr.write("{}\n".format(self.count))
 
 
-@sentry_client.capture_exceptions
 def main():
 
     parser = argparse.ArgumentParser()
@@ -205,6 +201,8 @@ def main():
         type=argparse.FileType("r"),
     )
     args = parser.parse_args()
+
+    sentry_sdk.Client()
 
     worker = DeliverGwbS3(**args.__dict__)
     worker.run(args.manifest_file)

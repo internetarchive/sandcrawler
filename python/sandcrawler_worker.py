@@ -7,9 +7,10 @@ or S3 (SeaweedFS).
 
 import argparse
 import os
+import subprocess
 import sys
 
-import raven
+import sentry_sdk
 
 from sandcrawler import *
 from sandcrawler.persist import (
@@ -17,13 +18,6 @@ from sandcrawler.persist import (
     PersistHtmlTeiXmlWorker,
     PersistXmlDocWorker,
 )
-
-# Yep, a global. Gets DSN from `SENTRY_DSN` environment variable
-try:
-    git_sha = raven.fetch_git_sha("..")
-except Exception:
-    git_sha = None
-sentry_client = raven.Client(release=git_sha)
 
 
 def run_grobid_extract(args):
@@ -483,6 +477,16 @@ def main():
     if not args.__dict__.get("func"):
         parser.print_help(file=sys.stderr)
         sys.exit(-1)
+
+    # configure sentry *after* parsing args
+    try:
+        GIT_REVISION = (
+            subprocess.check_output(["git", "describe", "--always"]).strip().decode("utf-8")
+        )
+    except Exception:
+        print("failed to configure git revision", file=sys.stderr)
+        GIT_REVISION = None
+    sentry_sdk.Client(release=GIT_REVISION, environment=args.env, max_breadcrumbs=10)
 
     args.func(args)
 
