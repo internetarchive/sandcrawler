@@ -477,7 +477,7 @@ class ZipfilePusher(RecordPusher):
                 self.counts["total"] += 1
                 # NB doesn't really extract the file, just gives you a stream (file-like-object) for reading it
                 flo = archive.open(zipinfo, "r")
-                data = flo.read(2 ** 32)
+                data = flo.read(2**32)
                 flo.close()
                 if self.batch_size:
                     batch.append(data)

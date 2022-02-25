@@ -340,7 +340,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
             file_meta = gen_file_metadata(resource.body)
             try:
                 file_meta, _html_resource = fix_transfer_encoding(file_meta, resource)
-            except:
+            except Exception:
                 m.status = "transfer-encoding-error"
                 continue
 

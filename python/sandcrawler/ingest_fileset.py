@@ -146,9 +146,9 @@ class IngestFilesetWorker(IngestFileWorker):
             result["status"] = "wayback-content-error"
             result["error_message"] = str(e)[:1600]
             return result
-        except NotImplementedError:
-            result['status'] = 'not-implemented'
-            result['error_message'] = str(e)[:1600]
+        except NotImplementedError as e:
+            result["status"] = "not-implemented"
+            result["error_message"] = str(e)[:1600]
             return result
 
         html_biblio = None
