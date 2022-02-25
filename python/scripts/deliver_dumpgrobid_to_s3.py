@@ -111,7 +111,7 @@ def main():
     )
     args = parser.parse_args()
 
-    sentry_client = sentry_sdk.Client()
+    sentry_sdk.init()
 
     worker = DeliverDumpGrobidS3(**args.__dict__)
     worker.run(args.dump_file)

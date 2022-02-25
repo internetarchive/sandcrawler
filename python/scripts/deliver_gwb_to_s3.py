@@ -202,7 +202,7 @@ def main():
     )
     args = parser.parse_args()
 
-    sentry_sdk.Client()
+    sentry_sdk.init()
 
     worker = DeliverGwbS3(**args.__dict__)
     worker.run(args.manifest_file)

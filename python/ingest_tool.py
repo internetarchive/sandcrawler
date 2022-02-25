@@ -218,7 +218,7 @@ def main():
         except Exception:
             print("failed to configure git revision", file=sys.stderr)
             GIT_REVISION = None
-        sentry_sdk.Client(release=GIT_REVISION, environment=args.env, max_breadcrumbs=10)
+        sentry_sdk.init(release=GIT_REVISION, environment=args.env, max_breadcrumbs=10)
 
     args.func(args)
 

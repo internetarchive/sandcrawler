@@ -187,7 +187,7 @@ def main():
     )
     args = parser.parse_args()
 
-    sentry_sdk.Client()
+    sentry_sdk.init()
 
     worker = DeliverGwbDisk(**args.__dict__)
     worker.run(args.manifest_file)
