@@ -571,7 +571,7 @@ requests, slightly updated to allow `https://doi.org/10*` in terminal URL:
     cat /srv/sandcrawler/tasks/patch_ingest_request_2022-01-06.ingest_request.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
     => TIMEDOUT
     => (probably due to re-assignment)
-    => TODO: try again
+    => DONE
 
 ## Stats Again (just OAI-PMH)
 
@@ -640,4 +640,39 @@ On 2022-02-08:
      bad-redirect          |      134
      redirects-exceeded    |      120
     (20 rows)
+
+
+On 2022-02-28, after bulk ingest completed:
+
+            status         |  count   
+    -----------------------+----------
+     success               | 14668123
+     no-pdf-link           |  8822460
+     no-capture            |  2987565
+     redirect-loop         |  1629015
+     terminal-bad-status   |   917851
+     wrong-mimetype        |   466512
+     link-loop             |   460941
+     null-body             |    71457
+     cdx-error             |    19636
+     petabox-error         |    16198
+                           |    15275
+     blocked-cookie        |    11885
+     wayback-error         |     8779
+     skip-url-blocklist    |     7838
+     empty-blob            |     5906
+     max-hops-exceeded     |     5563
+     wayback-content-error |      355
+     body-too-large        |      329
+     spn2-error:job-failed |      191
+     bad-redirect          |      137
+    (20 rows)
+
+
+Comparing to a couple months ago:
+
+    14668123-13258356 = +1,409,767  success
+    8822460-8685519 =   +  136,941  no-pdf-link
+    2987565-4765663 =   -1,778,098  no-capture
+    917851-803373 =     +  114,478  terminal-bad-status
 
