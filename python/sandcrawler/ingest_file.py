@@ -20,6 +20,7 @@ from sandcrawler.ia import (
     NoCaptureError,
     PetaboxError,
     ResourceResult,
+    SavePageNowBackoffError,
     SavePageNowClient,
     SavePageNowError,
     WaybackClient,
@@ -631,6 +632,12 @@ class IngestFileWorker(SandcrawlerWorker):
             except SavePageNowError as e:
                 result["status"] = "spn2-error"
                 result["error_message"] = str(e)[:1600]
+                return result
+            except SavePageNowBackoffError as e:
+                result["status"] = "spn2-backoff"
+                result["error_message"] = str(e)[:1600]
+                # small sleep as a slow-down
+                time.sleep(2.0)
                 return result
             except PetaboxError as e:
                 result["status"] = "petabox-error"

@@ -1057,6 +1057,7 @@ class SavePageNowClient:
 
         job_id = resp_json["job_id"]
         print(f"  SPNv2 running: job_id={job_id} url={request_url}", file=sys.stderr)
+        time.sleep(0.1)
 
         # poll until complete
         final_json = None
