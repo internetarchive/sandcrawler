@@ -356,7 +356,7 @@ class WebFilesetStrategy(FilesetIngestStrategy):
                 continue
 
             m.md5 = m.md5 or file_meta["md5hex"]
-            m.sha1 = m.sha1 or file_meta["md5hex"]
+            m.sha1 = m.sha1 or file_meta["sha1hex"]
             m.sha256 = m.sha256 or file_meta["sha256hex"]
             m.mimetype = m.mimetype or file_meta["mimetype"]
 
