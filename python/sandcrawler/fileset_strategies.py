@@ -212,15 +212,16 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
 
         # 2. upload all files, with metadata
         assert item.archiveorg_item_meta and item.archiveorg_item_meta["collection"]
-        item_files = []
+        item_files = {}
         for m in item.manifest:
             local_path = local_dir + "/" + m.path
-            item_files.append(
-                {
-                    "name": local_path,
-                    "remote_name": m.path,
-                }
-            )
+            if m.path == "name":
+                raise NotImplementedError(
+                    "fileset file path is 'name', which is a reserved keyword"
+                )
+            item_files[m.path] = local_path
+        if len(item_files) != len(item.manifest):
+            raise NotImplementedError("file/manifest length mismatch: duplicated file paths?")
 
         print(
             f"  uploading all files to {item.archiveorg_item_name} under {item.archiveorg_item_meta.get('collection')}...",
