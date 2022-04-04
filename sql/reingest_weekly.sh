@@ -13,7 +13,7 @@ sudo -u sandcrawler pipenv run \
 
 cat /srv/sandcrawler/tasks/reingest_weekly_current.json \
     | shuf \
-    | head -n60000 \
+    | head -n80000 \
     | jq . -c \
     | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-daily -p -1
 

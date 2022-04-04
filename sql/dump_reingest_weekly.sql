@@ -1,7 +1,11 @@
 
+BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE READ ONLY DEFERRABLE;
+
 COPY (
     SELECT row_to_json(ingest_request.*) FROM ingest_request
-    LEFT JOIN ingest_file_result ON ingest_file_result.base_url = ingest_request.base_url
+    LEFT JOIN ingest_file_result ON
+        ingest_file_result.base_url = ingest_request.base_url
+        AND ingest_file_result.ingest_type = ingest_request.ingest_type
     WHERE
         (ingest_request.ingest_type = 'pdf'
             OR ingest_request.ingest_type = 'html')
@@ -32,3 +36,4 @@ COPY (
 --      AND (ingest_request.ingest_request_source != 'fatcat-changelog'
 --           AND ingest_request.ingest_request_source != 'fatcat-ingest')
 
+ROLLBACK;
