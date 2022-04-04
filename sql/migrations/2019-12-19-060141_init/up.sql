@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS ingest_request (
     PRIMARY KEY (link_source, link_source_id, ingest_type, base_url)
 );
 CREATE INDEX ingest_request_base_url_idx ON ingest_request(base_url, ingest_type);
+CREATE INDEX ingest_request_source_created_idx ON ingest_request(ingest_request_source, created);
 
 CREATE TABLE IF NOT EXISTS ingest_file_result (
     ingest_type             TEXT NOT NULL CHECK (octet_length(ingest_type) >= 1),
