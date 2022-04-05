@@ -343,6 +343,14 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
         url = html_url + "pdf"
         return dict(pdf_url=url, technique="jmir-url")
 
+    # Google Drive
+    # this is assuming it is a PDF
+    if "drive.google.com/file/d/" in html_url and "/view" in html_url:
+        gdrive_id = html_url.split('/')[5]
+        if len(gdrive_id) > 10:
+            # https://drive.google.com/uc?export=download&id=15DnbNMZTbRHHqKj8nFaikGSd1-OyoJ24
+            return dict(pdf_url=f"https://drive.google.com/uc?export=download&id={gdrive_id}", technique="google-drive")
+
     ### below here we are doing guesses
 
     # generic guess: try current URL plus .pdf, if it exists in the HTML body
