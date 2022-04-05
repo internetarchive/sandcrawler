@@ -189,6 +189,35 @@ x URL list filtered from new OAI-PMH feed
     zstdcat oai_pmh_partial_dump_2022_03_01_urls.txt.zst | rg '\.ru/' | pv -l > oai_pmh_partial_dump_2022_03_01_urls.ru_tld.txt
     # 276k 0:00:03 [72.9k/s]
 
+
+### Landing Page Bulk Ingest
+
+Running these 2022-03-24, after targeted crawl completed:
+
+    zcat /srv/fatcat/tasks/ingest_ua_pdfs.2022-03-08.requests.json.gz \
+        | rg -v "\\\\" \
+        | jq . -c \
+        | pv -l \
+        | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+    # 103k 0:00:02 [36.1k/s]
+
+    zcat /srv/fatcat/tasks/ingest_by_pdfs.2022-03-09.requests.json.gz \
+        | rg -v "\\\\" \
+        | jq . -c \
+        | pv -l \
+        | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+    # 1.29k 0:00:00 [15.8k/s]
+
+    zcat /srv/fatcat/tasks/ingest_ru_pdfs.2022-03-09.requests.partial.json.gz \
+        | rg -v "\\\\" \
+        | jq . -c \
+        | pv -l \
+        | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+    # 546k 0:00:13 [40.6k/s]
+
+It will probably take a week or more for these to complete.
+
+
 ## Outreach
 
 - openalex
