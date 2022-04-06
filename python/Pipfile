@@ -1,6 +1,6 @@
 [[source]]
 name = "ia"
-url = "https://devpi.archive.org/wb/prod"
+url = "https://devpi.us.archive.org/wb/prod"
 verify_ssl = true
 
 [[source]]
