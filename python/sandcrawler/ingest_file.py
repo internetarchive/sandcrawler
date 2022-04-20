@@ -153,6 +153,8 @@ class IngestFileWorker(SandcrawlerWorker):
             "doi.org/10.15468/",  # gbif.org: database entry
             # deprecated domain (doesn't redirect correctly)
             "://edoc.mpg.de/",
+            # bogus/spam PDFs
+            "://isiarticles.com/",
         ]
 
         self.wall_blocklist = [
