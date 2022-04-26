@@ -6,8 +6,8 @@ Want to do priority crawling of Ukranian web content, plus Russia and Belarus.
 
     (country_code:ua OR lang:uk)
     => 2022-03-08, before ingests: 470,986 total, 170,987 missing, almost all article-journal, peak in 2019, 55k explicitly OA
-    => later in day, already some 22k missing found! wow
-
+       later in day, already some 22k missing found! wow
+    => 2022-04-04, after ingests:  476,174 total, 131,063 missing, 49k OA missing
 
 ## Metadata Prep
 
