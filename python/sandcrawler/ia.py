@@ -1010,19 +1010,41 @@ class SavePageNowClient:
                 if domain in request_url:
                     force_simple_get = 1
                     break
+
+        # check if SPNv2 user has capacity available
+        resp = self.v2_session.get("https://web.archive.org/save/status/user")
+        if resp.status_code == 429:
+            raise SavePageNowBackoffError(
+                f"SPNv2 availability API status_code: {resp.status_code}"
+            )
+        elif resp.status_code != 200:
+            raise SavePageNowError(f"SPN2 availability status_code: {resp.status_code}")
+        resp.raise_for_status()
+        status_user = resp.json()
+        if status_user["available"] <= 1:
+            print(f"SPNv2 user slots not available: {resp.text}", file=sys.stderr)
+            raise SavePageNowBackoffError(
+                "SPNv2 availability: {}, url: {}".format(status_user, request_url)
+            )
+
+        req_data = {
+            "url": request_url,
+            "capture_all": 1,
+            "if_not_archived_within": "1d",
+            "skip_first_archive": 1,
+            "js_behavior_timeout": 0,
+            # NOTE: not set explicitly to 0/false because of a bug in SPNv2 API
+            # implementation
+            # "capture_screenshot": 0,
+            # "outlinks_availability": 0,
+        }
+        if force_simple_get:
+            req_data["force_get"] = force_simple_get
+        if capture_outlinks:
+            req_data["capture_outlinks"] = capture_outlinks
         resp = self.v2_session.post(
             self.v2endpoint,
-            data={
-                "url": request_url,
-                "capture_all": 1,
-                "capture_outlinks": capture_outlinks,
-                "capture_screenshot": 0,
-                "if_not_archived_within": "1d",
-                "force_get": force_simple_get,
-                "skip_first_archive": 1,
-                "outlinks_availability": 0,
-                "js_behavior_timeout": 0,
-            },
+            data=req_data,
         )
         if resp.status_code == 429:
             raise SavePageNowBackoffError(
@@ -1032,6 +1054,7 @@ class SavePageNowClient:
             raise SavePageNowError(
                 "SPN2 status_code: {}, url: {}".format(resp.status_code, request_url)
             )
+        resp.raise_for_status()
         resp_json = resp.json()
 
         if (
