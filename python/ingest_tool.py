@@ -115,6 +115,20 @@ def run_file_requests_backfill(args):
     pusher.run()
 
 
+def run_spn_status(args):
+    worker = IngestFileWorker(
+        sink=None,
+        try_spn2=False,
+    )
+
+    resp = worker.spn_client.v2_session.get("https://web.archive.org/save/status/system")
+    resp.raise_for_status()
+    print(f"System status: {json.dumps(resp.json(), sort_keys=True)}")
+    resp = worker.spn_client.v2_session.get("https://web.archive.org/save/status/user")
+    resp.raise_for_status()
+    print(f"User status: {json.dumps(resp.json(), sort_keys=True)}")
+
+
 def run_api(args):
     port = 8083
     print("Listening on localhost:{}".format(port))
@@ -203,6 +217,11 @@ def main():
     sub_file_requests_backfill.add_argument(
         "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
     )
+
+    sub_spn_status = subparsers.add_parser(
+        "spn-status", help="checks save-page-now v2 API status for bot user"
+    )
+    sub_spn_status.set_defaults(func=run_spn_status)
 
     args = parser.parse_args()
     if not args.__dict__.get("func"):
