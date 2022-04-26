@@ -3,11 +3,12 @@ select = C,E,F,W,ANN
 # ANN003 is annotation on, eg, **kwargs
 # ANN101 is annotation on 'self' (why would that be wanted?)
 # ANN204 is annotation on '__init__()'
+# ANN401 is 'Any' type
 # E265,E266 are restrictions on comments ('#')
 # E501 is line-too-long, which we enforce with black
 # W503,E203 are allowed by black
 # TODO: C901 is complexity, should be re-enabled at some point
-ignore = ANN003,ANN101,ANN204,E265,E266,E501,C901,W503,E203
+ignore = ANN003,ANN101,ANN204,ANN401,E265,E266,E501,C901,W503,E203
 per-file-ignores =
     sandcrawler/__init__.py: F401
     sandcrawler/ia.py: E402
