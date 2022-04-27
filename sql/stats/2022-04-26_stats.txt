@@ -1,0 +1,432 @@
+
+## SQL Table Sizes
+
+    SELECT
+        table_name,
+        pg_size_pretty(table_size) AS table_size,
+        pg_size_pretty(indexes_size) AS indexes_size,
+        pg_size_pretty(total_size) AS total_size
+      FROM (
+          SELECT
+              table_name,
+              pg_table_size(table_name) AS table_size,
+              pg_indexes_size(table_name) AS indexes_size,
+              pg_total_relation_size(table_name) AS total_size
+          FROM (
+              SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
+              FROM information_schema.tables
+              WHERE table_schema = 'public'
+          ) AS all_tables
+          ORDER BY total_size DESC
+      ) AS pretty_sizes;
+
+                 table_name             | table_size | indexes_size | total_size 
+    ------------------------------------+------------+--------------+------------
+     "public"."crossref"                | 416 GB     | 10 GB        | 426 GB
+     "public"."grobid"                  | 98 GB      | 13 GB        | 112 GB
+     "public"."cdx"                     | 58 GB      | 41 GB        | 99 GB
+     "public"."ingest_request"          | 50 GB      | 48 GB        | 98 GB
+     "public"."ingest_file_result"      | 42 GB      | 48 GB        | 90 GB
+     "public"."grobid_shadow"           | 67 GB      | 5455 MB      | 73 GB
+     "public"."file_meta"               | 37 GB      | 34 GB        | 71 GB
+     "public"."pdf_meta"                | 21 GB      | 7386 MB      | 29 GB
+     "public"."grobid_refs"             | 23 GB      | 2516 MB      | 26 GB
+     "public"."fatcat_file"             | 13 GB      | 7314 MB      | 20 GB
+     "public"."shadow"                  | 9517 MB    | 8026 MB      | 17 GB
+     "public"."html_meta"               | 3015 MB    | 31 MB        | 3046 MB
+     "public"."petabox"                 | 403 MB     | 461 MB       | 864 MB
+     "public"."pdftrio"                 | 550 MB     | 297 MB       | 847 MB
+     "public"."ingest_fileset_platform" | 8192 bytes | 16 kB        | 24 kB
+     "public"."crossref_with_refs"      | 0 bytes    | 0 bytes      | 0 bytes
+    (16 rows)
+
+
+## File Metadata
+
+Counts and total file size:
+
+    SELECT COUNT(*) as total_count, SUM(size_bytes) as total_size FROM file_meta;
+
+     total_count |   total_size
+    -------------+-----------------
+       192402128 | 271919997557597
+    (1 row)
+
+    # 271,919,997,557,597 -> ~272 TByte
+
+Top mimetypes:
+
+    SELECT mimetype, COUNT(*) FROM file_meta GROUP BY mimetype ORDER BY COUNT DESC LIMIT 30;
+
+                                     mimetype                                  |   count   
+    ---------------------------------------------------------------------------+-----------
+     application/pdf                                                           | 191760695
+     text/html                                                                 |    330351
+     application/octet-stream                                                  |    186696
+     application/xml                                                           |     42170
+     application/xhtml+xml                                                     |     31470
+     text/plain                                                                |     16449
+     application/jats+xml                                                      |      6902
+     application/gzip                                                          |      6681
+                                                                               |      6033
+     application/postscript                                                    |      4916
+     image/jpeg                                                                |      2901
+     application/vnd.ms-powerpoint                                             |      1672
+     application/msword                                                        |       934
+     application/x-bzip2                                                       |       891
+     image/png                                                                 |       476
+     application/x-dosexec                                                     |       404
+     image/gif                                                                 |       395
+     application/vnd.openxmlformats-officedocument.wordprocessingml.document   |       374
+     application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         |       294
+     application/x-compress                                                    |       274
+     video/mp4                                                                 |       150
+     application/zip                                                           |       131
+     application/CDFV2-unknown                                                 |        99
+     application/mac-binhex40                                                  |        79
+     application/zlib                                                          |        68
+     text/x-tex                                                                |        44
+     application/vnd.openxmlformats-officedocument.presentationml.presentation |        39
+     text/x-php                                                                |        37
+     image/g3fax                                                               |        35
+     text/rtf                                                                  |        33
+    (30 rows)
+
+Missing full metadata:
+
+    SELECT COUNT(*) FROM file_meta WHERE sha256hex IS NULL;
+
+     count
+    -------
+     12831
+    (1 row)
+
+## CDX
+
+Total and unique-by-sha1 counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM cdx;
+
+     unique_sha1 |   total
+    -------------+-----------
+       130732381 | 162760251
+    (1 row)
+
+mimetype counts:
+
+    SELECT mimetype, COUNT(*) FROM cdx GROUP BY mimetype ORDER BY COUNT(*) DESC LIMIT 30;
+
+              mimetype          |   count
+    ----------------------------+-----------
+     application/pdf            | 149749828
+     warc/revisit               |  10437210
+     application/octet-stream   |    733161
+     text/html                  |    642992
+     text/xml                   |    525483
+     unk                        |    217642
+     application/postscript     |     81127
+     application/save           |     81023
+     binary/octet-stream        |     67938
+     application/x-download     |     41137
+     image/pdf                  |     39712
+     application/download       |     37153
+     text/plain                 |     36342
+     application/force-download |     21496
+     multipart/form-data        |      9792
+     application                |      5366
+     application/x-octetstream  |      5166
+     application/x-msdownload   |      3851
+     .pdf                       |      3445
+     application/x-pdf          |      3018
+     pdf                        |      1618
+     file                       |      1370
+     application/binary         |      1354
+     file/unknown               |      1345
+     application/pdf'           |      1196
+     application/octetstream    |      1047
+     application/unknown        |      1001
+     0                          |       773
+     text/pdf                   |       729
+     application/blob           |       673
+    (30 rows)
+
+## GROBID
+
+Counts:
+
+    SELECT COUNT(*) AS total_files FROM grobid;
+
+     total_files
+    -------------
+       123669603
+    (1 row)
+
+
+Status?
+
+    SELECT status_code, COUNT(*) FROM grobid GROUP BY status_code ORDER BY COUNT DESC LIMIT 25;
+
+     status_code |   count
+    -------------+-----------
+             200 | 115668412
+             500 |   7995428
+              -4 |      5745
+             503 |        18
+    (4 rows)
+
+
+What version used?
+
+    SELECT grobid_version, COUNT(*) FROM grobid WHERE status_code = 200 GROUP BY grobid_version ORDER BY COUNT DESC LIMIT 25;
+
+        grobid_version    |  count
+    ----------------------+----------
+     0.7.0-131-gdd0251d9f | 54780825
+     0.5.5-fatcat         | 48003940
+                          | 12694404
+     0.7.0-104-gbeebd9a6b |   189243
+    (4 rows)
+
+## Petabox
+
+Counts:
+
+    SELECT COUNT(DISTINCT sha1hex) as unique_sha1, COUNT(*) as total FROM petabox;
+
+     unique_sha1 |  total
+    -------------+---------
+         2868825 | 2887834
+    (1 row)
+
+
+## Ingests
+
+Requests by source:
+
+    SELECT ingest_type, link_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source ORDER BY COUNT DESC LIMIT 25;
+
+     ingest_type |   link_source   |  count
+    -------------+-----------------+----------
+     pdf         | oai             | 51185088
+     pdf         | unpaywall       | 43932525
+     pdf         | mag             | 43701948
+     pdf         | doi             | 40044585
+     pdf         | doaj            |  6016771
+     html        | doaj            |  3648181
+     pdf         | arxiv           |  2676200
+     pdf         | pmc             |  2402453
+     html        | doi             |    41492
+     xml         | doaj            |    20638
+     pdf         | cnki_covid19    |     2034
+     pdf         | wanfang_covid19 |      975
+     pdf         | spn             |      829
+     html        | spn             |       52
+     xml         | doi             |        1
+     xml         | spn             |        1
+    (16 rows)
+
+    SELECT ingest_type, link_source, ingest_request_source, COUNT(*) FROM ingest_request GROUP BY ingest_type, link_source, ingest_request_source ORDER BY COUNT DESC LIMIT 35;
+
+     ingest_type |   link_source   |  ingest_request_source  |  count
+    -------------+-----------------+-------------------------+----------
+     pdf         | oai             | metha-bulk              | 51185088
+     pdf         | unpaywall       | unpaywall               | 43932525
+     pdf         | mag             | mag-corpus              | 43701948
+     pdf         | doi             | fatcat-changelog        | 20936949
+     pdf         | doi             | fatcat-ingest           | 15590201
+     pdf         | doaj            | doaj                    |  6016771
+     html        | doaj            | doaj                    |  3648181
+     pdf         | doi             | fatcat-ingest-container |  3515873
+     pdf         | pmc             | fatcat-ingest-container |  2028825
+     pdf         | arxiv           | fatcat-ingest           |  1984766
+     pdf         | arxiv           | fatcat-changelog        |   691405
+     pdf         | pmc             | fatcat-ingest           |   297646
+     pdf         | pmc             | fatcat-changelog        |    75982
+     html        | doi             | fatcat-ingest           |    37904
+     xml         | doaj            | doaj                    |    20638
+     html        | doi             | fatcat-changelog        |     3534
+     pdf         | cnki_covid19    | scrape-covid19          |     2034
+     pdf         | doi             | savepapernow-web        |     1562
+     pdf         | wanfang_covid19 | scrape-covid19          |      975
+     pdf         | spn             | savepapernow-web        |      829
+     html        | doi             | savepapernow-web        |       54
+     html        | spn             | savepapernow-web        |       52
+     pdf         | arxiv           | fatcat-ingest-container |       26
+     pdf         | arxiv           | savepapernow-web        |        3
+     xml         | doi             | savepapernow-web        |        1
+     xml         | spn             | savepapernow-web        |        1
+    (26 rows)
+
+Uncrawled requests by source:
+
+    # TODO: verify this?
+    SELECT ingest_request.ingest_type, ingest_request.link_source, COUNT(*)
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+    WHERE ingest_file_result.base_url IS NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY COUNT DESC LIMIT 35;
+
+     ingest_type | link_source |  count
+    -------------+-------------+---------
+     pdf         | doaj        | 1619621
+     html        | doaj        | 1208412
+     pdf         | mag         |  167653
+     pdf         | oai         |   15282
+     xml         | doaj        |   11196
+     pdf         | unpaywall   |     270
+     pdf         | doi         |      22
+    (7 rows)
+
+Results by source:
+
+    SELECT
+        ingest_request.ingest_type,
+        ingest_request.link_source,
+        COUNT(*) as attempts,
+        COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) hits, 
+        ROUND(1.0 * COUNT(CASE WHEN ingest_file_result.hit THEN 1 END) / COUNT(*), 3) as fraction
+    FROM ingest_request
+    LEFT JOIN ingest_file_result
+        ON ingest_request.base_url = ingest_file_result.base_url
+        AND ingest_request.ingest_type = ingest_file_result.ingest_type
+        AND ingest_file_result.ingest_type IS NOT NULL
+    GROUP BY ingest_request.ingest_type, ingest_request.link_source ORDER BY attempts DESC LIMIT 35;
+
+     ingest_type |   link_source   | attempts |   hits   | fraction 
+    -------------+-----------------+----------+----------+----------
+     pdf         | oai             | 51185088 | 15968290 |    0.312
+     pdf         | unpaywall       | 43932525 | 32618045 |    0.742
+     pdf         | mag             | 43701948 | 32662926 |    0.747
+     pdf         | doi             | 40044738 | 10925369 |    0.273
+     pdf         | doaj            |  6016771 |  3042569 |    0.506
+     html        | doaj            |  3648181 |   344208 |    0.094
+     pdf         | arxiv           |  2676206 |  2269708 |    0.848
+     pdf         | pmc             |  2402453 |  1855679 |    0.772
+     html        | doi             |    41492 |     1739 |    0.042
+     xml         | doaj            |    20638 |     6899 |    0.334
+     pdf         | cnki_covid19    |     2034 |        0 |    0.000
+     pdf         | wanfang_covid19 |      975 |      764 |    0.784
+     pdf         | spn             |      829 |      616 |    0.743
+     html        | spn             |       52 |        7 |    0.135
+     xml         | doi             |        1 |        0 |    0.000
+     xml         | spn             |        1 |        0 |    0.000
+    (16 rows)
+
+Ingest result by status:
+
+    SELECT ingest_type, status, COUNT(*) FROM ingest_file_result GROUP BY ingest_type, status ORDER BY COUNT DESC LIMIT 50;
+
+     ingest_type |             status              |  count
+    -------------+---------------------------------+----------
+     pdf         | success                         | 85709322
+     pdf         | no-pdf-link                     | 29713304
+     pdf         | no-capture                      | 26632191
+     pdf         | redirect-loop                   | 10979145
+     pdf         | terminal-bad-status             |  4977000
+     pdf         | link-loop                       |  3434877
+     pdf         | skip-url-blocklist              |  3114258
+     pdf         | blocked-cookie                  |  2156835
+     html        | wrong-scope                     |  1126911
+     pdf         | wrong-mimetype                  |   980546
+     pdf         | gateway-timeout                 |   651562
+     pdf         | spn2-cdx-lookup-failure         |   484016
+     pdf         | spn2-backoff                    |   399382
+     pdf         | cdx-error                       |   373964
+     pdf         | wayback-content-error           |   354370
+     html        | success                         |   345860
+     pdf         | null-body                       |   336182
+     pdf         | spn2-error:500                  |   309755
+     pdf         | forbidden                       |   291175
+     pdf         | not-found                       |   275560
+     pdf         | too-many-redirects              |   262312
+     html        | unknown-scope                   |   230352
+     html        | redirect-loop                   |   226596
+     html        | html-resource-no-capture        |   205646
+     html        | no-capture                      |   164014
+     component   | spn2-cdx-lookup-failure         |   148825
+     component   | wrong-mimetype                  |   130344
+     html        | null-body                       |   100296
+     pdf         | wayback-error                   |    94286
+     pdf         | spn2-wayback-error              |    81365
+     component   | no-capture                      |    75278
+     pdf         | spn2-error                      |    69830
+     pdf         | skip-wall                       |    57744
+     pdf         | spn2-error:too-many-redirects   |    53808
+     pdf         | remote-server-error             |    41286
+     pdf         | petabox-error                   |    38800
+     pdf         | invalid-host-resolution         |    37337
+     pdf         | read-timeout                    |    36872
+     component   | spn2-backoff                    |    33217
+     pdf         | empty-blob                      |    27946
+     component   | spn2-error                      |    24078
+     pdf         | spn2-error:unknown              |    23697
+     component   | gateway-timeout                 |    23139
+     html        | wrong-mimetype                  |    22731
+     html        | wayback-content-error           |    20507
+     pdf         | spn2-error:host-crawling-paused |    19900
+     pdf         | bad-redirect                    |    19183
+     html        | terminal-bad-status             |    13354
+     component   | blocked-cookie                  |    12287
+     component   | spn2-error:500                  |    11271
+    (50 rows)
+
+Failed ingest by terminal status code:
+
+    SELECT ingest_type, terminal_status_code, COUNT(*) FROM ingest_file_result WHERE hit = false GROUP BY ingest_type, terminal_status_code ORDER BY COUNT DESC LIMIT 50;
+
+     ingest_type | terminal_status_code |  count
+    -------------+----------------------+----------
+     pdf         |                  200 | 38144779
+     pdf         |                      | 32762240
+     pdf         |                  301 |  9433087
+     html        |                  200 |  1716127
+     pdf         |                  403 |  1416632
+     pdf         |                  302 |  1134668
+     pdf         |                  404 |   888853
+     pdf         |                  401 |   746311
+     pdf         |                  503 |   655894
+     pdf         |                  400 |   531479
+     component   |                      |   337603
+     pdf         |                  500 |   247944
+     html        |                  301 |   224237
+     html        |                      |   167194
+     pdf         |                  303 |   135048
+     component   |                  200 |   130663
+     pdf         |                  429 |    93489
+     pdf         |                  410 |    67392
+     pdf         |                  420 |    26722
+     pdf         |                  502 |    18770
+     pdf         |                  409 |    15152
+     pdf         |                  509 |    15113
+     pdf         |                  999 |    11747
+     html        |                  404 |     9879
+     pdf         |                  307 |     8895
+     pdf         |                  412 |     7053
+     pdf         |                  308 |     6627
+     pdf         |                  202 |     5289
+     xml         |                  200 |     2540
+     html        |                  500 |     2480
+     pdf         |                  520 |     2220
+     pdf         |                  521 |     1844
+     pdf         |                  206 |     1739
+     html        |                  302 |     1407
+     pdf         |                  504 |     1146
+     html        |                  303 |     1123
+     pdf         |                  421 |      986
+     pdf         |                  406 |      938
+     pdf         |                  204 |      498
+     pdf         |                  505 |      468
+     pdf         |                  300 |      436
+     pdf         |                  508 |      422
+     pdf         |                  426 |      405
+     html        |                  429 |      402
+     html        |                  403 |      398
+     pdf         |                  432 |      366
+     component   |                  301 |      294
+     pdf         |                  405 |      210
+     pdf         |                  226 |      166
+     component   |                  302 |      128
+    (50 rows)
+
