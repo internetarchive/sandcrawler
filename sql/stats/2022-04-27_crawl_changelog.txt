@@ -1,0 +1,191 @@
+                domain                |         status          | count  
+--------------------------------------+-------------------------+--------
+ academic.oup.com                     |                         |   1243
+ academic.oup.com                     | spn2-cdx-lookup-failure |    990
+ aip.scitation.org                    |                         |    313
+ aip.scitation.org                    | spn2-cdx-lookup-failure |    224
+ ajps.uomustansiriyah.edu.iq          |                         |    235
+ apps.crossref.org                    |                         |   1329
+ apps.crossref.org                    | spn2-cdx-lookup-failure |    942
+ apps.crossref.org                    | no-pdf-link             |    387
+ archaeologydataservice.ac.uk         |                         |    422
+ archaeologydataservice.ac.uk         | spn2-cdx-lookup-failure |    289
+ arxiv.org                            |                         |   3512
+ arxiv.org                            | spn2-cdx-lookup-failure |   2319
+ arxiv.org                            | success                 |   1177
+ assets.researchsquare.com            |                         |    571
+ assets.researchsquare.com            | spn2-cdx-lookup-failure |    322
+ assets.researchsquare.com            | success                 |    249
+ brill.com                            |                         |    397
+ brill.com                            | spn2-cdx-lookup-failure |    265
+ cla.berkeley.edu                     |                         |    239
+ classiques-garnier.com               |                         |    249
+ cyberleninka.ru                      |                         |    340
+ cyberleninka.ru                      | spn2-cdx-lookup-failure |    244
+ dergipark.org.tr                     |                         |    468
+ dergipark.org.tr                     | spn2-cdx-lookup-failure |    333
+ dl.acm.org                           |                         |    592
+ dl.acm.org                           | spn2-cdx-lookup-failure |    470
+ doi.ala.org.au                       |                         |    288
+ doi.ala.org.au                       | spn2-cdx-lookup-failure |    220
+ doi.org                              |                         |   1107
+ doi.org                              | terminal-bad-status     |    679
+ doi.org                              | spn2-cdx-lookup-failure |    415
+ downloads.hindawi.com                |                         |    279
+ downloads.hindawi.com                | success                 |    267
+ edbs.uomustansiriyah.edu.iq          |                         |    294
+ edbs.uomustansiriyah.edu.iq          | spn2-cdx-lookup-failure |    209
+ elibrary.kdpu.edu.ua                 |                         |    320
+ elibrary.kdpu.edu.ua                 | spn2-cdx-lookup-failure |    233
+ elibrary.ru                          |                         |    722
+ elibrary.ru                          | spn2-cdx-lookup-failure |    505
+ europepmc.org                        |                         |    986
+ europepmc.org                        | spn2-cdx-lookup-failure |    681
+ europepmc.org                        | success                 |    291
+ figshare.com                         |                         |    377
+ figshare.com                         | spn2-cdx-lookup-failure |    328
+ fjfsdata01prod.blob.core.windows.net |                         |    255
+ fjfsdata01prod.blob.core.windows.net | spn2-cdx-lookup-failure |    216
+ hammer.purdue.edu                    |                         |    224
+ ieeexplore.ieee.org                  |                         |   3904
+ ieeexplore.ieee.org                  | spn2-cdx-lookup-failure |   2654
+ ieeexplore.ieee.org                  | gateway-timeout         |    792
+ ieeexplore.ieee.org                  | spn2-backoff            |    419
+ journals.eco-vector.com              |                         |    428
+ journals.eco-vector.com              | spn2-cdx-lookup-failure |    306
+ journals.lww.com                     |                         |    727
+ journals.lww.com                     | spn2-cdx-lookup-failure |    622
+ journals.openedition.org             |                         |    806
+ journals.openedition.org             | spn2-cdx-lookup-failure |    554
+ journals.plos.org                    |                         |    348
+ journals.plos.org                    | spn2-cdx-lookup-failure |    244
+ kiss.kstudy.com                      |                         |    226
+ kluwerlawonline.com                  |                         |    723
+ kluwerlawonline.com                  | spn2-cdx-lookup-failure |    489
+ kluwerlawonline.com                  | link-loop               |    203
+ linkinghub.elsevier.com              |                         |    401
+ linkinghub.elsevier.com              | spn2-backoff            |    342
+ mdpi-res.com                         |                         |   1463
+ mdpi-res.com                         | success                 |   1337
+ muse.jhu.edu                         |                         |    346
+ muse.jhu.edu                         | spn2-cdx-lookup-failure |    253
+ onepetro.org                         |                         |    363
+ onepetro.org                         | spn2-cdx-lookup-failure |    284
+ online.ucpress.edu                   |                         |   1620
+ online.ucpress.edu                   | spn2-cdx-lookup-failure |   1511
+ onlinelibrary.wiley.com              |                         |   2913
+ onlinelibrary.wiley.com              | spn2-cdx-lookup-failure |   2109
+ onlinelibrary.wiley.com              | terminal-bad-status     |    787
+ opendata.uni-halle.de                |                         |    519
+ opendata.uni-halle.de                | spn2-cdx-lookup-failure |    343
+ osf.io                               |                         |   1554
+ osf.io                               | spn2-cdx-lookup-failure |   1350
+ papers.ssrn.com                      |                         |   2207
+ papers.ssrn.com                      | spn2-cdx-lookup-failure |   1727
+ papers.ssrn.com                      | link-loop               |    457
+ psycharchives.org                    |                         |    384
+ psycharchives.org                    | spn2-cdx-lookup-failure |    283
+ publons.com                          |                         |    493
+ publons.com                          | spn2-cdx-lookup-failure |    348
+ pubs.acs.org                         |                         |   1240
+ pubs.acs.org                         | spn2-cdx-lookup-failure |    881
+ pubs.acs.org                         | terminal-bad-status     |    298
+ pubs.rsc.org                         |                         |    603
+ pubs.rsc.org                         | spn2-cdx-lookup-failure |    460
+ repositories.lib.utexas.edu          |                         |   1861
+ repositories.lib.utexas.edu          | spn2-cdx-lookup-failure |   1288
+ repositories.lib.utexas.edu          | terminal-bad-status     |    523
+ s3-eu-west-1.amazonaws.com           |                         |    216
+ sage.figshare.com                    |                         |    374
+ sage.figshare.com                    | spn2-cdx-lookup-failure |    309
+ scholar.dkyobobook.co.kr             |                         |    220
+ scholarworks.gsu.edu                 |                         |    749
+ scholarworks.gsu.edu                 | spn2-cdx-lookup-failure |    577
+ tandf.figshare.com                   |                         |    214
+ www.atlantis-press.com               |                         |    338
+ www.atlantis-press.com               | spn2-cdx-lookup-failure |    214
+ www.cairn.info                       |                         |    782
+ www.cairn.info                       | spn2-cdx-lookup-failure |    541
+ www.cambridge.org                    |                         |   2325
+ www.cambridge.org                    | spn2-cdx-lookup-failure |   1787
+ www.cambridge.org                    | no-pdf-link             |    300
+ www.cell.com                         |                         |    213
+ www.concrete.org                     |                         |    476
+ www.concrete.org                     | spn2-cdx-lookup-failure |    340
+ www.dbpia.co.kr                      |                         |    375
+ www.dbpia.co.kr                      | spn2-cdx-lookup-failure |    275
+ www.degruyter.com                    |                         |   3849
+ www.degruyter.com                    | spn2-cdx-lookup-failure |   2969
+ www.degruyter.com                    | no-pdf-link             |    712
+ www.dib.ie                           |                         |   1100
+ www.dib.ie                           | spn2-cdx-lookup-failure |   1038
+ www.e-periodica.ch                   |                         |    821
+ www.e-periodica.ch                   | spn2-cdx-lookup-failure |    620
+ www.e-periodica.ch                   | no-pdf-link             |    201
+ www.elibrary.ru                      |                         |    401
+ www.elibrary.ru                      | spn2-cdx-lookup-failure |    281
+ www.emerald.com                      |                         |    390
+ www.emerald.com                      | spn2-cdx-lookup-failure |    275
+ www.eurekaselect.com                 |                         |    275
+ www.frontiersin.org                  |                         |   1266
+ www.frontiersin.org                  | spn2-cdx-lookup-failure |   1025
+ www.hanspub.org                      |                         |    229
+ www.hindawi.com                      |                         |    604
+ www.hindawi.com                      | spn2-cdx-lookup-failure |    594
+ www.inderscience.com                 |                         |    201
+ www.jstage.jst.go.jp                 |                         |   1094
+ www.jstage.jst.go.jp                 | spn2-cdx-lookup-failure |    807
+ www.jstage.jst.go.jp                 | success                 |    206
+ www.mdpi.com                         |                         |   4340
+ www.mdpi.com                         | spn2-cdx-lookup-failure |   4258
+ www.nomos-elibrary.de                |                         |   2749
+ www.nomos-elibrary.de                | spn2-cdx-lookup-failure |   1909
+ www.nomos-elibrary.de                | redirect-loop           |    819
+ www.osti.gov                         |                         |    275
+ www.oxfordhandbooks.com              |                         |    248
+ www.oxfordhandbooks.com              | spn2-cdx-lookup-failure |    224
+ www.pdcnet.org                       |                         |    217
+ www.researchsquare.com               |                         |    483
+ www.researchsquare.com               | spn2-cdx-lookup-failure |    317
+ www.scielo.br                        |                         |    319
+ www.scielo.br                        | spn2-cdx-lookup-failure |    222
+ www.sciencedirect.com                |                         |   3384
+ www.sciencedirect.com                | spn2-cdx-lookup-failure |   3267
+ www.spiedigitallibrary.org           |                         |    441
+ www.spiedigitallibrary.org           | spn2-cdx-lookup-failure |    327
+ www.tandfonline.com                  |                         |   2401
+ www.tandfonline.com                  | spn2-cdx-lookup-failure |   1552
+ www.tandfonline.com                  | no-pdf-link             |    303
+ www.tandfonline.com                  | blocked-cookie          |    250
+ www.taylorfrancis.com                |                         |   1232
+ www.taylorfrancis.com                | spn2-cdx-lookup-failure |    908
+ www.thieme-connect.de                |                         |    520
+ www.thieme-connect.de                | spn2-cdx-lookup-failure |    366
+ www.worldscientific.com              |                         |    383
+ www.worldscientific.com              | spn2-cdx-lookup-failure |    276
+ zenodo.org                           |                         |  10625
+ zenodo.org                           | spn2-cdx-lookup-failure |   7777
+ zenodo.org                           | success                 |   1574
+ zenodo.org                           | no-pdf-link             |   1160
+ zivahub.uct.ac.za                    |                         |   3428
+ zivahub.uct.ac.za                    | spn2-cdx-lookup-failure |   2845
+ zivahub.uct.ac.za                    | no-pdf-link             |    583
+                                      |                         | 130491
+                                      | spn2-cdx-lookup-failure |  95169
+                                      | success                 |  13354
+                                      | no-pdf-link             |   9621
+                                      | terminal-bad-status     |   3385
+                                      | spn2-backoff            |   2396
+                                      | redirect-loop           |   2216
+                                      | link-loop               |   1850
+                                      | gateway-timeout         |   1061
+                                      | spn2-error:blocked-url  |    428
+                                      | blocked-cookie          |    415
+                                      | spn2-error              |    246
+(182 rows)
+
+----
+
+The overwhelming thing is `spn2-cdx-lookup-failure`. Should check in after a
+week or two, when crawling and retries are running smoothly, and see what
+things look like then.
