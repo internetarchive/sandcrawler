@@ -64,3 +64,7 @@ ingest_file_result table, pdf, success: 66,487,928
 "Parsed web PDFs": `file_meta`, left join CDX
 
 (didn't do this one)
+
+---
+
+Uploaded all these to <https://archive.org/download/ia_scholarly_urls_2021-09-09>
