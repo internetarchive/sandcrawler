@@ -15,5 +15,5 @@ cat /srv/sandcrawler/tasks/reingest_quarterly_current.json \
     | shuf \
     | head -n120000 \
     | jq . -c \
-    | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-daily -p -1
+    | kafkacat -P -b wbgrp-svc350.us.archive.org -t sandcrawler-prod.ingest-file-requests-daily -p -1
 

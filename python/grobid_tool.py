@@ -5,7 +5,7 @@ might go to stdout, or might go to Kafka topic.
 
 Example of large parallel run, locally:
 
-    cat /srv/sandcrawler/tasks/ungrobided.2019-09-23.json         | pv -l | parallel -j30 --pipe         ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
+    cat /srv/sandcrawler/tasks/ungrobided.2019-09-23.json         | pv -l | parallel -j30 --pipe         ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc350.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
 """
 
 import argparse

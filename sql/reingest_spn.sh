@@ -15,5 +15,5 @@ cat /srv/sandcrawler/tasks/reingest_spn.json \
     | shuf \
     | head -n60000 \
     | jq . -c \
-    | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-priority -p -1
+    | kafkacat -P -b wbgrp-svc350.us.archive.org -t sandcrawler-prod.ingest-file-requests-priority -p -1
 

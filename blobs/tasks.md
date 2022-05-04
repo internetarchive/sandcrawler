@@ -19,7 +19,7 @@ didn't try to connect to postgresql.
 
 Commands:
 
-    ./sandcrawler_worker.py --kafka-hosts wbgrp-svc263.us.archive.org:9092 --env prod --s3-bucket sandcrawler --s3-url wbgrp-svc169.us.archive.org:8333 persist-grobid --s3-only
+    ./sandcrawler_worker.py --kafka-hosts wbgrp-svc350.us.archive.org:9092 --env prod --s3-bucket sandcrawler --s3-url wbgrp-svc169.us.archive.org:8333 persist-grobid --s3-only
     => Consuming from kafka topic sandcrawler-prod.grobid-output-pg, group persist-grobid-seaweed
     => run briefly, then kill
 
@@ -29,7 +29,7 @@ On kafka-broker worker:
 
 Then run 2x instances of worker (same command as above):
 
-    ./sandcrawler_worker.py --kafka-hosts wbgrp-svc263.us.archive.org:9092 --env prod --s3-bucket sandcrawler --s3-url wbgrp-svc169.us.archive.org:8333 persist-grobid --s3-only
+    ./sandcrawler_worker.py --kafka-hosts wbgrp-svc350.us.archive.org:9092 --env prod --s3-bucket sandcrawler --s3-url wbgrp-svc169.us.archive.org:8333 persist-grobid --s3-only
 
 At this point CPU-limited on this worker by the python processes (only 4 cores
 on this machine).

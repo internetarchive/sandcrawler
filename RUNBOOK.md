@@ -23,7 +23,7 @@ Copy/transfer to a Kafka node; load a sample and then the whole output:
 
 Older example; if this fails, need to re-run entire thing:
 
-    cat /srv/sandcrawler/tasks/regrobid_cdx.split_*.json | pv -l | parallel -j40 --linebuffer --round-robin --pipe ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
+    cat /srv/sandcrawler/tasks/regrobid_cdx.split_*.json | pv -l | parallel -j40 --linebuffer --round-robin --pipe ./grobid_tool.py --kafka-env prod --kafka-hosts wbgrp-svc350.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --kafka-mode --grobid-host http://localhost:8070 -j0 extract-json -
 
 TODO: is it possible to use job log with millions of `--pipe` inputs? That
 would be more efficient in the event of failure.
@@ -35,7 +35,7 @@ Want to use GNU/Parallel in a mode that will do retries well:
     fd .zip /srv/sandcrawler/tasks/crossref-pre-1909-scholarly-works/ | \
         sort | \
         parallel -j16 --progress --joblog extract_tasks.log --resume-failed \
-        './grobid_tool.py --kafka-mode --kafka-env prod --kafka-hosts wbgrp-svc263.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --grobid-host http://localhost:8070 extract-zipfile {}'
+        './grobid_tool.py --kafka-mode --kafka-env prod --kafka-hosts wbgrp-svc350.us.archive.org:9092,wbgrp-svc284.us.archive.org:9092,wbgrp-svc285.us.archive.org:9092 --grobid-host http://localhost:8070 extract-zipfile {}'
 
 After starting, check that messages are actually getting pushed to kafka
 (producer failures can be silent!). If anything goes wrong, run the exact same
