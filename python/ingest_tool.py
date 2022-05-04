@@ -70,11 +70,11 @@ def run_file_requests_backfill(args):
 
     Can be used to batch re-process known files.
     """
-    grobid_topic = "sandcrawler-{}.grobid-output-pg".format(args.kafka_env)
-    pdftext_topic = "sandcrawler-{}.pdf-text".format(args.kafka_env)
-    thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.kafka_env)
-    xmldoc_topic = "sandcrawler-{}.xml-doc".format(args.kafka_env)
-    htmlteixml_topic = "sandcrawler-{}.html-teixml".format(args.kafka_env)
+    grobid_topic = "sandcrawler-{}.grobid-output-pg".format(args.env)
+    pdftext_topic = "sandcrawler-{}.pdf-text".format(args.env)
+    thumbnail_topic = "sandcrawler-{}.pdf-thumbnail-180px-jpg".format(args.env)
+    xmldoc_topic = "sandcrawler-{}.xml-doc".format(args.env)
+    htmlteixml_topic = "sandcrawler-{}.html-teixml".format(args.env)
     grobid_sink = KafkaSink(
         kafka_hosts=args.kafka_hosts,
         produce_topic=grobid_topic,
@@ -143,6 +143,9 @@ def main():
         action="store_true",
         help="report exceptions to Sentry",
     )
+    parser.add_argument(
+        "--env", default="dev", help="environment (eg, prod, qa, dev)"
+    )
     subparsers = parser.add_subparsers()
 
     sub_single = subparsers.add_parser("single", help="ingests a single base URL")
@@ -210,9 +213,6 @@ def main():
         "--kafka-hosts",
         default="localhost:9092",
         help="list of Kafka brokers (host/port) to use",
-    )
-    sub_file_requests_backfill.add_argument(
-        "--kafka-env", default="dev", help="Kafka topic namespace to use (eg, prod, qa, dev)"
     )
     sub_file_requests_backfill.add_argument(
         "--grobid-host", default="https://grobid.qa.fatcat.wiki", help="GROBID API host/port"
