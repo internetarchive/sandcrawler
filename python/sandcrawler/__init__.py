@@ -7,6 +7,7 @@ from .ia import (
     CdxRow,
     PetaboxError,
     ResourceResult,
+    SavePageNowBackoffError,
     SavePageNowClient,
     SavePageNowError,
     WarcResource,

@@ -4,7 +4,7 @@ import pytest
 import responses
 from test_wayback import *
 
-from sandcrawler import CdxPartial, SavePageNowClient, SavePageNowError
+from sandcrawler import CdxPartial, SavePageNowBackoffError, SavePageNowClient, SavePageNowError
 
 TARGET = "http://dummy-target.dummy"
 JOB_ID = "e70f33c7-9eca-4c88-826d-26930564d7c8"
@@ -117,6 +117,19 @@ def spn_client():
 def test_savepagenow_success(spn_client):
 
     responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/user",
+        status=200,
+        body=json.dumps(
+            {
+                "available": 23,
+                "daily_captures": 60295,
+                "daily_captures_limit": 300000,
+                "processing": 1,
+            }
+        ),
+    )
+    responses.add(
         responses.POST,
         "http://dummy-spnv2/save",
         status=200,
@@ -143,7 +156,7 @@ def test_savepagenow_success(spn_client):
 
     resp = spn_client.save_url_now_v2(TARGET)
 
-    assert len(responses.calls) == 4
+    assert len(responses.calls) == 5
 
     assert resp.success is True
     assert resp.status == "success"
@@ -156,6 +169,19 @@ def test_savepagenow_success(spn_client):
 @responses.activate
 def test_savepagenow_remote_error(spn_client):
 
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/user",
+        status=200,
+        body=json.dumps(
+            {
+                "available": 23,
+                "daily_captures": 60295,
+                "daily_captures_limit": 300000,
+                "processing": 1,
+            }
+        ),
+    )
     responses.add(
         responses.POST,
         "http://dummy-spnv2/save",
@@ -177,7 +203,7 @@ def test_savepagenow_remote_error(spn_client):
 
     resp = spn_client.save_url_now_v2(TARGET)
 
-    assert len(responses.calls) == 3
+    assert len(responses.calls) == 4
 
     assert resp.success is False
     assert resp.status == ERROR_BODY["status_ext"]
@@ -190,6 +216,19 @@ def test_savepagenow_remote_error(spn_client):
 @responses.activate
 def test_savepagenow_500(spn_client):
 
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/user",
+        status=200,
+        body=json.dumps(
+            {
+                "available": 23,
+                "daily_captures": 60295,
+                "daily_captures_limit": 300000,
+                "processing": 1,
+            }
+        ),
+    )
     responses.add(
         responses.POST,
         "http://dummy-spnv2/save",
@@ -206,12 +245,48 @@ def test_savepagenow_500(spn_client):
     with pytest.raises(SavePageNowError):
         spn_client.save_url_now_v2(TARGET)
 
-    assert len(responses.calls) == 2
+    assert len(responses.calls) == 3
+
+
+@responses.activate
+def test_savepagenow_no_slots(spn_client):
+
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/user",
+        status=200,
+        body=json.dumps(
+            {
+                "available": 0,
+                "daily_captures": 60295,
+                "daily_captures_limit": 300000,
+                "processing": 1,
+            }
+        ),
+    )
+
+    with pytest.raises(SavePageNowBackoffError):
+        spn_client.save_url_now_v2(TARGET)
+
+    assert len(responses.calls) == 1
 
 
 @responses.activate
 def test_crawl_resource(spn_client, wayback_client):
 
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/user",
+        status=200,
+        body=json.dumps(
+            {
+                "available": 23,
+                "daily_captures": 60295,
+                "daily_captures_limit": 300000,
+                "processing": 1,
+            }
+        ),
+    )
     responses.add(
         responses.POST,
         "http://dummy-spnv2/save",
@@ -244,7 +319,7 @@ def test_crawl_resource(spn_client, wayback_client):
     print("https://web.archive.org/web/{}id_/{}".format("20180326070330", TARGET + "/redirect"))
     resp = spn_client.crawl_resource(TARGET, wayback_client)
 
-    assert len(responses.calls) == 5
+    assert len(responses.calls) == 6
 
     assert resp.hit is True
     assert resp.status == "success"

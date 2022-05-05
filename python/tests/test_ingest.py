@@ -50,6 +50,19 @@ def test_ingest_success(ingest_worker_pdf):
         "base_url": "http://dummy-host/",
     }
     responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/user",
+        status=200,
+        body=json.dumps(
+            {
+                "available": 23,
+                "daily_captures": 60295,
+                "daily_captures_limit": 300000,
+                "processing": 1,
+            }
+        ),
+    )
+    responses.add(
         responses.POST,
         "http://dummy-spnv2/save",
         status=200,
@@ -135,6 +148,19 @@ def test_ingest_landing(ingest_worker):
         "ingest_type": "pdf",
         "base_url": "http://dummy-host/",
     }
+    responses.add(
+        responses.GET,
+        "http://dummy-spnv2/save/status/user",
+        status=200,
+        body=json.dumps(
+            {
+                "available": 23,
+                "daily_captures": 60295,
+                "daily_captures_limit": 300000,
+                "processing": 1,
+            }
+        ),
+    )
     responses.add(
         responses.POST,
         "http://dummy-spnv2/save",

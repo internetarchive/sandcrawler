@@ -1012,7 +1012,7 @@ class SavePageNowClient:
                     break
 
         # check if SPNv2 user has capacity available
-        resp = self.v2_session.get("https://web.archive.org/save/status/user")
+        resp = self.v2_session.get(f"{self.v2endpoint}/status/user")
         if resp.status_code == 429:
             raise SavePageNowBackoffError(
                 f"SPNv2 availability API status_code: {resp.status_code}"
