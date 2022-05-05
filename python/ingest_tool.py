@@ -143,9 +143,7 @@ def main():
         action="store_true",
         help="report exceptions to Sentry",
     )
-    parser.add_argument(
-        "--env", default="dev", help="environment (eg, prod, qa, dev)"
-    )
+    parser.add_argument("--env", default="dev", help="environment (eg, prod, qa, dev)")
     subparsers = parser.add_subparsers()
 
     sub_single = subparsers.add_parser("single", help="ingests a single base URL")
