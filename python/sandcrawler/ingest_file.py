@@ -166,6 +166,9 @@ class IngestFileWorker(SandcrawlerWorker):
             "/password-login",
             "://gateway.isiknowledge.com/",
             "/login?TARGET=",
+            "jstage.jst.go.jp/sblogin",
+            "://acw.elsevier.com/SSOCore",
+            "://acw.sciencedirect.com/SSOCore",
         ]
 
         self.cookie_blocklist = [
