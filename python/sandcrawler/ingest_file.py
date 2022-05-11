@@ -151,6 +151,7 @@ class IngestFileWorker(SandcrawlerWorker):
             "doi.org/10.2307/",  # JSTOR; slow and many redirects
             "doi.org/10.18730/",  # fao.org: database entry
             "doi.org/10.15468/",  # gbif.org: database entry
+            "doi.org/10.48550/",  # arxiv.org: redundant with direct ingest
             # deprecated domain (doesn't redirect correctly)
             "://edoc.mpg.de/",
             # bogus/spam PDFs
