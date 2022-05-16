@@ -120,6 +120,15 @@ class GrobidClient(object):
                 "status_code": -4,  # heritrix3 "HTTP timeout" code
                 "error_msg": "GROBID request (HTTP POST) timeout",
             }
+        except requests.exceptions.ConnectionError as ce:
+            # intentionally raising this, so workers crash when GROBID
+            # unavailable. but do add a sleep to slow things down.
+            print(
+                "GROBID ConnectionError. sleeping as a slow-down before crashing",
+                file=sys.stderr,
+            )
+            time.sleep(5.0)
+            raise ce
 
         info: Dict[str, Any] = dict(status_code=grobid_response.status_code)
         if grobid_response.status_code == 200:

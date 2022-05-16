@@ -611,6 +611,8 @@ class WaybackClient:
             )
         except requests.exceptions.TooManyRedirects:
             raise WaybackContentError("redirect loop (wayback replay fetch)")
+        except requests.exceptions.ConnectionError:
+            raise WaybackContentError("ConnectionError (wayback replay fetch)")
         except requests.exceptions.ChunkedEncodingError:
             raise WaybackError("ChunkedEncodingError (wayback replay fetch)")
         except UnicodeDecodeError:
@@ -1042,10 +1044,14 @@ class SavePageNowClient:
             req_data["force_get"] = force_simple_get
         if capture_outlinks:
             req_data["capture_outlinks"] = capture_outlinks
-        resp = self.v2_session.post(
-            self.v2endpoint,
-            data=req_data,
-        )
+        try:
+            resp = self.v2_session.post(
+                self.v2endpoint,
+                data=req_data,
+            )
+        except requests.exceptions.ConnectionError:
+            raise SavePageNowError(f"SPN2 TCP connection error {request_url=}")
+
         if resp.status_code == 429:
             raise SavePageNowBackoffError(
                 "status_code: {}, url: {}".format(resp.status_code, request_url)
