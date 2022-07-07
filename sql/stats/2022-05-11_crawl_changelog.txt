@@ -1,0 +1,410 @@
+                             domain                              |         status          | count  
+-----------------------------------------------------------------+-------------------------+--------
+ academic.oup.com                                                |                         |   2210
+ academic.oup.com                                                | no-pdf-link             |   1350
+ academic.oup.com                                                | bad-redirect            |    510
+ academiccommons.columbia.edu                                    |                         |    379
+ academiccommons.columbia.edu                                    | success                 |    339
+ aip.scitation.org                                               |                         |    762
+ aip.scitation.org                                               | terminal-bad-status     |    430
+ apps.crossref.org                                               |                         |   9894
+ apps.crossref.org                                               | no-pdf-link             |   9886
+ apps.euskadi.eus                                                |                         |    242
+ apps.euskadi.eus                                                | no-pdf-link             |    240
+ arxiv.org                                                       |                         |  44889
+ arxiv.org                                                       | success                 |  28781
+ arxiv.org                                                       | spn2-backoff            |   7975
+ arxiv.org                                                       | terminal-bad-status     |   4508
+ arxiv.org                                                       | spn2-cdx-lookup-failure |   2010
+ arxiv.org                                                       | redirect-loop           |    619
+ arxiv.org                                                       | no-pdf-link             |    242
+ arxiv.org                                                       | spn2-error              |    236
+ asa.scitation.org                                               |                         |    356
+ asa.scitation.org                                               | terminal-bad-status     |    299
+ asmedigitalcollection.asme.org                                  |                         |    240
+ assets.cureus.com                                               |                         |    336
+ assets.cureus.com                                               | success                 |    335
+ assets.researchsquare.com                                       |                         |   1042
+ assets.researchsquare.com                                       | success                 |    993
+ av.tib.eu                                                       |                         |    205
+ av.tib.eu                                                       | no-pdf-link             |    203
+ bibliographie.uni-tuebingen.de                                  |                         |    213
+ bibliographie.uni-tuebingen.de                                  | no-pdf-link             |    211
+ biorxiv.org                                                     | redirect-loop           |    217
+ biorxiv.org                                                     |                         |    217
+ books.openedition.org                                           |                         |    691
+ books.openedition.org                                           | no-pdf-link             |    687
+ boris.unibe.ch                                                  |                         |    525
+ boris.unibe.ch                                                  | success                 |    466
+ bridges.monash.edu                                              |                         |    663
+ bridges.monash.edu                                              | no-pdf-link             |    647
+ brill.com                                                       |                         |    860
+ brill.com                                                       | success                 |    434
+ chemrxiv.org                                                    |                         |    201
+ classiques-garnier.com                                          |                         |    242
+ content.iospress.com                                            |                         |    325
+ content.iospress.com                                            | link-loop               |    247
+ core.tdar.org                                                   |                         |    216
+ core.tdar.org                                                   | no-pdf-link             |    211
+ cyberleninka.ru                                                 |                         |    646
+ cyberleninka.ru                                                 | success                 |    620
+ d197for5662m48.cloudfront.net                                   |                         |    263
+ d197for5662m48.cloudfront.net                                   | success                 |    262
+ dergipark.org.tr                                                |                         |    891
+ dergipark.org.tr                                                | success                 |    526
+ dergipark.org.tr                                                | no-pdf-link             |    261
+ digi.ub.uni-heidelberg.de                                       |                         |    427
+ digi.ub.uni-heidelberg.de                                       | no-pdf-link             |    427
+ direct.mit.edu                                                  |                         |    268
+ direct.mit.edu                                                  | no-pdf-link             |    208
+ dl.acm.org                                                      |                         |   1719
+ dl.acm.org                                                      | success                 |    829
+ dl.acm.org                                                      | no-pdf-link             |    546
+ dl.acm.org                                                      | terminal-bad-status     |    205
+ dlc.library.columbia.edu                                        |                         |    385
+ dlc.library.columbia.edu                                        | terminal-bad-status     |    319
+ doi.ala.org.au                                                  |                         |    724
+ doi.ala.org.au                                                  | no-pdf-link             |    721
+ doi.apa.org                                                     |                         |    214
+ doi.org                                                         |                         |   3390
+ doi.org                                                         | terminal-bad-status     |   2938
+ doi.org                                                         | redirect-loop           |    233
+ doi.org                                                         | spn2-wayback-error      |    208
+ doi.usp.org                                                     |                         |    325
+ doi.usp.org                                                     | no-pdf-link             |    324
+ downloads.hindawi.com                                           |                         |   1439
+ downloads.hindawi.com                                           | success                 |   1436
+ du.diva-portal.org                                              |                         |    589
+ du.diva-portal.org                                              | success                 |    586
+ econtents.bc.unicamp.br                                         |                         |    310
+ econtents.bc.unicamp.br                                         | success                 |    310
+ ediss.uni-goettingen.de                                         |                         |    728
+ ediss.uni-goettingen.de                                         | success                 |    425
+ elibrary.kdpu.edu.ua                                            |                         |    907
+ elibrary.kdpu.edu.ua                                            | bad-redirect            |    712
+ elibrary.ru                                                     |                         |    925
+ elibrary.ru                                                     | terminal-bad-status     |    492
+ elibrary.ru                                                     | bad-redirect            |    230
+ elibrary.vdi-verlag.de                                          |                         |    393
+ elifesciences.org                                               |                         |    296
+ elifesciences.org                                               | success                 |    276
+ europepmc.org                                                   |                         |   3024
+ europepmc.org                                                   | success                 |   2541
+ europepmc.org                                                   | terminal-bad-status     |    463
+ figshare.com                                                    |                         |    493
+ figshare.com                                                    | no-pdf-link             |    440
+ files.osf.io                                                    |                         |    883
+ files.osf.io                                                    | success                 |    686
+ fjfsdata01prod.blob.core.windows.net                            |                         |   3869
+ fjfsdata01prod.blob.core.windows.net                            | success                 |   3818
+ ieeexplore.ieee.org                                             |                         |  10854
+ ieeexplore.ieee.org                                             | gateway-timeout         |   5495
+ ieeexplore.ieee.org                                             | spn2-backoff            |   1662
+ ieeexplore.ieee.org                                             | no-pdf-link             |   1417
+ ieeexplore.ieee.org                                             | success                 |   1410
+ ieeexplore.ieee.org                                             | redirect-loop           |    768
+ iiif.crossasia.org                                              |                         |   7608
+ iiif.crossasia.org                                              | no-pdf-link             |   7568
+ ikee.lib.auth.gr                                                |                         |    450
+ ikee.lib.auth.gr                                                | success                 |    332
+ ins.journals.ekb.eg                                             |                         |    212
+ iopscience.iop.org                                              |                         |    268
+ jamanetwork.com                                                 |                         |    333
+ journals.aps.org                                                |                         |    414
+ journals.asm.org                                                |                         |    242
+ journals.flvc.org                                               |                         |    245
+ journals.flvc.org                                               | success                 |    242
+ journals.healio.com                                             |                         |    755
+ journals.healio.com                                             | terminal-bad-status     |    668
+ journals.lincoln.ac.nz                                          |                         |    244
+ journals.lincoln.ac.nz                                          | success                 |    239
+ journals.lww.com                                                |                         |   1772
+ journals.lww.com                                                | link-loop               |   1425
+ journals.lww.com                                                | spn2-backoff            |    209
+ journals.openedition.org                                        |                         |   1192
+ journals.openedition.org                                        | redirect-loop           |    467
+ journals.openedition.org                                        | success                 |    451
+ journals.plos.org                                               |                         |    771
+ journals.plos.org                                               | success                 |    750
+ journals.ub.uni-heidelberg.de                                   |                         |    787
+ journals.ub.uni-heidelberg.de                                   | success                 |    741
+ kazanmedjournal.ru                                              |                         |    240
+ kazanmedjournal.ru                                              | success                 |    231
+ kiss.kstudy.com                                                 |                         |    219
+ kiss.kstudy.com                                                 | no-pdf-link             |    218
+ kluwerlawonline.com                                             |                         |    444
+ kluwerlawonline.com                                             | link-loop               |    402
+ libraetd.lib.virginia.edu                                       |                         |    362
+ libraetd.lib.virginia.edu                                       | no-pdf-link             |    361
+ link.springer.com                                               |                         |    305
+ linkinghub.elsevier.com                                         |                         |    568
+ linkinghub.elsevier.com                                         | spn2-backoff            |    545
+ ltu-figshare-repo.s3.aarnet.edu.au                              |                         |    269
+ ltu-figshare-repo.s3.aarnet.edu.au                              | success                 |    268
+ mausamjournal.imd.gov.in                                        |                         |    202
+ mdpi-res.com                                                    |                         |   8892
+ mdpi-res.com                                                    | success                 |   8863
+ mededpublish.org                                                |                         |   1900
+ mededpublish.org                                                | no-pdf-link             |   1900
+ meetingorganizer.copernicus.org                                 |                         |    276
+ meetingorganizer.copernicus.org                                 | no-pdf-link             |    271
+ muse.jhu.edu                                                    |                         |   1047
+ muse.jhu.edu                                                    | terminal-bad-status     |    755
+ muse.jhu.edu                                                    | link-loop               |    203
+ online.ucpress.edu                                              |                         |    358
+ online.ucpress.edu                                              | link-loop               |    212
+ onlinelibrary.wiley.com                                         |                         |   5813
+ onlinelibrary.wiley.com                                         | terminal-bad-status     |   4587
+ onlinelibrary.wiley.com                                         | spn2-wayback-error      |    614
+ onlinelibrary.wiley.com                                         | blocked-cookie          |    381
+ open.library.ubc.ca                                             |                         |    206
+ opendata.uni-halle.de                                           |                         |   1768
+ opendata.uni-halle.de                                           | success                 |   1215
+ opendata.uni-halle.de                                           | wrong-mimetype          |    260
+ opendata2.uni-halle.de                                          |                         |    206
+ opg.optica.org                                                  |                         |    205
+ osf.io                                                          |                         |   2949
+ osf.io                                                          | no-pdf-link             |   2404
+ osf.io                                                          | spn2-backoff            |    299
+ papers.ssrn.com                                                 |                         |   3962
+ papers.ssrn.com                                                 | link-loop               |   3800
+ peerj.com                                                       |                         |    273
+ preprints.jmir.org                                              |                         |    275
+ preprints.jmir.org                                              | cdx-error               |    255
+ publikationen.bibliothek.kit.edu                                |                         |    213
+ publons.com                                                     |                         |    593
+ publons.com                                                     | no-pdf-link             |    590
+ pubs.acs.org                                                    |                         |   2288
+ pubs.acs.org                                                    | terminal-bad-status     |   1841
+ pubs.acs.org                                                    | spn2-wayback-error      |    210
+ pubs.rsc.org                                                    |                         |   1698
+ pubs.rsc.org                                                    | bad-redirect            |    811
+ pubs.rsc.org                                                    | link-loop               |    352
+ pubs.rsc.org                                                    | success                 |    307
+ radiopaedia.org                                                 |                         |    220
+ read.dukeupress.edu                                             |                         |    303
+ repositories.lib.utexas.edu                                     |                         |   1570
+ repositories.lib.utexas.edu                                     | bad-redirect            |    513
+ repositories.lib.utexas.edu                                     | spn2-backoff            |    383
+ repositories.lib.utexas.edu                                     | gateway-timeout         |    379
+ repositories.lib.utexas.edu                                     | terminal-bad-status     |    282
+ repository.uj.ac.za                                             |                         |    489
+ repository.uj.ac.za                                             | no-pdf-link             |    365
+ repository.unsworks.unsw.edu.au                                 |                         |    397
+ repository.urosario.edu.co                                      |                         |   2429
+ repository.urosario.edu.co                                      | success                 |   1648
+ repository.urosario.edu.co                                      | bad-redirect            |    613
+ rex.libraries.wsu.edu                                           | no-pdf-link             |    241
+ rex.libraries.wsu.edu                                           |                         |    241
+ rsdjournal.org                                                  |                         |    208
+ rsdjournal.org                                                  | success                 |    208
+ s3-ap-southeast-2.amazonaws.com                                 |                         |    282
+ s3-ap-southeast-2.amazonaws.com                                 | success                 |    277
+ s3-eu-west-1.amazonaws.com                                      |                         |   4615
+ s3-eu-west-1.amazonaws.com                                      | success                 |   4593
+ s3-euw1-ap-pe-df-pch-content-store-p.s3.eu-west-1.amazonaws.com |                         |    240
+ s3-euw1-ap-pe-df-pch-content-store-p.s3.eu-west-1.amazonaws.com | success                 |    237
+ sage.figshare.com                                               |                         |    415
+ sage.figshare.com                                               | no-pdf-link             |    385
+ scholar.dkyobobook.co.kr                                        |                         |    512
+ scholar.dkyobobook.co.kr                                        | no-pdf-link             |    509
+ scholarlypublishingcollective.org                               |                         |    287
+ scholarworks.gsu.edu                                            |                         |   1132
+ scholarworks.gsu.edu                                            | success                 |   1000
+ scholarworks.iupui.edu                                          |                         |    205
+ scholarworks.umass.edu                                          |                         |    417
+ scholarworks.umass.edu                                          | success                 |    400
+ sciencescholar.us                                               |                         |    404
+ secure.jbs.elsevierhealth.com                                   |                         |    727
+ secure.jbs.elsevierhealth.com                                   | terminal-bad-status     |    722
+ tandf.figshare.com                                              |                         |    354
+ tandf.figshare.com                                              | no-pdf-link             |    342
+ unsworks.unsw.edu.au                                            |                         |    408
+ unsworks.unsw.edu.au                                            | spn2-cdx-lookup-failure |    342
+ valep.vc.univie.ac.at                                           | no-pdf-link             |    737
+ valep.vc.univie.ac.at                                           |                         |    737
+ watermark.silverchair.com                                       |                         |   1604
+ watermark.silverchair.com                                       | success                 |   1598
+ wayf.switch.ch                                                  |                         |    215
+ wayf.switch.ch                                                  | no-pdf-link             |    213
+ www.ahajournals.org                                             |                         |    438
+ www.ahajournals.org                                             | no-pdf-link             |    306
+ www.ahbps.org                                                   |                         |    316
+ www.ahbps.org                                                   | success                 |    312
+ www.atenaeditora.com.br                                         |                         |    390
+ www.atenaeditora.com.br                                         | terminal-bad-status     |    333
+ www.atlantis-press.com                                          |                         |    914
+ www.atlantis-press.com                                          | success                 |    901
+ www.atsjournals.org                                             |                         |   1245
+ www.atsjournals.org                                             | success                 |   1189
+ www.biorxiv.org                                                 |                         |    712
+ www.biorxiv.org                                                 | success                 |    670
+ www.bloomsburycollections.com                                   |                         |    982
+ www.bloomsburycollections.com                                   | terminal-bad-status     |    566
+ www.cahiers-clsl.ch                                             |                         |    305
+ www.cahiers-clsl.ch                                             | success                 |    298
+ www.cairn.info                                                  |                         |   1799
+ www.cairn.info                                                  | no-pdf-link             |    662
+ www.cairn.info                                                  | link-loop               |    487
+ www.cairn.info                                                  | success                 |    355
+ www.cairn.info                                                  | terminal-bad-status     |    267
+ www.cambridge.org                                               |                         |   3258
+ www.cambridge.org                                               | no-pdf-link             |   1682
+ www.cambridge.org                                               | success                 |    682
+ www.cambridge.org                                               | bad-redirect            |    404
+ www.cambridge.org                                               | link-loop               |    302
+ www.dbpia.co.kr                                                 |                         |    763
+ www.dbpia.co.kr                                                 | no-pdf-link             |    443
+ www.dbpia.co.kr                                                 | redirect-loop           |    287
+ www.degruyter.com                                               |                         |  12655
+ www.degruyter.com                                               | no-pdf-link             |   9112
+ www.degruyter.com                                               | success                 |   2898
+ www.degruyter.com                                               | spn2-backoff            |    507
+ www.dib.ie                                                      |                         |   1381
+ www.dib.ie                                                      | no-pdf-link             |   1378
+ www.dovepress.com                                               |                         |    231
+ www.dovepress.com                                               | success                 |    216
+ www.e-manuscripta.ch                                            |                         |    767
+ www.e-manuscripta.ch                                            | success                 |    399
+ www.e-periodica.ch                                              |                         |   1406
+ www.e-periodica.ch                                              | no-pdf-link             |   1402
+ www.e-rara.ch                                                   | no-pdf-link             |    251
+ www.e-rara.ch                                                   |                         |    251
+ www.editoracientifica.org                                       | no-pdf-link             |    205
+ www.editoracientifica.org                                       |                         |    205
+ www.elgaronline.com                                             |                         |    427
+ www.elibrary.ru                                                 |                         |    616
+ www.elibrary.ru                                                 | terminal-bad-status     |    364
+ www.elibrary.ru                                                 | no-pdf-link             |    216
+ www.emerald.com                                                 |                         |    862
+ www.emerald.com                                                 | no-pdf-link             |    724
+ www.endocrine-abstracts.org                                     |                         |   1907
+ www.endocrine-abstracts.org                                     | no-pdf-link             |   1905
+ www.eurekaselect.com                                            |                         |    285
+ www.eurekaselect.com                                            | link-loop               |    246
+ www.even3.com.br                                                |                         |    233
+ www.frontiersin.org                                             |                         |    585
+ www.frontiersin.org                                             | spn2-backoff            |    436
+ www.humankineticslibrary.com                                    | no-pdf-link             |    207
+ www.humankineticslibrary.com                                    |                         |    207
+ www.igi-global.com                                              |                         |   1600
+ www.igi-global.com                                              | no-pdf-link             |   1199
+ www.igi-global.com                                              | bad-redirect            |    258
+ www.inderscience.com                                            |                         |    385
+ www.inderscience.com                                            | no-pdf-link             |    365
+ www.inderscienceonline.com                                      |                         |    202
+ www.ingentaconnect.com                                          |                         |    450
+ www.ingentaconnect.com                                          | no-pdf-link             |    260
+ www.jstage.jst.go.jp                                            |                         |   1248
+ www.jstage.jst.go.jp                                            | success                 |    870
+ www.karger.com                                                  |                         |    313
+ www.liebertpub.com                                              |                         |    271
+ www.liebertpub.com                                              | no-pdf-link             |    241
+ www.nicecjournal.co.uk                                          |                         |    274
+ www.nicecjournal.co.uk                                          | success                 |    274
+ www.nomos-elibrary.de                                           |                         |   1771
+ www.nomos-elibrary.de                                           | no-pdf-link             |    788
+ www.nomos-elibrary.de                                           | redirect-loop           |    506
+ www.nomos-elibrary.de                                           | bad-redirect            |    207
+ www.osti.gov                                                    |                         |    381
+ www.osti.gov                                                    | link-loop               |    326
+ www.persee.fr                                                   |                         |    277
+ www.preprints.org                                               |                         |    225
+ www.preprints.org                                               | success                 |    225
+ www.protocols.io                                                |                         |    770
+ www.protocols.io                                                | success                 |    485
+ www.repository.cam.ac.uk                                        |                         |    510
+ www.repository.cam.ac.uk                                        | bad-redirect            |    213
+ www.research-collection.ethz.ch                                 |                         |    416
+ www.research-collection.ethz.ch                                 | bad-redirect            |    249
+ www.researchsquare.com                                          |                         |   1121
+ www.researchsquare.com                                          | bad-redirect            |    985
+ www.scielo.br                                                   |                         |    828
+ www.scielo.br                                                   | success                 |    641
+ www.sciencedirect.com                                           |                         |   8567
+ www.sciencedirect.com                                           | terminal-bad-status     |   5773
+ www.sciencedirect.com                                           | spn2-wayback-error      |   1590
+ www.sciencedirect.com                                           | no-pdf-link             |    576
+ www.sciencedirect.com                                           | spn2-backoff            |    479
+ www.sciendo.com                                                 |                         |    257
+ www.sciendo.com                                                 | success                 |    222
+ www.scitepress.org                                              |                         |    381
+ www.scitepress.org                                              | no-pdf-link             |    377
+ www.spiedigitallibrary.org                                      |                         |   1061
+ www.spiedigitallibrary.org                                      | bad-redirect            |    571
+ www.spiedigitallibrary.org                                      | gateway-timeout         |    233
+ www.tandfonline.com                                             |                         |   4934
+ www.tandfonline.com                                             | no-pdf-link             |   2088
+ www.tandfonline.com                                             | terminal-bad-status     |   1282
+ www.tandfonline.com                                             | blocked-cookie          |    757
+ www.tandfonline.com                                             | redirect-loop           |    488
+ www.tandfonline.com                                             | spn2-wayback-error      |    202
+ www.taylorfrancis.com                                           |                         |   3979
+ www.taylorfrancis.com                                           | link-loop               |   1928
+ www.taylorfrancis.com                                           | no-pdf-link             |   1840
+ www.techniques-ingenieur.fr                                     |                         |    354
+ www.techniques-ingenieur.fr                                     | no-pdf-link             |    353
+ www.thieme-connect.de                                           |                         |   1987
+ www.thieme-connect.de                                           | no-pdf-link             |    949
+ www.thieme-connect.de                                           | link-loop               |    869
+ www.tib.eu                                                      | no-pdf-link             |    315
+ www.tib.eu                                                      |                         |    315
+ www.un-ilibrary.org                                             | no-pdf-link             |    352
+ www.un-ilibrary.org                                             |                         |    352
+ www.worldscientific.com                                         |                         |    668
+ www.worldscientific.com                                         | no-pdf-link             |    629
+ www.zora.uzh.ch                                                 |                         |    318
+ zenodo.org                                                      |                         |  46585
+ zenodo.org                                                      | no-pdf-link             |  29519
+ zenodo.org                                                      | success                 |  14768
+ zenodo.org                                                      | terminal-bad-status     |    810
+ zenodo.org                                                      | wrong-mimetype          |    691
+ zenodo.org                                                      | spn2-cdx-lookup-failure |    395
+ zenodo.org                                                      | spn2-backoff            |    294
+ zivahub.uct.ac.za                                               |                         |   1909
+ zivahub.uct.ac.za                                               | no-pdf-link             |   1880
+ zop.zb.uzh.ch                                                   |                         |    228
+ zop.zb.uzh.ch                                                   | success                 |    217
+                                                                 |                         | 365582
+                                                                 | success                 | 141497  38.7%
+                                                                 | no-pdf-link             | 120852  33.0%
+                                                                 | terminal-bad-status     |  31900   8.7%
+                                                                 | spn2-backoff            |  16979   4.6%
+                                                                 | link-loop               |  13624   3.7%
+                                                                 | bad-redirect            |   8736
+                                                                 | redirect-loop           |   7405
+                                                                 | gateway-timeout         |   6997
+                                                                 | spn2-cdx-lookup-failure |   5146
+                                                                 | spn2-wayback-error      |   3708
+                                                                 | wrong-mimetype          |   2158
+                                                                 | blocked-cookie          |   1942
+                                                                 | spn2-error:blocked-url  |   1733
+                                                                 | wayback-error           |   1063
+                                                                 | spn2-error              |    647
+                                                                 | spn2-error:500          |    265
+                                                                 | cdx-error               |    257
+(383 rows)
+
+----
+
+365k in 7 days is about 52k a day, which is about expected. Around 5-7% need
+retries.
+
+important changes:
+- biorxiv.org: needs fix and then retries
+- academic.oup.com: should probably skip
+- apps.crossref.org: need to handle this in code
+- arxiv.org: should retry `terminal-bad-status` on PDFs; should also add support to extract PDF link from `/abs/`
+- doi.org: investigate redirect-loop and terminal-bad-status
+- osf.io: not getting PDFs
+- papers.ssrn.com: why are these attempted?
+- publons.com: not getting PDFs; special case these?
+- www.sciencedirect.com: not working at all?
+
+smaller:
+- bridges.monash.edu: fix, then retry?
+- dl.acm.org: some broader retries?
+- figshare.com: still some attempts, but almost all no-pdf-link
+- onlinelibrary.wiley.com: getting blocked broadly?
+- www.endocrine-abstracts.org: HTML content?
+- www.igi-global.com: no-pdf-link
