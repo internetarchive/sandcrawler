@@ -116,8 +116,9 @@ class IngestFileWorker(SandcrawlerWorker):
         self.max_html_resources = 200
 
         self.base_url_blocklist = [
-            # robot blocking
+            # robot blocking / rate-limited
             "://hkvalidate.perfdrive.com/",
+            "://ieeexplore.ieee.org/",
             # temporary, until we implement specific fetch and 'petabox' output
             "://archive.org/",
             "://www.archive.org/",
