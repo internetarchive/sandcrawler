@@ -138,5 +138,7 @@ TODO: are there any cases where we do a bulk ingest request, fail, and `terminal
     cd /srv/sandcrawler/src/python
     sudo su sandcrawler
     pipenv run ./scripts/ingestrequest_row2json.py /srv/sandcrawler/tasks/patch_ingest_request_$PATCHDATE.rows.json | pv -l > /srv/sandcrawler/tasks/patch_ingest_request_$PATCHDATE.ingest_request.json
+    => 4.84M 0:03:14 [24.9k/s]
 
-    cat /srv/sandcrawler/tasks/patch_ingest_request_$PATCHDATE.ingest_request.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc263.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+    cat /srv/sandcrawler/tasks/patch_ingest_request_$PATCHDATE.ingest_request.json | rg -v "\\\\" | jq . -c | kafkacat -P -b wbgrp-svc350.us.archive.org -t sandcrawler-prod.ingest-file-requests-bulk -p -1
+    => started 2022-05-11
