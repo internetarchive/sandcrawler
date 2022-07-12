@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import sys
@@ -192,9 +193,8 @@ class ArchiveorgFilesetStrategy(FilesetIngestStrategy):
                 ):
                     # these 'tab-separated-values' from dataverse are just noise, don't log them
                     if m.mimetype != "text/tab-separated-values":
-                        print(
-                            f"  WARN: mimetype mismatch: expected {m.mimetype}, found {file_meta['mimetype']}",
-                            file=sys.stderr,
+                        logging.warn(
+                            f"mimetype mismatch expected={m.mimetype} found={file_meta['mimetype']}"
                         )
                     m.mimetype = file_meta["mimetype"]
             else:
@@ -314,14 +314,13 @@ class WebFilesetStrategy(FilesetIngestStrategy):
                     fetch_url, self.wayback_client, force_simple_get=True
                 )
 
-            print(
-                "[FETCH {:>6}] {}  {}".format(
-                    via,
-                    (resource and resource.status),
-                    (resource and resource.terminal_url) or fetch_url,
-                ),
-                file=sys.stderr,
-            )
+            if resource:
+                print(
+                    f"fetch {via=} {fetch_url=} {resource.status=} {resource.terminal_url=}",
+                    file=sys.stderr,
+                )
+            else:
+                print(f"fetch {via=} {fetch_url=} status=", file=sys.stderr)
 
             m.terminal_url = resource.terminal_url
             m.terminal_dt = resource.terminal_dt

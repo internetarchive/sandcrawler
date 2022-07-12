@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import json
+import logging
 import sys
 import xml.etree.ElementTree as ET
 from typing import Any, List, Optional, Tuple
@@ -156,9 +157,7 @@ def quick_fetch_html_resources(
         if not cdx_row:
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
         if cdx_row.url != resource["url"] and not url_fuzzy_equal(cdx_row.url, resource["url"]):
-            print(
-                f"  WARN: CDX fuzzy match: {cdx_row.url} != {resource['url']}", file=sys.stderr
-            )
+            logging.warn(f"CDX fuzzy match expected={resource['url']} found={cdx_row.url}")
         if not cdx_row.status_code:
             # TODO: fall back to a full fetch?
             print("  WARN: skipping revisit record", file=sys.stderr)

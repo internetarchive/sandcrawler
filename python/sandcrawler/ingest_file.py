@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 import time
 import xml.etree.ElementTree
@@ -286,12 +287,13 @@ class IngestFileWorker(SandcrawlerWorker):
         ):
             via = "spn2"
             resource = self.spn_client.crawl_resource(url, self.wayback_client)
-        print(
-            "[FETCH {:>6}] {}  {}".format(
-                via, (resource and resource.status), (resource and resource.terminal_url) or url
-            ),
-            file=sys.stderr,
-        )
+        if resource:
+            print(
+                f"find_resource {via=} {url=} {resource.status=} {resource.terminal_url=}",
+                file=sys.stderr,
+            )
+        else:
+            print(f"find_resource {via=} {url=} status=", file=sys.stderr)
         return resource
 
     def process_existing(self, request: dict, result_row: dict) -> dict:
@@ -510,7 +512,7 @@ class IngestFileWorker(SandcrawlerWorker):
 
         try:
             if self.html_quick_mode:
-                print("  WARN: running quick CDX-only fetches", file=sys.stderr)
+                logging.warn("running quick CDX-only fetches")
                 full_resources = quick_fetch_html_resources(
                     raw_resources, self.wayback_client.cdx_client, when
                 )
@@ -549,7 +551,7 @@ class IngestFileWorker(SandcrawlerWorker):
         return info
 
     def timeout_response(self, task: dict) -> dict:
-        print("[TIMEOUT]", file=sys.stderr)
+        print("ingest-timeout", file=sys.stderr)
         return dict(
             request=task,
             hit=False,
@@ -563,7 +565,25 @@ class IngestFileWorker(SandcrawlerWorker):
         return True
 
     def process(self, request: dict, key: Any = None) -> dict:
-        return self.process_file(request, key=key)
+        start_time = time.time()
+        result = self.process_file(request, key=key)
+        result["duration"] = time.time() - start_time
+        print(self.canonical_log_line(result), file=sys.stderr)
+        return result
+
+    def canonical_log_line(self, result: dict) -> str:
+        request = result["request"]
+        line = f"ingest-result status={result['status']} ingest_type={request['ingest_type']}"
+        if result["status"] == "success":
+            if result.get("file_meta"):
+                line += f" sha1={result['file_meta']['sha1hex']}"
+            if result.get("grobid"):
+                line += f" grobid_status_code={result['grobid'].get('status_code')}"
+            if result.get("pdf_meta"):
+                line += f" pdf_status={result['pdf_meta'].get('status')}"
+        if result.get("duration"):
+            line += f" duration={result['duration']:.3}"
+        return line
 
     def process_file(self, request: dict, key: Any = None) -> dict:
 
@@ -584,10 +604,9 @@ class IngestFileWorker(SandcrawlerWorker):
 
         for block in self.base_url_blocklist:
             if block in base_url:
-                print("[SKIP {:>6}] {}".format(ingest_type, base_url), file=sys.stderr)
                 return dict(request=request, hit=False, status="skip-url-blocklist")
 
-        print("[INGEST {:>6}] {}".format(ingest_type, base_url), file=sys.stderr)
+        print(f"ingest-hop {ingest_type=} {base_url=}", file=sys.stderr)
 
         best_mimetype = None
         if ingest_type == "pdf":
@@ -756,14 +775,8 @@ class IngestFileWorker(SandcrawlerWorker):
                 next_url = fulltext_url.get("pdf_url") or fulltext_url.get("next_url") or ""
                 assert next_url
                 next_url = clean_url(next_url)
-                print(
-                    "[PARSE  {:>6}] {}  {}".format(
-                        ingest_type,
-                        fulltext_url.get("technique"),
-                        next_url,
-                    ),
-                    file=sys.stderr,
-                )
+                technique = fulltext_url.get("technique")
+                print(f"parse-html {ingest_type=} {technique=} {next_url=}", file=sys.stderr)
                 if next_url in hops:
                     result["status"] = "link-loop"
                     result["error_message"] = "repeated: {}".format(next_url)
@@ -788,12 +801,7 @@ class IngestFileWorker(SandcrawlerWorker):
                     next_url = next_url_found
                     technique = "html_biblio"
                     print(
-                        "[PARSE  {:>6}] {}  {}".format(
-                            ingest_type,
-                            technique,
-                            next_url,
-                        ),
-                        file=sys.stderr,
+                        f"parse-html {ingest_type=} {technique=} {next_url=}", file=sys.stderr
                     )
                     if next_url in hops:
                         if ingest_type == "html":
@@ -867,24 +875,6 @@ class IngestFileWorker(SandcrawlerWorker):
 
         result["status"] = "success"
         result["hit"] = True
-        if ingest_type == "pdf":
-            print(
-                "[SUCCESS {:>5}] sha1:{} grobid:{} pdfextract:{}".format(
-                    ingest_type,
-                    result.get("file_meta", {}).get("sha1hex"),
-                    result.get("grobid", {}).get("status_code"),
-                    result.get("pdf_meta", {}).get("status"),
-                ),
-                file=sys.stderr,
-            )
-        else:
-            print(
-                "[SUCCESS {:>5}] sha1:{}".format(
-                    ingest_type,
-                    result.get("file_meta", {}).get("sha1hex"),
-                ),
-                file=sys.stderr,
-            )
         return result
 
 

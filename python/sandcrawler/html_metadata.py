@@ -1,5 +1,5 @@
 import datetime
-import sys
+import logging
 import urllib.parse
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -726,7 +726,7 @@ def html_extract_fulltext_url(
             continue
         return (val, pattern.get("technique", "unknown"))
     if self_doc_url:
-        print("  WARN: returning fulltext URL pointing to self", file=sys.stderr)
+        logging.warn(f"returning fulltext URL pointing to self {self_doc_url=}")
         return self_doc_url
     return None
 
@@ -736,7 +736,7 @@ def html_extract_biblio(doc_url: str, doc: HTMLParser) -> Optional[BiblioMetadat
     meta: Any = dict()
     head = doc.css_first("head")
     if not head:
-        print(f"WARN: empty <head>? {doc_url}", file=sys.stderr)
+        logging.warn(f"empty HTML head {doc_url=}")
         return None
 
     for field, patterns in HEAD_META_PATTERNS.items():

@@ -6,6 +6,7 @@ import datetime
 import gzip
 import http.client
 import json
+import logging
 import os
 import sys
 import time
@@ -255,7 +256,7 @@ class CdxApiClient:
                     next_sleep = retry_sleep - 3
                     retry_sleep = 3
                 print(
-                    "  CDX fetch failed; will sleep {}sec and try again".format(retry_sleep),
+                    f"CDX fetch failed; will sleep {retry_sleep}sec and try again",
                     file=sys.stderr,
                 )
                 time.sleep(retry_sleep)
@@ -268,7 +269,7 @@ class CdxApiClient:
         if not (fuzzy_match_url(row.url, url) and row.datetime == datetime):
             if retry_sleep and retry_sleep > 0:
                 print(
-                    "  CDX fetch failed; will sleep {}sec and try again".format(retry_sleep),
+                    f"CDX fetch failed; will sleep {retry_sleep}sec and try again",
                     file=sys.stderr,
                 )
                 time.sleep(retry_sleep)
@@ -276,9 +277,7 @@ class CdxApiClient:
                     url, datetime, filter_status_code=filter_status_code, retry_sleep=None
                 )
             raise KeyError(
-                "Didn't get exact CDX url/datetime match. url:{} dt:{} got:{}".format(
-                    url, datetime, row
-                )
+                f"Didn't get exact CDX url/datetime match. {url=} {datetime=} {row=}"
             )
         if filter_status_code:
             assert row.status_code == filter_status_code
@@ -438,12 +437,12 @@ class WaybackClient:
             # print("offset: {} csize: {} uri: {}".format(offset, csize, warc_uri), file=sys.stderr)
             gwb_record = self.rstore.load_resource(warc_uri, offset, csize)
         except wayback.exception.ResourceUnavailable:
-            print("  Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
+            logging.warn(f"failed to fetch from petabox WARC  {warc_path=}")
             raise PetaboxError(
                 "failed to load file contents from wayback/petabox (ResourceUnavailable)"
             )
         except wayback.exception.InvalidResource:
-            print("  Failed to fetch from warc_path:{}".format(warc_path), file=sys.stderr)
+            logging.warn(f"failed to fetch from petabox WARC  {warc_path=}")
             raise WaybackContentError(
                 "failed to load file contents from wayback/petabox (InvalidResource)"
             )
@@ -643,11 +642,8 @@ class WaybackClient:
             # TODO: don't need *all* these hashes, just sha1
             file_meta = gen_file_metadata(resp.content)
             if cdx_sha1hex != file_meta["sha1hex"]:
-                print(
-                    "  REPLAY MISMATCH: cdx:{} replay:{}".format(
-                        cdx_sha1hex, file_meta["sha1hex"]
-                    ),
-                    file=sys.stderr,
+                logging.warn(
+                    f"CDX/wayback replay mismatch  {cdx_sha1hex=} sha1hex={file_meta['sha1hex']}"
                 )
                 raise WaybackContentError(
                     "replay fetch body didn't match CDX hash cdx:{} body:{}".format(
@@ -747,7 +743,7 @@ class WaybackClient:
         next_url = start_url
         urls_seen = [start_url]
         for i in range(self.max_redirects + 1):
-            print("  URL: {}".format(next_url), file=sys.stderr)
+            print(f"cdx-lookup {next_url=}", file=sys.stderr)
             next_row: Optional[CdxRow] = self.cdx_client.lookup_best(
                 next_url, best_mimetype=best_mimetype, closest=closest
             )
@@ -993,7 +989,7 @@ class SavePageNowClient:
         non-200 remote statuses, invalid hosts/URLs, timeouts, backoff, etc.
         """
         if capture_outlinks:
-            print("  capturing outlinks!", file=sys.stderr)
+            logging.warn(f"SPNv2 request with outlink capture {request_url=}")
         if not (self.ia_access_key and self.ia_secret_key):
             raise Exception("SPN2 requires authentication (IA_ACCESS_KEY/IA_SECRET_KEY)")
         if request_url.startswith("ftp://"):
@@ -1024,7 +1020,7 @@ class SavePageNowClient:
         resp.raise_for_status()
         status_user = resp.json()
         if status_user["available"] <= 1:
-            print(f"SPNv2 user slots not available: {resp.text}", file=sys.stderr)
+            logging.warn(f"SPNv2 user slots not available: {resp.text}")
             raise SavePageNowBackoffError(
                 "SPNv2 availability: {}, url: {}".format(status_user, request_url)
             )
@@ -1085,7 +1081,7 @@ class SavePageNowClient:
             )
 
         job_id = resp_json["job_id"]
-        print(f"  SPNv2 running: job_id={job_id} url={request_url}", file=sys.stderr)
+        print(f"spn2-api-request {job_id=} {request_url=}", file=sys.stderr)
         time.sleep(0.1)
 
         # poll until complete
@@ -1113,13 +1109,12 @@ class SavePageNowClient:
         # if there was a recent crawl of same URL, fetch the status of that
         # crawl to get correct datetime
         if final_json.get("original_job_id"):
+            original_job_id = final_json.get("original_job_id")
             print(
-                f"  SPN recent capture: {job_id} -> {final_json['original_job_id']}",
+                f"SPN recent capture {job_id=} {original_job_id=}",
                 file=sys.stderr,
             )
-            resp = self.v2_session.get(
-                "{}/status/{}".format(self.v2endpoint, final_json["original_job_id"])
-            )
+            resp = self.v2_session.get(f"{self.v2endpoint}/status/{original_job_id}")
             try:
                 resp.raise_for_status()
             except Exception:
@@ -1130,10 +1125,7 @@ class SavePageNowClient:
 
         if final_json["status"] == "success":
             if final_json.get("original_url").startswith("/"):
-                print(
-                    f"  truncateded URL in JSON: {request_url} {json.dumps(final_json)}",
-                    file=sys.stderr,
-                )
+                logging.warn(f"truncated URL in JSON {request_url=} {json.dumps(final_json)}")
             return SavePageNowResult(
                 True,
                 "success",
@@ -1254,11 +1246,10 @@ class SavePageNowClient:
                 best_mimetype="application/pdf",
             )
             if elsevier_pdf_cdx and elsevier_pdf_cdx.mimetype == "application/pdf":
-                print("  Trying pdf.sciencedirectassets.com hack!", file=sys.stderr)
+                logging.warn("trying pdf.sciencedirectassets.com hack")
                 cdx_row = elsevier_pdf_cdx
             else:
-                print("  Failed pdf.sciencedirectassets.com hack!", file=sys.stderr)
-                # print(elsevier_pdf_cdx, file=sys.stderr)
+                logging.warn("failed pdf.sciencedirectassets.com hack")
 
         if not cdx_row:
             # lookup exact
@@ -1282,7 +1273,7 @@ class SavePageNowClient:
                         retry_sleep=self.spn_cdx_retry_sec,
                     )
             except KeyError as ke:
-                print("  CDX KeyError: {}".format(ke), file=sys.stderr)
+                logging.warn(f"cdx-api KeyError {ke}")
                 return ResourceResult(
                     start_url=start_url,
                     hit=False,
@@ -1368,10 +1359,7 @@ def fix_transfer_encoding(
         and resource.cdx
         and resource.cdx.mimetype != "application/gzip"
     ):
-        print(
-            "  transfer encoding not stripped: {}".format(resource.cdx.mimetype),
-            file=sys.stderr,
-        )
+        logging.warn(f"transfer encoding not stripped  mimetype={resource.cdx.mimetype}")
         inner_body = gzip.decompress(resource.body)
         if not inner_body:
             raise Exception("null body inside transfer encoding")

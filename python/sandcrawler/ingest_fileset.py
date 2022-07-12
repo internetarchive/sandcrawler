@@ -263,6 +263,24 @@ class IngestFilesetWorker(IngestFileWorker):
         return result
 
     def process(self, request: dict, key: Any = None) -> dict:
+        start_time = time.time()
+        result = self.process_fileset(request, key=key)
+        result["duration"] = time.time() - start_time
+        print(self.canonical_log_line(result), file=sys.stderr)
+        return result
+
+    def canonical_log_line(self, result: dict) -> str:
+        request = result["request"]
+        line = f"ingest-result status={result['status']} ingest_type={request['ingest_type']} ingest_strategy={result.get('ingest_strategy')}"
+        if result.get("file_count") is not None:
+            line += f" file_count={result['file_count']}"
+        if result.get("total_size") is not None:
+            line += f" total_size={result['total_size']}"
+        if result.get("duration"):
+            line += f" duration={result['duration']:.3}"
+        return line
+
+    def process_fileset(self, request: dict, key: Any = None) -> dict:
 
         ingest_type = request.get("ingest_type")
         if ingest_type not in ("dataset",):
@@ -275,7 +293,7 @@ class IngestFilesetWorker(IngestFileWorker):
 
         force_recrawl = bool(request.get("force_recrawl", False))
 
-        print("[INGEST {:>6}] {}".format(ingest_type, base_url), file=sys.stderr)
+        print(f"ingest-request {ingest_type=} {base_url=}", file=sys.stderr)
 
         # TODO: "existing" check against file and/or fileset ingest result table
         # existing = self.check_existing_ingest(ingest_type, base_url)
@@ -366,8 +384,9 @@ class IngestFilesetWorker(IngestFileWorker):
 
         ingest_strategy = platform_helper.chose_strategy(dataset_meta)
         result["ingest_strategy"] = ingest_strategy
+
         print(
-            f"[PLATFORM {platform}] id={dataset_meta.platform_id} file_count={result['file_count']} total_size={result['total_size']} strategy={ingest_strategy}",
+            f"platform {platform=} platform_id={dataset_meta.platform_id} file_count={result['file_count']} total_size={result['total_size']} {ingest_strategy=}",
             file=sys.stderr,
         )
 
@@ -493,24 +512,4 @@ class IngestFilesetWorker(IngestFileWorker):
 
         if result["status"].startswith("success"):
             result["hit"] = True
-            print(
-                "[SUCCESS {:>5}] file_count={} total_size={} strategy={}".format(
-                    ingest_type,
-                    result["file_count"],
-                    result["total_size"],
-                    ingest_strategy,
-                ),
-                file=sys.stderr,
-            )
-        else:
-            print(
-                "[FAIL    {:>5}] status={} file_count={} total_size={} strategy={}".format(
-                    ingest_type,
-                    result["status"],
-                    result["file_count"],
-                    result["total_size"],
-                    ingest_strategy,
-                ),
-                file=sys.stderr,
-            )
         return result
