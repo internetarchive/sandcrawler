@@ -255,6 +255,12 @@ HTML_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "attr": "href",
         "technique": "dovepress fulltext link",
     },
+    {
+        "in_doc_url": "://doaj.org/article/",
+        "selector": "section.col-md-8 a[target='_blank'].button--primary",
+        "attr": "href",
+        "technique": "doaj.org access link",
+    },
 ]
 
 COMPONENT_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
@@ -626,6 +632,12 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "selector": "li.tab_pdf_btn a",
         "attr": "href",
         "technique": "PDF link (scitemed.com)",
+    },
+    {
+        "in_doc_url": "://doaj.org/article/",
+        "selector": "section.col-md-8 a[target='_blank'].button--primary",
+        "attr": "href",
+        "technique": "doaj.org access link",
     },
 ]
 

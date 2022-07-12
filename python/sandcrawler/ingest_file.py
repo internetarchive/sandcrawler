@@ -128,7 +128,6 @@ class IngestFileWorker(SandcrawlerWorker):
             "://www.openlibrary.org/",
             "://fatcat.wiki/",
             "://orcid.org/",
-            "://doaj.org/",
             # Domain squats
             "://bartandjones.com",
             "://ijretm.com",
