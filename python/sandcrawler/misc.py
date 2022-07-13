@@ -279,7 +279,7 @@ def test_datetime_to_cdx() -> None:
 
 def requests_retry_session(
     retries: int = 10,
-    backoff_factor: int = 3,
+    backoff_factor: int = 1,
     status_forcelist: List[int] = [500, 502, 504],
     session: requests.Session = None,
 ) -> requests.Session:
