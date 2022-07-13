@@ -639,6 +639,13 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "attr": "href",
         "technique": "doaj.org access link",
     },
+    {
+        "in_doc_url": "/jvi.aspx",
+        "in_fulltext_url": "download_fulltext",
+        "selector": "div.siteMainWrapper div.siteArticleShare a[target='_blank'].list-group-item",
+        "attr": "href",
+        "technique": "erciyesmedj.com publication system PDF download link",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
