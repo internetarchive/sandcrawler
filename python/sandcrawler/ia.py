@@ -396,6 +396,9 @@ class WaybackClient:
             "User-Agent": "Mozilla/5.0 sandcrawler.WaybackClient",
         }
         self.http_session = requests_retry_session()
+        self.record_http_session = requests_retry_session(
+            status_forcelist=[],
+        )
 
     def fetch_petabox(
         self, csize: int, offset: int, warc_path: str, resolve_revisit: bool = True
@@ -673,11 +676,18 @@ class WaybackClient:
         assert datetime.isdigit()
 
         try:
-            resp = self.http_session.get(
+            # when fetching via `id_`, it is possible to get a 5xx error which
+            # is either a wayback error, or an actual replay of an upstream 5xx
+            # error. the exception control flow here is tweaked, and a
+            # different HTTP session is used, to try and differentiate between
+            # the two cases
+            resp = None
+            resp = self.record_http_session.get(
                 self.wayback_endpoint + datetime + "id_/" + url,
                 allow_redirects=False,
                 headers=self.replay_headers,
             )
+            resp.raise_for_status()
         except requests.exceptions.TooManyRedirects:
             raise WaybackContentError("redirect loop (wayback replay fetch)")
         except UnicodeDecodeError:
@@ -686,11 +696,12 @@ class WaybackClient:
                     url
                 )
             )
-        try:
-            resp.raise_for_status()
         except Exception as e:
+            if resp is not None and "X-Archive-Src" in resp.headers:
+                raise WaybackContentError(
+                    f"expected redirect record but got HTTP status {resp.status_code}"
+                )
             raise WaybackError(str(e))
-        # print(resp.url, file=sys.stderr)
 
         # defensively check that this is actually correct replay based on headers
         # previously check for "X-Archive-Redirect-Reason" here
