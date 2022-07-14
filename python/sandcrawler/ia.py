@@ -699,13 +699,16 @@ class WaybackClient:
         except Exception as e:
             if resp is not None and "X-Archive-Src" in resp.headers:
                 raise WaybackContentError(
-                    f"expected redirect record but got HTTP status {resp.status_code}"
+                    f"expected redirect record but got captured HTTP status: {resp.status_code}"
                 )
             raise WaybackError(str(e))
 
         # defensively check that this is actually correct replay based on headers
         # previously check for "X-Archive-Redirect-Reason" here
-        if "X-Archive-Src" not in resp.headers:
+        if (
+            "X-Archive-Src" not in resp.headers
+            and "X-Archive-Redirect-Reason" not in resp.headers
+        ):
             raise WaybackError("redirect replay fetch didn't return X-Archive-Src in headers")
         if datetime not in resp.url:
             raise WaybackError(
