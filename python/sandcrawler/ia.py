@@ -345,6 +345,7 @@ class CdxApiClient:
             *reverse* order.
             """
             return (
+                int(r.url == url),
                 int(r.status_code in (200, 226)),
                 int(0 - (r.status_code or 999)),
                 int(r.mimetype == best_mimetype),
