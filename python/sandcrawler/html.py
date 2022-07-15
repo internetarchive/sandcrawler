@@ -38,38 +38,7 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
     redirect: Any
 
     ### General Tricks ###
-
-    # highwire-style meta tag
-    meta = soup.find("meta", attrs={"name": "citation_pdf_url"})
-    if not meta:
-        meta = soup.find("meta", attrs={"name": "bepress_citation_pdf_url"})
-    if not meta:
-        meta = soup.find("meta", attrs={"name": "wkhealth_pdf_url"})
-    if not meta:
-        # researchgate does this; maybe others also?
-        meta = soup.find("meta", attrs={"property": "citation_pdf_url"})
-    if not meta:
-        meta = soup.find("meta", attrs={"name": "eprints.document_url"})
-    # if tag is only partially populated
-    if meta and not meta.get("content"):
-        meta = None
-    # wiley has a weird almost-blank page we don't want to loop on
-    if meta and "://onlinelibrary.wiley.com/doi/pdf/" not in html_url:
-        url = meta["content"].strip()
-        if "://doi.org/" in url:
-            print(f"\tdoi.org in citation_pdf_url (loop?): {url}", file=sys.stderr)
-        elif url.startswith("/"):
-            if host_prefix + url == html_url:
-                print("\tavoiding citation_pdf_url link-loop", file=sys.stderr)
-            else:
-                return dict(pdf_url=host_prefix + url, technique="citation_pdf_url")
-        elif url.startswith("http"):
-            if url == html_url:
-                print("\tavoiding citation_pdf_url link-loop", file=sys.stderr)
-            else:
-                return dict(pdf_url=url, technique="citation_pdf_url")
-        else:
-            print("\tmalformed citation_pdf_url? {}".format(url), file=sys.stderr)
+    # note: most of these have migrated to the html_biblio code path
 
     meta = soup.find("meta", attrs={"name": "generator"})
     meta_generator = None
