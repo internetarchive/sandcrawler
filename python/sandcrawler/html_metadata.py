@@ -653,6 +653,7 @@ FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
     "://onlinelibrary.wiley.com/doi/pdf/",
     "://doi.org/",
     "://dx.doi.org/",
+    "{'embed': '",
 ]
 
 FULLTEXT_URL_PREFIX_SKIP: List[str] = [
