@@ -1084,6 +1084,20 @@ class SavePageNowClient:
             and "You have already reached the limit of active sessions" in resp_json["message"]
         ):
             raise SavePageNowBackoffError(resp_json["message"])
+        elif (
+            resp_json
+            and "message" in resp_json
+            and "The same snapshot had been made" in resp_json["message"]
+        ):
+            return SavePageNowResult(
+                False,
+                "spn2-recent-capture",
+                None,
+                request_url,
+                None,
+                None,
+                None,
+            )
         elif resp_json.get("status") == "error":
             return SavePageNowResult(
                 False,
