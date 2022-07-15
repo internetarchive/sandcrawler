@@ -844,6 +844,9 @@ def load_adblock_rules() -> braveblock.Adblocker:
             "||pbs.twimg.com^",
             "||badge.dimensions.ai^",
             "||recaptcha.net^",
+            "||tag.imagino.com^",
+            "||consent.cookiebot.com^",
+            "||recaptcha.net^",
             # not sure about these CC badges (usually via a redirect)
             # "||licensebuttons.net^",
             # "||i.creativecommons.org^",
@@ -857,6 +860,8 @@ def load_adblock_rules() -> braveblock.Adblocker:
             "js/_getUACode.js"
             # PLOS images
             "/resource/img/icon.*.16.png^",
+            # CAIRN broken tracking tag
+            "cairn-int.info//about.php?cairn_guest=",
         ],
     )
 
@@ -873,12 +878,19 @@ def _extract_generic(
             url = node.attrs.get(attr)
             # special-case a couple meta URI prefixes which don't match with adblock rules
             skip = False
-            for prefix in ["about:", "data:", "magnet:", "urn:", "mailto:"]:
+            for prefix in ["about:", "data:", "magnet:", "urn:", "mailto:", "javascript:"]:
                 if url and url.startswith(prefix):
                     skip = True
                     break
+            if url and "/" not in url and "." not in url and " " in url:
+                # eg: "Ce fichier n'existe pas"
+                skip = True
             if skip:
                 continue
+            if url and url.startswith("https://https://"):
+                url = url[8:]
+            elif url and url.startswith("http://http://"):
+                url = url[7:]
             if url:
                 # print(url, file=sys.stderr)
                 resources.append(dict(url=url.strip(), type=type_name))
