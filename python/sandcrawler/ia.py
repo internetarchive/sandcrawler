@@ -617,7 +617,7 @@ class WaybackClient:
         assert datetime.isdigit()
 
         try:
-            resp = self.http_session.get(
+            resp = self.record_http_session.get(
                 self.wayback_endpoint + datetime + "id_/" + url,
                 allow_redirects=False,
                 headers=self.replay_headers,
@@ -635,14 +635,14 @@ class WaybackClient:
                 )
             )
 
-        try:
-            resp.raise_for_status()
-        except Exception as e:
-            raise WaybackError(str(e))
-        # print(resp.url, file=sys.stderr)
-
         # defensively check that this is actually correct replay based on headers
         if "X-Archive-Src" not in resp.headers:
+            # check if this was an error first
+            try:
+                resp.raise_for_status()
+            except Exception as e:
+                raise WaybackError(str(e))
+            # otherwise, a weird case (200/redirect but no Src header
             raise WaybackError("replay fetch didn't return X-Archive-Src in headers")
         if datetime not in resp.url:
             raise WaybackError(
