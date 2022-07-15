@@ -116,6 +116,8 @@ class IngestFileWorker(SandcrawlerWorker):
         self.max_html_resources = 200
 
         self.base_url_blocklist = [
+            "://localhost/",
+            "://127.0.0.1/",
             # robot blocking / rate-limited
             "://hkvalidate.perfdrive.com/",
             "://ieeexplore.ieee.org/",
@@ -127,6 +129,7 @@ class IngestFileWorker(SandcrawlerWorker):
             "://openlibrary.org/",
             "://www.openlibrary.org/",
             "://fatcat.wiki/",
+            "://scholar.archive.org/",
             "://orcid.org/",
             # Domain squats
             "://bartandjones.com",
