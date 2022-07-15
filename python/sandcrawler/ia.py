@@ -136,6 +136,8 @@ def fuzzy_match_url(left: str, right: str) -> bool:
         return True
     if left == right + "/" or right == left + "/":
         return True
+    if left.replace("//", "/") == right.replace("//", "/"):
+        return True
     return False
 
 
@@ -147,6 +149,13 @@ def test_fuzzy_match_url() -> None:
     assert fuzzy_match_url("https://thing.com", "http://thing.com/") is True
     assert fuzzy_match_url("https://thing.com/", "http://thing.com") is True
     assert fuzzy_match_url("http://thing.com", "http://thing.com/blue") is False
+    assert (
+        fuzzy_match_url(
+            "https://www.cairn.info/static/images//logo-partners/logo-cnl-negatif.png",
+            "https://www.cairn.info/static/images/logo-partners/logo-cnl-negatif.png",
+        )
+        is True
+    )
 
     # should probably handle these?
     assert fuzzy_match_url("http://thing.com", "http://www.thing.com") is False
