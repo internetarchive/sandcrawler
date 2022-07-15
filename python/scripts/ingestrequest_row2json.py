@@ -44,7 +44,7 @@ def main():
         "json_file", help="SQL output JSON file to process", type=argparse.FileType("r")
     )
     parser.add_argument(
-        "force_recrawl",
+        "--force-recrawl",
         action="store_true",
         help="whether to add recrawl (SPNv2) flag to request",
     )
