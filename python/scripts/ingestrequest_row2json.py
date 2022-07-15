@@ -33,13 +33,20 @@ def run(args):
             req = transform(json.loads(l))
         except:
             print(l, file=sys.stderr)
+        if args.force_recrawl:
+            req["force_recrawl"] = True
         print(json.dumps(req, sort_keys=True))
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        "json_file", help="arabesque output file to use", type=argparse.FileType("r")
+        "json_file", help="SQL output JSON file to process", type=argparse.FileType("r")
+    )
+    parser.add_argument(
+        "force_recrawl",
+        action="store_true",
+        help="whether to add recrawl (SPNv2) flag to request",
     )
     subparsers = parser.add_subparsers()
 
