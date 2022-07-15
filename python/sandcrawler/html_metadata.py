@@ -650,9 +650,14 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
 
 FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
     # wiley has a weird almost-blank page we don't want to loop on
-    "://onlinelibrary.wiley.com/doi/pdf/"
-    "://doi.org/"
-    "://dx.doi.org/"
+    "://onlinelibrary.wiley.com/doi/pdf/",
+    "://doi.org/",
+    "://dx.doi.org/",
+]
+
+FULLTEXT_URL_PREFIX_SKIP: List[str] = [
+    "javascript:",
+    "about:",
 ]
 
 RELEASE_TYPE_MAP: Dict[str, str] = {
@@ -736,9 +741,19 @@ def html_extract_fulltext_url(
         if "in_fulltext_url" in pattern:
             if pattern["in_fulltext_url"] not in val:
                 continue
+        skip_matched = False
         for skip_pattern in FULLTEXT_URL_PATTERNS_SKIP:
             if skip_pattern in val.lower():
-                continue
+                skip_matched = True
+                break
+        if skip_matched:
+            continue
+        for skip_pattern in FULLTEXT_URL_PREFIX_SKIP:
+            if val.lower().startswith(skip_pattern):
+                skip_matched = True
+                break
+        if skip_matched:
+            continue
         if url_fuzzy_equal(doc_url, val):
             # don't link to self, unless no other options
             self_doc_url = (val, pattern.get("technique", "unknown"))
