@@ -176,6 +176,8 @@ class IngestFileWorker(SandcrawlerWorker):
             "/cookieAbsent",
             "cookieSet=1",
             "error=cookies_not_supported",
+            # SPNv2 seems to work (not end up here), but heritrix fails
+            "://secure.jbs.elsevierhealth.com/",
         ]
 
         self.src_valid_mimetypes = [
