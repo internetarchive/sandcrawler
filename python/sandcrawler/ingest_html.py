@@ -196,10 +196,17 @@ def fetch_html_resources(
         wayback_resp = wayback_client.lookup_resource(resource["url"], closest=closest)
         if not wayback_resp or wayback_resp.status != "success":
             raise NoCaptureError(f"HTML sub-resource not found: {resource['url']}")
-        file_meta = gen_file_metadata(wayback_resp.body, allow_empty=True)
-        if file_meta["sha1hex"] != wayback_resp.cdx.sha1hex:
+        # for HTML sub-resources specifically, we allow the CDX SHA1 to match
+        # either the transfer-encoded or inner (un-encoded) payload body to
+        # match. This is because of an ambiguity in the WARC specification
+        outer_file_meta = gen_file_metadata(wayback_resp.body, allow_empty=True)
+        file_meta, wayback_resp = fix_transfer_encoding(outer_file_meta, wayback_resp)
+        if (
+            file_meta["sha1hex"] != wayback_resp.cdx.sha1hex
+            and outer_file_meta["sha1hex"] != wayback_resp.cdx.sha1hex
+        ):
             raise WaybackContentError(
-                f"wayback payload sha1hex mismatch: {wayback_resp.cdx.datetime} {wayback_resp.cdx.url}"
+                f"wayback payload sha1hex mismatch: {wayback_resp.cdx.datetime} {wayback_resp.cdx.url} found:{file_meta['sha1hex']} expected:{wayback_resp.cdx.sha1hex}"
             )
         full.append(
             WebResource(
