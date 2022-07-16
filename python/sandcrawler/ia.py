@@ -325,7 +325,7 @@ class CdxApiClient:
         params: Dict[str, str] = {
             "url": url,
             "matchType": "exact",
-            "limit": "-25",
+            "limit": "-40",
             "output": "json",
             # Collapsing seems efficient, but is complex; would need to include
             # other filters and status code in filter
@@ -336,11 +336,14 @@ class CdxApiClient:
         if max_age_days:
             since = datetime.date.today() - datetime.timedelta(days=max_age_days)
             params["from"] = "%04d%02d%02d" % (since.year, since.month, since.day)
+        closest_dt = "00000000"
         if closest:
             if isinstance(closest, datetime.datetime):
-                params["closest"] = "%04d%02d%02d" % (closest.year, closest.month, closest.day)
+                closest_dt = "%04d%02d%02d" % (closest.year, closest.month, closest.day)
+                params["closest"] = closest_dt
             else:
-                params["closest"] = closest
+                closest_dt = closest
+                params["closest"] = closest_dt
             params["sort"] = "closest"
         # print(params, file=sys.stderr)
         rows = self._query_api(params)
@@ -359,7 +362,7 @@ class CdxApiClient:
                 int(0 - (r.status_code or 999)),
                 int(r.mimetype == best_mimetype),
                 int(r.mimetype != "warc/revisit"),
-                int(r.datetime[:6]),
+                r.datetime[:4] == closest_dt[:4],
                 int("/" in r.warc_path),
                 int(r.datetime),
             )
