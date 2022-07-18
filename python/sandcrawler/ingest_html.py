@@ -200,7 +200,10 @@ def fetch_html_resources(
         # either the transfer-encoded or inner (un-encoded) payload body to
         # match. This is because of an ambiguity in the WARC specification
         outer_file_meta = gen_file_metadata(wayback_resp.body, allow_empty=True)
-        file_meta, wayback_resp = fix_transfer_encoding(outer_file_meta, wayback_resp)
+        try:
+            file_meta, wayback_resp = fix_transfer_encoding(outer_file_meta, wayback_resp)
+        except Exception as e:
+            raise WaybackContentError(f"bad gzip encoding: {e}")
         if (
             file_meta["sha1hex"] != wayback_resp.cdx.sha1hex
             and outer_file_meta["sha1hex"] != wayback_resp.cdx.sha1hex
