@@ -323,6 +323,13 @@ def extract_fulltext_url(html_url: str, html_body: bytes) -> Dict[str, str]:
                 technique="google-drive",
             )
 
+    # https://doi.org/10.24850/j-tyca-14-4-7
+    # https://docs.google.com/viewer?url=http://revistatyca.org.mx/index.php/tyca/libraryFiles/downloadPublic/150
+    if "docs.google.com/viewer?url=" in html_url:
+        original_url = html_url.split("?url=")[1]
+        if original_url:
+            return dict(pdf_url=original_url, technique="docs.google.com viewer")
+
     ### below here we are doing guesses
 
     # generic guess: try current URL plus .pdf, if it exists in the HTML body

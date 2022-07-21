@@ -685,6 +685,30 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "technique": "filclass.ru PDF link",
         "example_page": "https://filclass.ru/en/archive/2018/2-52/the-chronicle-of-domestic-literary-criticism",
     },
+    {
+        "in_doc_url": "cdnsciencepub.com",
+        "in_fulltext_url": "pdf",
+        "selector": "article .info-panel a.btn--pdf",
+        "attr": "href",
+        "technique": "cdnsciencepub.com PDF link",
+        "example_page": "https://cdnsciencepub.com/doi/10.1139/AS-2022-0011",
+    },
+    {
+        "in_doc_url": "grrjournal.com",
+        "in_fulltext_url": "pdf",
+        "selector": ".ereaders-main-section a[download]",
+        "attr": "href",
+        "technique": "grrjournal.com PDF link",
+        "example_page": "https://www.grrjournal.com/article/analysis-of-audiences-uses-and-gratifications-in-the-selected-pakistani-urdu-films",
+    },
+    {
+        "in_doc_url": "/article/view/",
+        "in_fulltext_url": "pdf",
+        "selector": "#articleFullText a.remote_pdf",
+        "attr": "href",
+        "technique": "OJS remote_pdf link",
+        "example_page": "https://www.mediterranea-comunicacion.org/article/view/22240",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
@@ -801,6 +825,11 @@ def html_extract_fulltext_url(
             # don't link to self, unless no other options
             self_doc_url = (val, pattern.get("technique", "unknown"))
             continue
+
+        # quirks modes / hacks
+        if "drops.dagstuhl.de" in doc_url and val.endswith(".pdf/"):
+            val = val[:-1]
+
         return (val, pattern.get("technique", "unknown"))
     if self_doc_url:
         print("  WARN: returning fulltext URL pointing to self", file=sys.stderr)
