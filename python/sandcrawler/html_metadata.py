@@ -646,6 +646,45 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "attr": "href",
         "technique": "erciyesmedj.com publication system PDF download link",
     },
+    {
+        "selector": "body embed[alt='pdf']",
+        "attr": "src",
+        "technique": "embed PDF",
+        "example_pdf": "https://www.arkat-usa.org/arkivoc-journal/browse-arkivoc/ark.5550190.0006.913",
+    },
+    {
+        "in_fulltext_url": "viewPDFInterstitial",
+        "in_doc_url": "/article/view/",
+        "selector": "frameset frame",
+        "attr": "src",
+        "technique": "PDF iframe (viewPDFInterstitial)",
+        "example_page": "http://revistaadmmade.estacio.br/index.php/reeduc/article/view/1910/47965873",
+    },
+    {
+        # note this one has a special handler
+        "in_doc_url": "viewPDFInterstitial",
+        "in_fulltext_url": "://",
+        "selector": "head meta[http-equiv='refresh']",
+        "attr": "content",
+        "technique": "HTML meta refresh (viewPDFInterstitial)",
+        "example_page": "http://revistaadmmade.estacio.br/index.php/reeduc/article/view/1910/47965873",
+    },
+    {
+        "in_doc_url": "dlib.si/details/",
+        "in_fulltext_url": "PDF",
+        "selector": "body #FilesBox a",
+        "attr": "href",
+        "technique": "dlib.si download links",
+        "example_page": "https://www.dlib.si/details/URN:NBN:SI:DOC-WR9GTSCJ",
+    },
+    {
+        "in_doc_url": "filclass.ru",
+        "in_fulltext_url": "pdf",
+        "selector": "main .pdf-article a.pdficon",
+        "attr": "href",
+        "technique": "filclass.ru PDF link",
+        "example_page": "https://filclass.ru/en/archive/2018/2-52/the-chronicle-of-domestic-literary-criticism",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
@@ -731,6 +770,9 @@ def html_extract_fulltext_url(
         val = None
         if "attr" in pattern:
             val = elem.attrs.get(pattern["attr"])
+            # handle HTML redirect
+            if val and pattern["attr"] == "content" and "URL=" in val:
+                val = val.split("URL=")[1]
         elif pattern.get("use_body"):
             val = elem.text()
             if "://" not in val:
