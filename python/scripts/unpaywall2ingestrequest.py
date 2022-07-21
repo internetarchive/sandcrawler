@@ -15,12 +15,9 @@ DOMAIN_BLOCKLIST = [
     "://arxiv.org/",
     "://europepmc.org/",
     "ncbi.nlm.nih.gov/",
-    "semanticscholar.org/",
     "://doi.org/",
     "zenodo.org/",
     "figshare.com/",
-    "://archive.org/",
-    ".archive.org/",
 ]
 
 RELEASE_STAGE_MAP = {

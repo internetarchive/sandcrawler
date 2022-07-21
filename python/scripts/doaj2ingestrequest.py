@@ -23,6 +23,7 @@ DOMAIN_BLOCKLIST = [
     "ncbi.nlm.nih.gov/",
     # "semanticscholar.org/",
     "://doi.org/",
+    "://dx.doi.org/",
     "zenodo.org/",
     "figshare.com/",
     "://archive.org/",
