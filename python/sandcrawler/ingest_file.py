@@ -104,7 +104,7 @@ class IngestFileWorker(SandcrawlerWorker):
         self.pdftext_sink = kwargs.get("pdftext_sink")
         self.xmldoc_sink = kwargs.get("xmldoc_sink")
         self.htmlteixml_sink = kwargs.get("htmlteixml_sink")
-        self.max_hops = 6
+        self.max_hops = 8
 
         self.try_existing_ingest = kwargs.get("try_existing_ingest", False)
         self.try_existing_grobid = kwargs.get("try_existing_grobid", True)
