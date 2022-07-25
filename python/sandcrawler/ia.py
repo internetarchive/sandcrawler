@@ -211,8 +211,12 @@ class CdxApiClient:
             else:
                 status_code = int(raw[4])
 
-            # CDX rows with no WARC records?
+            # remove CDX rows with no WARC records (?)
             if raw[8] == "-" or raw[9] == "-" or raw[10] == "-":
+                continue
+
+            # remove CDX rows with SHA256 (not SHA1) digests
+            if raw[5].startswith("sha-256"):
                 continue
 
             row = CdxRow(
