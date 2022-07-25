@@ -84,6 +84,7 @@ BAD_PDF_SHA1HEX: List[str] = [
     "781dafda896a9f5c30f3d0a011f79a3b79b574c4",
     "788672c7c2bcdecf6e2f6a2177c01e60f04d9cfb",
     "79d6cba3c6e577a0f3a3a9fe575680d38454938d",
+    "7c5c925cfb7c5a861b5c0a1d923308f9bedd335e",
     "7cfc0739be9c49d94272110a0a748256bdde9be6",
     "7daf61526ec825151f384cc1db510ca5237d5d80",
     "7e9d846f3bf9ce15cdb991b78cc870ab8a2bed76",
