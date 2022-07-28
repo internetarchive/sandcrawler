@@ -457,7 +457,10 @@ class IngestFileWorker(SandcrawlerWorker):
             return dict(status="html-selectolax-error")
         html_biblio = html_extract_biblio(resource.terminal_url, html_doc)
         assert html_biblio
-        html_body = html_extract_body_teixml(resource.body)
+        try:
+            html_body = html_extract_body_teixml(resource.body)
+        except xml.etree.ElementTree.ParseError:
+            return dict(status="html-teixml-error")
         html_platform = html_guess_platform(resource.terminal_url, html_doc, html_biblio)
         html_scope = html_guess_scope(
             resource.terminal_url, html_doc, html_biblio, html_body.get("word_count")
