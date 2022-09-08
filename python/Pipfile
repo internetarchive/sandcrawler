@@ -30,7 +30,6 @@ black = "*"
 
 [packages]
 requests = ">=2"
-raven = {extras = ['flask'],version = "*"}
 confluent-kafka = "*"
 python-snappy = "*"
 boto3 = "*"
@@ -40,7 +39,6 @@ bs4 = "*"
 python-magic = "*"
 ftfy = "*"
 internetarchive = "*"
-Flask = ">=1"
 urlcanon = "*"
 Pillow = ">=3"
 python-poppler = ">=0.2.1"
