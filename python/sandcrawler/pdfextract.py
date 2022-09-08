@@ -69,6 +69,7 @@ BAD_PDF_SHA1HEX: List[str] = [
     "58d9ae7dcb0a7dbbdfc58ad266030b037e9cd0ff",
     "59cfc843ebdb1c1e5db1efc76a40f46cb3bb06f0",
     "5ab98405b676ee81a6ca74fba51a9e4a6cff7311",
+    "5c5b45c85eff07d4302844e00ec8baa57b988c60",
     "5e04779cbbae5ce88bb786064f756885dd6895fe",
     "5e6a3adde9f08c276c4efd72bfacb256f2ec35d9",
     "623ff84b616383d0a3e0dd8dbce12f0b5fe9a6ac",
@@ -137,6 +138,7 @@ BAD_PDF_SHA1HEX: List[str] = [
     "d613b9e4442f5d5d19ea6814fa9729bff7da7c85",
     "d6b0f405bf13c23d0e90c54eea527442786d1cd3",
     "da2211ee2dbc6dda36571976d810e2366a3d2504",
+    "dbb3093a797e0ae83d39eb7b235ff85a17fd965c",
     "e01bb7256d77aea258313bb410dfcfc10512f420",
     "e2bf5d0a5885359381fe8ef2cd9290171d494e9b",
     "e2c3b8a2cf33d5e8972bc9ddb78373766a75e412",
@@ -147,6 +149,7 @@ BAD_PDF_SHA1HEX: List[str] = [
     "eaf84b2efd2f69c7b3f407f89ea66ac4c41fac36",
     "eb1b39fd7a874896688855a22efddef10272427c",
     "eb5fffaa590a52bcc3705b888c6ff9c4dc4c45b2",
+    "ecc4b927c5e84e145c610876931bc261ae13769b",
     "edf8dcc8736f06afbaca0e01d60bd2c475403a3d",
     "ee2ee6ae2cf05128810d0d95bbe69bd263e140de",
     "ee9530a2c5a3d1e3813ccb51a55cc8b0d9b5dfc7",
@@ -155,6 +158,7 @@ BAD_PDF_SHA1HEX: List[str] = [
     "f0ea221d8587cede25592266486e119d277f7096",
     "f68f9a9202a75d2aee35252e104d796f9515001e",
     "f9314d3bf2eac78a7d78d18adcccdb35542054ef",
+    "f932ef936021a3b00842b481478c40868b9a007c",
     "fd9bd560662e070b222d63052830837829c490f0",
 ]
 
