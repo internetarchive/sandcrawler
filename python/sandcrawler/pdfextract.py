@@ -340,7 +340,8 @@ def process_pdf(
             )
         # this call sometimes fails an returns an AttributeError
         page0rect = page0.page_rect()
-    except (AttributeError, poppler.document.LockedDocumentError) as e:
+    # NOTE: poppler sometimes throws a 'ValueError', but this is pretty broad to catch
+    except (AttributeError, poppler.document.LockedDocumentError, ValueError) as e:
         # may need to expand the set of exceptions caught here over time, but
         # starting with a narrow set
         return PdfExtractResult(
