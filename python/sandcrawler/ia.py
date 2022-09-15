@@ -964,7 +964,9 @@ class SavePageNowClient:
         self.ia_access_key = kwargs.get("ia_access_key", os.environ.get("IA_ACCESS_KEY"))
         self.ia_secret_key = kwargs.get("ia_secret_key", os.environ.get("IA_SECRET_KEY"))
         self.v2endpoint = v2endpoint
-        self.v2_session = requests_retry_session(retries=5, backoff_factor=3)
+        self.v2_session = requests_retry_session(
+            retries=5, backoff_factor=3, status_forcelist=[502, 504]
+        )
         self.v2_session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 sandcrawler.SavePageNowClient",
