@@ -25,8 +25,38 @@ DOMAIN_BLOCKLIST = [
     "://archive.org/",
     ".archive.org/",
     "://127.0.0.1/",
+    "://www.kb.dk/",
+    "://kb-images.kb.dk/",
+    "://mdz-nbn-resolving.de/",
+    "://aggr.ukm.um.si/",
+    "://edoc.mpg.de/",
+    "doaj.org/",
+    "orcid.org/",
+    "://gateway.isiknowledge.com/",
     # OAI specific additions
     "://hdl.handle.net/",
+]
+
+# OAI identifier prefixes for repositories that we want to skip (for various reasons)
+OAI_BLOCKLIST = [
+    "oai:kb.dk:",
+    "oai:bdr.oai.bsb-muenchen.de:",
+    "oai:hispana.mcu.es:",
+    "oai:bnf.fr:",
+    "oai:ukm.si:",
+    "oai:biodiversitylibrary.org:",
+    "oai:hsp.org:",
+    "oai:repec:",
+    "oai:n/a:",
+    "oai:quod.lib.umich.edu:",
+    "oai:americanae.aecid.es:",
+    "oai:www.irgrid.ac.cn:",
+    "oai:espace.library.uq.edu:",
+    "oai:edoc.mpg.de:",
+    "oai:bibliotecadigital.jcyl.es:",
+    "oai:repository.erciyes.edu.tr:",
+    "oai:krm.or.kr:",
+    "oai:hypotheses.org:%",
 ]
 
 RELEASE_STAGE_MAP = {
@@ -54,6 +84,11 @@ def transform(obj):
         return []
     if not obj.get("urls"):
         return []
+
+    oai_id = obj["oai"].lower()
+    for prefix in OAI_BLOCKLIST:
+        if oai_id.startswith(prefix):
+            return []
 
     # look in obj['formats'] for PDF?
     if obj.get("formats"):
@@ -97,16 +132,17 @@ def transform(obj):
             "base_url": base_url,
             "ingest_type": "pdf",
             "link_source": "oai",
-            "link_source_id": obj["oai"].lower(),
+            "link_source_id": oai_id,
             "ingest_request_source": "metha-bulk",
             "release_stage": release_stage,
             "rel": rel,
             "ext_ids": {
-                "doi": doi,
                 "oai": obj["oai"].lower(),
             },
             "edit_extra": {},
         }
+        if doi:
+            request["ext_ids"]["doi"] = doi
         requests.append(request)
 
     return requests
