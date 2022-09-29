@@ -101,6 +101,10 @@ class PersistIngestFileResultWorker(SandcrawlerWorker):
         if raw["ingest_type"] not in ("pdf", "xml", "html"):
             self.counts["skip-ingest-type"] += 1
             return None
+        # limit on base_url length
+        if len(raw["base_url"]) > 1500:
+            self.counts["skip-url-too-long"] += 1
+            return None
         request = {
             "ingest_type": raw["ingest_type"],
             "base_url": raw["base_url"],
