@@ -43,7 +43,7 @@ class FilesetPlatformHelper:
 
     def chose_strategy(self, item: FilesetPlatformItem) -> IngestStrategy:
         assert item.manifest
-        total_size = sum([m.size for m in item.manifest]) or 0
+        total_size = sum([m.size or 0 for m in item.manifest]) or 0
         largest_size = max([m.size or 0 for m in item.manifest]) or 0
         if len(item.manifest) == 1:
             if total_size < 64 * 1024 * 1024:
