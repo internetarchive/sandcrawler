@@ -8,7 +8,9 @@ COPY (
         AND ingest_file_result.ingest_type = ingest_request.ingest_type
     WHERE
         (ingest_request.ingest_type = 'pdf'
-            OR ingest_request.ingest_type = 'html')
+            OR ingest_request.ingest_type = 'html'
+            OR ingest_request.ingest_type = 'xml'
+            OR ingest_request.ingest_type = 'component')
         AND ingest_file_result.hit = false
         AND ingest_request.created < NOW() - '6 hour'::INTERVAL
         AND ingest_request.created > NOW() - '180 day'::INTERVAL

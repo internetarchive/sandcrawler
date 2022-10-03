@@ -8,12 +8,15 @@ COPY (
         AND ingest_file_result.ingest_type = ingest_request.ingest_type
     WHERE
         (ingest_request.ingest_type = 'pdf'
-            OR ingest_request.ingest_type = 'html')
+            OR ingest_request.ingest_type = 'html'
+            OR ingest_request.ingest_type = 'xml'
+            OR ingest_request.ingest_type = 'component')
         AND ingest_file_result.hit = false
         AND ingest_request.created < NOW() - '8 hour'::INTERVAL
         AND ingest_request.created > NOW() - '8 day'::INTERVAL
         AND (ingest_request.ingest_request_source = 'fatcat-changelog'
-             OR ingest_request.ingest_request_source = 'fatcat-ingest')
+             OR ingest_request.ingest_request_source = 'fatcat-ingest'
+             OR ingest_request.ingest_request_source = 'fatcat-ingest-container')
         AND (
             ingest_file_result.status like 'spn2-%'
             -- OR ingest_file_result.status = 'cdx-error'
