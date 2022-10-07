@@ -1506,8 +1506,8 @@ possible to detect these at ingest time, or earlier at OAI-PMH
 harvest/transform time and filter them out.
 
 It may be worthwhile to attempt ingest of multiple existing captures
-(timestamps) in the ingest pipeline.  Eg, isntead of chosing a single "best"
-capture, if therea are multiple HTTP 200 status captures, try ingest with each
+(timestamps) in the ingest pipeline.  Eg, instead of chosing a single "best"
+capture, if there are multiple HTTP 200 status captures, try ingest with each
 (or at least a couple).  This is because repository software gets upgraded, so
 old "no-capture" or "not found" or "link loop" type captures may work when
 recrawled.
