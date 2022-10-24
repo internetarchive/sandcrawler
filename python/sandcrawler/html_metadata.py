@@ -725,6 +725,20 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "technique": "worldscientific reader",
         "example_page": "https://www.worldscientific.com/doi/epdf/10.1142/S0116110521500098",
     },
+    {
+        "in_fulltext_url": "pdf",
+        "selector": ".container .view-content .download-article a",
+        "attr": "href",
+        "technique": "generic download article button",
+        "example_page": "https://science.lpnu.ua/mmc/all-volumes-and-issues/volume-9-number-1-2022/pursuit-differential-game-many-pursuers-and-one",
+    },
+    {
+        "in_fulltext_url": "pdf",
+        "selector": "body a.download-pdf",
+        "attr": "href",
+        "technique": "generic download article button",
+        "example_page": "https://plit-periodical.com.ua/arhiv/struktura-ta-vlastyvosti-materialu-zrazkiv-vyroshchenyh-metodom-selektyvnogo-lazernogo",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
