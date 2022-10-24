@@ -173,6 +173,7 @@ class IngestFileWorker(SandcrawlerWorker):
             "jstage.jst.go.jp/sblogin",
             "://acw.elsevier.com/SSOCore",
             "://acw.sciencedirect.com/SSOCore",
+            "/login?source=",
         ]
 
         self.cookie_blocklist = [
@@ -625,7 +626,7 @@ class IngestFileWorker(SandcrawlerWorker):
                     result["status"] = "skip-url-blocklist"
                     return result
 
-            # check against known loginwall URLs
+            # also check against known loginwall patterns
             for block in self.wall_blocklist:
                 if block in next_url:
                     # TODO: blocked-wall instead of skip-wall
@@ -758,6 +759,12 @@ class IngestFileWorker(SandcrawlerWorker):
 
                 result["extract_next_hop"] = fulltext_url
                 if not fulltext_url:
+                    # check if we hit a paywall/loginwall
+                    for block in self.wall_blocklist:
+                        if block in resource.terminal_url:
+                            result["status"] = "blocked-wall"
+                            return result
+                    # else, just failed to find link
                     result["status"] = "no-pdf-link"
                     return result
                 next_url = fulltext_url.get("pdf_url") or fulltext_url.get("next_url") or ""
@@ -836,6 +843,12 @@ class IngestFileWorker(SandcrawlerWorker):
         result["cdx"] = cdx_to_dict(resource.cdx)
         if resource.revisit_cdx:
             result["revisit_cdx"] = cdx_to_dict(resource.revisit_cdx)
+
+        # check if we hit a paywall/loginwall before trying mimetype
+        for block in self.wall_blocklist:
+            if block in resource.terminal_url:
+                result["status"] = "blocked-wall"
+                return result
 
         if ingest_type == "pdf":
             if file_meta["mimetype"] != "application/pdf":
