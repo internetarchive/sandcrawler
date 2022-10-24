@@ -367,8 +367,9 @@ class CdxApiClient:
                 int(r.mimetype == best_mimetype),
                 int(r.mimetype != "warc/revisit"),
                 r.datetime[:4] == closest_dt[:4],
-                int("/" in r.warc_path),
                 int(r.datetime),
+                # NOTE: previously we demoted SPN records with this warc_path check ahead of datetime
+                int("/" in r.warc_path),
             )
 
         rows = sorted(rows, key=_cdx_sort_key)
