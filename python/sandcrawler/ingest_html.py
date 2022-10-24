@@ -260,6 +260,8 @@ def html_guess_platform(
                 in doc.html
             ):
                 return "ojs"
+            if '<a href="https://www.pubpub.org">Published with' in doc.html:
+                return "pubpub"
             if 'Powered by <a target="_blank" href="http://arphahub.com">' in doc.html:
                 return "arpha"
             if "<meta property='og:image' content='http://cms.galenos.com.tr' />" in doc.html:
