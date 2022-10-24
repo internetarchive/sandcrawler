@@ -709,6 +709,22 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "technique": "OJS remote_pdf link",
         "example_page": "https://www.mediterranea-comunicacion.org/article/view/22240",
     },
+    {
+        "in_doc_url": "worldscientific.com/doi/abs/",
+        "in_fulltext_url": "/reader/",
+        "selector": "article.container .single__download a",
+        "attr": "href",
+        "technique": "worldscientific landing pages",
+        "example_page": "https://www.worldscientific.com/doi/abs/10.1142/S0116110521500098",
+    },
+    {
+        "in_doc_url": "worldscientific.com/doi/",
+        "in_fulltext_url": "/pdf/",
+        "selector": "noscript a[target='_blank']",
+        "attr": "href",
+        "technique": "worldscientific reader",
+        "example_page": "https://www.worldscientific.com/doi/epdf/10.1142/S0116110521500098",
+    },
 ]
 
 FULLTEXT_URL_PATTERNS_SKIP: List[str] = [
