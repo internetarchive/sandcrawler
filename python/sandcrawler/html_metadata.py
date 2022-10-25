@@ -207,7 +207,7 @@ XML_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "technique": "SciElo XML link",
     },
     {
-        "in_doc_url": "/article/view/",
+        "in_doc_url": "/view/",
         "in_fulltext_url": "viewXML",
         "selector": "a[class='obj_galley_link']",
         "attr": "href",
@@ -331,7 +331,7 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "example_page": "https://pubs.acs.org/doi/10.1021/acs.estlett.9b00379",
     },
     {
-        "in_doc_url": "/article/view/",
+        "in_doc_url": "/view/",
         "selector": "a#pdfDownloadLink",
         "attr": "href",
         "technique": "OJS pdfDownloadLink link",
@@ -612,8 +612,8 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "example_page": "https://integrityresjournals.org/journal/JBBD/article-abstract/750B649A1",
     },
     {
-        "in_doc_url": "/article/view/",
-        "in_fulltext_url": "/article/download/",
+        "in_doc_url": "/view/",
+        "in_fulltext_url": "/download/",
         "selector": "body.pkp_page_article a.download",
         "attr": "href",
         "technique": "OJS PDF Embed",
@@ -654,7 +654,7 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
     },
     {
         "in_fulltext_url": "viewPDFInterstitial",
-        "in_doc_url": "/article/view/",
+        "in_doc_url": "/view/",
         "selector": "frameset frame",
         "attr": "src",
         "technique": "PDF iframe (viewPDFInterstitial)",
@@ -702,7 +702,7 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "example_page": "https://www.grrjournal.com/article/analysis-of-audiences-uses-and-gratifications-in-the-selected-pakistani-urdu-films",
     },
     {
-        "in_doc_url": "/article/view/",
+        "in_doc_url": "/view/",
         "in_fulltext_url": "pdf",
         "selector": "#articleFullText a.remote_pdf",
         "attr": "href",
@@ -738,6 +738,22 @@ PDF_FULLTEXT_PATTERNS: List[Dict[str, str]] = [
         "attr": "href",
         "technique": "generic download article button",
         "example_page": "https://plit-periodical.com.ua/arhiv/struktura-ta-vlastyvosti-materialu-zrazkiv-vyroshchenyh-metodom-selektyvnogo-lazernogo",
+    },
+    {
+        "in_doc_url": "/view/",
+        "in_fulltext_url": "/view/",
+        "selector": "body .entry_details a.pdf",
+        "attr": "href",
+        "technique": "generic OJS/preprints",
+        "example_page": "https://preprints.scielo.org/index.php/scielo/preprint/view/4729/version/5022",
+    },
+    {
+        "in_doc_url": "/view/",
+        "in_fulltext_url": "/download/",
+        "selector": "body header a.download",
+        "attr": "href",
+        "technique": "generic OJS/preprints PDF Embed",
+        "example_page": "https://preprints.scielo.org/index.php/scielo/preprint/view/4729/9327",
     },
 ]
 
