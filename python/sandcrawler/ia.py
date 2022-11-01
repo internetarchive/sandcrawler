@@ -219,6 +219,11 @@ class CdxApiClient:
             if raw[5].startswith("sha-256"):
                 continue
 
+            # remove CDX rows with 'error' digests
+            # TODO: follow-up on this (2022-11-01 sandcrawler errors)
+            if raw[5].lower() == "error":
+                continue
+
             row = CdxRow(
                 surt=raw[0],
                 datetime=raw[1],
