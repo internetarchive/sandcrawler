@@ -1,0 +1,15 @@
+
+- all releases from small journals, regardless of OA status, if small (eg, less than 200 papers published), and not big5
+
+more complex crawling/content:
+- add video link to alternative content demo ingest: https://open.library.ubc.ca/cIRcle/collections/48630/items/1.0400764
+- watermark.silverchair.com: if terminal-bad-status, then do recrawl via heritrix with base_url
+- www.morressier.com: interesting site for rich web crawling/preservation (video+slides+data)
+- doi.ala.org.au: possible dataset ingest source
+- peerj.com, at least reviews, should be HTML ingest? or are some PDF?
+- publons.com should be HTML ingest, possibly special case for scope
+- frontiersin.org: any 'component' releases with PDF file are probably a metadata bug
+
+other tasks:
+- handle this related withdrawn notice? https://open.library.ubc.ca/cIRcle/collections/48630/items/1.0401512
+- push/deploy sandcrawler changes
