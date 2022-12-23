@@ -43,7 +43,10 @@ urlcanon = "*"
 Pillow = ">=3"
 python-poppler = ">=0.2.1"
 selectolax = ">=0.2"
-trafilatura = ">=1"
+# constraining trafilatura to prevent a version conflict with
+# `charset_normalizer`, between htmldate and requests
+trafilatura = ">=1,<1.4"
+htmldate= ">=1,<1.4"
 pydantic = ">=1.7"
 dateparser = "*"
 braveblock = "*"
