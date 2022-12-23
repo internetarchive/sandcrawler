@@ -1,0 +1,294 @@
+
+## Queries to find broken domains
+
+Top domains with failed ingests:
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain != ''
+            AND t1.status != 'success'
+            AND t1.status != 'no-capture'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC
+        LIMIT 30;
+
+Status overview for a particular domain:
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'osapublishing.org'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT domain, terminal_status_code, COUNT((domain, terminal_status_code))
+        FROM (SELECT terminal_status_code, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'osapublishing.org'
+            AND t1.terminal_status_code is not null
+        GROUP BY domain, terminal_status_code
+        ORDER BY COUNT DESC;
+
+Sample recent failures:
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%osapublishing.org%'
+            AND status = 'terminal-bad-status'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+
+## Failing
+
+www.osapublishing.org
+
+    this publisher (The Optical Society) is systemically using a CAPTCHA to
+    gate access to PDFs.  bummer! could ask them to white-list?
+
+    has citation_pdf_url, so that isn't an issue
+
+    status: "no-pdf-link"
+    hops:
+        "https://doi.org/10.1364/optica.6.000798",
+        "https://www.osapublishing.org/viewmedia.cfm?uri=optica-6-6-798&seq=0"
+        "https://www.osapublishing.org/captcha/?guid=830CEAB5-09BD-6140-EABD-751200C78B1C"
+
+            domain         |       status        | count 
+    -----------------------+---------------------+-------
+     www.osapublishing.org | no-capture          | 16680
+     www.osapublishing.org | no-pdf-link         |   373
+     www.osapublishing.org | redirect-loop       |    19
+     www.osapublishing.org | terminal-bad-status |     5
+     www.osapublishing.org | cdx-error           |     1
+     www.osapublishing.org | wrong-mimetype      |     1
+     www.osapublishing.org | spn-error           |     1
+     www.osapublishing.org | success             |     1
+     www.osapublishing.org | wayback-error       |     1
+    (9 rows)
+
+www.persee.fr
+
+    Seems to be mostly blocking or rate-limiting?
+
+        domain     |               status                | count
+    ---------------+-------------------------------------+-------
+     www.persee.fr | no-capture                          | 37862
+     www.persee.fr | terminal-bad-status                 |  3134
+     www.persee.fr | gateway-timeout                     |  2828
+     www.persee.fr | no-pdf-link                         |   431
+     www.persee.fr | spn-error                           |    75
+     www.persee.fr | redirect-loop                       |    23
+     www.persee.fr | success                             |     8
+     www.persee.fr | spn2-error                          |     2
+     www.persee.fr | spn2-error:soft-time-limit-exceeded |     1
+     www.persee.fr | wrong-mimetype                      |     1
+    (10 rows)
+
+journals.openedition.org
+
+    PDF access is via "freemium" subscription. Get redirects to:
+
+        https://auth.openedition.org/authorized_ip?url=http%3A%2F%2Fjournals.openedition.org%2Fnuevomundo%2Fpdf%2F61053
+
+    Content is technically open access (HTML and license; for all content?),
+    but can't be crawled as PDF without subscription.
+
+              domain          |         status          | count 
+    --------------------------+-------------------------+-------
+     journals.openedition.org | redirect-loop           | 29587
+     journals.openedition.org | success                 |  6821
+     journals.openedition.org | no-pdf-link             |  1507
+     journals.openedition.org | no-capture              |   412
+     journals.openedition.org | wayback-error           |    32
+     journals.openedition.org | wrong-mimetype          |    27
+     journals.openedition.org | terminal-bad-status     |    13
+     journals.openedition.org | spn2-cdx-lookup-failure |     4
+     journals.openedition.org | spn-remote-error        |     1
+     journals.openedition.org | null-body               |     1
+     journals.openedition.org | cdx-error               |     1
+    (11 rows)
+
+journals.lww.com
+
+    no-pdf-link
+
+          domain      |     status     | count 
+    ------------------+----------------+-------
+     journals.lww.com | no-pdf-link    | 11668
+     journals.lww.com | wrong-mimetype |   131
+    (2 rows)
+
+    doi prefix: 10.1097
+
+    <meta name="wkhealth_pdf_url" content="https://pdfs.journals.lww.com/spinejournal/9000/00000/Making_the_Most_of_Systematic_Reviews_and.94318.pdf" />
+    data-pdf-url="https://pdfs.journals.lww.com/spinejournal/9000/00000/Making_the_Most_of_Systematic_Reviews_and.94318.pdf?token=method|ExpireAbsolute;source|Journals;ttl|1582413672903;payload|mY8D3u1TCCsNvP5E421JYK6N6XICDamxByyYpaNzk7FKjTaa1Yz22MivkHZqjGP4kdS2v0J76WGAnHACH69s21Csk0OpQi3YbjEMdSoz2UhVybFqQxA7lKwSUlA502zQZr96TQRwhVlocEp/sJ586aVbcBFlltKNKo+tbuMfL73hiPqJliudqs17cHeLcLbV/CqjlP3IO0jGHlHQtJWcICDdAyGJMnpi6RlbEJaRheGeh5z5uvqz3FLHgPKVXJzdiVgCTnUeUQFYzcJRFhNtc2gv+ECZGji7HUicj1/6h85Y07DBRl1x2MGqlHWXUawD;hash|6cqYBa15ZK407m4VhFfJLw=="
+
+    Some weird thing going on, maybe they are blocking-via-redirect based on
+    our User-Agent? Seems like wget works, so funny that they don't block that.
+
+musewide.aip.de
+
+    no-pdf-link
+
+koreascience.or.kr          | no-pdf-link         |   8867
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'osapublishing.org'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%osapublishing.org%'
+            AND status = 'terminal-bad-status'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+www.cairn.info              | link-loop           |   8717
+
+easy.dans.knaw.nl           | no-pdf-link         |   8262
+scielo.conicyt.cl           | no-pdf-link         |   7925
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'scielo.conicyt.cl'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%scielo.conicyt.cl%'
+            AND status = 'terminal-bad-status'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+
+          domain       |       status        | count 
+    -------------------+---------------------+-------
+     scielo.conicyt.cl | no-pdf-link         |  7926
+     scielo.conicyt.cl | success             |  4972
+     scielo.conicyt.cl | terminal-bad-status |  1474
+     scielo.conicyt.cl | wrong-mimetype      |     6
+     scielo.conicyt.cl | no-capture          |     4
+     scielo.conicyt.cl | null-body           |     1
+
+
+     pdf         | https://doi.org/10.4067/s0370-41061980000300002 | 2020-02-22 23:55:56.235822+00 | f   | terminal-bad-status | https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0370-41061980000300002&lng=en&nrm=iso&tlng=en | 20200212201727 |                  200 | 
+     pdf         | https://doi.org/10.4067/s0718-221x2019005000201 | 2020-02-22 23:01:49.070104+00 | f   | terminal-bad-status | https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0718-221X2019005000201&lng=en&nrm=iso&tlng=en | 20200214105308 |                  200 | 
+     pdf         | https://doi.org/10.4067/s0717-75262011000200002 | 2020-02-22 22:49:36.429717+00 | f   | terminal-bad-status | https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0717-75262011000200002&lng=en&nrm=iso&tlng=en | 20200211205804 |                  200 | 
+     pdf         | https://doi.org/10.4067/s0717-95022006000400029 | 2020-02-22 22:33:07.761766+00 | f   | terminal-bad-status | https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0717-95022006000400029&lng=en&nrm=iso&tlng=en | 20200209044048 |                  200 | 
+
+    These seem, on retry, like success? Maybe previous was a matter of warc/revisit not getting handled correctly?
+
+    pdf         | https://doi.org/10.4067/s0250-71611998007100009 | 2020-02-22 23:57:16.481703+00 | f   | no-pdf-link | https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0250-71611998007100009&lng=en&nrm=iso&tlng=en | 20200212122939 |                  200 | 
+    pdf         | https://doi.org/10.4067/s0716-27902005020300006 | 2020-02-22 23:56:01.247616+00 | f   | no-pdf-link | https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0716-27902005020300006&lng=en&nrm=iso&tlng=en | 20200214192151 |                  200 | 
+    pdf         | https://doi.org/10.4067/s0718-23762005000100015 | 2020-02-22 23:53:55.81526+00  | f   | no-pdf-link | https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0718-23762005000100015&lng=en&nrm=iso&tlng=en | 20200214173237 |                  200 | 
+
+    Look like web/xml only.
+
+    TODO: XML ingest (and replay?) support. These are as "<article>", not sure if that is JATS or what.
+
+www.kci.go.kr               | no-pdf-link         |   6842
+www.m-hikari.com            | no-pdf-link         |   6763
+cshprotocols.cshlp.org      | no-pdf-link         |   6553
+www.bibliotekevirtual.org   | no-pdf-link         |   6309
+data.hpc.imperial.ac.uk     | no-pdf-link         |   6071
+projecteuclid.org           | link-loop           |   5970
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'projecteuclid.org'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%projecteuclid.org%'
+            AND status = 'link-loop'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+          domain       |         status          | count 
+    -------------------+-------------------------+-------
+     projecteuclid.org | link-loop               |  5985
+     projecteuclid.org | success                 |    26
+     projecteuclid.org | wayback-error           |    26
+     projecteuclid.org | wrong-mimetype          |    17
+     projecteuclid.org | spn2-cdx-lookup-failure |     4
+     projecteuclid.org | other-mimetype          |     4
+     projecteuclid.org | no-capture              |     3
+     projecteuclid.org | terminal-bad-status     |     2
+     projecteuclid.org | spn2-error:job-failed   |     1
+     projecteuclid.org | spn-remote-error        |     1
+    (10 rows)
+
+    Doing a cookie check and redirect.
+
+    TODO: brozzler behavior to "click the link" instead?
+
+www.scielo.br               | no-pdf-link         |   5823
+
+    SELECT domain, status, COUNT((domain, status))
+        FROM (SELECT status, substring(terminal_url FROM '[^/]+://([^/]*)') AS domain FROM ingest_file_result) t1
+        WHERE t1.domain = 'www.scielo.br'
+        GROUP BY domain, status
+        ORDER BY COUNT DESC;
+
+    SELECT * FROM ingest_file_result
+        WHERE terminal_url LIKE '%www.scielo.br%'
+            AND status = 'no-pdf-link'
+        ORDER BY updated DESC
+        LIMIT 10;
+
+        domain     |         status          | count 
+    ---------------+-------------------------+-------
+     www.scielo.br | success                 | 35150
+     www.scielo.br | no-pdf-link             |  5839
+     www.scielo.br | terminal-bad-status     |   429
+     www.scielo.br | no-capture              |   189
+     www.scielo.br | wrong-mimetype          |     7
+     www.scielo.br | spn2-cdx-lookup-failure |     2
+    (6 rows)
+
+    Seems to just be the subset with no PDFs.
+
+get.iedadata.org            | no-pdf-link         |   5822
+www.pdcnet.org              | no-pdf-link         |   5798
+publications.rwth-aachen.de | no-pdf-link         |   5323
+www.sciencedomain.org       | no-pdf-link         |   5231
+medicalforum.ch             | terminal-bad-status |   4574
+jrnl.nau.edu.ua             | link-loop           |   4145
+ojs.academypublisher.com    | no-pdf-link         |   4017
+
+## MAG bulk ingest
+
+- dialnet.unirioja.es | redirect-loop       | 240967
+  dialnet.unirioja.es | terminal-bad-status |  20320
+    => may be worth re-crawling via heritrix?
+- agupubs.onlinelibrary.wiley.com | no-pdf-link |  72639
+    => and other *.onlinelibrary.wiley.com
+- www.researchgate.net | redirect-loop |  42859
+- www.redalyc.org:9081 | no-pdf-link |  10515
+- www.repository.naturalis.nl | redirect-loop | 8213
+- bjp.rcpsych.org | link-loop | 8045
+- journals.tubitak.gov.tr | wrong-mimetype | 7159
+- www.erudit.org | redirect-loop | 6819
+- papers.ssrn.com | redirect-loop |  27328
+    => blocking is pretty aggressive, using cookies or referrer or something.
+       maybe a brozzler behavior would work, but doesn't currently
+
+## Out of Scope
+
+Datasets only?
+
+- plutof.ut.ee
+- www.gbif.org
+- doi.pangaea.de
+- www.plate-archive.org
+
+Historical non-paper content:
+
+- dhz.uni-passau.de (newspapers)
+- digital.ucd.ie (irish historical)
+
+Mostly datasets (some PDF content):
+
+- *.figshare.com
+- zenodo.com
+- data.mendeley.com
