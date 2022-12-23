@@ -1,0 +1,153 @@
+
+Good examples of journals to run HTML fulltext extraction on.
+
+## Live Web
+
+d-lib magazine
+    live web
+    no longer active
+    http://www.dlib.org/back.html
+
+NLM technical bulletin
+    https://www.nlm.nih.gov/pubs/techbull/back_issues.html
+
+Genders
+    https://web.archive.org/web/20141227010240/http://www.genders.org:80/index.html
+
+firstmondays
+    live web; now OJS
+
+outhistory.org
+
+http://journal.sjdm.org/
+
+http://whoosh.org/
+
+
+## Vanished (but wayback coverage)
+
+ohmylittledata
+    issn:2551-1289
+    vanished
+    blog format
+    http://web.archive.org/web/20180421061156/https://ohmylittledata.com/
+
+exquisit corpse
+    https://web.archive.org/web/20080521052400/http://corpse.org:80/
+
+Journal of Mundane Behavior
+    https://fatcat.wiki/container/tjwfvrjlunf25ofegccgjjmvya
+    ISSN: 1529-3041
+
+    defunct since ~2010
+    simple HTML articles
+    references
+    http://web.archive.org/web/20100406162007/http:/mundanebehavior.org/index2.htm
+    http://web.archive.org/web/20081120141926fw_/http://www.mundanebehavior.org/issues/v5n1/rosen.htm
+
+War Crimes
+
+    PDF articles (not HTML)
+    http://web.archive.org/web/20120916035741/http:/www.war-crimes.org/
+
+
+## DOAJ Test Articles (HTML)
+
+    zcat doaj_article_data_2020-08-07.json.gz | jq '.bibjson.link[]' -c | rg -i '"html"' | rg -v doi.org | rg '"fulltext"' | jq -r .url | pv -l > html_fulltext_urls.txt
+    => 2,184,954
+
+    cut -f3 -d/ html_fulltext_urls.txt | sort | uniq -c | sort -nr | head -n25
+     254817 link.springer.com
+     145159 www.scielo.br
+      78044 journal.frontiersin.org
+      77394 www.frontiersin.org
+      40849 www.dovepress.com
+      19024 dergipark.org.tr
+      18758 periodicos.ufsc.br
+      16346 www.revistas.usp.br
+      15872 revistas.unal.edu.co
+      15527 revistas.ucm.es
+      13669 revistas.usal.es
+      12640 dergipark.gov.tr
+      12111 journals.rudn.ru
+      11839 www.scielosp.org
+      11277 www.karger.com
+      10827 www.journals.vu.lt
+      10318 
+       9854 peerj.com
+       9100 ojs.unud.ac.id
+       8581 jurnal.ugm.ac.id
+       8261 riviste.unimi.it
+       8012 journals.uran.ua
+       7454 revistas.pucp.edu.pe
+       7264 journals.vgtu.lt
+       7200 publicaciones.banrepcultural.org
+
+    cat html_fulltext_urls.txt \
+        | rg -v link.springer.com \
+        | rg -v scielo \
+        | rg -v dergipark.gov.tr \
+        | rg -v frontiersin.org \
+        > html_fulltext_urls.filtered.txt
+    => 1,579,257
+
+    zcat doaj_article_data_2020-08-07.json.gz | rg -v '"doi"' | jq '.bibjson.link[]' -c | rg -i '"html"' | rg -v doi.org | rg '"fulltext"' | jq -r .url | pv -l > html_fulltext_urls.no_doi.txt
+    => 560k
+
+    cut -f3 -d/ html_fulltext_urls.no_doi.txt | sort | uniq -c | sort -nr | head -n25
+      40849 www.dovepress.com
+      10570 journals.rudn.ru
+      10494 dergipark.org.tr
+      10233 revistas.unal.edu.co
+       9981 dergipark.gov.tr
+       9428 revistas.usal.es
+       8292 revistas.ucm.es
+       7200 publicaciones.banrepcultural.org
+       6953 revistas.pucp.edu.pe
+       6000 www.scielosp.org
+       5962 www.scielo.br
+       5621 www.richtmann.org
+       5123 scielo.sld.cu
+       5067 ojs.unud.ac.id
+       4838 periodicos.ufsc.br
+       4736 revistasonlinepre.inap.es
+       4486 journal.fi
+       4221 www.seer.ufu.br
+       3553 revistas.uam.es
+       3492 revistas.pucsp.br
+       3060 www.scielo.org.co
+       2991 scielo.isciii.es
+       2802 seer.ufrgs.br
+       2692 revistas.unc.edu.ar
+       2685 srl.si
+
+    cat html_fulltext_urls.no_doi.txt \
+        | rg -v link.springer.com \
+        | rg -v scielo \
+        | rg -v dergipark.gov.tr \
+        | rg -v frontiersin.org \
+        > html_fulltext_urls.no_doi.filtered.txt
+    => 518,608
+
+    zcat doaj_articles_2020-08-07.html_fulltext_urls.no_doi.filtered.txt.gz | shuf -n20
+        https://revistas.unc.edu.ar/index.php/revistaEF/article/view/22795
+        https://journal.umy.ac.id/index.php/st/article/view/3297
+        https://www.unav.edu/publicaciones/revistas/index.php/estudios-sobre-educacion/article/view/23442
+        http://publications.muet.edu.pk/research_papers/pdf/pdf1615.pdf
+        http://revistas.uncu.edu.ar/ojs/index.php/revistaestudiosclasicos/article/view/1440
+        https://journal.fi/inf/article/view/59430
+        http://journal.uii.ac.id/index.php/Eksakta/article/view/2429
+        https://www.dovepress.com/infant-sleep-and-its-relation-with-cognition-and-growth-a-narrative-re-peer-reviewed-article-NSS
+        https://revistasonlinepre.inap.es/index.php/REALA/article/view/9157
+        http://dergipark.org.tr/dubited/issue/27453/299047?publisher=duzce
+        http://revistas.pucp.edu.pe/index.php/themis/article/view/11862
+        http://journal.bdfish.org/index.php/fisheries/article/view/91
+        https://ojs.unud.ac.id/index.php/buletinfisika/article/view/30567
+        https://www.lithosphere.ru/jour/article/view/779
+        https://journals.hioa.no/index.php/seminar/article/view/2412
+        http://revistas.unicauca.edu.co/index.php/rfcs/article/view/197
+        https://www.kmuj.kmu.edu.pk/article/view/15698
+        http://forodeeducacion.com/ojs/index.php/fde/article/view/82
+        https://revistas.unc.edu.ar/index.php/ConCienciaSocial/article/view/19941
+        http://grbs.library.duke.edu/article/view/3361
+
