@@ -1,0 +1,21 @@
+PostgreSQL 13.2 - wbgrp-svc506.us.archive.org
+Size: 1.13T
+
+             table_name             | table_size | indexes_size | total_size 
+------------------------------------+------------+--------------+------------
+ "public"."crossref"                | 459 GB     | 10 GB        | 470 GB
+ "public"."grobid"                  | 98 GB      | 13 GB        | 112 GB
+ "public"."cdx"                     | 63 GB      | 45 GB        | 108 GB
+ "public"."ingest_request"          | 53 GB      | 52 GB        | 105 GB
+ "public"."ingest_file_result"      | 46 GB      | 55 GB        | 100 GB
+ "public"."file_meta"               | 39 GB      | 40 GB        | 79 GB
+ "public"."grobid_shadow"           | 67 GB      | 5455 MB      | 73 GB
+ "public"."pdf_meta"                | 24 GB      | 7466 MB      | 31 GB
+ "public"."grobid_refs"             | 28 GB      | 3306 MB      | 31 GB
+ "public"."fatcat_file"             | 13 GB      | 7314 MB      | 20 GB
+ "public"."shadow"                  | 9517 MB    | 8026 MB      | 17 GB
+ "public"."html_meta"               | 7879 MB    | 68 MB        | 7947 MB
+ "public"."petabox"                 | 403 MB     | 461 MB       | 864 MB
+ "public"."pdftrio"                 | 550 MB     | 297 MB       | 847 MB
+ "public"."ingest_fileset_platform" | 8192 bytes | 16 kB        | 24 kB
+ "public"."crossref_with_refs"      | 0 bytes    | 0 bytes      | 0 bytes
