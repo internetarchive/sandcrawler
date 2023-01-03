@@ -1,4 +1,6 @@
 
+Note: as of 2022 this file is ancient and need review
+ 
 ## Kafka Pipelines
 
 - after network split, mass restarting import/harvest stuff seemed to

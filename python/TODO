@@ -1,7 +1,0 @@
-
-ingest crawler:
-- SPNv2 only
-    - remove most SPNv1/v2 path selection
-- landing page + fulltext hops only (short recursion depth)
-- use wayback client library instead of requests to fetch content
-- https://pypi.org/project/ratelimit/
