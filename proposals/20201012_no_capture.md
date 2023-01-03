@@ -1,5 +1,8 @@
 
-status: in-progress
+status: work-in-progress
+
+NOTE: as of December 2022, bnewbold can't remember if this was fully
+implemented or not.
 
 Storing no-capture missing URLs in `terminal_url`
 =================================================

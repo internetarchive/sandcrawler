@@ -1,5 +1,5 @@
 
-status: work-in-progress
+status: deployed
 
 This document proposes structure and systems for ingesting (crawling) paper
 PDFs and other content as part of sandcrawler.

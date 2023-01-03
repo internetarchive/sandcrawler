@@ -1,5 +1,5 @@
 
-status: work-in-progress
+status: deployed
 
 Crossref DOI Metadata in Sandcrawler DB
 =======================================

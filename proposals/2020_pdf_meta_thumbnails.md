@@ -1,5 +1,5 @@
 
-status: work-in-progress
+status: deployed
 
 New PDF derivatives: thumbnails, metadata, raw text
 ===================================================

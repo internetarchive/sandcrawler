@@ -1,5 +1,5 @@
 
-status: planned
+status: deployed
 
 2020q1 Fulltext PDF Ingest Plan
 ===================================

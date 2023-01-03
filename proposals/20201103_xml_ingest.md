@@ -1,22 +1,5 @@
 
-status: wip
-
-TODO:
-x XML fulltext URL extractor (based on HTML biblio metadata, not PDF url extractor)
-x differential JATS XML and scielo XML from generic XML?
-    application/xml+jats is what fatcat is doing for abstracts
-    but it should be application/jats+xml?
-    application/tei+xml
-    if startswith "<article " and "<article-meta>" => JATS
-x refactor ingest worker to be more general
-x have ingest code publish body to kafka topic
-x write a persist worker
-/ create/configure kafka topic
-- test everything locally
-- fatcat: ingest tool to create requests
-- fatcat: entity updates worker creates XML ingest requests for specific sources
-- fatcat: ingest file import worker allows XML results
-- ansible: deployment of persist worker
+status: deployed
 
 XML Fulltext Ingest
 ====================
