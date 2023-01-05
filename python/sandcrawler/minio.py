@@ -99,7 +99,7 @@ class SandcrawlerMinioClient(object):
         sha1hex: str,
         extension: str = "",
         prefix: str = "",
-        bucket: str = None,
+        bucket: Optional[str] = None,
     ) -> bytes:
         """
         sha1hex is sha1 of the blob itself

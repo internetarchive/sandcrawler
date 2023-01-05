@@ -281,7 +281,7 @@ def requests_retry_session(
     retries: int = 10,
     backoff_factor: int = 1,
     status_forcelist: List[int] = [500, 502, 504],
-    session: requests.Session = None,
+    session: Optional[requests.Session] = None,
 ) -> requests.Session:
     """
     From: https://www.peterbe.com/plog/best-practice-with-retries-with-requests

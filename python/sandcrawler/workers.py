@@ -108,7 +108,7 @@ class SandcrawlerWorker(object):
         """
         return True
 
-    def process(self, task: Any, key: str = None) -> Any:
+    def process(self, task: Any, key: Optional[str] = None) -> Any:
         """
         Derived workers need to implement business logic here.
 
