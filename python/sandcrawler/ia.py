@@ -299,7 +299,9 @@ class CdxApiClient:
                 )
             )
         if filter_status_code:
-            assert row.status_code == filter_status_code
+            assert (
+                row.status_code == filter_status_code
+            ), f"status code mismatch: {row.status_code} {filter_status_code}"
         return row
 
     def lookup_best(
@@ -532,7 +534,7 @@ class WaybackClient:
                 )
             # convert revisit_dt
             # len("2018-07-24T11:56:49"), or with "Z"
-            assert len(revisit_dt) in (19, 20)
+            assert len(revisit_dt) in (19, 20), f"unexpected revisit_dt: {revisit_dt}"
             if type(revisit_uri) is bytes:
                 revisit_uri = revisit_uri.decode("utf-8")
             if type(revisit_dt) is bytes:
@@ -540,7 +542,7 @@ class WaybackClient:
             revisit_dt = (
                 revisit_dt.replace("-", "").replace(":", "").replace("T", "").replace("Z", "")
             )
-            assert len(revisit_dt) == 14
+            assert len(revisit_dt) == 14, f"unexpected revisit_dt: {revisit_dt}"
             try:
                 revisit_cdx = self.cdx_client.fetch(revisit_uri, revisit_dt)
                 body = self.fetch_petabox_body(
@@ -626,8 +628,8 @@ class WaybackClient:
         """
 
         # defensively check datetime format
-        assert len(datetime) == 14
-        assert datetime.isdigit()
+        assert len(datetime) == 14, f"unexpected datetime: {datetime}"
+        assert datetime.isdigit(), f"unexpected datetime: {datetime}"
 
         try:
             resp = self.record_http_session.get(
@@ -695,8 +697,8 @@ class WaybackClient:
         """
 
         # defensively check datetime format
-        assert len(datetime) == 14
-        assert datetime.isdigit()
+        assert len(datetime) == 14, f"unexpected datetime: {datetime}"
+        assert datetime.isdigit(), f"unexpected datetime: {datetime}"
 
         try:
             # when fetching via `id_`, it is possible to get a 5xx error which
@@ -861,7 +863,9 @@ class WaybackClient:
                         warc_path=cdx_row.warc_path,
                         resolve_revisit=False,
                     )
-                    assert 300 <= resource.status_code < 400
+                    assert (
+                        300 <= resource.status_code < 400
+                    ), f"unexpected status code: {resource.status_code}"
                     if not resource.location:
                         print("  bad redirect record: {}".format(cdx_row), file=sys.stderr)
                         return ResourceResult(
@@ -1361,7 +1365,9 @@ class SavePageNowClient:
             )
             body = resource.body
             if resource.revisit_cdx:
-                assert resource.revisit_cdx.sha1hex == cdx_row.sha1hex
+                assert (
+                    resource.revisit_cdx.sha1hex == cdx_row.sha1hex
+                ), f"sha1hex mismatch: {resource.revisit_cdx.sha1hex} {cdx_row.sha1hex}"
                 revisit_cdx = resource.revisit_cdx
         else:
             # note: currently not trying to verify cdx_row.sha1hex
