@@ -533,6 +533,10 @@ class WaybackClient:
                     )
                 )
             # convert revisit_dt
+            if len(revisit_dt) > 20 and revisit_dt[-1] == "Z":
+                # 2023-06-23T20:37:30.173133737Z, trim to seconds
+                revisit_dt = revisit_dt[:19] + "Z"
+            revisit_dt = revisit_dt[:19]
             # len("2018-07-24T11:56:49"), or with "Z"
             assert len(revisit_dt) in (19, 20), f"unexpected revisit_dt: {revisit_dt}"
             if type(revisit_uri) is bytes:
