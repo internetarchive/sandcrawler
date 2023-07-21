@@ -159,6 +159,8 @@ class IngestFileWorker(SandcrawlerWorker):
             "://edoc.mpg.de/",
             # bogus/spam PDFs
             "://isiarticles.com/",
+            # requested to be not crawled in 2023
+            "://unsworks.unsw.edu.au/",
         ]
 
         self.wall_blocklist = [
