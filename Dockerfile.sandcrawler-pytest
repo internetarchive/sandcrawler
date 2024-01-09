@@ -14,7 +14,8 @@ RUN make deps
 CMD make test
 
 # Build
-# docker build -t sandcrawler-pytest -f Dockerfile.sandcrawler-pytest .
+# NB: requires sshuttle or similar bc build process talks to devpi.us.archive.org
+# docker build --network=host -t sandcrawler-pytest -f Dockerfile.sandcrawler-pytest .
 
 # Run, adjusting source path as needed
 # docker run --network host -v/home/vilmibm/src/sandcrawler:/src sandcrawler-pytest
