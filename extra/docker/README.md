@@ -1,6 +1,6 @@
 
 The docker-compose script in this directory may be helpful for local
-development. It starts several dependant services, such as Kafka, minio, etc.
+development. It starts Kafka, postgrest, and zookeeper.
 
 PostgreSQL is assumed to be running natively on localhost, not under docker. It
 should be possible to add postgresql to the docker-compose file, but some

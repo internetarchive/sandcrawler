@@ -27,13 +27,3 @@ services:
     environment:
       PGRST_DB_URI: "postgres://fatcat:tactaf@localhost/sandcrawler"
       PGRST_DB_ANON_ROLE: "fatcat"
-  minio:
-    image: minio/minio
-    ports:
-      - "9000:9000"
-    environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-    entrypoint: sh
-    command: -c "mkdir -p /tmp/minio/sandcrawler && mkdir -p /tmp/minio/thumbnail && mkdir -p /tmp/minio/sandcrawler-dev && /usr/bin/minio server /tmp/minio"
-
