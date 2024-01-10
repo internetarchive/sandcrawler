@@ -270,7 +270,7 @@ def html_guess_platform(
             pass
 
     icon_elem = doc.css_first("link[type='image/x-icon']")
-    if icon_elem and "href" in icon_elem.attrs:
+    if icon_elem and "href" in icon_elem.attrs and icon_elem.attrs["href"] is not None:
         if "journalssystem.com" in icon_elem.attrs["href"]:
             return "journalssystem.com"
         elif "indexcopernicus.com" in icon_elem.attrs["href"]:
