@@ -464,7 +464,7 @@ class IngestFileWorker(SandcrawlerWorker):
             html_body = html_extract_body_teixml(resource.body)
         except xml.etree.ElementTree.ParseError:
             return dict(status="html-teixml-error")
-        html_platform = html_guess_platform(resource.terminal_url, html_doc, html_biblio)
+        html_platform = html_guess_platform(resource.terminal_url, html_doc)
         html_scope = html_guess_scope(
             resource.terminal_url, html_doc, html_biblio, html_body.get("word_count")
         )
