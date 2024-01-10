@@ -229,10 +229,7 @@ def fetch_html_resources(
     return full
 
 
-def html_guess_platform(
-    url: str, doc: HTMLParser, biblio: Optional[BiblioMetadata]
-) -> Optional[str]:
-
+def html_guess_platform(url: str, doc: HTMLParser) -> Optional[str]:
     generator: Optional[str] = None
     generator_elem = doc.css_first("meta[name='generator']")
     if generator_elem:
@@ -331,7 +328,7 @@ def html_guess_scope(
     if url.count("/") <= 2 or (url.count("/") == 3) and url.endswith("/"):
         return "homepage-domain"
 
-    platform = html_guess_platform(url, doc, biblio)
+    platform = html_guess_platform(url, doc)
 
     if biblio:
         if biblio.html_fulltext_url:
