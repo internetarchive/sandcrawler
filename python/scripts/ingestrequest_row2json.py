@@ -31,8 +31,10 @@ def run(args):
             continue
         try:
             req = transform(json.loads(l))
-        except:
+        except Exception as e:
+            print(e, file=sys.stderr)
             print(l, file=sys.stderr)
+            continue
         if args.force_recrawl:
             req["force_recrawl"] = True
         print(json.dumps(req, sort_keys=True))
