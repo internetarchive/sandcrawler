@@ -537,8 +537,8 @@ class WaybackClient:
                 # 2023-06-23T20:37:30.173133737Z, trim to seconds
                 revisit_dt = revisit_dt[:19] + "Z"
             revisit_dt = revisit_dt[:19]
-            # len("2018-07-24T11:56:49"), or with "Z"
-            assert len(revisit_dt) in (19, 20), f"unexpected revisit_dt: {revisit_dt}"
+            # len("2018-07-24T11:56:49"), or with "Z"; or the desired 14 digits format
+            assert len(revisit_dt) in (14, 19, 20), f"unexpected revisit_dt: {revisit_dt}"
             if type(revisit_uri) is bytes:
                 revisit_uri = revisit_uri.decode("utf-8")
             if type(revisit_dt) is bytes:
