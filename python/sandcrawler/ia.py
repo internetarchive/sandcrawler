@@ -194,7 +194,7 @@ class CdxApiClient:
         except RetryError as e:
             # TODO capture and raise is an antipattern
             sentry_sdk.capture_exception(e)
-            raise CdxApiError(str(e))
+            raise CdxApiError(str(e)) from e
         if resp.status_code != 200:
             raise CdxApiError(resp.text)
         # print(resp.url, file=sys.stderr)
