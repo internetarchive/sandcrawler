@@ -15,6 +15,8 @@ from http.client import IncompleteRead
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
+from requests.exceptions import RetryError
+import sentry_sdk
 import urllib3.exceptions
 
 # not sure this will really work. Should go before wayback imports.
@@ -187,7 +189,12 @@ class CdxApiClient:
         """
         Hits CDX API with a query, parses result into a list of CdxRow
         """
-        resp = self.http_session.get(self.host_url, params=params)
+        try:
+            resp = self.http_session.get(self.host_url, params=params)
+        except RetryError as e:
+            # TODO capture and raise is an antipattern
+            sentry_sdk.capture_exception(e)
+            raise CdxApiError(str(e)) from e
         if resp.status_code != 200:
             raise CdxApiError(resp.text)
         # print(resp.url, file=sys.stderr)
@@ -336,7 +343,7 @@ class CdxApiClient:
         params: Dict[str, str] = {
             "url": url,
             "matchType": "exact",
-            "limit": "-40",
+            "limit": "40",
             "output": "json",
             # Collapsing seems efficient, but is complex; would need to include
             # other filters and status code in filter
