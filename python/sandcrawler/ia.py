@@ -343,7 +343,7 @@ class CdxApiClient:
         params: Dict[str, str] = {
             "url": url,
             "matchType": "exact",
-            "limit": "-40",
+            "limit": "40",
             "output": "json",
             # Collapsing seems efficient, but is complex; would need to include
             # other filters and status code in filter
