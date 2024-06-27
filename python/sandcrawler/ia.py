@@ -1086,7 +1086,7 @@ class SavePageNowClient:
         req_data = {
             "url": request_url,
             "capture_all": 1,
-            "if_not_archived_within": "1d",
+            "if_not_archived_within": "14d",
             "skip_first_archive": 1,
             "js_behavior_timeout": 0,
             # NOTE: not set explicitly to 0/false because of a bug in SPNv2 API

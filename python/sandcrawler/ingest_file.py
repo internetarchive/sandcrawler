@@ -292,7 +292,7 @@ class IngestFileWorker(SandcrawlerWorker):
             or old_failure
         ):
             via = "spn2"
-            resource = self.spn_client.crawl_resource(url, self.wayback_client)
+            resource = self.spn_client.crawl_resource(url, self.wayback_client, force_simple_get=1)
         print(
             "[FETCH {:>6}] {}  {}".format(
                 via, (resource and resource.status), (resource and resource.terminal_url) or url
