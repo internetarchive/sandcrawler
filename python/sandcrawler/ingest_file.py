@@ -257,6 +257,17 @@ class IngestFileWorker(SandcrawlerWorker):
         via = "none"
         resource = None
 
+        # TODO this is hideous and bad but later, much more complicated code
+        # does not handle this simple redirect case. Instead of just failing to
+        # scrape arxiv I've decided to shove in this URL rewrite for now:
+        if url.startswith("https://arxiv.org/pdf/") and url.endswith(".pdf"):
+            stripped = url[:-4]
+            try:
+                print(f"  ARXIV REDIRECT HACK ({url} -> {stripped})")
+                return self.find_resource(stripped, best_mimetype, force_recrawl)
+            except Exception as e:
+                print("  ARXIV HACK FAILED: ", e)
+
         if url.startswith("http://web.archive.org/web/") or url.startswith(
             "https://web.archive.org/web/"
         ):
