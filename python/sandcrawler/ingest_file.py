@@ -257,15 +257,25 @@ class IngestFileWorker(SandcrawlerWorker):
         via = "none"
         resource = None
 
-        # TODO this is hideous and bad but later, much more complicated code
-        # does not handle this simple redirect case. Instead of just failing to
-        # scrape arxiv I've decided to shove in this URL rewrite for now:
+        # TODO At some point, arxiv.org started redirecting from 'pdf/foo.pdf'
+        # to 'pdf/foo'. Because of how later and much more brittle/convoluted
+        # code handles redirects we were thus dropping these URLs on the floor.
+        # Specifically, we were submitting these URLs to SPN2, taking up
+        # valuable session slots, then failing to ever find the successful
+        # result in the resulting CDX records. The entire process of handling
+        # 301s needs to be rethought but until then I've decided to detect this
+        # specific arxiv case and rewrite the URL to avoid the 301. In several
+        # manually checked cases, SPN had already crawled the (redirected) pdf
+        # url, so we're avoiding a completely useless request to re-crawl for a
+        # given pdf.
         if url.startswith("https://arxiv.org/pdf/") and url.endswith(".pdf"):
             stripped = url[:-4]
             try:
                 print(f"  ARXIV REDIRECT HACK ({url} -> {stripped})")
                 return self.find_resource(stripped, best_mimetype, force_recrawl)
             except Exception as e:
+                # this should be re-raised but it would introduce inconsistency
+                # between the ingest request result and its URL.
                 print("  ARXIV HACK FAILED: ", e)
 
         if url.startswith("http://web.archive.org/web/") or url.startswith(
